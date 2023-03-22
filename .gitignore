@@ -20,6 +20,7 @@ api/.openapi-generator/*
 
 # config file
 api/openapi_server/resources/app.properties
+api/instance/app.cfg
 
 # log files in any path
 **/*.log
