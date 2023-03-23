@@ -5,8 +5,8 @@ from datetime import date, datetime  # noqa: F401
 
 from typing import List, Dict  # noqa: F401
 
-from openapi_server.models.base_model_ import Model
-from openapi_server import util
+from .base_model_ import Model
+from . import util
 
 
 class StyTuiStn(Model):
@@ -114,3 +114,10 @@ class StyTuiStn(Model):
         """
 
         self._stn = stn
+
+    def serialize(self):
+        return {
+            "sty": self._sty,
+            "tui": self._tui,
+            "stn": self._stn
+        }

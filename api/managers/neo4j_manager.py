@@ -5,25 +5,25 @@ from typing import List
 
 import neo4j
 
-from api.openapi_server.models.assay_type_property_info import AssayTypePropertyInfo  # noqa: E501
-from api.openapi_server.models.codes_codes_obj import CodesCodesObj  # noqa: E501
-from api.openapi_server.models.concept_detail import ConceptDetail  # noqa: E501
-from api.openapi_server.models.concept_prefterm import ConceptPrefterm  # noqa: E501
-from api.openapi_server.models.concept_sab_rel import ConceptSabRel  # noqa: E501
-from api.openapi_server.models.concept_sab_rel_depth import ConceptSabRelDepth  # noqa: E501
-from api.openapi_server.models.concept_term import ConceptTerm  # noqa: E501
-from api.openapi_server.models.dataset_property_info import DatasetPropertyInfo  # noqa: E501
-from api.openapi_server.models.path_item_concept_relationship_sab_prefterm import \
+from api.models.assay_type_property_info import AssayTypePropertyInfo  # noqa: E501
+from api.models.codes_codes_obj import CodesCodesObj  # noqa: E501
+from api.models.concept_detail import ConceptDetail  # noqa: E501
+from api.models.concept_prefterm import ConceptPrefterm  # noqa: E501
+from api.models.concept_sab_rel import ConceptSabRel  # noqa: E501
+from api.models.concept_sab_rel_depth import ConceptSabRelDepth  # noqa: E501
+from api.models.concept_term import ConceptTerm  # noqa: E501
+from api.models.dataset_property_info import DatasetPropertyInfo  # noqa: E501
+from api.models.path_item_concept_relationship_sab_prefterm import \
     PathItemConceptRelationshipSabPrefterm  # noqa: E501
-from api.openapi_server.models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel  # noqa: E501
-from api.openapi_server.models.qqst import QQST  # noqa: E501
-from api.openapi_server.models.sab_code_term import SabCodeTerm  # noqa: E501
-from api.openapi_server.models.sab_definition import SabDefinition  # noqa: E501
-from api.openapi_server.models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
-from api.openapi_server.models.sab_relationship_concept_term import SabRelationshipConceptTerm  # noqa: E501
-from api.openapi_server.models.semantic_stn import SemanticStn  # noqa: E501
-from api.openapi_server.models.sty_tui_stn import StyTuiStn  # noqa: E501
-from api.openapi_server.models.termtype_code import TermtypeCode  # noqa: E501
+from api.models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel  # noqa: E501
+from api.models.qqst import QQST  # noqa: E501
+from api.models.sab_code_term import SabCodeTerm  # noqa: E501
+from api.models.sab_definition import SabDefinition  # noqa: E501
+from api.models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
+from api.models.sab_relationship_concept_term import SabRelationshipConceptTerm  # noqa: E501
+from api.models.semantic_stn import SemanticStn  # noqa: E501
+from api.models.sty_tui_stn import StyTuiStn  # noqa: E501
+from api.models.termtype_code import TermtypeCode  # noqa: E501
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -101,7 +101,7 @@ class Neo4jManager(object):
         # Server = bolt://localhost: 7687
         # Username = neo4j
         # Password = password
-        config.read('openapi_server/resources/app.properties')
+        config.read('instance/app.properties')
         neo4j_config = config['neo4j']
         server = neo4j_config.get('Server')
         username = neo4j_config.get('Username')
@@ -144,7 +144,7 @@ class Neo4jManager(object):
             recds: neo4j.Result = session.run(query, code_id=code_id)
             for record in recds:
                 try:
-                    conceptDetail: ConceptDetail = ConceptDetail(record.get('Concept'), record.get('Prefterm'))
+                    conceptDetail: ConceptDetail = ConceptDetail(record.get('Concept'), record.get('Prefterm')).serialize()
                     conceptDetails.append(conceptDetail)
                 except KeyError:
                     pass
@@ -186,7 +186,7 @@ class Neo4jManager(object):
                 try:
                     sabRelationshipConceptPrefterm: SabRelationshipConceptPrefterm = \
                         SabRelationshipConceptPrefterm(record.get('SAB'), record.get('Relationship'),
-                                                       record.get('Concept2'), record.get('Prefterm2'))
+                                                       record.get('Concept2'), record.get('Prefterm2')).serialize()
                     sabRelationshipConceptPrefterms.append(sabRelationshipConceptPrefterm)
                 except KeyError:
                     pass
@@ -204,7 +204,7 @@ class Neo4jManager(object):
             recds: neo4j.Result = session.run(query, concept_id=concept_id)
             for record in recds:
                 try:
-                    sabDefinition: SabDefinition = SabDefinition(record.get('SAB'), record.get('Definition'))
+                    sabDefinition: SabDefinition = SabDefinition(record.get('SAB'), record.get('Definition')).serialize()
                     sabDefinitions.append(sabDefinition)
                 except KeyError:
                     pass
@@ -221,7 +221,7 @@ class Neo4jManager(object):
             recds: neo4j.Result = session.run(query, concept_id=concept_id)
             for record in recds:
                 try:
-                    styTuiStn: StyTuiStn = StyTuiStn(record.get('STY'), record.get('TUI'), record.get('STN'))
+                    styTuiStn: StyTuiStn = StyTuiStn(record.get('STY'), record.get('TUI'), record.get('STN')).serialize()
                     styTuiStns.append(styTuiStn)
                 except KeyError:
                     pass
@@ -392,7 +392,7 @@ class Neo4jManager(object):
             for record in recds:
                 try:
                     qqst: QQST = QQST(record.get('queryTUI'), record.get('querySTN'), record.get('semantic'),
-                                      record.get('TUI'), record.get('STN'))
+                                      record.get('TUI'), record.get('STN')).serialize()
                     qqsts.append(qqst)
                 except KeyError:
                     pass
@@ -410,7 +410,7 @@ class Neo4jManager(object):
             recds: neo4j.Result = session.run(query, term_id=term_id)
             for record in recds:
                 try:
-                    termtypeCode: TermtypeCode = TermtypeCode(record.get('TermType'), record.get('Code'))
+                    termtypeCode: TermtypeCode = TermtypeCode(record.get('TermType'), record.get('Code')).serialize()
                     termtypeCodes.append(termtypeCode)
                 except KeyError:
                     pass
@@ -453,7 +453,7 @@ class Neo4jManager(object):
             recds: neo4j.Result = session.run(query, term_id=term_id)
             for record in recds:
                 try:
-                    conceptTerm: ConceptTerm = ConceptTerm(record.get('Concept'), record.get('Term2'))
+                    conceptTerm: ConceptTerm = ConceptTerm(record.get('Concept'), record.get('Term2')).serialize()
                     conceptTerms.append(conceptTerm)
                 except KeyError:
                     pass
@@ -470,7 +470,7 @@ class Neo4jManager(object):
             recds: neo4j.Result = session.run(query, tui_id=tui_id)
             for record in recds:
                 try:
-                    semanticStn: SemanticStn = SemanticStn(record.get('semantic'), record.get('STN1'))
+                    semanticStn: SemanticStn = SemanticStn(record.get('semantic'), record.get('STN1')).serialize()
                     semanticStns.append(semanticStn)
                 except KeyError:
                     pass

@@ -5,8 +5,8 @@ from datetime import date, datetime  # noqa: F401
 
 from typing import List, Dict  # noqa: F401
 
-from openapi_server.models.base_model_ import Model
-from openapi_server import util
+from .base_model_ import Model
+from . import util
 
 
 class SabDefinition(Model):
@@ -88,3 +88,9 @@ class SabDefinition(Model):
         """
 
         self._definition = definition
+
+    def serialize(self):
+        return {
+            "sab": self._sab,
+            "definition": self._definition
+        }

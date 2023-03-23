@@ -106,7 +106,7 @@ This code will simply need to add the definition information for any new vocabul
 ###### insert_new_cui_cui_relations
 This method extracts all the relationships between **CUIs** in: UBERON, CL, and CCF.  It inserts these relations into the **umls_cui_cuis** table.  In general, it does the following in separate SQL queries:
 1) Select two **CUIs** from the same vocabulary (UBERON, CL, or CCF) and return their relationship information
-2) Make sure the two **CUIs** are different from one another (don't create self-references)
+2) Make sure the two **CUIs** are different from one another (don't create cls-references)
 3) Convert the relationship from its URI identifier to its 'label' and replace any spaces in the label with an underscore
 4) Insert this data into the **umls_cui_cuis** table.
 5) Repeat the above steps but for the 'inverse relationships'

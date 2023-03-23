@@ -21,7 +21,7 @@ Shared cross-references resulted in exceptions in the block of code
 that starts with the comment
 
 ```# iterate to select one CUI from cuis in row order - we ensure each node_id has its own distinct CUI```
-```# each node_id is assigned one CUI distinct from all others' CUIs to ensure no self-reference in edgelist```
+```# each node_id is assigned one CUI distinct from all others' CUIs to ensure no cls-reference in edgelist```
 
 
 This appears to be a rare edge case that has occurred only for a handful of

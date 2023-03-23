@@ -1,5 +1,5 @@
 import connexion
-from openapi_server import encoder
+from api import encoder
 
 options = {"swagger_ui": False}
 app = connexion.App(__name__, specification_dir='openapi_server/openapi/', options=options)

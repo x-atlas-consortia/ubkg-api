@@ -5,8 +5,8 @@ from datetime import date, datetime  # noqa: F401
 
 from typing import List, Dict  # noqa: F401
 
-from openapi_server.models.base_model_ import Model
-from openapi_server import util
+from .base_model_ import Model
+from . import util
 
 
 class QQST(Model):
@@ -166,3 +166,12 @@ class QQST(Model):
         """
 
         self._stn = stn
+
+    def serialize(self):
+        return {
+            "query_tui": self._query_tui,
+            "query_stn": self._query_stn,
+            "query_semantic": self._semantic,
+            "tui": self._tui,
+            "stn": self._stn
+        }

@@ -11,7 +11,7 @@ from api.routes.semantics.semantics_controller import semantics_blueprint
 from api.routes.terms.terms_controller import terms_blueprint
 from api.routes.tui.tui_controller import tui_blueprint
 from api.routes.valueset.valueset_controller import valueset_blueprint
-from openapi_server import encoder
+import encoder
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -46,7 +46,7 @@ def index():
 def main():
     # uncomment to check if the blueprint route exists in the app
     # print(app.url_map)
-    app.json_encoder = encoder.JSONEncoder
+    # app.json_encoder = encoder.JSONEncoder
     app.run(debug=True, port=8080)
 
 

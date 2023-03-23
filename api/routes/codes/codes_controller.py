@@ -1,4 +1,4 @@
-from api.openapi_server.managers.neo4j_manager import Neo4jManager
+from api.managers.neo4j_manager import Neo4jManager
 from flask import Blueprint, jsonify
 
 codes_blueprint = Blueprint('codes', __name__, url_prefix='/codes')
