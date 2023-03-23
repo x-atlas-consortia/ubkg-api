@@ -53,7 +53,7 @@ fi
 
 echo "*** Using python3 venv in ${VENV}"
 source ${VENV}/bin/activate
-# JAS FEB 2023 Change reference to spec file from ontology-api-spec to ubkg-api-spec.
+# JAS FEB 2023 Change reference to spec file from ontology-src-spec to ubkg-src-spec.
 openapi-generator generate -i ../ubkg-api-spec.yaml -g python-flask -o .
 
 ./update_controller_and_manager.py
@@ -82,7 +82,7 @@ git add setup.py
 
 if [ $CLIENT ]; then
   echo "Building Python Client..."
-  #rm -rf ./hu-bmap-ontology-api-client
+  #rm -rf ./hu-bmap-ontology-src-client
   # https://pypi.org/project/openapi-python-client/
   action='generate'
   if [[ -d ./hu-bmap-ontology-api-client ]] ; then

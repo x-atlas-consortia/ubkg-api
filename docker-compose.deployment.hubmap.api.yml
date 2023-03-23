@@ -3,8 +3,8 @@ version: '3.7'
 
 services:
   hubmap-ubkg-api:
-    hostname: hubmap-ubkg-api
-    container_name: hubmap-ubkg-api
+    hostname: hubmap-ubkg-src
+    container_name: hubmap-ubkg-src
     # Use the published image from DockerHub instead of local build
     # Exit with an error message containing err if UBKG_API_VERSION is unset or empty in the environment
     image: ubkg-api:${UBKG_API_VERSION:?err}
@@ -20,9 +20,9 @@ services:
       - gateway_hubmap
     volumes:
       # Persist the logging
-      - "./api/log:/usr/src/app/log"
+      - "./src/log:/usr/src/app/log"
       # Mount the neo4j connection file
-      - "./api/openapi_server/resources/app.properties:/usr/src/app/openapi_server/resources/app.properties"
+      - "./src/openapi_server/resources/app.properties:/usr/src/app/openapi_server/resources/app.properties"
 
 networks:
   gateway_hubmap:

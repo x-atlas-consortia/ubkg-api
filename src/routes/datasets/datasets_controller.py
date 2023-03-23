@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 
-from api.managers.neo4j_manager import Neo4jManager
+from src.managers.neo4j_manager import Neo4jManager
 
 
 datasets_blueprint = Blueprint('datasets', __name__, url_prefix='/datasets')

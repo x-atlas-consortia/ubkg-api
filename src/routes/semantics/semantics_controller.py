@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 
-from api.managers.neo4j_manager import Neo4jManager
+from src.managers.neo4j_manager import Neo4jManager
 
 semantics_blueprint = Blueprint('semantics', __name__, url_prefix='/semantics')
 neo4jManager = Neo4jManager()

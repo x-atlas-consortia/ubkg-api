@@ -69,40 +69,40 @@ Then, shut down the server
 ```bash
 $ docker images
 REPOSITORY              TAG            IMAGE ID       CREATED             SIZE
-bkg-api                1.2.1          876c464197ac   3 days ago          576MB...
+bkg-src                1.2.1          876c464197ac   3 days ago          576MB...
 
 # Stop process and remove old (in this case) hubmap image...
-$ export UBKG_API_VERSION=1.2.1; docker-compose -f docker-compose.deployment.hubmap.api.yml down --rmi all
+$ export UBKG_API_VERSION=1.2.1; docker-compose -f docker-compose.deployment.hubmap.src.yml down --rmi all
 [+] Running 2/1
- ⠿ Container hubmap-ubkg-api  Removed                                                                                                             1.2s
- ⠿ Image ubkg-api:1.2.1      Removed
+ ⠿ Container hubmap-ubkg-src  Removed                                                                                                             1.2s
+ ⠿ Image ubkg-src:1.2.1      Removed
 ```
 
 Rebuild the image
 ```bash
-$ (cd api; docker build -t ubkg-api:1.2.1 .)
+$ (cd src; docker build -t ubkg-src:1.2.1 .)
 Sending build context to Docker daemon  414.2kB
-Step 1/10 : FROM hubmap/api-base-image:1.0.0
+Step 1/10 : FROM hubmap/src-base-image:1.0.0
  ---> 9eedc8946055
 ...
 Removing intermediate container c6f36572ece6
  ---> 6c860ba70aab
 Successfully built 6c860ba70aab
-Successfully tagged ubkg-api:1.2.1
+Successfully tagged ubkg-src:1.2.1
 ```
 
 Deploy the new image...
 ```bash
-$ export UBKG_API_VERSION=1.2.1; docker-compose -f docker-compose.deployment.hubmap.api.yml up -d
+$ export UBKG_API_VERSION=1.2.1; docker-compose -f docker-compose.deployment.hubmap.src.yml up -d
 [+] Running 1/1
- ⠿ Container hubmap-ubkg-api  Started
+ ⠿ Container hubmap-ubkg-src  Started
 ```
 
 Verify that it is running
 ```bash
 $ docker ps
 CONTAINER ID   IMAGE           COMMAND                  CREATED          STATUS          PORTS                                                                                                                                                                                                                                                                                      NAMES
-b989f4a4daf0   ubkg-api:1.2.1  "/usr/local/bin/entr…"   58 seconds ago   Up 57 seconds   5000/tcp     ```
+b989f4a4daf0   ubkg-src:1.2.1  "/usr/local/bin/entr…"   58 seconds ago   Up 57 seconds   5000/tcp     ```
 ```
 
 Disconnect from the server

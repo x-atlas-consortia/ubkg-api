@@ -5,25 +5,25 @@ from typing import List
 
 import neo4j
 
-from api.models.assay_type_property_info import AssayTypePropertyInfo  # noqa: E501
-from api.models.codes_codes_obj import CodesCodesObj  # noqa: E501
-from api.models.concept_detail import ConceptDetail  # noqa: E501
-from api.models.concept_prefterm import ConceptPrefterm  # noqa: E501
-from api.models.concept_sab_rel import ConceptSabRel  # noqa: E501
-from api.models.concept_sab_rel_depth import ConceptSabRelDepth  # noqa: E501
-from api.models.concept_term import ConceptTerm  # noqa: E501
-from api.models.dataset_property_info import DatasetPropertyInfo  # noqa: E501
-from api.models.path_item_concept_relationship_sab_prefterm import \
+from src.models.assay_type_property_info import AssayTypePropertyInfo  # noqa: E501
+from src.models.codes_codes_obj import CodesCodesObj  # noqa: E501
+from src.models.concept_detail import ConceptDetail  # noqa: E501
+from src.models.concept_prefterm import ConceptPrefterm  # noqa: E501
+from src.models.concept_sab_rel import ConceptSabRel  # noqa: E501
+from src.models.concept_sab_rel_depth import ConceptSabRelDepth  # noqa: E501
+from src.models.concept_term import ConceptTerm  # noqa: E501
+from src.models.dataset_property_info import DatasetPropertyInfo  # noqa: E501
+from src.models.path_item_concept_relationship_sab_prefterm import \
     PathItemConceptRelationshipSabPrefterm  # noqa: E501
-from api.models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel  # noqa: E501
-from api.models.qqst import QQST  # noqa: E501
-from api.models.sab_code_term import SabCodeTerm  # noqa: E501
-from api.models.sab_definition import SabDefinition  # noqa: E501
-from api.models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
-from api.models.sab_relationship_concept_term import SabRelationshipConceptTerm  # noqa: E501
-from api.models.semantic_stn import SemanticStn  # noqa: E501
-from api.models.sty_tui_stn import StyTuiStn  # noqa: E501
-from api.models.termtype_code import TermtypeCode  # noqa: E501
+from src.models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel  # noqa: E501
+from src.models.qqst import QQST  # noqa: E501
+from src.models.sab_code_term import SabCodeTerm  # noqa: E501
+from src.models.sab_definition import SabDefinition  # noqa: E501
+from src.models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
+from src.models.sab_relationship_concept_term import SabRelationshipConceptTerm  # noqa: E501
+from src.models.semantic_stn import SemanticStn  # noqa: E501
+from src.models.sty_tui_stn import StyTuiStn  # noqa: E501
+from src.models.termtype_code import TermtypeCode  # noqa: E501
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -732,7 +732,7 @@ class Neo4jManager(object):
 
         # The original assay_types.yaml file has keys that use dashes instead of underscores--e.g., alt-names.
         # neo4j cannot interpret return variables that contain dashes, so the query string uses underscores--
-        # e.g., alt_names. The ubkg-api-spec.yaml file uses dashes for key names for the return to the GET.
+        # e.g., alt_names. The ubkg-src-spec.yaml file uses dashes for key names for the return to the GET.
 
         sab = sab.upper()
 
@@ -890,7 +890,7 @@ class Neo4jManager(object):
 
     def assaytype_name_get(self, name: str, application_context: str = 'HUBMAP') -> AssayTypePropertyInfo:
         """
-        This is intended to be a drop in replacement for the same endpoint in search-api.
+        This is intended to be a drop in replacement for the same endpoint in search-src.
 
         The only difference is the optional application_contect to make it consistent with a HUBMAP or SENNET
         environment.

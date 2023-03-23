@@ -3,14 +3,14 @@ import os
 
 from flask import Flask
 
-from api.routes.assaytype.assaytype_controller import assaytype_blueprint
-from api.routes.codes.codes_controller import codes_blueprint
-from api.routes.concepts.concepts_controller import concepts_blueprint
-from api.routes.datasets.datasets_controller import datasets_blueprint
-from api.routes.semantics.semantics_controller import semantics_blueprint
-from api.routes.terms.terms_controller import terms_blueprint
-from api.routes.tui.tui_controller import tui_blueprint
-from api.routes.valueset.valueset_controller import valueset_blueprint
+from src.routes.assaytype.assaytype_controller import assaytype_blueprint
+from src.routes.codes.codes_controller import codes_blueprint
+from src.routes.concepts.concepts_controller import concepts_blueprint
+from src.routes.datasets.datasets_controller import datasets_blueprint
+from src.routes.semantics.semantics_controller import semantics_blueprint
+from src.routes.terms.terms_controller import terms_blueprint
+from src.routes.tui.tui_controller import tui_blueprint
+from src.routes.valueset.valueset_controller import valueset_blueprint
 
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG,

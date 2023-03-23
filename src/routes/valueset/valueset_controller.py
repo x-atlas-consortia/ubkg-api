@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 
-from api.managers.neo4j_manager import Neo4jManager
+from src.managers.neo4j_manager import Neo4jManager
 
 valueset_blueprint = Blueprint('valueset', __name__, url_prefix='/valueset')
 neo4jManager = Neo4jManager()
