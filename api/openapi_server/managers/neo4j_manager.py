@@ -1,31 +1,29 @@
-from flask import abort
-import neo4j
 import configparser
-from typing import List
-import re
-from neo4j.exceptions import CypherSyntaxError
-import json
-
-from openapi_server.models.assay_name_request import AssayNameRequest  # noqa: E501
-from openapi_server.models.assay_type_property_info import AssayTypePropertyInfo  # noqa: E501
-from openapi_server.models.codes_codes_obj import CodesCodesObj  # noqa: E501
-from openapi_server.models.concept_detail import ConceptDetail  # noqa: E501
-from openapi_server.models.concept_prefterm import ConceptPrefterm  # noqa: E501
-from openapi_server.models.concept_sab_rel import ConceptSabRel  # noqa: E501
-from openapi_server.models.concept_sab_rel_depth import ConceptSabRelDepth  # noqa: E501
-from openapi_server.models.concept_term import ConceptTerm  # noqa: E501
-from openapi_server.models.dataset_property_info import DatasetPropertyInfo  # noqa: E501
-from openapi_server.models.path_item_concept_relationship_sab_prefterm import PathItemConceptRelationshipSabPrefterm  # noqa: E501
-from openapi_server.models.qqst import QQST  # noqa: E501
-from openapi_server.models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel  # noqa: E501
-from openapi_server.models.sab_code_term import SabCodeTerm  # noqa: E501
-from openapi_server.models.sab_definition import SabDefinition  # noqa: E501
-from openapi_server.models.sab_relationship_concept_term import SabRelationshipConceptTerm  # noqa: E501
-from openapi_server.models.semantic_stn import SemanticStn  # noqa: E501
-from openapi_server.models.sty_tui_stn import StyTuiStn  # noqa: E501
-from openapi_server.models.termtype_code import TermtypeCode  # noqa: E501
-
 import logging
+import re
+from typing import List
+
+import neo4j
+
+from api.openapi_server.models.assay_type_property_info import AssayTypePropertyInfo  # noqa: E501
+from api.openapi_server.models.codes_codes_obj import CodesCodesObj  # noqa: E501
+from api.openapi_server.models.concept_detail import ConceptDetail  # noqa: E501
+from api.openapi_server.models.concept_prefterm import ConceptPrefterm  # noqa: E501
+from api.openapi_server.models.concept_sab_rel import ConceptSabRel  # noqa: E501
+from api.openapi_server.models.concept_sab_rel_depth import ConceptSabRelDepth  # noqa: E501
+from api.openapi_server.models.concept_term import ConceptTerm  # noqa: E501
+from api.openapi_server.models.dataset_property_info import DatasetPropertyInfo  # noqa: E501
+from api.openapi_server.models.path_item_concept_relationship_sab_prefterm import \
+    PathItemConceptRelationshipSabPrefterm  # noqa: E501
+from api.openapi_server.models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel  # noqa: E501
+from api.openapi_server.models.qqst import QQST  # noqa: E501
+from api.openapi_server.models.sab_code_term import SabCodeTerm  # noqa: E501
+from api.openapi_server.models.sab_definition import SabDefinition  # noqa: E501
+from api.openapi_server.models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
+from api.openapi_server.models.sab_relationship_concept_term import SabRelationshipConceptTerm  # noqa: E501
+from api.openapi_server.models.semantic_stn import SemanticStn  # noqa: E501
+from api.openapi_server.models.sty_tui_stn import StyTuiStn  # noqa: E501
+from api.openapi_server.models.termtype_code import TermtypeCode  # noqa: E501
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -890,32 +888,6 @@ class Neo4jManager(object):
 
         return datasets
 
-    def _get_data_type_by_query(self, name: str or List, application_context: str) -> AssayTypePropertyInfo:
-        """
-        Return the AssayTypePropertyInfo associated with the record information associated with name.
-        The 'name' parameter as passed by 'assayname_post' can be a string or list. If it is a string it's a
-        'data_type'; as a list it would be an 'alt_name'. This behavior is that of the endpoint in search-api
-        that this code is replacing.
-        """
-        # Build the Cypher query that will return the table of data.
-        query = self.__query_cypher_dataset_info(application_context)
-
-        # Execute Cypher query and return result.
-        with self.driver.session() as session:
-            recds: neo4j.Result = session.run(query)
-            for record in recds:
-                if (isinstance(name, List) and record.get('alt_names') == name) or \
-                        (isinstance(name, str) and record.get('data_type') == name):
-                    return AssayTypePropertyInfo(
-                        record['data_type'],
-                        record['primary'],
-                        record['description'],
-                        record['vitessce_hints'],
-                        record['contains_pii'],
-                        record['vis_only']
-                    )
-        abort(400, f'No such assay_type {name}, even as alternate name')
-
     def assaytype_name_get(self, name: str, application_context: str = 'HUBMAP') -> AssayTypePropertyInfo:
         """
         This is intended to be a drop in replacement for the same endpoint in search-api.
@@ -925,16 +897,21 @@ class Neo4jManager(object):
         """
         # datasets: List[DatasetPropertyInfo] = self.dataset_get(application_context, name)
 
-        return self._get_data_type_by_query(name, application_context)
+        # Build the Cypher query that will return the table of data.
+        query = self.__query_cypher_dataset_info(application_context)
 
-    def assayname_post(self, assay_name_request: AssayNameRequest) -> AssayTypePropertyInfo:
-        """
-        assay_type_request.name can be either the canonical name of an assay or an alternate name.
-
-        All names are simple strings, but some alt-names are ordered lists of
-        simple strings, e.g. ['IMC', 'image_pyramid'].
-
-        Note: the default value of 'assay_name_request.application_context' is defined in the OpenAPI .yaml file.
-        """
-        logger.info(f'assayname_post; Request Body: {assay_name_request.to_dict()}')
-        return self._get_data_type_by_query(assay_name_request.name, assay_name_request.application_context)
+        # Execute Cypher query and return result.
+        with self.driver.session() as session:
+            recds: neo4j.Result = session.run(query)
+            for record in recds:
+                if record.get('data_type') == name:
+                    # Accessing the record by .get('str') does not appear to work?! :-(
+                    return AssayTypePropertyInfo(
+                        record['data_type'],
+                        record['primary'],
+                        record['description'],
+                        record['vitessce_hints'],
+                        record['contains_pii'],
+                        record['vis_only']
+                    )
+        return AssayTypePropertyInfo()
