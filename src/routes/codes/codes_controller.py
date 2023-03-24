@@ -1,9 +1,9 @@
-from src.managers.neo4j_manager import Neo4jManager
+from neo4j_manager import get_neo4j_manager
 from flask import Blueprint, jsonify
 
 codes_blueprint = Blueprint('codes', __name__, url_prefix='/codes')
 
-neo4j_manager = Neo4jManager()
+neo4jManager = get_neo4j_manager()
 
 
 @codes_blueprint.route('/<code_id>/codes', methods=['GET'])
@@ -19,7 +19,7 @@ def codes_code_id_codes_get(code_id, sab=None):  # noqa: E501
 
     :rtype: Union[List[CodesCodesObj], Tuple[List[CodesCodesObj], int], Tuple[List[CodesCodesObj], int, Dict[str, str]]
     """
-    return jsonify(neo4j_manager.codes_code_id_codes_get(code_id, sab))
+    return jsonify(neo4jManager.codes_code_id_codes_get(code_id, sab))
 
 
 @codes_blueprint.route('/<code_id>/concepts', methods=['GET'])
@@ -33,4 +33,4 @@ def codes_code_id_concepts_get(code_id):  # noqa: E501
 
     :rtype: Union[List[ConceptDetail], Tuple[List[ConceptDetail], int], Tuple[List[ConceptDetail], int, Dict[str, str]]
     """
-    return jsonify(neo4j_manager.codes_code_id_concepts_get(code_id))
+    return jsonify(neo4jManager.codes_code_id_concepts_get(code_id))

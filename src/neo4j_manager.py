@@ -92,10 +92,45 @@ def parse_and_check_rel(rel: List[str]) -> List[List]:
     return rel_list
 
 
-# https://editor.swagger.io/
+instance = None
+
+
+def get_neo4j_manager():
+    try:
+        if Neo4jManager.is_initialized():
+            logger.info("Neo4jManager has already been initialized")
+            return Neo4jManager.instance()
+        else:
+            logger.info("Initialized Neo4jManager successfully :)")
+            return Neo4jManager.create()
+    except Exception:
+        logger.exception('Failed to initialize the Neo4jManager :(. Please check the /instance/app.properties are '
+                         'correct')
+
+
 class Neo4jManager(object):
+    @staticmethod
+    def create():
+        if instance is not None:
+            raise Exception(
+                "An instance of Neo4jManager exists already. Use the Neo4jManager.instance() method to retrieve it.")
+
+        return Neo4jManager()
+
+    @staticmethod
+    def instance():
+        if instance is None:
+            raise Exception(
+                "An instance of Neo4jManager does not yet exist. Use Neo4jManager.create() to create a new instance")
+
+        return instance
+
+    @staticmethod
+    def is_initialized():
+        return instance is not None
 
     def __init__(self):
+        global instance
         config = configparser.ConfigParser()
         # [neo4j]
         # Server = bolt://localhost: 7687
@@ -107,6 +142,8 @@ class Neo4jManager(object):
         username = neo4j_config.get('Username')
         password = neo4j_config.get('Password')
         self.driver = neo4j.GraphDatabase.driver(server, auth=(username, password))
+        if instance is None:
+            instance = self
 
     # https://neo4j.com/docs/api/python-driver/current/api.html
     def close(self):
@@ -144,7 +181,8 @@ class Neo4jManager(object):
             recds: neo4j.Result = session.run(query, code_id=code_id)
             for record in recds:
                 try:
-                    conceptDetail: ConceptDetail = ConceptDetail(record.get('Concept'), record.get('Prefterm')).serialize()
+                    conceptDetail: ConceptDetail = ConceptDetail(record.get('Concept'),
+                                                                 record.get('Prefterm')).serialize()
                     conceptDetails.append(conceptDetail)
                 except KeyError:
                     pass
@@ -204,7 +242,8 @@ class Neo4jManager(object):
             recds: neo4j.Result = session.run(query, concept_id=concept_id)
             for record in recds:
                 try:
-                    sabDefinition: SabDefinition = SabDefinition(record.get('SAB'), record.get('Definition')).serialize()
+                    sabDefinition: SabDefinition = SabDefinition(record.get('SAB'),
+                                                                 record.get('Definition')).serialize()
                     sabDefinitions.append(sabDefinition)
                 except KeyError:
                     pass
@@ -221,7 +260,8 @@ class Neo4jManager(object):
             recds: neo4j.Result = session.run(query, concept_id=concept_id)
             for record in recds:
                 try:
-                    styTuiStn: StyTuiStn = StyTuiStn(record.get('STY'), record.get('TUI'), record.get('STN')).serialize()
+                    styTuiStn: StyTuiStn = StyTuiStn(record.get('STY'), record.get('TUI'),
+                                                     record.get('STN')).serialize()
                     styTuiStns.append(styTuiStn)
                 except KeyError:
                     pass
@@ -561,7 +601,8 @@ class Neo4jManager(object):
 
         return sabcodeterms
 
-    def __subquery_dataset_synonym_property(self, sab: str, cuialias: str, returnalias: str, collectvalues: bool) -> str:
+    def __subquery_dataset_synonym_property(self, sab: str, cuialias: str, returnalias: str,
+                                            collectvalues: bool) -> str:
         # JAS FEB 2023
         # Returns a subquery to obtain a "synonym" relationship property. See __query_dataset_info for an explanation.
 
@@ -591,7 +632,9 @@ class Neo4jManager(object):
 
         return qry
 
-    def __subquery_dataset_relationship_property(self, sab: str, cuialias: str, rel_string: str, returnalias: str, isboolean: bool = False, collectvalues: bool = False, codelist: List[str] = []) -> str:
+    def __subquery_dataset_relationship_property(self, sab: str, cuialias: str, rel_string: str, returnalias: str,
+                                                 isboolean: bool = False, collectvalues: bool = False,
+                                                 codelist: List[str] = []) -> str:
 
         # JAS FEB 2023
         # Returns a subquery to obtain a "relationship property". See __query_dataset_info for an explanation.
@@ -803,7 +846,9 @@ class Neo4jManager(object):
         qry = qry + 'ORDER BY tolower(data_type)'
         return qry
 
-    def dataset_get(self, application_context: str, data_type: str = '', description: str = '', alt_name: str = '', primary: str = '', contains_pii: str = '', vis_only: str = '', vitessce_hint: str = '', dataset_provider: str = '') -> List[DatasetPropertyInfo]:
+    def dataset_get(self, application_context: str, data_type: str = '', description: str = '', alt_name: str = '',
+                    primary: str = '', contains_pii: str = '', vis_only: str = '', vitessce_hint: str = '',
+                    dataset_provider: str = '') -> List[DatasetPropertyInfo]:
 
         # JAS FEB 2023
         # Returns an array of objects corresponding to Dataset (type) nodes in the HubMAP

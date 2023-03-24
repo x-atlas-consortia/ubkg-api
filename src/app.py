@@ -12,7 +12,6 @@ from src.routes.terms.terms_controller import terms_blueprint
 from src.routes.tui.tui_controller import tui_blueprint
 from src.routes.valueset.valueset_controller import valueset_blueprint
 
-
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
@@ -30,12 +29,6 @@ app.register_blueprint(tui_blueprint)
 app.register_blueprint(valueset_blueprint)
 app.register_blueprint(terms_blueprint)
 
-#
-# try:
-#     neo4j_manager = Neo4jManager()
-#     logger.info("Initialized neo4j_manager successfully :)")
-# except Exception:
-#     logger.exception('Failed to initialize the neo4j_manager')
 
 
 @app.route('/', methods=['GET'])

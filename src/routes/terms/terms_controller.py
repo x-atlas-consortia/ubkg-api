@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify
 
-from src.managers.neo4j_manager import Neo4jManager
+from neo4j_manager import get_neo4j_manager
 
 terms_blueprint = Blueprint('terms', __name__, url_prefix='/terms')
-neo4jManager = Neo4jManager()
+neo4jManager = get_neo4j_manager()
 
 
 @terms_blueprint.route('<term_id>/codes', methods=['GET'])
