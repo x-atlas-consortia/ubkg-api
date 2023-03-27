@@ -3,14 +3,14 @@ import os
 
 from flask import Flask
 
-from src.routes.assaytype.assaytype_controller import assaytype_blueprint
-from src.routes.codes.codes_controller import codes_blueprint
-from src.routes.concepts.concepts_controller import concepts_blueprint
-from src.routes.datasets.datasets_controller import datasets_blueprint
-from src.routes.semantics.semantics_controller import semantics_blueprint
-from src.routes.terms.terms_controller import terms_blueprint
-from src.routes.tui.tui_controller import tui_blueprint
-from src.routes.valueset.valueset_controller import valueset_blueprint
+from routes.assaytype.assaytype_controller import assaytype_blueprint
+from routes.codes.codes_controller import codes_blueprint
+from routes.concepts.concepts_controller import concepts_blueprint
+from routes.datasets.datasets_controller import datasets_blueprint
+from routes.semantics.semantics_controller import semantics_blueprint
+from routes.terms.terms_controller import terms_blueprint
+from routes.tui.tui_controller import tui_blueprint
+from routes.valueset.valueset_controller import valueset_blueprint
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -30,7 +30,6 @@ app.register_blueprint(valueset_blueprint)
 app.register_blueprint(terms_blueprint)
 
 
-
 @app.route('/', methods=['GET'])
 def index():
     return "Hello! This is UBKG-API service :)"
@@ -39,7 +38,7 @@ def index():
 def main():
     # uncomment to check if the blueprint route exists in the app
     # print(app.url_map)
-    app.run(debug=True, port=8080)
+    app.run(port=8080, host='0.0.0.0')
 
 
 if __name__ == '__main__':

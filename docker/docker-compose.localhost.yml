@@ -7,8 +7,8 @@ services:
     build: neo4j
     restart: unless-stopped
     ports:
-      - 7474:7474
-      - 7687:7687
+      - "7474:7474"
+      - "7687:7687"
     volumes:
       - ubkg-neo4j-data:/data
     healthcheck:
@@ -40,8 +40,8 @@ services:
       - _JAVA_OPTIONS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
 
   ubkg-api:
-    container_name: ubkg-src
-    build: src
+    container_name: ubkg-container
+    build: ../src
     restart: unless-stopped
     environment:
       - HOST_GID=${HOST_GID:-1000}
@@ -49,12 +49,14 @@ services:
     volumes:
       # Persist the logging
       - "./src/log:/usr/src/app/log"
+      # Mount the source code to container
+      - "./src:/usr/src/app"
     deploy:
       resources:
         limits:
           memory: 256M
     ports:
-      - 8080:8080
+      - "8080:8080"
 
 volumes:
   ubkg-neo4j-data:

@@ -5,25 +5,25 @@ from typing import List
 
 import neo4j
 
-from src.models.assay_type_property_info import AssayTypePropertyInfo  # noqa: E501
-from src.models.codes_codes_obj import CodesCodesObj  # noqa: E501
-from src.models.concept_detail import ConceptDetail  # noqa: E501
-from src.models.concept_prefterm import ConceptPrefterm  # noqa: E501
-from src.models.concept_sab_rel import ConceptSabRel  # noqa: E501
-from src.models.concept_sab_rel_depth import ConceptSabRelDepth  # noqa: E501
-from src.models.concept_term import ConceptTerm  # noqa: E501
-from src.models.dataset_property_info import DatasetPropertyInfo  # noqa: E501
-from src.models.path_item_concept_relationship_sab_prefterm import \
+from models.assay_type_property_info import AssayTypePropertyInfo  # noqa: E501
+from models.codes_codes_obj import CodesCodesObj  # noqa: E501
+from models.concept_detail import ConceptDetail  # noqa: E501
+from models.concept_prefterm import ConceptPrefterm  # noqa: E501
+from models.concept_sab_rel import ConceptSabRel  # noqa: E501
+from models.concept_sab_rel_depth import ConceptSabRelDepth  # noqa: E501
+from models.concept_term import ConceptTerm  # noqa: E501
+from models.dataset_property_info import DatasetPropertyInfo  # noqa: E501
+from models.path_item_concept_relationship_sab_prefterm import \
     PathItemConceptRelationshipSabPrefterm  # noqa: E501
-from src.models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel  # noqa: E501
-from src.models.qqst import QQST  # noqa: E501
-from src.models.sab_code_term import SabCodeTerm  # noqa: E501
-from src.models.sab_definition import SabDefinition  # noqa: E501
-from src.models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
-from src.models.sab_relationship_concept_term import SabRelationshipConceptTerm  # noqa: E501
-from src.models.semantic_stn import SemanticStn  # noqa: E501
-from src.models.sty_tui_stn import StyTuiStn  # noqa: E501
-from src.models.termtype_code import TermtypeCode  # noqa: E501
+from models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel  # noqa: E501
+from models.qqst import QQST  # noqa: E501
+from models.sab_code_term import SabCodeTerm  # noqa: E501
+from models.sab_definition import SabDefinition  # noqa: E501
+from models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
+from models.sab_relationship_concept_term import SabRelationshipConceptTerm  # noqa: E501
+from models.semantic_stn import SemanticStn  # noqa: E501
+from models.sty_tui_stn import StyTuiStn  # noqa: E501
+from models.termtype_code import TermtypeCode  # noqa: E501
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',

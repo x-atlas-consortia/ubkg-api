@@ -26,3 +26,7 @@ src/instance/app.properties
 # log files in any path
 **/*.log
 
+# Ignore docker copied stuff
+docker/ubkg-api/src
+docker/ubkg-api/VERSION
+docker/ubkg-api/BUILD
