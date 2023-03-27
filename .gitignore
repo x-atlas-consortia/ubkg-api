@@ -30,3 +30,5 @@ src/instance/app.properties
 docker/ubkg-api/src
 docker/ubkg-api/VERSION
 docker/ubkg-api/BUILD
+
+BUILD
