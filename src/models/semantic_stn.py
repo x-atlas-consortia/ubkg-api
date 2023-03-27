@@ -92,5 +92,5 @@ class SemanticStn(Model):
     def serialize(self):
         return {
             "semantic": self._semantic,
-            "stn": self._stn
+            "STN": self._stn
         }
