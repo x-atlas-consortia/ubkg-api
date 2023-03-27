@@ -3,6 +3,7 @@ version: '3.7'
 
 services:
   ubkg-api:
+    hostname: ubkg-api
     container_name: ubkg-container
     build: ./ubkg-api
     init: true
