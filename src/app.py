@@ -36,8 +36,6 @@ def index():
 
 
 def main():
-    # uncomment to check if the blueprint route exists in the app
-    # print(app.url_map)
     app.run(port=8080, host='0.0.0.0')
 
 
