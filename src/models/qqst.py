@@ -169,9 +169,9 @@ class QQST(Model):
 
     def serialize(self):
         return {
-            "query_tui": self._query_tui,
-            "query_stn": self._query_stn,
-            "query_semantic": self._semantic,
-            "tui": self._tui,
-            "stn": self._stn
+            "queryTUI": self._query_tui,
+            "querySTN": self._query_stn,
+            "semantic": self._semantic,
+            "TUI": self._tui,
+            "STN": self._stn
         }
