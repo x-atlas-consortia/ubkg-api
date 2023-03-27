@@ -162,7 +162,7 @@ class Neo4jManager(object):
             for record in recds:
                 try:
                     codesCodesObj: CodesCodesObj = \
-                        CodesCodesObj(record.get('Concept'), record.get('Code2'), record.get('Sab2'))
+                        CodesCodesObj(record.get('Concept'), record.get('Code2'), record.get('Sab2')).serialize()
                     codesCodesObjs.append(codesCodesObj)
                 except KeyError:
                     pass

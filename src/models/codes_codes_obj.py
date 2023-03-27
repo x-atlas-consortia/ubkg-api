@@ -114,3 +114,10 @@ class CodesCodesObj(Model):
         """
 
         self._sab = sab
+
+    def serialize(self):
+        return {
+            "concept": self._concept,
+            "code": self._code,
+            "SAB": self._sab
+        }
