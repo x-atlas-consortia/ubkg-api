@@ -9,6 +9,7 @@ from routes.assaytype.assaytype_controller import assaytype_blueprint
 from routes.codes.codes_controller import codes_blueprint
 from routes.concepts.concepts_controller import concepts_blueprint
 from routes.datasets.datasets_controller import datasets_blueprint
+from routes.organs.organs_controller import organs_blueprint
 from routes.semantics.semantics_controller import semantics_blueprint
 from routes.terms.terms_controller import terms_blueprint
 from routes.tui.tui_controller import tui_blueprint
@@ -30,6 +31,7 @@ app.register_blueprint(semantics_blueprint)
 app.register_blueprint(tui_blueprint)
 app.register_blueprint(valueset_blueprint)
 app.register_blueprint(terms_blueprint)
+app.register_blueprint(organs_blueprint)
 
 neo4j = None
 
