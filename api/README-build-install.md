@@ -52,48 +52,57 @@ http://localhost:8080/
 For run_server_on_localhost.py to work, a local instance of neo4j should be running.
 If neo4j is not running, the error message will throw a "connection refused" exception.
 
-## Rebuilding the Docker container
+## Rebuilding the Docker container (DEV Only)
 
 To get the latest version of the server on the server execute the following:
 
 ```bash
 # Access the server, switch accounts and go to the server directory
-$ ssh -i ~/.ssh/id_rsa_e2c.pem cpk36@ingest.dev.hubmapconsortium.org
-$ sudo /bin/su - centos
-$ cd hubmap/ontology-api
-# Get the most recent version of the code
+$ ssh -i ~/.ssh/id_rsa_e2c.pem <your-login>@ingest.dev.hubmapconsortium.org
+$ sudo /bin/su - hive
+$ cd /opt/hubmap/ubkg
+$ git checkout dev-integrate
 $ git pull
 ```
 
-At this point you can shut down the server, remove the old image, rebuild it, and restart it.
+Then, shut down the server
 ```bash
-# Shut down the server
 $ docker images
-REPOSITORY                  TAG                 IMAGE ID            CREATED             SIZE
-ontology-api_ontology-api   latest              24b1f748f10f        31 minutes ago      77.6MB
+REPOSITORY              TAG            IMAGE ID       CREATED             SIZE
+bkg-api                1.2.1          876c464197ac   3 days ago          576MB...
+
+# Stop process and remove old (in this case) hubmap image...
+$ export UBKG_API_VERSION=1.2.1; docker-compose -f docker-compose.deployment.hubmap.api.yml down --rmi all
+[+] Running 2/1
+ ⠿ Container hubmap-ubkg-api  Removed                                                                                                             1.2s
+ ⠿ Image ubkg-api:1.2.1      Removed
+```
+
+Rebuild the image
+```bash
+$ (cd api; docker build -t ubkg-api:1.2.1 .)
+Sending build context to Docker daemon  414.2kB
+Step 1/10 : FROM hubmap/api-base-image:1.0.0
+ ---> 9eedc8946055
 ...
+Removing intermediate container c6f36572ece6
+ ---> 6c860ba70aab
+Successfully built 6c860ba70aab
+Successfully tagged ubkg-api:1.2.1
+```
 
-# Stop process and remove old image...
-$ export ONTOLOGY_API_VERSION=latest; docker-compose -f docker-compose.deployment.yml down --rmi all
-Stopping ontology-api ... done
-Removing ontology-api ... done
-Network gateway_hubmap is external, skipping
+Deploy the new image...
+```bash
+$ export UBKG_API_VERSION=1.2.1; docker-compose -f docker-compose.deployment.hubmap.api.yml up -d
+[+] Running 1/1
+ ⠿ Container hubmap-ubkg-api  Started
+```
 
-# Rebuild the image
-$ docker-compose -f docker-compose.deployment.api.yml build --no-cache
-Building ontology-api
-...
-Successfully built 3dd48d5cedbd
-Successfully tagged ontology-api_ontology-api:latest
-
-# Startup the container
-$ docker-compose -f docker-compose.deployment.api.yml up -d
-Creating ontology-api ... done
-
-# Verify that it is running
+Verify that it is running
+```bash
 $ docker ps
-CONTAINER ID        IMAGE                        COMMAND                  CREATED             STATUS                 PORTS           NAMES
-95ff4678fab4        ontology-api_ontology-api    "/usr/local/bin/entr…"   8 seconds ago       Up 8 seconds           5000/tcp        ontology-api
+CONTAINER ID   IMAGE           COMMAND                  CREATED          STATUS          PORTS                                                                                                                                                                                                                                                                                      NAMES
+b989f4a4daf0   ubkg-api:1.2.1  "/usr/local/bin/entr…"   58 seconds ago   Up 57 seconds   5000/tcp     ```
 ```
 
 Disconnect from the server
