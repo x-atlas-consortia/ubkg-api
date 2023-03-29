@@ -23,7 +23,6 @@ module_hotfixes=true\n'\
 RUN yum install -y yum-utils && \
     yum-config-manager --enable nginx-mainline && \
     yum install -y nginx && \
-    rm /etc/nginx/conf.d/default.conf && \
     mv nginx/nginx.conf /etc/nginx/nginx.conf && \
     rm -rf nginx && \
     pip install --upgrade pip -r src/requirements.txt && \
