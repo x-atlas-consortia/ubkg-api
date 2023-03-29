@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'),
             instance_relative_config=True)
-app.config.from_pyfile('app.cfg')
 
 app.register_blueprint(assaytype_blueprint)
 app.register_blueprint(codes_blueprint)
