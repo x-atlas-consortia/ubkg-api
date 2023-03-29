@@ -19,9 +19,7 @@ scripts/.openapi-generator
 api/.openapi-generator/*
 
 # config file
-src/openapi_server/resources/app.properties
 src/instance/app.cfg
-src/instance/app.properties
 
 # log files in any path
 **/*.log

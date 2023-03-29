@@ -1,4 +1,3 @@
-import configparser
 import logging
 import re
 from typing import List
@@ -108,6 +107,17 @@ def get_neo4j_manager():
                          'correct')
 
 
+def parse_app_config():
+    with open('instance/app.cfg') as f:
+        config_file = f.read().split('\n')
+        config = {}
+        for c in config_file:
+            result = c.replace("'", "").split('=')
+            config[result[0]] = result[1]
+    print('Config dictionary : ', config)
+    return config
+
+
 class Neo4jManager(object):
     @staticmethod
     def create():
@@ -131,17 +141,8 @@ class Neo4jManager(object):
 
     def __init__(self):
         global instance
-        config = configparser.ConfigParser()
-        # [neo4j]
-        # Server = bolt://localhost: 7687
-        # Username = neo4j
-        # Password = password
-        config.read('instance/app.properties')
-        neo4j_config = config['neo4j']
-        server = neo4j_config.get('Server')
-        username = neo4j_config.get('Username')
-        password = neo4j_config.get('Password')
-        self.driver = neo4j.GraphDatabase.driver(server, auth=(username, password))
+        config = parse_app_config()
+        self.driver = neo4j.GraphDatabase.driver(config['Server'], auth=(config['Username'], config['Password']))
         if instance is None:
             instance = self
 
