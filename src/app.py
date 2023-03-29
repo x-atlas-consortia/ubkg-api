@@ -16,8 +16,7 @@ logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message
                     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'),
-            instance_relative_config=True)
+app = Flask(__name__)
 
 app.register_blueprint(assaytype_blueprint)
 app.register_blueprint(codes_blueprint)
