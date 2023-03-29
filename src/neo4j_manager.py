@@ -983,7 +983,7 @@ class Neo4jManager(object):
             "MATCH (pOrgan:Concept)-[r1:CODE]->(cOrgan:Code) " \
             "WHERE pOrgan.CUI=OrganCUI " \
             "AND cOrgan.SAB='UBERON' " \
-            "RETURN cOrgan.CodeID as OrganUBERON " \
+            "RETURN DISTINCT CASE pOrgan.CUI WHEN 'C1123023' THEN 'UBERON 0002097' ELSE cOrgan.CodeID END AS OrganUBERON " \
             "} " \
             "CALL " \
             "{ " \
