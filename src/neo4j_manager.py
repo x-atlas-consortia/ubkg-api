@@ -958,40 +958,43 @@ class Neo4jManager(object):
                     ).serialize()
         return AssayTypePropertyInfo().serialize()
 
+    # Objectives: Provide crosswalk information between SenNet and RUI for organ types. Replicate the original organ_types.yaml.
+    # 1.FindSAB, code, and term for all organs.
+    # 2.Find UBERON codes for organs.The code for Skin maps to UBERON 0002097 and UBERON 002097 cross-references
+    # UMLS with CUI C1123023; however, the UMLS CUI also maps to UBERON 0000014. It is necessary to specify the
+    # UBERON code explicitly.
+    # 3.Find two - digit code for organs.
+    # Order return
     def get_organs(self, sab):
         result = []
-        query = """
-            CALL
-            {
-            MATCH (cParent:Code)<-[r1]-(pParent:Concept)<-[r2:isa]-(pOrgan:Concept)-[r3:CODE]->(cOrgan:Code)-[r4:PT]->(tOrgan:Term)
-            WHERE cParent.CodeID='SENNET C000008'
-            AND r2.SAB='SENNET'
-            AND cOrgan.SAB='SENNET'
-            AND r4.CUI=pOrgan.CUI
-            RETURN cOrgan.CODE as OrganCode,cOrgan.SAB as OrganSAB,tOrgan.name as OrganName, pOrgan.CUI as OrganCUI
-            }
-
-            CALL
-            {
-            WITH OrganCUI
-            MATCH (pOrgan:Concept)-[r1:CODE]->(cOrgan:Code)
-            WHERE pOrgan.CUI=OrganCUI
-            AND cOrgan.SAB='UBERON'
-            RETURN cOrgan.CodeID as OrganUBERON
-            }
-
-            CALL
-            {
-            WITH OrganCUI
-            MATCH (pOrgan:Concept)-[r1:has_two_character_code]->(p2CC:Concept)-[r2:PREF_TERM]->(t2CC:Term)
-            WHERE pOrgan.CUI=OrganCUI
-            AND r1.SAB='SENNET'
-            RETURN t2CC.name as OrganTwoCharacterCode
-            }
-
-            WITH OrganCode,OrganSAB,OrganName,OrganTwoCharacterCode,OrganUBERON
-            RETURN OrganCode,OrganSAB,OrganName,OrganUBERON,OrganTwoCharacterCode ORDER BY OrganName
-        """
+        query = \
+            "CALL " \
+            "{ " \
+            "MATCH (cParent:Code)<-[r1]-(pParent:Concept)<-[r2:isa]-(pOrgan:Concept)-[r3:CODE]->(cOrgan:Code)-[r4:PT]->(tOrgan:Term) " \
+            "WHERE cParent.CodeID='SENNET C000008' " \
+            f"AND r2.SAB='{sab}' " \
+            f"AND cOrgan.SAB='{sab}'" \
+            "AND r4.CUI=pOrgan.CUI " \
+            "RETURN cOrgan.CODE as OrganCode,cOrgan.SAB as OrganSAB,tOrgan.name as OrganName, pOrgan.CUI as OrganCUI " \
+            "} " \
+            "CALL " \
+            "{ " \
+            "WITH OrganCUI " \
+            "MATCH (pOrgan:Concept)-[r1:CODE]->(cOrgan:Code) " \
+            "WHERE pOrgan.CUI=OrganCUI " \
+            "AND cOrgan.SAB='UBERON' " \
+            "RETURN cOrgan.CodeID as OrganUBERON " \
+            "} " \
+            "CALL " \
+            "{ " \
+            "WITH OrganCUI " \
+            "MATCH (pOrgan:Concept)-[r1:has_two_character_code]->(p2CC:Concept)-[r2:PREF_TERM]->(t2CC:Term) " \
+            "WHERE pOrgan.CUI=OrganCUI " \
+            f"AND r1.SAB='{sab}' " \
+            "RETURN t2CC.name as OrganTwoCharacterCode " \
+            "} " \
+            "WITH OrganCode,OrganSAB,OrganName,OrganTwoCharacterCode,OrganUBERON " \
+            "RETURN OrganCode,OrganSAB,OrganName,OrganUBERON,OrganTwoCharacterCode ORDER BY OrganName"
 
         with self.driver.session() as session:
             recds: neo4j.Result = session.run(query)
