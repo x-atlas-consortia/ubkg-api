@@ -18,10 +18,6 @@ services:
       - "../src:/usr/src/app/src"
       # Mount conf.d on host machine to the nginx conf.d on container
       - "./ubkg-api/nginx/conf.d:/etc/nginx/conf.d"
-    deploy:
-      resources:
-        limits:
-          memory: 256M
     ports:
       - "8080:8080"
 
