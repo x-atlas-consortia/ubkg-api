@@ -16,6 +16,8 @@ services:
       - "../log:/usr/src/app/log"
       # Mount the source code to container
       - "../src:/usr/src/app/src"
+      # Mount conf.d on host machine to the nginx conf.d on container
+      - "./ubkg-api/nginx/conf.d:/etc/nginx/conf.d"
     ports:
       - "8080:8080"
 
