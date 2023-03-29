@@ -12,13 +12,6 @@ Verify it's running
 curl localhost:8080
 ```
 
-
-To launch the integration tests, use tox:
-```
-sudo pip install tox
-tox
-```
-
 ## Running with Docker
 
 To run the server on a Docker container, please navigate to the `/docker` directory:
@@ -27,19 +20,19 @@ You only need to build the image once. After the image is built you can make cha
 
 ### Build the image
 ```bash
-./docker-development build
+docker-compose -f docker-compose.yml -p ubkg-api build
 ```
 
 ### Start the container
 ```bash
-./docker-development start
+docker-compose -f docker-compose.yml -p ubkg-api up -d
 ```
 
 Make changes to the source code then `down` and `start` the container
 ```bash
-./docker-development down
+docker-compose -f docker-compose.yml -p ubkg-api down
 ```
 
 ```bash
-./docker-development start
+docker-compose -f docker-compose.yml -p ubkg-api up -d
 ```
