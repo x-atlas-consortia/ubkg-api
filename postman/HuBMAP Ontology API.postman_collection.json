@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "7d82577a-bac5-4fb7-b1a4-c6a7453e94c4",
+		"_postman_id": "05e4f47e-f17d-45dc-81ba-e65cba387237",
 		"name": "HuBMAP Ontology API",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21354713"
 	},
 	"item": [
 		{
@@ -229,6 +230,46 @@
 						"Breast%20cancer",
 						"concepts",
 						"terms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_organs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/organs?sab=sennet",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"organs"
+					],
+					"query": [
+						{
+							"key": "sab",
+							"value": "sennet"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check connection (status)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/status",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"status"
 					]
 				}
 			},
