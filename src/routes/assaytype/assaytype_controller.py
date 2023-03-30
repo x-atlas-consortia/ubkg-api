@@ -4,7 +4,7 @@ assaytype_blueprint = Blueprint('assaytype', __name__, url_prefix='/assaytype')
 
 
 @assaytype_blueprint.route('/<name>', methods=['GET'])
-def assaytype_name_get(name, application_context=None):
+def assaytype_name_get(name, application_context='HUBMAP'):
     """Returns information on a set of HuBMAP or SenNet dataset types, with options to filter the list to those with specific property values. Filters are additive (i.e., boolean AND)
 
 
@@ -15,4 +15,5 @@ def assaytype_name_get(name, application_context=None):
 
     :rtype: Union[AssayTypePropertyInfo, Tuple[AssayTypePropertyInfo, int], Tuple[AssayTypePropertyInfo, int, Dict[str, str]]
     """
+
     return jsonify(current_app.neo4jManager.assaytype_name_get(name, application_context))
