@@ -3,6 +3,7 @@ import re
 from typing import List
 
 import neo4j
+from flask import current_app
 
 from models.assay_type_property_info import AssayTypePropertyInfo
 from models.codes_codes_obj import CodesCodesObj
@@ -94,38 +95,14 @@ def parse_and_check_rel(rel: List[str]) -> List[List]:
 instance = None
 
 
-def get_neo4j_manager():
-    try:
-        if Neo4jManager.is_initialized():
-            logger.info("Neo4jManager has already been initialized")
-            return Neo4jManager.instance()
-        else:
-            logger.info("Initialized Neo4jManager successfully :)")
-            return Neo4jManager.create()
-    except Exception:
-        logger.exception('Failed to initialize the Neo4jManager :(. Please check the /instance/app.properties are '
-                         'correct')
-
-
-def parse_app_config():
-    with open('instance/app.cfg') as f:
-        config_file = f.read().split('\n')
-        config = {}
-        for c in config_file:
-            result = c.replace("'", "").split('=')
-            config[result[0]] = result[1]
-    print('Config dictionary : ', config)
-    return config
-
-
 class Neo4jManager(object):
     @staticmethod
-    def create():
+    def create(server, username, password):
         if instance is not None:
             raise Exception(
                 "An instance of Neo4jManager exists already. Use the Neo4jManager.instance() method to retrieve it.")
 
-        return Neo4jManager()
+        return Neo4jManager(server, username, password)
 
     @staticmethod
     def instance():
@@ -139,10 +116,9 @@ class Neo4jManager(object):
     def is_initialized():
         return instance is not None
 
-    def __init__(self):
+    def __init__(self, server, username, password):
         global instance
-        config = parse_app_config()
-        self.driver = neo4j.GraphDatabase.driver(config['Server'], auth=(config['Username'], config['Password']))
+        self.driver = neo4j.GraphDatabase.driver(server, auth=(username, password))
         if instance is None:
             instance = self
 

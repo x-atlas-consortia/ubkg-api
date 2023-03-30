@@ -3,6 +3,7 @@ import os
 
 from flask import Flask
 
+from neo4j_manager import Neo4jManager
 from routes.assaytype.assaytype_controller import assaytype_blueprint
 from routes.codes.codes_controller import codes_blueprint
 from routes.concepts.concepts_controller import concepts_blueprint
@@ -28,6 +29,21 @@ app.register_blueprint(semantics_blueprint)
 app.register_blueprint(tui_blueprint)
 app.register_blueprint(valueset_blueprint)
 app.register_blueprint(terms_blueprint)
+
+neo4j = None
+
+try:
+    if Neo4jManager.is_initialized():
+        neo4j = Neo4jManager.instance()
+        logger.info("Neo4jManager has already been initialized")
+    else:
+        neo4j = Neo4jManager.create(app.config['SERVER'], app.config['USERNAME'], app.config['PASSWORD'])
+        logger.info("Initialized Neo4jManager successfully :)")
+except Exception:
+    logger.exception('Failed to initialize the Neo4jManager :(. Please check the instance/app.cfg are '
+                     'correct')
+
+app.neo4jManager = neo4j
 
 
 @app.route('/', methods=['GET'])

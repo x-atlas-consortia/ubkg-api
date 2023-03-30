@@ -1,13 +1,10 @@
-from flask import Blueprint, jsonify
-
-from neo4j_manager import get_neo4j_manager
+from flask import Blueprint, jsonify, current_app
 
 tui_blueprint = Blueprint('tui', __name__, url_prefix='/tui')
-neo4jManager = get_neo4j_manager()
 
 
 @tui_blueprint.route('<tui_id>/semantics', methods=['GET'])
-def tui_tui_id_semantics_get(tui_id):  # noqa: E501
+def tui_tui_id_semantics_get(tui_id):
     """Returns a list of symantic_types {semantic, STN} of the type unique id (tui)
 
 
@@ -16,4 +13,4 @@ def tui_tui_id_semantics_get(tui_id):  # noqa: E501
 
     :rtype: Union[List[SemanticStn], Tuple[List[SemanticStn], int], Tuple[List[SemanticStn], int, Dict[str, str]]
     """
-    return jsonify(neo4jManager.tui_tui_id_semantics_get(tui_id))
+    return jsonify(current_app.neo4jManager.tui_tui_id_semantics_get(tui_id))

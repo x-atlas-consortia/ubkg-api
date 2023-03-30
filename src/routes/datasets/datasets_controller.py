@@ -1,13 +1,11 @@
-from flask import Blueprint, jsonify
-
-from neo4j_manager import get_neo4j_manager
+from flask import Blueprint, jsonify, current_app
 
 datasets_blueprint = Blueprint('datasets', __name__, url_prefix='/datasets')
-neo4jManager = get_neo4j_manager()
 
 
+@datasets_blueprint.route('/', methods=['GET'])
 def dataset_get(application_context, data_type=None, description=None, alt_name=None, primary=None, contains_pii=None,
-                vis_only=None, vitessce_hint=None, dataset_provider=None):  # noqa: E501
+                vis_only=None, vitessce_hint=None, dataset_provider=None):
     """Returns information on a set of HuBMAP or SenNet dataset types, with options to filter the list to those with specific property values. Filters are additive (i.e., boolean AND)
 
 
@@ -33,5 +31,5 @@ def dataset_get(application_context, data_type=None, description=None, alt_name=
     :rtype: Union[List[DatasetPropertyInfo], Tuple[List[DatasetPropertyInfo], int], Tuple[List[DatasetPropertyInfo], int, Dict[str, str]]
     """
     return jsonify(
-        neo4jManager.dataset_get(application_context, data_type, description, alt_name, primary, contains_pii, vis_only,
+        current_app.neo4jManager.dataset_get(application_context, data_type, description, alt_name, primary, contains_pii, vis_only,
                                  vitessce_hint, dataset_provider))

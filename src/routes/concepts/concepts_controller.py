@@ -1,9 +1,6 @@
-from flask import Blueprint, jsonify
-
-from neo4j_manager import get_neo4j_manager
+from flask import Blueprint, jsonify, current_app
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
-neo4jManager = get_neo4j_manager()
 
 
 @concepts_blueprint.route('<concept_id>/codes', methods=['GET'])
@@ -18,7 +15,7 @@ def concepts_concept_id_codes_get(concept_id, sab=[]):
 
     :rtype: Union[List[str], Tuple[List[str], int], Tuple[List[str], int, Dict[str, str]]
     """
-    return jsonify(neo4jManager.concepts_concept_id_codes_get(concept_id, sab))
+    return jsonify(current_app.neo4jManager.concepts_concept_id_codes_get(concept_id, sab))
 
 
 @concepts_blueprint.route('<concept_id>/concepts', methods=['GET'])
@@ -31,7 +28,7 @@ def concepts_concept_id_concepts_get(concept_id):
 
     :rtype: Union[List[SabRelationshipConceptTerm], Tuple[List[SabRelationshipConceptTerm], int], Tuple[List[SabRelationshipConceptTerm], int, Dict[str, str]]
     """
-    return jsonify(neo4jManager.concepts_concept_id_concepts_get(concept_id))
+    return jsonify(current_app.neo4jManager.concepts_concept_id_concepts_get(concept_id))
 
 
 @concepts_blueprint.route('<concept_id>/definitions', methods=['GET'])
@@ -44,7 +41,7 @@ def concepts_concept_id_definitions_get(concept_id):
 
     :rtype: Union[List[SabDefinition], Tuple[List[SabDefinition], int], Tuple[List[SabDefinition], int, Dict[str, str]]
     """
-    return jsonify(neo4jManager.concepts_concept_id_definitions_get(concept_id))
+    return jsonify(current_app.neo4jManager.concepts_concept_id_definitions_get(concept_id))
 
 
 @concepts_blueprint.route('<concept_id>/semantics', methods=['GET'])
@@ -57,7 +54,7 @@ def concepts_concept_id_semantics_get(concept_id):
 
     :rtype: Union[List[StyTuiStn], Tuple[List[StyTuiStn], int], Tuple[List[StyTuiStn], int, Dict[str, str]]
     """
-    return jsonify(neo4jManager.concepts_concept_id_semantics_get(concept_id))
+    return jsonify(current_app.neo4jManager.concepts_concept_id_semantics_get(concept_id))
 
 
 @concepts_blueprint.route('expand', methods=['POST'])
@@ -72,7 +69,7 @@ def concepts_expand_post():
     """
     if connexion.request.is_json:
         concept_sab_rel_depth = ConceptSabRelDepth.from_dict(connexion.request.get_json())
-    return jsonify(neo4jManager.concepts_expand_post(concept_sab_rel_depth))
+    return jsonify(current_app.neo4jManager.concepts_expand_post(concept_sab_rel_depth))
 
 
 @concepts_blueprint.route('paths', methods=['POST'])
@@ -87,7 +84,7 @@ def concepts_path_post():
     """
     if connexion.request.is_json:
         concept_sab_rel = ConceptSabRel.from_dict(connexion.request.get_json())
-    return jsonify(neo4jManager.concepts_path_post(concept_sab_rel))
+    return jsonify(current_app.neo4jManager.concepts_path_post(concept_sab_rel))
 
 
 @concepts_blueprint.route('shortestpath', methods=['POST'])
@@ -103,7 +100,7 @@ def concepts_shortestpaths_post():
     """
     if connexion.request.is_json:
         qconcept_tconcept_sab_rel = QconceptTconceptSabRel.from_dict(connexion.request.get_json())
-    return jsonify(neo4jManager.concepts_shortestpaths_post(qconcept_tconcept_sab_rel))
+    return jsonify(current_app.neo4jManager.concepts_shortestpaths_post(qconcept_tconcept_sab_rel))
 
 
 @concepts_blueprint.route('trees', methods=['POST'])
@@ -118,4 +115,4 @@ def concepts_trees_post():
     """
     if connexion.request.is_json:
         concept_sab_rel_depth = ConceptSabRelDepth.from_dict(connexion.request.get_json())
-    return jsonify(neo4jManager.concepts_trees_post(concept_sab_rel_depth))
+    return jsonify(current_app.neo4jManager.concepts_trees_post(concept_sab_rel_depth))

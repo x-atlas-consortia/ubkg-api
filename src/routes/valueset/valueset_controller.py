@@ -1,13 +1,10 @@
-from flask import Blueprint, jsonify
-
-from neo4j_manager import get_neo4j_manager
+from flask import Blueprint, jsonify, current_app
 
 valueset_blueprint = Blueprint('valueset', __name__, url_prefix='/valueset')
-neo4jManager = get_neo4j_manager()
 
 
 @valueset_blueprint.route('/', methods=['GET'])
-def valueset_get(parent_sab, parent_code, child_sabs):  # noqa: E501
+def valueset_get(parent_sab, parent_code, child_sabs):
     """Returns a valueset of concepts that are children (have as isa relationship) of another concept.
 
 
@@ -20,4 +17,4 @@ def valueset_get(parent_sab, parent_code, child_sabs):  # noqa: E501
 
     :rtype: Union[List[SabCodeTerm], Tuple[List[SabCodeTerm], int], Tuple[List[SabCodeTerm], int, Dict[str, str]]
     """
-    return jsonify(neo4jManager.valueset_get(parent_sab, parent_code, child_sabs))
+    return jsonify(current_app.neo4jManager.valueset_get(parent_sab, parent_code, child_sabs))

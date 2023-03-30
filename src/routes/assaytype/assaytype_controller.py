@@ -1,9 +1,6 @@
-from flask import Blueprint, jsonify
-
-from neo4j_manager import get_neo4j_manager
+from flask import Blueprint, jsonify, current_app
 
 assaytype_blueprint = Blueprint('assaytype', __name__, url_prefix='/assaytype')
-neo4jManager = get_neo4j_manager()
 
 
 @assaytype_blueprint.route('/<name>', methods=['GET'])
@@ -19,4 +16,4 @@ def assaytype_name_get(name, application_context=None):
 
     :rtype: Union[AssayTypePropertyInfo, Tuple[AssayTypePropertyInfo, int], Tuple[AssayTypePropertyInfo, int, Dict[str, str]]
     """
-    return jsonify(neo4jManager.assaytype_name_get(name, application_context))
+    return jsonify(current_app.neo4jManager.assaytype_name_get(name, application_context))
