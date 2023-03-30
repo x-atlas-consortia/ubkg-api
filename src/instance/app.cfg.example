@@ -1,3 +1,3 @@
-Server='bolt://34.234.131.112:7688'
-Username='neo4j'
-Password='HappyG0at'
+SERVER='bolt://34.234.131.112:7688'
+USERNAME='neo4j'
+PASSWORD='HappyG0at'
