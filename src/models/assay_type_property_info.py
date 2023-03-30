@@ -9,7 +9,6 @@ from .base_model_ import Model
 
 
 class AssayTypePropertyInfo(Model):
-
     def __init__(self, name=None, primary=None, description=None, vitessce_hints=None, contains_pii=None, vis_only=None):
         """AssayTypePropertyInfo - a model defined in OpenAPI
 
