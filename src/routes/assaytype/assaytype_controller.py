@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, current_app
+from flask import Blueprint, jsonify, current_app, request
 
 assaytype_blueprint = Blueprint('assaytype', __name__, url_prefix='/assaytype')
 
@@ -15,5 +15,7 @@ def assaytype_name_get(name, application_context='HUBMAP'):
 
     :rtype: Union[AssayTypePropertyInfo, Tuple[AssayTypePropertyInfo, int], Tuple[AssayTypePropertyInfo, int, Dict[str, str]]
     """
-
+    query_string_application_context = request.args.get('application_context')
+    if query_string_application_context is not None:
+        application_context = query_string_application_context
     return jsonify(current_app.neo4jManager.assaytype_name_get(name, application_context))

@@ -955,4 +955,4 @@ class Neo4jManager(object):
                         record['contains_pii'],
                         record['vis_only']
                     ).serialize()
-        return AssayTypePropertyInfo()
+        return AssayTypePropertyInfo().serialize()
