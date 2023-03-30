@@ -15,17 +15,17 @@ class PathItemConceptRelationshipSabPrefterm(Model):
     def __init__(self, path=None, item=None, concept=None, relationship=None, sab=None, prefterm=None):
         """PathItemConceptRelationshipSabPrefterm - a model defined in OpenAPI
 
-        :param path: The path of this PathItemConceptRelationshipSabPrefterm.  # noqa: E501
+        :param path: The path of this PathItemConceptRelationshipSabPrefterm.
         :type path: str
-        :param item: The item of this PathItemConceptRelationshipSabPrefterm.  # noqa: E501
+        :param item: The item of this PathItemConceptRelationshipSabPrefterm.
         :type item: str
-        :param concept: The concept of this PathItemConceptRelationshipSabPrefterm.  # noqa: E501
+        :param concept: The concept of this PathItemConceptRelationshipSabPrefterm.
         :type concept: str
-        :param relationship: The relationship of this PathItemConceptRelationshipSabPrefterm.  # noqa: E501
+        :param relationship: The relationship of this PathItemConceptRelationshipSabPrefterm.
         :type relationship: str
-        :param sab: The sab of this PathItemConceptRelationshipSabPrefterm.  # noqa: E501
+        :param sab: The sab of this PathItemConceptRelationshipSabPrefterm.
         :type sab: str
-        :param prefterm: The prefterm of this PathItemConceptRelationshipSabPrefterm.  # noqa: E501
+        :param prefterm: The prefterm of this PathItemConceptRelationshipSabPrefterm.
         :type prefterm: str
         """
         self.openapi_types = {

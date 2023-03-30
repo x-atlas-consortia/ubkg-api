@@ -1,12 +1,11 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime
 
-from typing import List, Dict
+from typing import List
 
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class AssayTypePropertyInfo(Model):
@@ -18,17 +17,17 @@ class AssayTypePropertyInfo(Model):
     def __init__(self, name=None, primary=None, description=None, vitessce_hints=None, contains_pii=None, vis_only=None):
         """AssayTypePropertyInfo - a model defined in OpenAPI
 
-        :param name: The name of this AssayTypePropertyInfo.  # noqa: E501
+        :param name: The name of this AssayTypePropertyInfo.
         :type name: str
-        :param primary: The primary of this AssayTypePropertyInfo.  # noqa: E501
+        :param primary: The primary of this AssayTypePropertyInfo.
         :type primary: bool
-        :param description: The description of this AssayTypePropertyInfo.  # noqa: E501
+        :param description: The description of this AssayTypePropertyInfo.
         :type description: str
-        :param vitessce_hints: The vitessce_hints of this AssayTypePropertyInfo.  # noqa: E501
+        :param vitessce_hints: The vitessce_hints of this AssayTypePropertyInfo.
         :type vitessce_hints: List[str]
-        :param contains_pii: The contains_pii of this AssayTypePropertyInfo.  # noqa: E501
+        :param contains_pii: The contains_pii of this AssayTypePropertyInfo.
         :type contains_pii: bool
-        :param vis_only: The vis_only of this AssayTypePropertyInfo.  # noqa: E501
+        :param vis_only: The vis_only of this AssayTypePropertyInfo.
         :type vis_only: List[bool]
         """
         self.openapi_types = {

@@ -91,7 +91,6 @@ def concepts_path_post():
 def concepts_shortestpaths_post():
     """Return all paths of the relationship pattern specified within the selected sources
 
-     # noqa: E501
 
     :param qconcept_tconcept_sab_rel:
     :type qconcept_tconcept_sab_rel: dict | bytes

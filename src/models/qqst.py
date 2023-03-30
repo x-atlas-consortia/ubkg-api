@@ -1,12 +1,9 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime
 
-from typing import List, Dict
-
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class QQST(Model):
@@ -18,15 +15,15 @@ class QQST(Model):
     def __init__(self, query_tui=None, query_stn=None, semantic=None, tui=None, stn=None):
         """QQST - a model defined in OpenAPI
 
-        :param query_tui: The query_tui of this QQST.  # noqa: E501
+        :param query_tui: The query_tui of this QQST.
         :type query_tui: str
-        :param query_stn: The query_stn of this QQST.  # noqa: E501
+        :param query_stn: The query_stn of this QQST.
         :type query_stn: str
-        :param semantic: The semantic of this QQST.  # noqa: E501
+        :param semantic: The semantic of this QQST.
         :type semantic: str
-        :param tui: The tui of this QQST.  # noqa: E501
+        :param tui: The tui of this QQST.
         :type tui: str
-        :param stn: The stn of this QQST.  # noqa: E501
+        :param stn: The stn of this QQST.
         :type stn: str
         """
         self.openapi_types = {
@@ -57,7 +54,7 @@ class QQST(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The QQST of this QQST.  # noqa: E501
+        :return: The QQST of this QQST.
         :rtype: QQST
         """
         return util.deserialize_model(dikt, cls)
