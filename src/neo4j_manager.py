@@ -64,6 +64,7 @@ cypher_head: str = \
     " WHERE relationship.CUI = concept.CUI" \
     " OPTIONAL MATCH (matched_term:Term)<-[:PREF_TERM]-(concept:Concept)"
 
+record_field_name = 'result'
 
 def rel_str_to_array(rels: List[str]) -> List[List]:
     rel_array: List[List] = []
@@ -124,6 +125,25 @@ class Neo4jManager(object):
     # https://neo4j.com/docs/api/python-driver/current/api.html
     def close(self):
         self.driver.close()
+
+    def check_connection(self):
+        query = f"RETURN 1 AS {record_field_name}"
+
+        # Sessions will often be created and destroyed using a with block context
+        with self.driver.session() as session:
+            # Returned type is a Record object
+            records = session.run(query)
+
+            # When record[record_field_name] is not None (namely the cypher result is not null)
+            # and the value equals 1
+            for record in records:
+                if record and record[record_field_name] and (record[record_field_name] == 1):
+                    logger.info("Neo4j is connected :)")
+                    return True
+
+        logger.info("Neo4j is NOT connected :(")
+
+        return False
 
     def codes_code_id_codes_get(self, code_id: str, sab: List[str]) -> List[CodesCodesObj]:
         codesCodesObjs: List[CodesCodesObj] = []

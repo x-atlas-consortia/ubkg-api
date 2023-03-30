@@ -1,7 +1,8 @@
 import logging
 import os
+from pathlib import Path
 
-from flask import Flask
+from flask import Flask, jsonify
 
 from neo4j_manager import Neo4jManager
 from routes.assaytype.assaytype_controller import assaytype_blueprint
@@ -49,6 +50,21 @@ app.neo4jManager = neo4j
 @app.route('/', methods=['GET'])
 def index():
     return "Hello! This is UBKG-API service :)"
+
+
+@app.route('/status', methods=['GET'])
+def status():
+    status_data = {
+        # Use strip() to remove leading and trailing spaces, newlines, and tabs
+        'version': (Path(__file__).absolute().parent.parent / 'VERSION').read_text().strip(),
+        'build': (Path(__file__).absolute().parent.parent / 'BUILD').read_text().strip(),
+        'neo4j_connection': False
+    }
+    is_connected = app.neo4jManager.check_connection()
+    if is_connected:
+        status_data['neo4j_connection'] = True
+
+    return jsonify(status_data)
 
 
 def main():
