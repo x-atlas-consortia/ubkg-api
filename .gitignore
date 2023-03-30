@@ -30,3 +30,5 @@ docker/ubkg-api/VERSION
 docker/ubkg-api/BUILD
 
 BUILD
+
+**/__pycache__
