@@ -1,12 +1,9 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class PathItemConceptRelationshipSabPrefterm(Model):
@@ -15,7 +12,7 @@ class PathItemConceptRelationshipSabPrefterm(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, path=None, item=None, concept=None, relationship=None, sab=None, prefterm=None):  # noqa: E501
+    def __init__(self, path=None, item=None, concept=None, relationship=None, sab=None, prefterm=None):
         """PathItemConceptRelationshipSabPrefterm - a model defined in OpenAPI
 
         :param path: The path of this PathItemConceptRelationshipSabPrefterm.  # noqa: E501
@@ -62,7 +59,7 @@ class PathItemConceptRelationshipSabPrefterm(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The PathItemConceptRelationshipSabPrefterm of this PathItemConceptRelationshipSabPrefterm.  # noqa: E501
+        :return: The PathItemConceptRelationshipSabPrefterm of this PathItemConceptRelationshipSabPrefterm.
         :rtype: PathItemConceptRelationshipSabPrefterm
         """
         return util.deserialize_model(dikt, cls)

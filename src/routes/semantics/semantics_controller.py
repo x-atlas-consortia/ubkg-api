@@ -10,7 +10,6 @@ neo4jManager = get_neo4j_manager()
 def semantics_semantic_id_semantics_get(semantic_id):  # noqa: E501
     """Returns a list of semantic_types {queryTUI, querySTN ,semantic, TUI_STN} of the semantic type
 
-     # noqa: E501
 
     :param semantic_id: The semantic identifier
     :type semantic_id: str

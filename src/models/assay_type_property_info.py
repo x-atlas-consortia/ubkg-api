@@ -1,9 +1,9 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict
 
 from .base_model_ import Model
 from . import util
@@ -15,7 +15,7 @@ class AssayTypePropertyInfo(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, name=None, primary=None, description=None, vitessce_hints=None, contains_pii=None, vis_only=None):  # noqa: E501
+    def __init__(self, name=None, primary=None, description=None, vitessce_hints=None, contains_pii=None, vis_only=None):
         """AssayTypePropertyInfo - a model defined in OpenAPI
 
         :param name: The name of this AssayTypePropertyInfo.  # noqa: E501
@@ -62,7 +62,7 @@ class AssayTypePropertyInfo(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The AssayTypePropertyInfo of this AssayTypePropertyInfo.  # noqa: E501
+        :return: The AssayTypePropertyInfo of this AssayTypePropertyInfo.
         :rtype: AssayTypePropertyInfo
         """
         return util.deserialize_model(dikt, cls)
@@ -71,7 +71,7 @@ class AssayTypePropertyInfo(Model):
     def name(self):
         """Gets the name of this AssayTypePropertyInfo.
 
-        AssayType name; used to characterize dataset entities in provenance hierarchy  # noqa: E501
+        AssayType name; used to characterize dataset entities in provenance hierarchy
 
         :return: The name of this AssayTypePropertyInfo.
         :rtype: str
@@ -82,7 +82,7 @@ class AssayTypePropertyInfo(Model):
     def name(self, name):
         """Sets the name of this AssayTypePropertyInfo.
 
-        AssayType name; used to characterize dataset entities in provenance hierarchy  # noqa: E501
+        AssayType name; used to characterize dataset entities in provenance hierarchy
 
         :param name: The name of this AssayTypePropertyInfo.
         :type name: str
@@ -94,7 +94,7 @@ class AssayTypePropertyInfo(Model):
     def primary(self):
         """Gets the primary of this AssayTypePropertyInfo.
 
-        Indicates whether the assay is primary (true) or derived (false)  # noqa: E501
+        Indicates whether the assay is primary (true) or derived (false)
 
         :return: The primary of this AssayTypePropertyInfo.
         :rtype: bool
@@ -105,7 +105,7 @@ class AssayTypePropertyInfo(Model):
     def primary(self, primary):
         """Sets the primary of this AssayTypePropertyInfo.
 
-        Indicates whether the assay is primary (true) or derived (false)  # noqa: E501
+        Indicates whether the assay is primary (true) or derived (false)
 
         :param primary: The primary of this AssayTypePropertyInfo.
         :type primary: bool
@@ -117,7 +117,7 @@ class AssayTypePropertyInfo(Model):
     def description(self):
         """Gets the description of this AssayTypePropertyInfo.
 
-        How datasets of the data type are named in the Data Portal.  # noqa: E501
+        How datasets of the data type are named in the Data Portal.
 
         :return: The description of this AssayTypePropertyInfo.
         :rtype: str
@@ -128,7 +128,7 @@ class AssayTypePropertyInfo(Model):
     def description(self, description):
         """Sets the description of this AssayTypePropertyInfo.
 
-        How datasets of the data type are named in the Data Portal.  # noqa: E501
+        How datasets of the data type are named in the Data Portal.
 
         :param description: The description of this AssayTypePropertyInfo.
         :type description: str
@@ -140,7 +140,7 @@ class AssayTypePropertyInfo(Model):
     def vitessce_hints(self):
         """Gets the vitessce_hints of this AssayTypePropertyInfo.
 
-        Flags for Vitessce visualization  # noqa: E501
+        Flags for Vitessce visualization
 
         :return: The vitessce_hints of this AssayTypePropertyInfo.
         :rtype: List[str]
@@ -151,7 +151,7 @@ class AssayTypePropertyInfo(Model):
     def vitessce_hints(self, vitessce_hints):
         """Sets the vitessce_hints of this AssayTypePropertyInfo.
 
-        Flags for Vitessce visualization  # noqa: E501
+        Flags for Vitessce visualization
 
         :param vitessce_hints: The vitessce_hints of this AssayTypePropertyInfo.
         :type vitessce_hints: List[str]
@@ -163,7 +163,7 @@ class AssayTypePropertyInfo(Model):
     def contains_pii(self):
         """Gets the contains_pii of this AssayTypePropertyInfo.
 
-        Whether the dataset contains Patient Identifying Information (PII) (true or false)  # noqa: E501
+        Whether the dataset contains Patient Identifying Information (PII) (true or false)
 
         :return: The contains_pii of this AssayTypePropertyInfo.
         :rtype: bool
@@ -174,7 +174,7 @@ class AssayTypePropertyInfo(Model):
     def contains_pii(self, contains_pii):
         """Sets the contains_pii of this AssayTypePropertyInfo.
 
-        Whether the dataset contains Patient Identifying Information (PII) (true or false)  # noqa: E501
+        Whether the dataset contains Patient Identifying Information (PII) (true or false)
 
         :param contains_pii: The contains_pii of this AssayTypePropertyInfo.
         :type contains_pii: bool
@@ -186,7 +186,7 @@ class AssayTypePropertyInfo(Model):
     def vis_only(self):
         """Gets the vis_only of this AssayTypePropertyInfo.
 
-        Indicates whether for visualization only (true or false)  # noqa: E501
+        Indicates whether for visualization only (true or false)
 
         :return: The vis_only of this AssayTypePropertyInfo.
         :rtype: List[bool]
@@ -197,7 +197,7 @@ class AssayTypePropertyInfo(Model):
     def vis_only(self, vis_only):
         """Sets the vis_only of this AssayTypePropertyInfo.
 
-        Indicates whether for visualization only (true or false)  # noqa: E501
+        Indicates whether for visualization only (true or false)
 
         :param vis_only: The vis_only of this AssayTypePropertyInfo.
         :type vis_only: List[bool]

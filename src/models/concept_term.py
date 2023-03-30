@@ -1,12 +1,9 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class ConceptTerm(Model):
@@ -15,12 +12,12 @@ class ConceptTerm(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, concept=None, term=None):  # noqa: E501
+    def __init__(self, concept=None, term=None):
         """ConceptTerm - a model defined in OpenAPI
 
-        :param concept: The concept of this ConceptTerm.  # noqa: E501
+        :param concept: The concept of this ConceptTerm.
         :type concept: str
-        :param term: The term of this ConceptTerm.  # noqa: E501
+        :param term: The term of this ConceptTerm.
         :type term: str
         """
         self.openapi_types = {
@@ -42,7 +39,7 @@ class ConceptTerm(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The ConceptTerm of this ConceptTerm.  # noqa: E501
+        :return: The ConceptTerm of this ConceptTerm.
         :rtype: ConceptTerm
         """
         return util.deserialize_model(dikt, cls)

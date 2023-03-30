@@ -1,12 +1,9 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class SabRelationshipConceptTerm(Model):
@@ -15,16 +12,16 @@ class SabRelationshipConceptTerm(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, sab=None, relationship=None, concept=None, prefterm=None):  # noqa: E501
+    def __init__(self, sab=None, relationship=None, concept=None, prefterm=None):
         """SabRelationshipConceptTerm - a model defined in OpenAPI
 
-        :param sab: The sab of this SabRelationshipConceptTerm.  # noqa: E501
+        :param sab: The sab of this SabRelationshipConceptTerm.
         :type sab: str
-        :param relationship: The relationship of this SabRelationshipConceptTerm.  # noqa: E501
+        :param relationship: The relationship of this SabRelationshipConceptTerm.
         :type relationship: str
-        :param concept: The concept of this SabRelationshipConceptTerm.  # noqa: E501
+        :param concept: The concept of this SabRelationshipConceptTerm.
         :type concept: str
-        :param prefterm: The prefterm of this SabRelationshipConceptTerm.  # noqa: E501
+        :param prefterm: The prefterm of this SabRelationshipConceptTerm.
         :type prefterm: str
         """
         self.openapi_types = {
@@ -52,7 +49,7 @@ class SabRelationshipConceptTerm(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The SabRelationshipConceptTerm of this SabRelationshipConceptTerm.  # noqa: E501
+        :return: The SabRelationshipConceptTerm of this SabRelationshipConceptTerm.
         :rtype: SabRelationshipConceptTerm
         """
         return util.deserialize_model(dikt, cls)

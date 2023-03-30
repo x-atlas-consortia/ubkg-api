@@ -1,12 +1,11 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
+from typing import List
 
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class QconceptTconceptSabRel(Model):
@@ -15,16 +14,16 @@ class QconceptTconceptSabRel(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, query_concept_id=None, target_concept_id=None, sab=None, rel=None):  # noqa: E501
+    def __init__(self, query_concept_id=None, target_concept_id=None, sab=None, rel=None):
         """QconceptTconceptSabRel - a model defined in OpenAPI
 
-        :param query_concept_id: The query_concept_id of this QconceptTconceptSabRel.  # noqa: E501
+        :param query_concept_id: The query_concept_id of this QconceptTconceptSabRel.
         :type query_concept_id: str
-        :param target_concept_id: The target_concept_id of this QconceptTconceptSabRel.  # noqa: E501
+        :param target_concept_id: The target_concept_id of this QconceptTconceptSabRel.
         :type target_concept_id: str
-        :param sab: The sab of this QconceptTconceptSabRel.  # noqa: E501
+        :param sab: The sab of this QconceptTconceptSabRel.
         :type sab: List[str]
-        :param rel: The rel of this QconceptTconceptSabRel.  # noqa: E501
+        :param rel: The rel of this QconceptTconceptSabRel.
         :type rel: List[str]
         """
         self.openapi_types = {
@@ -52,7 +51,7 @@ class QconceptTconceptSabRel(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The QconceptTconceptSabRel of this QconceptTconceptSabRel.  # noqa: E501
+        :return: The QconceptTconceptSabRel of this QconceptTconceptSabRel.
         :rtype: QconceptTconceptSabRel
         """
         return util.deserialize_model(dikt, cls)

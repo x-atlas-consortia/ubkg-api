@@ -1,9 +1,9 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict
 
 from .base_model_ import Model
 from . import util
@@ -15,14 +15,14 @@ class CodesCodesObj(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, concept=None, code=None, sab=None):  # noqa: E501
+    def __init__(self, concept=None, code=None, sab=None):
         """CodesCodesObj - a model defined in OpenAPI
 
-        :param concept: The concept of this CodesCodesObj.  # noqa: E501
+        :param concept: The concept of this CodesCodesObj.
         :type concept: str
-        :param code: The code of this CodesCodesObj.  # noqa: E501
+        :param code: The code of this CodesCodesObj.
         :type code: str
-        :param sab: The sab of this CodesCodesObj.  # noqa: E501
+        :param sab: The sab of this CodesCodesObj.
         :type sab: str
         """
         self.openapi_types = {
@@ -47,7 +47,7 @@ class CodesCodesObj(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The CodesCodesObj of this CodesCodesObj.  # noqa: E501
+        :return: The CodesCodesObj of this CodesCodesObj.
         :rtype: CodesCodesObj
         """
         return util.deserialize_model(dikt, cls)

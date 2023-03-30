@@ -1,12 +1,9 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class SemanticStn(Model):
@@ -15,12 +12,12 @@ class SemanticStn(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, semantic=None, stn=None):  # noqa: E501
+    def __init__(self, semantic=None, stn=None):
         """SemanticStn - a model defined in OpenAPI
 
-        :param semantic: The semantic of this SemanticStn.  # noqa: E501
+        :param semantic: The semantic of this SemanticStn.
         :type semantic: str
-        :param stn: The stn of this SemanticStn.  # noqa: E501
+        :param stn: The stn of this SemanticStn.
         :type stn: str
         """
         self.openapi_types = {
@@ -42,7 +39,7 @@ class SemanticStn(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The SemanticStn of this SemanticStn.  # noqa: E501
+        :return: The SemanticStn of this SemanticStn.
         :rtype: SemanticStn
         """
         return util.deserialize_model(dikt, cls)

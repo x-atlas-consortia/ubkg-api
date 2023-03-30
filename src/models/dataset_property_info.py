@@ -1,12 +1,11 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
+from typing import List
 
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class DatasetPropertyInfo(Model):
@@ -15,24 +14,24 @@ class DatasetPropertyInfo(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, alt_names=None, contains_pii=None, data_type=None, dataset_provider=None, description=None, primary=None, vis_only=None, vitessce_hints=None):  # noqa: E501
+    def __init__(self, alt_names=None, contains_pii=None, data_type=None, dataset_provider=None, description=None, primary=None, vis_only=None, vitessce_hints=None):
         """DatasetPropertyInfo - a model defined in OpenAPI
 
-        :param alt_names: The alt_names of this DatasetPropertyInfo.  # noqa: E501
+        :param alt_names: The alt_names of this DatasetPropertyInfo.
         :type alt_names: List[str]
-        :param contains_pii: The contains_pii of this DatasetPropertyInfo.  # noqa: E501
+        :param contains_pii: The contains_pii of this DatasetPropertyInfo.
         :type contains_pii: str
-        :param data_type: The data_type of this DatasetPropertyInfo.  # noqa: E501
+        :param data_type: The data_type of this DatasetPropertyInfo.
         :type data_type: str
-        :param dataset_provider: The dataset_provider of this DatasetPropertyInfo.  # noqa: E501
+        :param dataset_provider: The dataset_provider of this DatasetPropertyInfo.
         :type dataset_provider: str
-        :param description: The description of this DatasetPropertyInfo.  # noqa: E501
+        :param description: The description of this DatasetPropertyInfo.
         :type description: str
-        :param primary: The primary of this DatasetPropertyInfo.  # noqa: E501
+        :param primary: The primary of this DatasetPropertyInfo.
         :type primary: str
-        :param vis_only: The vis_only of this DatasetPropertyInfo.  # noqa: E501
+        :param vis_only: The vis_only of this DatasetPropertyInfo.
         :type vis_only: List[str]
-        :param vitessce_hints: The vitessce_hints of this DatasetPropertyInfo.  # noqa: E501
+        :param vitessce_hints: The vitessce_hints of this DatasetPropertyInfo.
         :type vitessce_hints: List[str]
         """
         self.openapi_types = {
@@ -72,7 +71,7 @@ class DatasetPropertyInfo(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The DatasetPropertyInfo of this DatasetPropertyInfo.  # noqa: E501
+        :return: The DatasetPropertyInfo of this DatasetPropertyInfo.
         :rtype: DatasetPropertyInfo
         """
         return util.deserialize_model(dikt, cls)
@@ -81,7 +80,7 @@ class DatasetPropertyInfo(Model):
     def alt_names(self):
         """Gets the alt_names of this DatasetPropertyInfo.
 
-        Alternative/deprecated synonyms of data_type that may still be associated with dataset entities  # noqa: E501
+        Alternative/deprecated synonyms of data_type that may still be associated with dataset entities
 
         :return: The alt_names of this DatasetPropertyInfo.
         :rtype: List[str]
@@ -92,7 +91,7 @@ class DatasetPropertyInfo(Model):
     def alt_names(self, alt_names):
         """Sets the alt_names of this DatasetPropertyInfo.
 
-        Alternative/deprecated synonyms of data_type that may still be associated with dataset entities  # noqa: E501
+        Alternative/deprecated synonyms of data_type that may still be associated with dataset entities
 
         :param alt_names: The alt_names of this DatasetPropertyInfo.
         :type alt_names: List[str]
@@ -104,7 +103,7 @@ class DatasetPropertyInfo(Model):
     def contains_pii(self):
         """Gets the contains_pii of this DatasetPropertyInfo.
 
-        Whether the dataset contains Patient Identifying Information (PII)  # noqa: E501
+        Whether the dataset contains Patient Identifying Information (PII)
 
         :return: The contains_pii of this DatasetPropertyInfo.
         :rtype: str
@@ -115,7 +114,7 @@ class DatasetPropertyInfo(Model):
     def contains_pii(self, contains_pii):
         """Sets the contains_pii of this DatasetPropertyInfo.
 
-        Whether the dataset contains Patient Identifying Information (PII)  # noqa: E501
+        Whether the dataset contains Patient Identifying Information (PII)
 
         :param contains_pii: The contains_pii of this DatasetPropertyInfo.
         :type contains_pii: str
@@ -127,7 +126,7 @@ class DatasetPropertyInfo(Model):
     def data_type(self):
         """Gets the data_type of this DatasetPropertyInfo.
 
-        Data type for the dataset; used to characterize dataset entities in provenance hierarchy  # noqa: E501
+        Data type for the dataset; used to characterize dataset entities in provenance hierarchy
 
         :return: The data_type of this DatasetPropertyInfo.
         :rtype: str
@@ -138,7 +137,7 @@ class DatasetPropertyInfo(Model):
     def data_type(self, data_type):
         """Sets the data_type of this DatasetPropertyInfo.
 
-        Data type for the dataset; used to characterize dataset entities in provenance hierarchy  # noqa: E501
+        Data type for the dataset; used to characterize dataset entities in provenance hierarchy
 
         :param data_type: The data_type of this DatasetPropertyInfo.
         :type data_type: str
@@ -150,7 +149,7 @@ class DatasetPropertyInfo(Model):
     def dataset_provider(self):
         """Gets the dataset_provider of this DatasetPropertyInfo.
 
-        Identifies the provider of the dataset. 'External Provider' also referred to as 'lab-processed'.  # noqa: E501
+        Identifies the provider of the dataset. 'External Provider' also referred to as 'lab-processed'.
 
         :return: The dataset_provider of this DatasetPropertyInfo.
         :rtype: str
@@ -161,7 +160,7 @@ class DatasetPropertyInfo(Model):
     def dataset_provider(self, dataset_provider):
         """Sets the dataset_provider of this DatasetPropertyInfo.
 
-        Identifies the provider of the dataset. 'External Provider' also referred to as 'lab-processed'.  # noqa: E501
+        Identifies the provider of the dataset. 'External Provider' also referred to as 'lab-processed'.
 
         :param dataset_provider: The dataset_provider of this DatasetPropertyInfo.
         :type dataset_provider: str
@@ -173,7 +172,7 @@ class DatasetPropertyInfo(Model):
     def description(self):
         """Gets the description of this DatasetPropertyInfo.
 
-        How datasets of the data type are named in the Data Portal.  # noqa: E501
+        How datasets of the data type are named in the Data Portal.
 
         :return: The description of this DatasetPropertyInfo.
         :rtype: str
@@ -184,7 +183,7 @@ class DatasetPropertyInfo(Model):
     def description(self, description):
         """Sets the description of this DatasetPropertyInfo.
 
-        How datasets of the data type are named in the Data Portal.  # noqa: E501
+        How datasets of the data type are named in the Data Portal.
 
         :param description: The description of this DatasetPropertyInfo.
         :type description: str
@@ -196,7 +195,7 @@ class DatasetPropertyInfo(Model):
     def primary(self):
         """Gets the primary of this DatasetPropertyInfo.
 
-        Indicates whether the assay is primary (true) or derived (false)  # noqa: E501
+        Indicates whether the assay is primary (true) or derived (false)
 
         :return: The primary of this DatasetPropertyInfo.
         :rtype: str
@@ -207,7 +206,7 @@ class DatasetPropertyInfo(Model):
     def primary(self, primary):
         """Sets the primary of this DatasetPropertyInfo.
 
-        Indicates whether the assay is primary (true) or derived (false)  # noqa: E501
+        Indicates whether the assay is primary (true) or derived (false)
 
         :param primary: The primary of this DatasetPropertyInfo.
         :type primary: str
@@ -219,7 +218,7 @@ class DatasetPropertyInfo(Model):
     def vis_only(self):
         """Gets the vis_only of this DatasetPropertyInfo.
 
-        Indicates whether for visualization only  # noqa: E501
+        Indicates whether for visualization only
 
         :return: The vis_only of this DatasetPropertyInfo.
         :rtype: List[str]
@@ -230,7 +229,7 @@ class DatasetPropertyInfo(Model):
     def vis_only(self, vis_only):
         """Sets the vis_only of this DatasetPropertyInfo.
 
-        Indicates whether for visualization only  # noqa: E501
+        Indicates whether for visualization only
 
         :param vis_only: The vis_only of this DatasetPropertyInfo.
         :type vis_only: List[str]
@@ -242,7 +241,7 @@ class DatasetPropertyInfo(Model):
     def vitessce_hints(self):
         """Gets the vitessce_hints of this DatasetPropertyInfo.
 
-        Flags for Vitessce visualization  # noqa: E501
+        Flags for Vitessce visualization
 
         :return: The vitessce_hints of this DatasetPropertyInfo.
         :rtype: List[str]
@@ -253,7 +252,7 @@ class DatasetPropertyInfo(Model):
     def vitessce_hints(self, vitessce_hints):
         """Sets the vitessce_hints of this DatasetPropertyInfo.
 
-        Flags for Vitessce visualization  # noqa: E501
+        Flags for Vitessce visualization
 
         :param vitessce_hints: The vitessce_hints of this DatasetPropertyInfo.
         :type vitessce_hints: List[str]

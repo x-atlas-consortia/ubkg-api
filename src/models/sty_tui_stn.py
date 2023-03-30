@@ -1,12 +1,9 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class StyTuiStn(Model):
@@ -15,14 +12,14 @@ class StyTuiStn(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, sty=None, tui=None, stn=None):  # noqa: E501
+    def __init__(self, sty=None, tui=None, stn=None):
         """StyTuiStn - a model defined in OpenAPI
 
-        :param sty: The sty of this StyTuiStn.  # noqa: E501
+        :param sty: The sty of this StyTuiStn.
         :type sty: str
-        :param tui: The tui of this StyTuiStn.  # noqa: E501
+        :param tui: The tui of this StyTuiStn.
         :type tui: str
-        :param stn: The stn of this StyTuiStn.  # noqa: E501
+        :param stn: The stn of this StyTuiStn.
         :type stn: str
         """
         self.openapi_types = {
@@ -47,7 +44,7 @@ class StyTuiStn(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The StyTuiStn of this StyTuiStn.  # noqa: E501
+        :return: The StyTuiStn of this StyTuiStn.
         :rtype: StyTuiStn
         """
         return util.deserialize_model(dikt, cls)

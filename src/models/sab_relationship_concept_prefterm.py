@@ -3,12 +3,9 @@
 from __future__ import absolute_import
 
 from dataclasses import dataclass
-from datetime import date, datetime  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 @dataclass
@@ -18,16 +15,16 @@ class SabRelationshipConceptPrefterm(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, sab=None, relationship=None, concept=None, prefterm=None):  # noqa: E501
+    def __init__(self, sab=None, relationship=None, concept=None, prefterm=None):
         """SabRelationshipConceptPrefterm - a model defined in OpenAPI
 
-        :param sab: The sab of this SabRelationshipConceptPrefterm.  # noqa: E501
+        :param sab: The sab of this SabRelationshipConceptPrefterm.
         :type sab: str
-        :param relationship: The relationship of this SabRelationshipConceptPrefterm.  # noqa: E501
+        :param relationship: The relationship of this SabRelationshipConceptPrefterm.
         :type relationship: str
-        :param concept: The concept of this SabRelationshipConceptPrefterm.  # noqa: E501
+        :param concept: The concept of this SabRelationshipConceptPrefterm.
         :type concept: str
-        :param prefterm: The prefterm of this SabRelationshipConceptPrefterm.  # noqa: E501
+        :param prefterm: The prefterm of this SabRelationshipConceptPrefterm.
         :type prefterm: str
         """
         self.openapi_types = {
@@ -55,7 +52,7 @@ class SabRelationshipConceptPrefterm(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The SabRelationshipConceptPrefterm of this SabRelationshipConceptPrefterm.  # noqa: E501
+        :return: The SabRelationshipConceptPrefterm of this SabRelationshipConceptPrefterm.
         :rtype: SabRelationshipConceptPrefterm
         """
         return util.deserialize_model(dikt, cls)

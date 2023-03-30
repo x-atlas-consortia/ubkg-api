@@ -1,9 +1,9 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
+from datetime import date, datetime
 
-from typing import List, Dict  # noqa: F401
+from typing import List, Dict
 
 from .base_model_ import Model
 from . import util
@@ -15,7 +15,7 @@ class QQST(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, query_tui=None, query_stn=None, semantic=None, tui=None, stn=None):  # noqa: E501
+    def __init__(self, query_tui=None, query_stn=None, semantic=None, tui=None, stn=None):
         """QQST - a model defined in OpenAPI
 
         :param query_tui: The query_tui of this QQST.  # noqa: E501

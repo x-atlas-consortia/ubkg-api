@@ -1,12 +1,9 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class SabDefinition(Model):
@@ -15,12 +12,12 @@ class SabDefinition(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, sab=None, definition=None):  # noqa: E501
+    def __init__(self, sab=None, definition=None):
         """SabDefinition - a model defined in OpenAPI
 
-        :param sab: The sab of this SabDefinition.  # noqa: E501
+        :param sab: The sab of this SabDefinition.
         :type sab: str
-        :param definition: The definition of this SabDefinition.  # noqa: E501
+        :param definition: The definition of this SabDefinition.
         :type definition: str
         """
         self.openapi_types = {
@@ -42,7 +39,7 @@ class SabDefinition(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The SabDefinition of this SabDefinition.  # noqa: E501
+        :return: The SabDefinition of this SabDefinition.
         :rtype: SabDefinition
         """
         return util.deserialize_model(dikt, cls)

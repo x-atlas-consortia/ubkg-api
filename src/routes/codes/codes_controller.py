@@ -7,7 +7,7 @@ neo4jManager = get_neo4j_manager()
 
 
 @codes_blueprint.route('/<code_id>/codes', methods=['GET'])
-def codes_code_id_codes_get(code_id, sab=[]):  # noqa: E501
+def codes_code_id_codes_get(code_id, sab=[]):
     """Returns a list of code_ids {Concept, Code, SAB} that code the same concept(s) as the code_id, optionally restricted to source (SAB)
 
      # noqa: E501
@@ -23,7 +23,7 @@ def codes_code_id_codes_get(code_id, sab=[]):  # noqa: E501
 
 
 @codes_blueprint.route('/<code_id>/concepts', methods=['GET'])
-def codes_code_id_concepts_get(code_id):  # noqa: E501
+def codes_code_id_concepts_get(code_id):
     """Returns a list of concepts {Concept, Prefterm} that the code_id codes
 
      # noqa: E501

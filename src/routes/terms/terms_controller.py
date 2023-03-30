@@ -10,7 +10,6 @@ neo4jManager = get_neo4j_manager()
 def terms_term_id_codes_get(term_id):  # noqa: E501
     """Returns a list of codes {TermType, Code} of the text string
 
-     # noqa: E501
 
     :param term_id: The term identifier
     :type term_id: str
@@ -24,7 +23,6 @@ def terms_term_id_codes_get(term_id):  # noqa: E501
 def terms_term_id_concepts_get(term_id):  # noqa: E501
     """Returns a list of concepts associated with the text string
 
-     # noqa: E501
 
     :param term_id: The term identifier
     :type term_id: str
@@ -38,7 +36,6 @@ def terms_term_id_concepts_get(term_id):  # noqa: E501
 def terms_term_id_concepts_terms_get(term_id):  # noqa: E501
     """Returns an expanded list of concept(s) and preferred term(s) {Concept, Term} from an exact text match
 
-     # noqa: E501
 
     :param term_id: The term identifier
     :type term_id: str

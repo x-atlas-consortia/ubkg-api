@@ -10,7 +10,6 @@ neo4jManager = get_neo4j_manager()
 def tui_tui_id_semantics_get(tui_id):  # noqa: E501
     """Returns a list of symantic_types {semantic, STN} of the type unique id (tui)
 
-     # noqa: E501
 
     :param tui_id: The TUI identifier
     :type tui_id: str

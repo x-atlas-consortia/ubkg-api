@@ -1,12 +1,11 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
+from typing import List
 
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class ConceptSabRelDepth(Model):
@@ -15,16 +14,16 @@ class ConceptSabRelDepth(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, query_concept_id=None, sab=None, rel=None, depth=None):  # noqa: E501
+    def __init__(self, query_concept_id=None, sab=None, rel=None, depth=None):
         """ConceptSabRelDepth - a model defined in OpenAPI
 
-        :param query_concept_id: The query_concept_id of this ConceptSabRelDepth.  # noqa: E501
+        :param query_concept_id: The query_concept_id of this ConceptSabRelDepth.
         :type query_concept_id: str
-        :param sab: The sab of this ConceptSabRelDepth.  # noqa: E501
+        :param sab: The sab of this ConceptSabRelDepth.
         :type sab: List[str]
-        :param rel: The rel of this ConceptSabRelDepth.  # noqa: E501
+        :param rel: The rel of this ConceptSabRelDepth.
         :type rel: List[str]
-        :param depth: The depth of this ConceptSabRelDepth.  # noqa: E501
+        :param depth: The depth of this ConceptSabRelDepth.
         :type depth: int
         """
         self.openapi_types = {
@@ -52,7 +51,7 @@ class ConceptSabRelDepth(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The ConceptSabRelDepth of this ConceptSabRelDepth.  # noqa: E501
+        :return: The ConceptSabRelDepth of this ConceptSabRelDepth.
         :rtype: ConceptSabRelDepth
         """
         return util.deserialize_model(dikt, cls)

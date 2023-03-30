@@ -1,12 +1,9 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class SabCodeTerm(Model):
@@ -15,14 +12,14 @@ class SabCodeTerm(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, sab=None, code=None, term=None):  # noqa: E501
+    def __init__(self, sab=None, code=None, term=None):
         """SabCodeTerm - a model defined in OpenAPI
 
-        :param sab: The sab of this SabCodeTerm.  # noqa: E501
+        :param sab: The sab of this SabCodeTerm.
         :type sab: str
-        :param code: The code of this SabCodeTerm.  # noqa: E501
+        :param code: The code of this SabCodeTerm.
         :type code: str
-        :param term: The term of this SabCodeTerm.  # noqa: E501
+        :param term: The term of this SabCodeTerm.
         :type term: str
         """
         self.openapi_types = {
@@ -47,7 +44,7 @@ class SabCodeTerm(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The SabCodeTerm of this SabCodeTerm.  # noqa: E501
+        :return: The SabCodeTerm of this SabCodeTerm.
         :rtype: SabCodeTerm
         """
         return util.deserialize_model(dikt, cls)

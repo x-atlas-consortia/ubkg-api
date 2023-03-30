@@ -1,12 +1,9 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime  # noqa: F401
 
-from typing import List, Dict  # noqa: F401
-
-from .base_model_ import Model
 from . import util
+from .base_model_ import Model
 
 
 class TermtypeCode(Model):
@@ -15,12 +12,12 @@ class TermtypeCode(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, termtype=None, code=None):  # noqa: E501
+    def __init__(self, termtype=None, code=None):
         """TermtypeCode - a model defined in OpenAPI
 
-        :param termtype: The termtype of this TermtypeCode.  # noqa: E501
+        :param termtype: The termtype of this TermtypeCode.
         :type termtype: str
-        :param code: The code of this TermtypeCode.  # noqa: E501
+        :param code: The code of this TermtypeCode.
         :type code: str
         """
         self.openapi_types = {
@@ -42,7 +39,7 @@ class TermtypeCode(Model):
 
         :param dikt: A dict.
         :type: dict
-        :return: The TermtypeCode of this TermtypeCode.  # noqa: E501
+        :return: The TermtypeCode of this TermtypeCode.
         :rtype: TermtypeCode
         """
         return util.deserialize_model(dikt, cls)

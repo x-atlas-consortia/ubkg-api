@@ -10,7 +10,6 @@ neo4jManager = get_neo4j_manager()
 def valueset_get(parent_sab, parent_code, child_sabs):  # noqa: E501
     """Returns a valueset of concepts that are children (have as isa relationship) of another concept.
 
-     # noqa: E501
 
     :param parent_sab: the SAB of the parent concept
     :type parent_sab: str

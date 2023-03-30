@@ -10,7 +10,6 @@ def dataset_get(application_context, data_type=None, description=None, alt_name=
                 vis_only=None, vitessce_hint=None, dataset_provider=None):  # noqa: E501
     """Returns information on a set of HuBMAP or SenNet dataset types, with options to filter the list to those with specific property values. Filters are additive (i.e., boolean AND)
 
-     # noqa: E501
 
     :param application_context: Required filter to indicate application context.
     :type application_context: str
