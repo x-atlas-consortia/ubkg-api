@@ -3,7 +3,6 @@ import re
 from typing import List
 
 import neo4j
-from flask import current_app
 
 from models.assay_type_property_info import AssayTypePropertyInfo
 from models.codes_codes_obj import CodesCodesObj
