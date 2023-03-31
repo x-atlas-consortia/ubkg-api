@@ -31,6 +31,8 @@ services:
       - "../log:/usr/src/app/log"
       # Mount the app config to container in order to keep it outside of the image
       - "../src/instance:/usr/src/app/src/instance"
+      # Mount conf.d on host machine to the nginx conf.d on container
+      - "./ubkg-api/nginx/conf.d:/etc/nginx/conf.d"
 
 networks:
   gateway_hubmap:
