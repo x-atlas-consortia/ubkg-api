@@ -4,7 +4,7 @@ info:
   description: This document describes the UBKG API
   version: 1.2.0
 servers:
-  - url: https://ontology.api.hubmapconsortium.org/
+  - url: https://ontology.src.hubmapconsortium.org/
 paths:
   /codes/{code_id}/codes:
     get:
@@ -500,7 +500,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DatasetPropertyInfo'
-  /assaytype/{name}: # CPK MAR 2023 - replacement for search-api endpoint of the same name
+  /assaytype/{name}: # CPK MAR 2023 - replacement for search-src endpoint of the same name
     get:
       operationId: assaytype_name_get
       summary: Replacement for the same endpoint in search-api with the addition of application_context
@@ -808,7 +808,7 @@ components:
             type: string
             example: ["pyramid","anndata","is_image","is_tiled","is_sc","rna","atac","sprm","codex","maldi"]
           example: Microscopy
-    AssayTypePropertyInfo: # Schema name CPK MR 2023. search-api replacement subsset of DatasetPropertyInfo
+    AssayTypePropertyInfo: # Schema name CPK MR 2023. search-src replacement subsset of DatasetPropertyInfo
       type: object
       description: Properties of a HuBMAP/SenNet AssayType. 'DatasetPropertyInfo.data_type' matches key in original assay_types.yaml.
       properties:

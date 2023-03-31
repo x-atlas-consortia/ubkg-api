@@ -1,0 +1,299 @@
+{
+	"info": {
+		"_postman_id": "05e4f47e-f17d-45dc-81ba-e65cba387237",
+		"name": "HuBMAP Ontology API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21354713"
+	},
+	"item": [
+		{
+			"name": "concepts_concept_id_codes_get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/concepts/C0678222/codes",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"concepts",
+						"C0678222",
+						"codes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "concepts_concept_id_concepts_get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/concepts/C0678222/concepts",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"concepts",
+						"C0678222",
+						"concepts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "concepts_concept_id_definitions_get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/concepts/C0678222/definitions",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"concepts",
+						"C0678222",
+						"definitions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "concepts_concept_id_semantics_get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/concepts/C0678222/semantics",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"concepts",
+						"C0678222",
+						"semantics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "semantics_semantic_id_semantics_get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/semantics/Physical%20Object/semantics",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"semantics",
+						"Physical%20Object",
+						"semantics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "tui_tui_id_semantics_get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/tui/T200/semantics",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"tui",
+						"T200",
+						"semantics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "terms_term_id_codes_get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/terms/Breast%20cancer/codes",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"terms",
+						"Breast%20cancer",
+						"codes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "terms_term_id_concepts_get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/terms/Breast%20Cancer/concepts",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"terms",
+						"Breast%20Cancer",
+						"concepts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "codes_code_id_codes_get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/codes/SNOMEDCT_US%20254837009/codes",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"codes",
+						"SNOMEDCT_US%20254837009",
+						"codes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "codes_code_id_codes_get SAB",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/codes/SNOMEDCT_US%20254837009/codes",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"codes",
+						"SNOMEDCT_US%20254837009",
+						"codes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "codes_code_id_concepts_get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/codes/SNOMEDCT_US%20254837009/concepts",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"codes",
+						"SNOMEDCT_US%20254837009",
+						"concepts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "terms_term_id_concepts_terms_get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/terms/Breast%20cancer/concepts/terms",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"terms",
+						"Breast%20cancer",
+						"concepts",
+						"terms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_organs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/organs?sab=sennet",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"organs"
+					],
+					"query": [
+						{
+							"key": "sab",
+							"value": "sennet"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check connection (status)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ontology_url}}/status",
+					"host": [
+						"{{ontology_url}}"
+					],
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
