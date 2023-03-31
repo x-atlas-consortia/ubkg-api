@@ -184,3 +184,17 @@ class PathItemConceptRelationshipSabPrefterm(Model):
         """
 
         self._prefterm = prefterm
+
+    def serialize(self):
+        dict = {
+            'path': self._path,
+            'item': self._item,
+            'concept': self._concept,
+            'relationship': self._relationship,
+            'sab': self._sab,
+            'prefterm': self._prefterm
+        }
+        empty_keys = [k for k, v in dict.items() if v is None]
+        for k in empty_keys:
+            del dict[k]
+        return dict

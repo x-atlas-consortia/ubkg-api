@@ -28,6 +28,12 @@ class ConceptPrefterm(Model):
         self._concept = concept
         self._prefterm = prefterm
 
+    def serialize(self):
+        return {
+            "concept": self._concept,
+            "prefterm": self._prefterm
+        }
+
     @classmethod
     def from_dict(cls, dikt) -> 'ConceptPrefterm':
         """Returns the dict as a model

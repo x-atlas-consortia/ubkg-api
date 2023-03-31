@@ -1,4 +1,8 @@
-from flask import Blueprint, jsonify, current_app
+from flask import Blueprint, jsonify, current_app, request
+
+from models.concept_sab_rel import ConceptSabRel
+from models.concept_sab_rel_depth import ConceptSabRelDepth
+from models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
 
@@ -67,8 +71,7 @@ def concepts_expand_post():
 
     :rtype: Union[List[ConceptPrefterm], Tuple[List[ConceptPrefterm], int], Tuple[List[ConceptPrefterm], int, Dict[str, str]]
     """
-    if connexion.request.is_json:
-        concept_sab_rel_depth = ConceptSabRelDepth.from_dict(connexion.request.get_json())
+    concept_sab_rel_depth = ConceptSabRelDepth.from_dict(request.get_json())
     return jsonify(current_app.neo4jManager.concepts_expand_post(concept_sab_rel_depth))
 
 
@@ -82,12 +85,11 @@ def concepts_path_post():
 
     :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm], int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
     """
-    if connexion.request.is_json:
-        concept_sab_rel = ConceptSabRel.from_dict(connexion.request.get_json())
+    concept_sab_rel = ConceptSabRel.from_dict(request.get_json())
     return jsonify(current_app.neo4jManager.concepts_path_post(concept_sab_rel))
 
 
-@concepts_blueprint.route('shortestpath', methods=['POST'])
+@concepts_blueprint.route('shortestpaths', methods=['POST'])
 def concepts_shortestpaths_post():
     """Return all paths of the relationship pattern specified within the selected sources
 
@@ -97,8 +99,7 @@ def concepts_shortestpaths_post():
 
     :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm], int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
     """
-    if connexion.request.is_json:
-        qconcept_tconcept_sab_rel = QconceptTconceptSabRel.from_dict(connexion.request.get_json())
+    qconcept_tconcept_sab_rel = QconceptTconceptSabRel.from_dict(request.get_json())
     return jsonify(current_app.neo4jManager.concepts_shortestpaths_post(qconcept_tconcept_sab_rel))
 
 
@@ -112,6 +113,5 @@ def concepts_trees_post():
 
     :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm], int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
     """
-    if connexion.request.is_json:
-        concept_sab_rel_depth = ConceptSabRelDepth.from_dict(connexion.request.get_json())
+    concept_sab_rel_depth = ConceptSabRelDepth.from_dict(request.get_json())
     return jsonify(current_app.neo4jManager.concepts_trees_post(concept_sab_rel_depth))

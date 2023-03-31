@@ -290,7 +290,7 @@ class Neo4jManager(object):
             for record in recds:
                 try:
                     conceptPrefterm: ConceptPrefterm = \
-                        ConceptPrefterm(record.get('concept'), record.get('prefterm'))
+                        ConceptPrefterm(record.get('concept'), record.get('prefterm')).serialize()
                     conceptPrefterms.append(conceptPrefterm)
                 except KeyError:
                     pass
@@ -328,7 +328,7 @@ class Neo4jManager(object):
                     pathItemConceptRelationshipSabPrefterm: PathItemConceptRelationshipSabPrefterm = \
                         PathItemConceptRelationshipSabPrefterm(record.get('path'), record.get('item'),
                                                                record.get('concept'), record.get('relationship'),
-                                                               record.get('sab'), record.get('prefterm'))
+                                                               record.get('sab'), record.get('prefterm')).serialize()
                     pathItemConceptRelationshipSabPrefterms.append(pathItemConceptRelationshipSabPrefterm)
                 except KeyError:
                     pass
@@ -369,7 +369,7 @@ class Neo4jManager(object):
                     pathItemConceptRelationshipSabPrefterm: PathItemConceptRelationshipSabPrefterm = \
                         PathItemConceptRelationshipSabPrefterm(record.get('path'), record.get('item'),
                                                                record.get('concept'), record.get('relationship'),
-                                                               record.get('sab'), record.get('prefterm'))
+                                                               record.get('sab'), record.get('prefterm')).serialize()
                     pathItemConceptRelationshipSabPrefterms.append(pathItemConceptRelationshipSabPrefterm)
                 except KeyError:
                     pass
@@ -409,7 +409,7 @@ class Neo4jManager(object):
                     pathItemConceptRelationshipSabPrefterm: PathItemConceptRelationshipSabPrefterm = \
                         PathItemConceptRelationshipSabPrefterm(record.get('path'), record.get('item'),
                                                                record.get('concept'), record.get('relationship'),
-                                                               record.get('sab'), record.get('prefterm'))
+                                                               record.get('sab'), record.get('prefterm')).serialize()
                     pathItemConceptRelationshipSabPrefterms.append(pathItemConceptRelationshipSabPrefterm)
                 except KeyError:
                     pass
