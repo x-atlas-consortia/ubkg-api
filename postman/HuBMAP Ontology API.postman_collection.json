@@ -236,12 +236,12 @@
 			"response": []
 		},
 		{
-			"name": "get_organs",
+			"name": "get_organ_types",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{ontology_url}}/organs?sab=sennet",
+					"raw": "{{ontology_url}}/organs?application_context=sennet",
 					"host": [
 						"{{ontology_url}}"
 					],
@@ -250,7 +250,7 @@
 					],
 					"query": [
 						{
-							"key": "sab",
+							"key": "application_context",
 							"value": "sennet"
 						}
 					]
