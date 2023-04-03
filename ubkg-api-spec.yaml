@@ -567,6 +567,34 @@ paths:
                 vitessce-hints: ["pyramid","anndata"]
                 contains-pii: true
                 vis-only: true
+  /organs:
+    get:
+      operationId: get_organ_types
+      summary: Returns 2 letter organ codes to support the Registration User Interface (RUI)
+      parameters:
+        - name: application_context
+          in: query
+          required: false
+          description: Filter to indicate application context
+          schema:
+            type: string
+            default: HUBMAP
+            enum:
+              - HUBMAP
+              - SENNET
+              - hubmap
+              - sennet
+              - HuBMAP
+              - SenNet
+      responses:
+        '200':
+          description: A JSON array of the organ types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SabCodeTermRuiCode'
 components:
   schemas:
     CodesCodesObj: # Schema name
@@ -862,3 +890,23 @@ components:
             - sennet
             - HuBMAP
             - SenNet
+    SabCodeTermRuiCode:
+      type: object
+      description: Respoonse body for organs GET request
+      properties:
+        sab:
+          type: string
+          description: Source abbreviation
+          example: "HUBMAP"
+        term:
+          type: string
+          description: Organ type
+          example: "Uterus"
+        code:
+          type: string
+          description: The identifier for a concept in a vocabulary or ontology in the UMLS. A code is unique to the ontology.
+          example: "C030081"
+        rui_code:
+          type: string
+          description: Two letter organ code
+          example: "UT"
