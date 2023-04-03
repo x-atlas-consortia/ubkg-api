@@ -965,7 +965,7 @@ class Neo4jManager(object):
     # UBERON code explicitly.
     # 3.Find two - digit code for organs.
     # Order return
-    def get_organs(self, sab):
+    def get_organ_types(self, sab):
         result = []
         query = \
             "CALL " \

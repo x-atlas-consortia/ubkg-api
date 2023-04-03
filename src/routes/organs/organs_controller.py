@@ -1,14 +1,12 @@
-from neo4j_manager import get_neo4j_manager
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, current_app
 
 organs_blueprint = Blueprint('organs', __name__, url_prefix='/organs')
 
-neo4jManager = get_neo4j_manager()
-
 
 @organs_blueprint.route('/', methods=['GET'])
-def get_organs():
-    sab = request.args.get('sab').upper()
-    if sab not in ['SENNET', 'HUBMAP']:
-        return jsonify(f'Invalid sab specified ({sab}) sab query parameter must be one of SENNET or HUBMAP'), 400
-    return jsonify(neo4jManager.get_organs(sab))
+def get_organ_types():
+    application_context = request.args.get('application_context').upper()
+    if application_context not in ['SENNET', 'HUBMAP']:
+        return jsonify(f'Invalid application_context specified ({application_context}) application_context query '
+                       f'string must be one of SENNET or HUBMAP'), 400
+    return jsonify(current_app.neo4jManager.get_organ_types(application_context))
