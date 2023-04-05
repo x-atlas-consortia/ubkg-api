@@ -4,7 +4,7 @@ datasets_blueprint = Blueprint('datasets', __name__, url_prefix='/datasets')
 
 
 @datasets_blueprint.route('/', methods=['GET'])
-def dataset_get(application_context, data_type=None, description=None, alt_name=None, primary=None, contains_pii=None,
+def dataset_get(application_context='HUBMAP', data_type=None, description=None, alt_name=None, primary=None, contains_pii=None,
                 vis_only=None, vitessce_hint=None, dataset_provider=None):
     """Returns information on a set of HuBMAP or SenNet dataset types, with options to filter the list to those with specific property values. Filters are additive (i.e., boolean AND)
 

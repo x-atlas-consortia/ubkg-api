@@ -921,7 +921,7 @@ class Neo4jManager(object):
                                                                              record.get('primary'),
                                                                              record.get('vis_only'),
                                                                              record.get('vitessce_hints')
-                                                                             )
+                                                                             ).serialize()
 
                         datasets.append(dataset)
                     except KeyError:
