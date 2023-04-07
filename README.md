@@ -33,19 +33,19 @@ You only need to build the image once. After the image is built you can make cha
 
 ### Build the image
 ```bash
-docker-compose -f docker-compose.yml -p ubkg-api build
+docker-compose -f docker-compose.yml -p ubkg_api build
 ```
 
 ### Start the container
 ```bash
-docker-compose -f docker-compose.yml -p ubkg-api up -d
+docker-compose -f docker-compose.yml -p ubkg_api up -d
 ```
 
 Make changes to the source code then `down` and `start` the container
 ```bash
-docker-compose -f docker-compose.yml -p ubkg-api down
+docker-compose -f docker-compose.yml -p ubkg_api down
 ```
 
 ```bash
-docker-compose -f docker-compose.yml -p ubkg-api up -d
+docker-compose -f docker-compose.yml -p ubkg_api up -d
 ```

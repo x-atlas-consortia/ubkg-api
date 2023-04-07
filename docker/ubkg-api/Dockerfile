@@ -26,7 +26,7 @@ RUN yum install -y yum-utils && \
     rm /etc/nginx/conf.d/default.conf && \
     mv nginx/nginx.conf /etc/nginx/nginx.conf && \
     rm -rf nginx && \
-    pip install --upgrade pip -r src/requirements.txt && \
+    pip install --upgrade pip -r src/ubkg_api/requirements.txt && \
     chmod +x start.sh && \
     dnf install langpacks-en glibc-all-langpacks -y && \
     yum clean all

@@ -4,26 +4,24 @@ from typing import List
 
 import neo4j
 
-from models.assay_type_property_info import AssayTypePropertyInfo
-from models.codes_codes_obj import CodesCodesObj
-from models.concept_detail import ConceptDetail
-from models.concept_prefterm import ConceptPrefterm
-from models.concept_sab_rel import ConceptSabRel
-from models.concept_sab_rel_depth import ConceptSabRelDepth
-from models.concept_term import ConceptTerm
-from models.dataset_property_info import DatasetPropertyInfo
-from models.path_item_concept_relationship_sab_prefterm import \
+from ubkg_api.models.assay_type_property_info import AssayTypePropertyInfo
+from ubkg_api.models.codes_codes_obj import CodesCodesObj
+from ubkg_api.models.concept_detail import ConceptDetail
+from ubkg_api.models.concept_prefterm import ConceptPrefterm
+from ubkg_api.models.concept_sab_rel_depth import ConceptSabRelDepth
+from ubkg_api.models.concept_term import ConceptTerm
+from ubkg_api.models.dataset_property_info import DatasetPropertyInfo
+from ubkg_api.models.path_item_concept_relationship_sab_prefterm import \
     PathItemConceptRelationshipSabPrefterm
-from models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel
-from models.qqst import QQST
-from models.sab_code_term import SabCodeTerm
-from models.sab_code_term_rui_code import SabCodeTermRuiCode
-from models.sab_definition import SabDefinition
-from models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
-from models.sab_relationship_concept_term import SabRelationshipConceptTerm
-from models.semantic_stn import SemanticStn
-from models.sty_tui_stn import StyTuiStn
-from models.termtype_code import TermtypeCode
+from ubkg_api.models.qqst import QQST
+from ubkg_api.models.sab_code_term import SabCodeTerm
+from ubkg_api.models.sab_code_term_rui_code import SabCodeTermRuiCode
+from ubkg_api.models.sab_definition import SabDefinition
+from ubkg_api.models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
+from ubkg_api.models.sab_relationship_concept_term import SabRelationshipConceptTerm
+from ubkg_api.models.semantic_stn import SemanticStn
+from ubkg_api.models.sty_tui_stn import StyTuiStn
+from ubkg_api.models.termtype_code import TermtypeCode
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -274,8 +272,8 @@ class Neo4jManager(object):
                     pass
         return styTuiStns
 
-    def concepts_expand_post(self, concept_sab_rel_depth: ConceptSabRelDepth) -> List[ConceptPrefterm]:
-        logger.info(f'concepts_expand_post; Request Body: {concept_sab_rel_depth.to_dict()}')
+    def concepts_expand_post(self, concept_sab_rel_depth) -> List[ConceptPrefterm]:
+        logger.info(f'concepts_expand_post; Request Body: {concept_sab_rel_depth}')
         conceptPrefterms: [ConceptPrefterm] = []
         query: str = \
             "MATCH (c:Concept {CUI: $query_concept_id})" \
@@ -285,18 +283,18 @@ class Neo4jManager(object):
             " UNWIND nodes(path) AS con OPTIONAL MATCH (con)-[:PREF_TERM]->(pref:Term)" \
             " RETURN DISTINCT con.CUI as concept, pref.name as prefterm"
         # TODO: There seems to be a BUG in 'session.run' where it cannot handle arrays correctly?!
-        sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth.sab)
+        sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['sab'])
         query = query.replace('$sab', sab)
-        rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth.rel)
+        rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['rel'])
         # logger.info(f'Converted from array to string... sab: {sab} ; rel: {rel}')
         query = query.replace('$rel', rel)
         logger.info(f'query: "{query}"')
         with self.driver.session() as session:
             recds: neo4j.Result = session.run(query,
-                                              query_concept_id=concept_sab_rel_depth.query_concept_id,
+                                              query_concept_id=concept_sab_rel_depth['query_concept_id'],
                                               # sab=sab,
                                               # rel=rel,
-                                              depth=concept_sab_rel_depth.depth
+                                              depth=concept_sab_rel_depth['depth']
                                               )
             for record in recds:
                 try:
@@ -307,8 +305,8 @@ class Neo4jManager(object):
                     pass
         return conceptPrefterms
 
-    def concepts_path_post(self, concept_sab_rel: ConceptSabRel) -> List[PathItemConceptRelationshipSabPrefterm]:
-        logger.info(f'concepts_path_post; Request Body: {concept_sab_rel.to_dict()}')
+    def concepts_path_post(self, concept_sab_rel) -> List[PathItemConceptRelationshipSabPrefterm]:
+        logger.info(f'concepts_path_post; Request Body: {concept_sab_rel}')
         pathItemConceptRelationshipSabPrefterms: [PathItemConceptRelationshipSabPrefterm] = []
         query: str = \
             "MATCH (c:Concept {CUI: $query_concept_id})" \
@@ -323,14 +321,14 @@ class Neo4jManager(object):
             " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
             " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
         # TODO: There seems to be a BUG in 'session.run' where it cannot handle arrays correctly?!
-        sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel.sab)
+        sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel['sab'])
         query = query.replace('$sab', sab)
-        rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel.rel)
+        rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel['rel'])
         query = query.replace('$rel', rel)
         logger.info(f'query: "{query}"')
         with self.driver.session() as session:
             recds: neo4j.Result = session.run(query,
-                                              query_concept_id=concept_sab_rel.query_concept_id,
+                                              query_concept_id=concept_sab_rel['query_concept_id'],
                                               # sab=concept_sab_rel.sab,
                                               # rel=concept_sab_rel.rel
                                               )
@@ -345,9 +343,9 @@ class Neo4jManager(object):
                     pass
         return pathItemConceptRelationshipSabPrefterms
 
-    def concepts_shortestpaths_post(self, qconcept_tconcept_sab_rel: QconceptTconceptSabRel) -> List[
+    def concepts_shortestpaths_post(self, qconcept_tconcept_sab_rel) -> List[
         PathItemConceptRelationshipSabPrefterm]:
-        logger.info(f'concepts_shortestpath_post; Request Body: {qconcept_tconcept_sab_rel.to_dict()}')
+        logger.info(f'concepts_shortestpath_post; Request Body: {qconcept_tconcept_sab_rel}')
         pathItemConceptRelationshipSabPrefterms: [PathItemConceptRelationshipSabPrefterm] = []
         query: str = \
             "MATCH (c:Concept {CUI: $query_concept_id})" \
@@ -363,17 +361,17 @@ class Neo4jManager(object):
             " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
             " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
         # TODO: There seems to be a BUG in 'session.run' where it cannot handle arrays correctly?!
-        sab: str = ', '.join("'{0}'".format(s) for s in qconcept_tconcept_sab_rel.sab)
+        sab: str = ', '.join("'{0}'".format(s) for s in qconcept_tconcept_sab_rel['sab'])
         query = query.replace('$sab', sab)
-        rel: str = ', '.join("'{0}'".format(s) for s in qconcept_tconcept_sab_rel.rel)
+        rel: str = ', '.join("'{0}'".format(s) for s in qconcept_tconcept_sab_rel['rel'])
         query = query.replace('$rel', rel)
         logger.info(f'query: "{query}"')
         with self.driver.session() as session:
             recds: neo4j.Result = session.run(query,
-                                              query_concept_id=qconcept_tconcept_sab_rel.query_concept_id,
+                                              query_concept_id=qconcept_tconcept_sab_rel['query_concept_id'],
                                               # sab=concept_sab_rel.sab,
                                               # rel=concept_sab_rel.rel,
-                                              target_concept_id=qconcept_tconcept_sab_rel.target_concept_id
+                                              target_concept_id=qconcept_tconcept_sab_rel['target_concept_id']
                                               )
             for record in recds:
                 try:
@@ -388,7 +386,7 @@ class Neo4jManager(object):
 
     def concepts_trees_post(self, concept_sab_rel_depth: ConceptSabRelDepth) -> List[
         PathItemConceptRelationshipSabPrefterm]:
-        logger.info(f'concepts_trees_post; Request Body: {concept_sab_rel_depth.to_dict()}')
+        logger.info(f'concepts_trees_post; Request Body: {concept_sab_rel_depth}')
         pathItemConceptRelationshipSabPrefterms: [PathItemConceptRelationshipSabPrefterm] = []
         query: str = \
             "MATCH (c:Concept {CUI: $query_concept_id})" \
@@ -403,17 +401,17 @@ class Neo4jManager(object):
             " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
             " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
         # TODO: There seems to be a BUG in 'session.run' where it cannot handle arrays correctly?!
-        sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth.sab)
+        sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['sab'])
         query = query.replace('$sab', sab)
-        rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth.rel)
+        rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['rel'])
         query = query.replace('$rel', rel)
         logger.info(f'query: "{query}"')
         with self.driver.session() as session:
             recds: neo4j.Result = session.run(query,
-                                              query_concept_id=concept_sab_rel_depth.query_concept_id,
+                                              query_concept_id=concept_sab_rel_depth['query_concept_id'],
                                               # sab=concept_sab_rel_depth.sab,
                                               # rel=concept_sab_rel_depth.rel,
-                                              depth=concept_sab_rel_depth.depth
+                                              depth=concept_sab_rel_depth['depth']
                                               )
             for record in recds:
                 try:

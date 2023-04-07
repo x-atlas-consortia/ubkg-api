@@ -1,8 +1,5 @@
 from flask import Blueprint, jsonify, current_app, request
 
-from models.concept_sab_rel import ConceptSabRel
-from models.concept_sab_rel_depth import ConceptSabRelDepth
-from models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
 
@@ -71,8 +68,7 @@ def concepts_expand_post():
 
     :rtype: Union[List[ConceptPrefterm], Tuple[List[ConceptPrefterm], int], Tuple[List[ConceptPrefterm], int, Dict[str, str]]
     """
-    concept_sab_rel_depth = ConceptSabRelDepth.from_dict(request.get_json())
-    return jsonify(current_app.neo4jManager.concepts_expand_post(concept_sab_rel_depth))
+    return jsonify(current_app.neo4jManager.concepts_expand_post(request.get_json()))
 
 
 @concepts_blueprint.route('paths', methods=['POST'])
@@ -85,8 +81,7 @@ def concepts_path_post():
 
     :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm], int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
     """
-    concept_sab_rel = ConceptSabRel.from_dict(request.get_json())
-    return jsonify(current_app.neo4jManager.concepts_path_post(concept_sab_rel))
+    return jsonify(current_app.neo4jManager.concepts_path_post(request.get_json()))
 
 
 @concepts_blueprint.route('shortestpaths', methods=['POST'])
@@ -99,8 +94,7 @@ def concepts_shortestpaths_post():
 
     :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm], int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
     """
-    qconcept_tconcept_sab_rel = QconceptTconceptSabRel.from_dict(request.get_json())
-    return jsonify(current_app.neo4jManager.concepts_shortestpaths_post(qconcept_tconcept_sab_rel))
+    return jsonify(current_app.neo4jManager.concepts_shortestpaths_post(request.get_json()))
 
 
 @concepts_blueprint.route('trees', methods=['POST'])
@@ -113,5 +107,4 @@ def concepts_trees_post():
 
     :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm], int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
     """
-    concept_sab_rel_depth = ConceptSabRelDepth.from_dict(request.get_json())
-    return jsonify(current_app.neo4jManager.concepts_trees_post(concept_sab_rel_depth))
+    return jsonify(current_app.neo4jManager.concepts_trees_post(request.get_json()))

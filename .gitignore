@@ -19,7 +19,7 @@ scripts/.openapi-generator
 api/.openapi-generator/*
 
 # config file
-src/instance/app.cfg
+src/ubkg_api/instance/app.cfg
 
 # log files in any path
 **/*.log
@@ -32,3 +32,5 @@ docker/ubkg-api/BUILD
 BUILD
 
 **/__pycache__
+
+**/dist
