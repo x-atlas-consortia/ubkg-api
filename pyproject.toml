@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ubkg_api"
+version = "0.0.11"
+authors = [
+  { name="Samuel Sedivy", email="sam.sedivy@pitt.edu" },
+]
+description = "A REST API infront of the Unified Biomedical Knowlegde Graph"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "python_dateutil>=2.6.0",
+    "setuptools>=21.0.0",
+    "Flask==2.1.1",
+    # Test pypi doesn't have neo4j==4.2.1
+    "neo4j==4.3.0.dev0"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/x-atlas-consortia/ubkg-api"
+"Bug Tracker" = "https://github.com/x-atlas-consortia/ubkg-api/issues"

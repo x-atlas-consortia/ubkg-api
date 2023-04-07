@@ -4,15 +4,15 @@ from typing import List
 
 import neo4j
 
-from models.assay_type_property_info import AssayTypePropertyInfo
-from models.codes_codes_obj import CodesCodesObj
-from models.concept_detail import ConceptDetail
-from models.concept_prefterm import ConceptPrefterm
-from models.concept_sab_rel import ConceptSabRel
-from models.concept_sab_rel_depth import ConceptSabRelDepth
-from models.concept_term import ConceptTerm
-from models.dataset_property_info import DatasetPropertyInfo
-from models.path_item_concept_relationship_sab_prefterm import \
+from ubkg_api.models.assay_type_property_info import AssayTypePropertyInfo
+from ubkg_api.models.codes_codes_obj import CodesCodesObj
+from ubkg_api.models.concept_detail import ConceptDetail
+from ubkg_api.models.concept_prefterm import ConceptPrefterm
+from ubkg_api.models.concept_sab_rel import ConceptSabRel
+from ubkg_api.models.concept_sab_rel_depth import ConceptSabRelDepth
+from ubkg_api.models.concept_term import ConceptTerm
+from ubkg_api.models.dataset_property_info import DatasetPropertyInfo
+from ubkg_api.models.path_item_concept_relationship_sab_prefterm import \
     PathItemConceptRelationshipSabPrefterm
 from models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel
 from models.qqst import QQST

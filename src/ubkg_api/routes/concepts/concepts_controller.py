@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, current_app, request
 
-from models.concept_sab_rel import ConceptSabRel
-from models.concept_sab_rel_depth import ConceptSabRelDepth
-from models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel
+from ubkg_api.models.concept_sab_rel import ConceptSabRel
+from ubkg_api.models.concept_sab_rel_depth import ConceptSabRelDepth
+from ubkg_api.models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
 

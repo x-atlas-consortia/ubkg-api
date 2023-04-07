@@ -1,9 +1,6 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from datetime import date, datetime
-
-from typing import List, Dict
 
 from .base_model_ import Model
 from . import util
