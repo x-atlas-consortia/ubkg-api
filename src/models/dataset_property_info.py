@@ -60,6 +60,18 @@ class DatasetPropertyInfo(Model):
         self._vis_only = vis_only
         self._vitessce_hints = vitessce_hints
 
+    def serialize(self):
+        return {
+            "alt-names": self._alt_names,
+            "contains-pii": self._contains_pii,
+            "data_type": self._data_type,
+            "dataset_provider": self._dataset_provider,
+            "description": self._description,
+            "primary": self._primary,
+            "vis-only": self._vis_only,
+            "vitessce-hints": self._vitessce_hints
+        }
+
     @classmethod
     def from_dict(cls, dikt) -> 'DatasetPropertyInfo':
         """Returns the dict as a model

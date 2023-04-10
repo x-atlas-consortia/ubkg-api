@@ -5,6 +5,14 @@ services:
   hubmap-ubkg-api:
     hostname: hubmap-ubkg-api
     container_name: hubmap-ubkg-api
+    ports:
+      - "6666:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     # Use the published image from DockerHub instead of local build
     # Exit with an error message containing err if UBKG_API_VERSION is unset or empty in the environment
     image: ubkg-api:${UBKG_API_VERSION:?err}
@@ -19,10 +27,12 @@ services:
     networks:
       - gateway_hubmap
     volumes:
-      # Persist the logging
-      - "./src/log:/usr/src/app/log"
+      # Mount the logging to container
+      - "../log:/usr/src/app/log"
       # Mount the app config to container in order to keep it outside of the image
       - "../src/instance:/usr/src/app/src/instance"
+      # Mount conf.d on host machine to the nginx conf.d on container
+      - "./ubkg-api/nginx/conf.d:/etc/nginx/conf.d"
 
 networks:
   gateway_hubmap:
