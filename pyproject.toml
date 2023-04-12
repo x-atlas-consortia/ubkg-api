@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ubkg_api"
-version = "0.0.11"
+version = "0.0.17"
 authors = [
   { name="Samuel Sedivy", email="sam.sedivy@pitt.edu" },
 ]
@@ -19,7 +19,7 @@ classifiers = [
 dependencies = [
     "python_dateutil>=2.6.0",
     "setuptools>=21.0.0",
-    "Flask==2.1.1",
+    "Flask==2.1.3",
     # Test pypi doesn't have neo4j==4.2.1
     "neo4j==4.3.0.dev0"
 ]
