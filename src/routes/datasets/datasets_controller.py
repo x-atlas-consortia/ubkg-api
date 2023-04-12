@@ -32,4 +32,4 @@ def dataset_get(application_context='HUBMAP', data_type=None, description=None, 
     """
     return jsonify(
         current_app.neo4jManager.dataset_get(request.args.get('application_context'), data_type, description, alt_name, primary, contains_pii, vis_only,
-                                 vitessce_hint, dataset_provider))
+                                 vitessce_hint, request.args.get('dataset_provider')))
