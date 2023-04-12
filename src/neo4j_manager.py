@@ -591,7 +591,7 @@ class Neo4jManager(object):
             recds: neo4j.Result = session.run(query)
             for record in recds:
                 try:
-                    sabcodeterm: [SabCodeTerm] = SabCodeTerm(record.get('sab'), record.get('code'), record.get('term'))
+                    sabcodeterm: [SabCodeTerm] = SabCodeTerm(record.get('sab'), record.get('code'), record.get('term')).serialize()
                     sabcodeterms.append(sabcodeterm)
                 except KeyError:
                     pass

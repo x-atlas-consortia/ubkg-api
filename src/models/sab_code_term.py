@@ -106,3 +106,10 @@ class SabCodeTerm(Model):
         """
 
         self._term = term
+
+    def serialize(self):
+        return {
+            "code": self._code,
+            "sab": self._sab,
+            "term": self._term
+        }
