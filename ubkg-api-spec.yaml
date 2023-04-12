@@ -4,7 +4,10 @@ info:
   description: This document describes the UBKG API
   version: 1.2.0
 servers:
-  - url: https://ontology.src.hubmapconsortium.org/
+  - url: https://ontology.api.hubmapconsortium.org/
+    description: Production server
+  - url: https://ontology-api.dev.hubmapconsortium.org/
+    description: Development server
 paths:
   /codes/{code_id}/codes:
     get:
