@@ -16,10 +16,19 @@ scripts/venv
 scripts/.python-version
 scripts/robot
 scripts/.openapi-generator
+api/.openapi-generator/*
 
 # config file
-api/openapi_server/resources/app.properties
+src/instance/app.cfg
 
 # log files in any path
 **/*.log
 
+# Ignore docker copied stuff
+docker/ubkg-api/src
+docker/ubkg-api/VERSION
+docker/ubkg-api/BUILD
+
+BUILD
+
+**/__pycache__
