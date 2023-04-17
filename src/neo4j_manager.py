@@ -93,6 +93,16 @@ def parse_and_check_rel(rel: List[str]) -> List[List]:
     return rel_list
 
 
+def make_assaytype_property_info(record):
+    return AssayTypePropertyInfo(
+        record['data_type'],
+        record['primary'],
+        record['description'],
+        record['vitessce_hints'],
+        record['contains_pii'],
+        record['vis_only'])
+
+
 instance = None
 
 
@@ -930,6 +940,24 @@ class Neo4jManager(object):
 
         return datasets
 
+    def assaytype_get(self, primary: bool, application_context: str = 'HUBMAP') -> AssayTypePropertyInfo:
+        # Build the Cypher query that will return the table of data.
+        query = self.__query_cypher_dataset_info(application_context)
+
+        assaytypes: List[dict] = []
+        # Execute Cypher query and return result.
+        with self.driver.session() as session:
+            recds: neo4j.Result = session.run(query)
+            for record in recds:
+                if primary is None:
+                    assaytypes.append(make_assaytype_property_info(record).serialize())
+                elif primary is True and record['primary'] is True:
+                    assaytypes.append(make_assaytype_property_info(record).serialize())
+                elif primary is False and record['primary'] is False:
+                    assaytypes.append(make_assaytype_property_info(record).serialize())
+        result: dict = {"result": assaytypes}
+        return result
+
     def assaytype_name_get(self, name: str, application_context: str = 'HUBMAP') -> AssayTypePropertyInfo:
         """
         This is intended to be a drop in replacement for the same endpoint in search-src.
@@ -948,14 +976,7 @@ class Neo4jManager(object):
             for record in recds:
                 if record.get('data_type') == name:
                     # Accessing the record by .get('str') does not appear to work?! :-(
-                    return AssayTypePropertyInfo(
-                        record['data_type'],
-                        record['primary'],
-                        record['description'],
-                        record['vitessce_hints'],
-                        record['contains_pii'],
-                        record['vis_only']
-                    ).serialize()
+                    return make_assaytype_property_info(record).serialize()
         return AssayTypePropertyInfo().serialize()
 
     # Objectives: Provide crosswalk information between SenNet and RUI for organ types. Replicate the original organ_types.yaml.
