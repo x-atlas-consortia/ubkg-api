@@ -963,7 +963,7 @@ components:
             - SenNet
     SabCodeTermRuiCode:
       type: object
-      description: Respoonse body for organs GET request
+      description: Response body for organs GET request
       properties:
         sab:
           type: string
