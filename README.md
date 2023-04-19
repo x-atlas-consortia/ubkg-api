@@ -1,5 +1,18 @@
-# UBKG-API
+## Unified Biomedical Knowledge Graph 
+## UBKG-API
 
+The components of the UBKG include:
+- The **source framework** that extracts ontology information from the UMLS to create a set of CSV files (**UMLS CSVs**)
+- The **generation framework** that appends to the UMLS CSVs assertion data from other ontologies to create a set of **ontology CSVs**.
+- A neo4j **ontology knowledge graph** populated from the ontology CSVS.
+- An **API server** that provides RESTful endpoints to query the ontology knowledge graph.
+
+This repository contains the source for the API.
+
+# SmartAPI documentation
+The specification for the UBKG API can be found [here](https://smart-api.info/ui/33a83dc8f62b4a9aaecd32a24cb8563c).
+
+# Developer Information
 ## Requirements
 Python 3.5.2+
 
