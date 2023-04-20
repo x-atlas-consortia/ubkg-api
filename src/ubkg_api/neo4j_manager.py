@@ -4,25 +4,24 @@ from typing import List
 
 import neo4j
 
-from models.assay_type_property_info import AssayTypePropertyInfo
-from models.codes_codes_obj import CodesCodesObj
-from models.concept_detail import ConceptDetail
-from models.concept_prefterm import ConceptPrefterm
-from models.concept_sab_rel_depth import ConceptSabRelDepth
-from models.concept_term import ConceptTerm
-from models.dataset_property_info import DatasetPropertyInfo
-from models.path_item_concept_relationship_sab_prefterm import \
+from ubkg_api.models.assay_type_property_info import AssayTypePropertyInfo
+from ubkg_api.models.codes_codes_obj import CodesCodesObj
+from ubkg_api.models.concept_detail import ConceptDetail
+from ubkg_api.models.concept_prefterm import ConceptPrefterm
+from ubkg_api.models.concept_sab_rel_depth import ConceptSabRelDepth
+from ubkg_api.models.concept_term import ConceptTerm
+from ubkg_api.models.dataset_property_info import DatasetPropertyInfo
+from ubkg_api.models.path_item_concept_relationship_sab_prefterm import \
     PathItemConceptRelationshipSabPrefterm
-from models.qconcept_tconcept_sab_rel import QconceptTconceptSabRel
-from models.qqst import QQST
-from models.sab_code_term import SabCodeTerm
-from models.sab_code_term_rui_code import SabCodeTermRuiCode
-from models.sab_definition import SabDefinition
-from models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
-from models.sab_relationship_concept_term import SabRelationshipConceptTerm
-from models.semantic_stn import SemanticStn
-from models.sty_tui_stn import StyTuiStn
-from models.termtype_code import TermtypeCode
+from ubkg_api.models.qqst import QQST
+from ubkg_api.models.sab_code_term import SabCodeTerm
+from ubkg_api.models.sab_code_term_rui_code import SabCodeTermRuiCode
+from ubkg_api.models.sab_definition import SabDefinition
+from ubkg_api.models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
+from ubkg_api.models.sab_relationship_concept_term import SabRelationshipConceptTerm
+from ubkg_api.models.semantic_stn import SemanticStn
+from ubkg_api.models.sty_tui_stn import StyTuiStn
+from ubkg_api.models.termtype_code import TermtypeCode
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
