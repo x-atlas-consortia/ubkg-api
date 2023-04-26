@@ -10,7 +10,7 @@ The components of the UBKG include:
 This repository contains the source for the API.
 
 # SmartAPI documentation
-The specification for the UBKG API can be found [here](https://smart-api.info/ui/96e5b5c0b0efeef5b93ea98ac2794837#/).
+The specification for the UBKG API can be found [here](https://smart-api.info/ui/96e5b5c0b0efeef5b93ea98ac2794837/).
 
 # Developer Information
 ## Requirements
