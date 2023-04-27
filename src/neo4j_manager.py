@@ -93,14 +93,26 @@ def parse_and_check_rel(rel: List[str]) -> List[List]:
     return rel_list
 
 
-def make_assaytype_property_info(record):
-    return AssayTypePropertyInfo(
-        record['data_type'],
-        record['primary'],
-        record['description'],
-        record['vitessce_hints'],
-        record['contains_pii'],
-        record['vis_only'])
+def make_assaytype_property_info(record) -> dict:
+    """
+    Return the Neo4j record as a dict. Note that the 'data_type' record is duplicated
+    for backward compatibility with search-api which uses 'name' as the key for this field.
+
+    See 'AssayTypePropertyInfoExpanded' in ubkg-api-spec.yaml
+
+    :param record:
+    :return:
+    """
+    return {'data_type': record['data_type'],
+            'name': record['data_type'],
+            'primary': record['primary'],
+            'description': record['description'],
+            'alt_names': record['alt_names'],
+            'dataset_provider': record['dataset_provider'],
+            'vitessce_hints': record['vitessce_hints'],
+            'contains_pii': record['contains_pii'],
+            'vis_only': record['vis_only']
+            }
 
 
 instance = None
@@ -940,8 +952,15 @@ class Neo4jManager(object):
 
         return datasets
 
-    def assaytype_get(self, primary: bool, application_context: str = 'HUBMAP') -> AssayTypePropertyInfo:
-        # Build the Cypher query that will return the table of data.
+    def assaytype_get(self, primary: bool, application_context: str = 'HUBMAP') -> dict:
+        """
+        Build the Cypher query that will return the table of data. This data is used as a replacement for
+        and endpoint in search-api.
+
+        :param primary:
+        :param application_context:
+        :return:
+        """
         query = self.__query_cypher_dataset_info(application_context)
 
         assaytypes: List[dict] = []
@@ -950,15 +969,14 @@ class Neo4jManager(object):
             recds: neo4j.Result = session.run(query)
             for record in recds:
                 if primary is None:
-                    assaytypes.append(make_assaytype_property_info(record).serialize())
+                    assaytypes.append(make_assaytype_property_info(record))
                 elif primary is True and record['primary'] is True:
-                    assaytypes.append(make_assaytype_property_info(record).serialize())
+                    assaytypes.append(make_assaytype_property_info(record))
                 elif primary is False and record['primary'] is False:
-                    assaytypes.append(make_assaytype_property_info(record).serialize())
-        result: dict = {"result": assaytypes}
-        return result
+                    assaytypes.append(make_assaytype_property_info(record))
+        return {"result": assaytypes}
 
-    def assaytype_name_get(self, name: str, application_context: str = 'HUBMAP') -> AssayTypePropertyInfo:
+    def assaytype_name_get(self, name: str, application_context: str = 'HUBMAP') -> dict:
         """
         This is intended to be a drop in replacement for the same endpoint in search-src.
 
@@ -976,8 +994,8 @@ class Neo4jManager(object):
             for record in recds:
                 if record.get('data_type') == name:
                     # Accessing the record by .get('str') does not appear to work?! :-(
-                    return make_assaytype_property_info(record).serialize()
-        return AssayTypePropertyInfo().serialize()
+                    return make_assaytype_property_info(record)
+        return {}
 
     # Objectives: Provide crosswalk information between SenNet and RUI for organ types. Replicate the original organ_types.yaml.
     # 1.FindSAB, code, and term for all organs.

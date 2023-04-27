@@ -535,7 +535,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssayTypePropertyInfo'
+                $ref: '#/components/schemas/AssayTypePropertyInfoExpanded'
               example:
                 name: bulk-RNA
                 primary: true
@@ -575,7 +575,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssayTypePropertyInfo'
+                $ref: '#/components/schemas/AssayTypePropertyInfoExpanded'
               example:
                 name: bulk-RNA
                 primary: true
@@ -923,6 +923,52 @@ components:
           type: string
           description: How datasets of the data type are named in the Data Portal.
           example: Bulk RNA-seq
+        vitessce-hints:
+          type: array
+          description: Flags for Vitessce visualization
+          items:
+            type: string
+            example: ["pyramid","anndata","is_image","is_tiled","is_sc","rna","atac","sprm","codex","maldi"]
+        contains-pii:
+          type: boolean
+          description: Whether the dataset contains Patient Identifying Information (PII) (true or false)
+          example: true
+        vis-only:
+          type: boolean
+          description: Indicates whether for visualization only (true or false)
+          items:
+            type: boolean
+            example: true
+    AssayTypePropertyInfoExpanded:
+      type: object
+      description: Expanded version of AssayTypePropertyInfo containing all recurds from Neo4j query.
+      properties:
+        data_type:
+          type: string
+          description: AssayType name; used to characterize dataset entities in provenance hierarchy
+          example: AF
+        name:
+          type: string
+          description: AssayType name; for backward compatibility with search-api. Same value as 'data_type'
+          example: AF
+        primary:
+          type: boolean
+          description: Indicates whether the assay is primary (true) or derived (false)
+          example: true
+        description:
+          type: string
+          description: How datasets of the data type are named in the Data Portal.
+          example: Bulk RNA-seq
+        alt_names:
+          type: array
+          description: Alternative names
+          items:
+            type: string
+            example: ["3D Imaging Mass Cytometry","3D-IMC"]
+        dataset_provider:
+          type: string
+          description: Provider of the dataset.
+          example: HuBMAP IEC
         vitessce-hints:
           type: array
           description: Flags for Vitessce visualization
