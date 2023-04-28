@@ -503,6 +503,46 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DatasetPropertyInfo'
+  /assaytype:
+    get:
+      operationId: assaytype_get
+      summary: Get all of the assaytypes without query parameter. Otherwise the record['primary'] according to query parameter
+      parameters:
+        - name: primary
+          in: query
+          required: false
+          description: Determines if records are all, primary, or not primary.
+          schema:
+            type: string
+            example: true
+        - name: application_context
+          in: query
+          required: false
+          description: Filter to indicate application context
+          schema:
+            type: string
+            default: HUBMAP
+            enum:
+              - HUBMAP
+              - SENNET
+              - hubmap
+              - sennet
+              - HuBMAP
+              - SenNet
+      responses:
+        '200':
+          description: A JSON array of the assay type name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssayTypePropertyInfo'
+              example:
+                name: bulk-RNA
+                primary: true
+                description: Bulk RNA-seq
+                vitessce-hints: ["pyramid","anndata"]
+                contains-pii: true
+                vis-only: true
   /assaytype/{name}: # CPK MAR 2023 - replacement for search-src endpoint of the same name
     get:
       operationId: assaytype_name_get
@@ -573,7 +613,7 @@ paths:
   /organs:
     get:
       operationId: get_organ_types
-      summary: Returns 2 letter organ codes to support the Registration User Interface (RUI)
+      summary: Returns 2 letter organ code, rui_code, sab, and term to support the Registration User Interface (RUI)
       parameters:
         - name: application_context
           in: query
@@ -598,6 +638,34 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SabCodeTermRuiCode'
+  /organs/by-code:
+    get:
+      operationId: get_organ_by_code
+      summary: Returns term by 2 letter organ code
+      parameters:
+        - name: application_context
+          in: query
+          required: false
+          description: Filter to indicate application context
+          schema:
+            type: string
+            default: HUBMAP
+            enum:
+              - HUBMAP
+              - SENNET
+              - hubmap
+              - sennet
+              - HuBMAP
+              - SenNet
+      responses:
+        '200':
+          description: A JSON array of term by 2 letter organ code
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RuiCodeTerm'
 components:
   schemas:
     CodesCodesObj: # Schema name
@@ -895,7 +963,7 @@ components:
             - SenNet
     SabCodeTermRuiCode:
       type: object
-      description: Respoonse body for organs GET request
+      description: Response body for organs GET request
       properties:
         sab:
           type: string
@@ -913,3 +981,15 @@ components:
           type: string
           description: Two letter organ code
           example: "UT"
+    RuiCodeTerm:
+      type: object
+      description: Respoonse body for organs/by-code GET request
+      properties:
+        rui_code:
+          type: string
+          description: Two letter organ code
+          example: "UT"
+        term:
+          type: string
+          description: Organ type
+          example: "Uterus"
