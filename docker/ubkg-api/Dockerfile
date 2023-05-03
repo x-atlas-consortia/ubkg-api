@@ -27,7 +27,6 @@ RUN yum install -y yum-utils && \
     mv nginx/nginx.conf /etc/nginx/nginx.conf && \
     rm -rf nginx && \
     pip install --upgrade pip -r src/ubkg_api/requirements.txt && \
-    pip install --index-url https://test.pypi.org/simple/ --no-cache-dir ubkg-api==0.0.21 && \
     chmod +x start.sh && \
     dnf install langpacks-en glibc-all-langpacks -y && \
     yum clean all
