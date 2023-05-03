@@ -3,8 +3,8 @@ version: '3.7'
 
 services:
   hubmap-ubkg-api:
-    hostname: hubmap-ubkg_api
-    container_name: hubmap-ubkg_api
+    hostname: hubmap-ubkg-api
+    container_name: hubmap-ubkg-api
     ports:
       - "6666:8080"
     healthcheck:
@@ -32,7 +32,7 @@ services:
       # Mount the app config to container in order to keep it outside of the image
       - "../src/instance:/usr/src/app/src/instance"
       # Mount conf.d on host machine to the nginx conf.d on container
-      - "./ubkg_api/nginx/conf.d:/etc/nginx/conf.d"
+      - "./ubkg-api/nginx/conf.d:/etc/nginx/conf.d"
 
 networks:
   gateway_hubmap:
