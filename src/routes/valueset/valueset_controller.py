@@ -18,6 +18,14 @@ def valueset_get():
     :rtype: Union[List[SabCodeTerm], Tuple[List[SabCodeTerm], int], Tuple[List[SabCodeTerm], int, Dict[str, str]]
     """
     child_sabs = request.args.getlist('child_sabs')
+    if child_sabs == []:
+        child_sabs = ['SENNET']
+    parent_sab = request.args.get('parent_sab')
+    if parent_sab is None:
+        parent_sab = 'SENNET'
+    parent_code = request.args.get('parent_code')
+    if parent_code is None:
+        parent_code = 'C020076'
     return jsonify(
-        current_app.neo4jManager.valueset_get(request.args.get('parent_sab'), request.args.get('parent_code'),
+        current_app.neo4jManager.valueset_get(parent_sab, parent_code,
                                               child_sabs))
