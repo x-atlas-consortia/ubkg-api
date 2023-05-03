@@ -593,7 +593,7 @@ class Neo4jManager(object):
 
         # 5. Get the term associated with the child concept code with the earliest SAB.
         query = query + 'WITH codeChild,conceptChildCUI '
-        query = query + 'MATCH (termChild:Term)<-[:PT]-(codeChild:Code) '
+        query = query + 'MATCH (termChild:Term)<-[r:PT]-(codeChild:Code) '
         query = query + 'WHERE r.CUI = conceptChildCUI '
         query = query + 'RETURN termChild.name AS term, codeChild.CODE as code,codeChild.SAB as sab'
 
