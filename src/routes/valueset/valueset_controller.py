@@ -19,13 +19,13 @@ def valueset_get():
     """
     child_sabs = request.args.getlist('child_sabs')
     if child_sabs == []:
-        child_sabs = ['SENNET']
+        return jsonify("Invalid child_sabs (empty list) specified"), 400
     parent_sab = request.args.get('parent_sab')
     if parent_sab is None:
-        parent_sab = 'SENNET'
+        return jsonify(f"Invalid parent_sab ({parent_sab}) specified"), 400
     parent_code = request.args.get('parent_code')
     if parent_code is None:
-        parent_code = 'C020076'
+        return jsonify(f"Invalid parent_code ({parent_code}) specified"), 400
     return jsonify(
         current_app.neo4jManager.valueset_get(parent_sab, parent_code,
                                               child_sabs))
