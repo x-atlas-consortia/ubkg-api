@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, current_app, request, abort
+from flask import Blueprint, jsonify, current_app, request
 
 from routes.validate import validate_application_context
 
