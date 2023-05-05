@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify, current_app, request
 
+from routes.validate import validate_application_context
+
 datasets_blueprint = Blueprint('datasets', __name__, url_prefix='/datasets')
 
 
@@ -29,9 +31,10 @@ def dataset_get():
 
     :rtype: Union[List[DatasetPropertyInfo], Tuple[List[DatasetPropertyInfo], int], Tuple[List[DatasetPropertyInfo], int, Dict[str, str]]
     """
+    application_context = validate_application_context()
     return jsonify(
         current_app.neo4jManager.dataset_get(
-            request.args.get('application_context'), request.args.get('data_type'),
+            application_context, request.args.get('data_type'),
             request.args.get('description'), request.args.get('alt_name'), request.args.get('primary'),
             request.args.get('contains_pii'), request.args.get('vis_only'),
             request.args.get('vitessce_hint'), request.args.get('dataset_provider'))
