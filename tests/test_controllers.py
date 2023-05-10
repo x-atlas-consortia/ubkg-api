@@ -1,6 +1,9 @@
 import json
 
 import pytest
+import sys
+
+sys.path.append("../src")
 from app import app
 
 
@@ -43,7 +46,8 @@ def test_valueset_sennet_entities(client):
 def test_valueset_sennet_specimen_categories(client):
     response = client.get('/valueset',
                           query_string={'child_sabs': 'SENNET', 'parent_sab': 'SENNET', 'parent_code': 'C020076'})
-    assert_expected_response_equals_actual_response(response, 'sennet_expected_responses/valueset_specimen_categories.json')
+    assert_expected_response_equals_actual_response(response,
+                                                    'sennet_expected_responses/valueset_specimen_categories.json')
 
 
 def test_valueset_sennet_source_types(client):
@@ -67,7 +71,8 @@ def test_hubmap_organs(client):
 
 
 def test_valueset_hubmap_specimen_categories(client):
-    response = client.get('/valueset', query_string={'child_sabs': 'HUBMAP', 'parent_sab': 'HUBMAP', 'parent_code': 'C020076'})
+    response = client.get('/valueset',
+                          query_string={'child_sabs': 'HUBMAP', 'parent_sab': 'HUBMAP', 'parent_code': 'C020076'})
     assert_expected_response_equals_actual_response(response, 'hubmap_expected_responses/specimen_categories.json')
 
 
