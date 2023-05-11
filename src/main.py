@@ -1,11 +1,11 @@
 from ubkg_api.app import UbkgAPI
 
-config = {
-          'SERVER': 'bolt://34.234.131.112:7688',
-          'USERNAME': 'neo4j',
-          'PASSWORD': 'HappyG0at'
-    }
 
-# For local standalone (non-docker) development/testing
+run_with_config_file = True
+
 if __name__ == "__main__":
-    UbkgAPI(config).app.run(host='0.0.0.0', debug=True, port=8080)
+    if run_with_config_file:
+        UbkgAPI(None).app.run(host='0.0.0.0', debug=True, port=8080)
+    else:
+        UbkgAPI({'SERVER': '', 'USERNAME': '', 'PASSWORD': ''}).app.run(host='0.0.0.0', debug=True, port=8080)
+

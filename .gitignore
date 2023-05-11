@@ -19,7 +19,7 @@ scripts/.openapi-generator
 api/.openapi-generator/*
 
 # config file
-src/ubkg_api/instance/app.cfg
+src/instance/app.cfg
 
 # log files in any path
 **/*.log

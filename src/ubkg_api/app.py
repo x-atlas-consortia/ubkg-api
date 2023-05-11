@@ -22,11 +22,8 @@ logger = logging.getLogger(__name__)
 
 class UbkgAPI:
     def __init__(self, config):
-        # Set self based on passed in config parameters
-        for key, value in config.items():
-            setattr(self, key, value)
 
-        self.app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__))))
+        self.app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), '../instance'), instance_relative_config=True)
 
         self.app.register_blueprint(assaytype_blueprint)
         self.app.register_blueprint(codes_blueprint)
@@ -45,10 +42,19 @@ class UbkgAPI:
                 neo4j = Neo4jManager.instance()
                 logger.info("Neo4jManager has already been initialized")
             else:
-                neo4j = Neo4jManager.create(self.SERVER, self.USERNAME, self.PASSWORD)
+                if not config:
+                    logger.info('Config not provided. Looking for app.cfg ...')
+                    self.app.config.from_pyfile('app.cfg')
+                    neo4j = Neo4jManager.create(self.app.config['SERVER'], self.app.config['USERNAME'], self.app.config['PASSWORD'])
+                else:
+                    logger.info('Using provided config.')
+                    # Set self based on passed in config parameters
+                    for key, value in config.items():
+                        setattr(self, key, value)
+                    neo4j = Neo4jManager.create(self.SERVER, self.USERNAME, self.PASSWORD)
                 logger.info("Initialized Neo4jManager successfully :)")
         except Exception:
-            logger.exception('Failed to initialize the Neo4jManager :(. Please check the instance/app.cfg are '
+            logger.exception('Failed to initialize the Neo4jManager :(. Please check that the provided config dictionary is correct or the instance/app.cfg is '
                              'correct')
 
         self.app.neo4jManager = neo4j
@@ -70,11 +76,3 @@ class UbkgAPI:
                 status_data['neo4j_connection'] = True
 
             return jsonify(status_data)
-
-
-if __name__ == '__main__':
-    UbkgAPI({
-          'SERVER': 'bolt://34.234.131.112:7688',
-          'USERNAME': 'neo4j',
-          'PASSWORD': 'HappyG0at'
-    }).app.run(debug=True, port=8080, host='0.0.0.0')
