@@ -13,6 +13,13 @@ This repository contains the source for the API.
 The specification for the UBKG API can be found [here](https://smart-api.info/ui/96e5b5c0b0efeef5b93ea98ac2794837/).
 
 # Developer Information
+## Build and publish to PyPi
+```
+python -m build
+```
+```
+python3 -m twine upload dist/*
+```
 ## Requirements
 Python 3.5.2+
 
