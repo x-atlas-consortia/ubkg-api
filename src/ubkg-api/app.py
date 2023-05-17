@@ -67,8 +67,8 @@ class UbkgAPI:
         def status():
             status_data = {
                 # Use strip() to remove leading and trailing spaces, newlines, and tabs
-                'version': (Path(__file__).absolute().parent.parent / 'VERSION').read_text().strip(),
-                'build': (Path(__file__).absolute().parent.parent / 'BUILD').read_text().strip(),
+                'version': (Path(__file__).absolute().parent.parent.parent / 'VERSION').read_text().strip(),
+                'build': (Path(__file__).absolute().parent.parent.parent / 'BUILD').read_text().strip(),
                 'neo4j_connection': False
             }
             is_connected = self.app.neo4jManager.check_connection()
