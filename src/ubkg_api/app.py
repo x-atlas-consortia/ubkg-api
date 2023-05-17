@@ -4,6 +4,12 @@ from pathlib import Path
 
 from flask import Flask, jsonify
 
+import sys
+print(sys.path)
+path_root = Path(__file__).parents[0]
+print(path_root)
+sys.path.append(str(path_root))
+
 from neo4j_manager import Neo4jManager
 from routes.assaytype.assaytype_controller import assaytype_blueprint
 from routes.codes.codes_controller import codes_blueprint
