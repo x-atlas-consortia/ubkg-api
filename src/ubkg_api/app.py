@@ -1,15 +1,16 @@
-import logging
 import os
+import logging
 from pathlib import Path
-
 from flask import Flask, jsonify
 
+# To fix the ModuleNotFoundError when used as a package
 import sys
 print(sys.path)
 path_root = Path(__file__).parents[0]
 print(path_root)
 sys.path.append(str(path_root))
 
+# Local modules
 from neo4j_manager import Neo4jManager
 from routes.assaytype.assaytype_controller import assaytype_blueprint
 from routes.codes.codes_controller import codes_blueprint
@@ -68,20 +69,6 @@ class UbkgAPI:
         @self.app.route('/', methods=['GET'])
         def index():
             return "Hello! This is UBKG-API service :)"
-
-        @self.app.route('/status', methods=['GET'])
-        def status():
-            status_data = {
-                # Use strip() to remove leading and trailing spaces, newlines, and tabs
-                'version': (Path(__file__).absolute().parent.parent.parent / 'VERSION').read_text().strip(),
-                'build': (Path(__file__).absolute().parent.parent.parent / 'BUILD').read_text().strip(),
-                'neo4j_connection': False
-            }
-            is_connected = self.app.neo4jManager.check_connection()
-            if is_connected:
-                status_data['neo4j_connection'] = True
-
-            return jsonify(status_data)
 
 
 ####################################################################################################
