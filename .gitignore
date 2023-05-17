@@ -19,18 +19,14 @@ scripts/.openapi-generator
 api/.openapi-generator/*
 
 # config file
-src/instance/app.cfg
+ubkg_api/instance/app.cfg
 
 # log files in any path
 **/*.log
-
-# Ignore docker copied stuff
-docker/ubkg-api/src
-docker/ubkg-api/VERSION
-docker/ubkg-api/BUILD
 
 BUILD
 
 **/__pycache__
 
 **/.pytest_cache
+**/dist
