@@ -4,16 +4,16 @@ from pathlib import Path
 
 from flask import Flask, jsonify
 
-from ubkg_api.neo4j_manager import Neo4jManager
-from ubkg_api.routes.assaytype.assaytype_controller import assaytype_blueprint
-from ubkg_api.routes.codes.codes_controller import codes_blueprint
-from ubkg_api.routes.concepts.concepts_controller import concepts_blueprint
-from ubkg_api.routes.datasets.datasets_controller import datasets_blueprint
-from ubkg_api.routes.organs.organs_controller import organs_blueprint
-from ubkg_api.routes.semantics.semantics_controller import semantics_blueprint
-from ubkg_api.routes.terms.terms_controller import terms_blueprint
-from ubkg_api.routes.tui.tui_controller import tui_blueprint
-from ubkg_api.routes.valueset.valueset_controller import valueset_blueprint
+from neo4j_manager import Neo4jManager
+from routes.assaytype.assaytype_controller import assaytype_blueprint
+from routes.codes.codes_controller import codes_blueprint
+from routes.concepts.concepts_controller import concepts_blueprint
+from routes.datasets.datasets_controller import datasets_blueprint
+from routes.organs.organs_controller import organs_blueprint
+from routes.semantics.semantics_controller import semantics_blueprint
+from routes.terms.terms_controller import terms_blueprint
+from routes.tui.tui_controller import tui_blueprint
+from routes.valueset.valueset_controller import valueset_blueprint
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class UbkgAPI:
     def __init__(self, config):
 
-        self.app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), '../instance'), instance_relative_config=True)
+        self.app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'), instance_relative_config=True)
 
         self.app.register_blueprint(assaytype_blueprint)
         self.app.register_blueprint(codes_blueprint)
@@ -76,3 +76,22 @@ class UbkgAPI:
                 status_data['neo4j_connection'] = True
 
             return jsonify(status_data)
+
+
+####################################################################################################
+## For local development/testing
+####################################################################################################
+
+if __name__ == "__main__":
+    flask_app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'),
+            instance_relative_config=True)
+    flask_app.config.from_pyfile('app.cfg')
+
+    try:
+        ubkg_app = UbkgAPI(flask_app.config).app
+        ubkg_app.run(host='0.0.0.0', port="5002")
+    except Exception as e:
+        print("Error during starting debug server.")
+        print(str(e))
+        logger.error(e, exc_info=True)
+        print("Error during startup check the log file for further information")
