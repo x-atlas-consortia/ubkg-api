@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class UbkgAPI:
-    def __init__(self, config):
+    def __init__(self, config = None):
 
         self.app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'), instance_relative_config=True)
 
@@ -83,12 +83,8 @@ class UbkgAPI:
 ####################################################################################################
 
 if __name__ == "__main__":
-    flask_app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'),
-            instance_relative_config=True)
-    flask_app.config.from_pyfile('app.cfg')
-
     try:
-        ubkg_app = UbkgAPI(flask_app.config).app
+        ubkg_app = UbkgAPI().app
         ubkg_app.run(host='0.0.0.0', port="5002")
     except Exception as e:
         print("Error during starting debug server.")
