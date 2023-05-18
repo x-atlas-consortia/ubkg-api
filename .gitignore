@@ -24,8 +24,6 @@ ubkg_api/instance/app.cfg
 # log files in any path
 **/*.log
 
-BUILD
-
 **/__pycache__
 
 **/dist
