@@ -1,0 +1,104 @@
+[
+  {
+    "code": "C030024",
+    "rui_code": "AD",
+    "sab": "SENNET",
+    "term": "Adipose Tissue"
+  },
+  {
+    "code": "C030025",
+    "rui_code": "BD",
+    "sab": "SENNET",
+    "term": "Blood "
+  },
+  {
+    "code": "C030026",
+    "rui_code": "BR",
+    "sab": "SENNET",
+    "term": "Brain"
+  },
+  {
+    "code": "C030027",
+    "rui_code": "BS",
+    "sab": "SENNET",
+    "term": "Breast"
+  },
+  {
+    "code": "C030029",
+    "rui_code": "LK",
+    "sab": "SENNET",
+    "term": "Kidney (Left)"
+  },
+  {
+    "code": "C030030",
+    "rui_code": "RK",
+    "sab": "SENNET",
+    "term": "Kidney (Right)"
+  },
+  {
+    "code": "C030031",
+    "rui_code": "LI",
+    "sab": "SENNET",
+    "term": "Large Intestine"
+  },
+  {
+    "code": "C030032",
+    "rui_code": "LV",
+    "sab": "SENNET",
+    "term": "Liver "
+  },
+  {
+    "code": "C030034",
+    "rui_code": "LL",
+    "sab": "SENNET",
+    "term": "Lung (Left)"
+  },
+  {
+    "code": "C030035",
+    "rui_code": "RL",
+    "sab": "SENNET",
+    "term": "Lung (Right)"
+  },
+  {
+    "code": "C030052",
+    "rui_code": "LN",
+    "sab": "SENNET",
+    "term": "Lymph Node"
+  },
+  {
+    "code": "C030036",
+    "rui_code": "MU",
+    "sab": "SENNET",
+    "term": "Muscle"
+  },
+  {
+    "code": "C030036",
+    "rui_code": "MU",
+    "sab": "SENNET",
+    "term": "Muscle"
+  },
+  {
+    "code": "C030036",
+    "rui_code": "MU",
+    "sab": "SENNET",
+    "term": "Muscle"
+  },
+  {
+    "code": "C030038",
+    "rui_code": "LO",
+    "sab": "SENNET",
+    "term": "Ovary (Left)"
+  },
+  {
+    "code": "C030041",
+    "rui_code": "RO",
+    "sab": "SENNET",
+    "term": "Ovary (Right)"
+  },
+  {
+    "code": "C030040",
+    "rui_code": "SK",
+    "sab": "SENNET",
+    "term": "Skin "
+  }
+]

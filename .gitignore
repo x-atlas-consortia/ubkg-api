@@ -32,3 +32,5 @@ docker/ubkg-api/BUILD
 BUILD
 
 **/__pycache__
+
+**/.pytest_cache

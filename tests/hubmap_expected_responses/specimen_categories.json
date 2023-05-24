@@ -1,0 +1,27 @@
+[
+    {
+        "code": "C000008",
+        "sab": "HUBMAP",
+        "term": "Organ"
+    },
+    {
+        "code": "C020079",
+        "sab": "HUBMAP",
+        "term": "suspension"
+    },
+    {
+        "code": "C020078",
+        "sab": "HUBMAP",
+        "term": "section"
+    },
+    {
+        "code": "C020077",
+        "sab": "HUBMAP",
+        "term": "block"
+    },
+    {
+        "code": "C020120",
+        "sab": "HUBMAP",
+        "term": "fresh_tissue"
+    }
+]
