@@ -2,6 +2,8 @@
 
 ## UBKG-API
 
+[![PyPI version](https://badge.fury.io/py/ubkg-api.svg)](https://badge.fury.io/py/ubkg-api)
+
 The components of the UBKG include:
 - The **source framework** that extracts ontology information from the UMLS to create a set of CSV files (**UMLS CSVs**)
 - The **generation framework** that appends to the UMLS CSVs assertion data from other ontologies to create a set of **ontology CSVs**.
