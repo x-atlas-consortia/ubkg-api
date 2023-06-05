@@ -1,13 +1,11 @@
 import os
+import sys
 import logging
 from pathlib import Path
 from flask import Flask, jsonify
 
 # To fix the ModuleNotFoundError when used as a package
-import sys
-print(sys.path)
 path_root = Path(__file__).parents[0]
-print(path_root)
 sys.path.append(str(path_root))
 
 # Local modules
