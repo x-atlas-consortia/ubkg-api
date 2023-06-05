@@ -1021,6 +1021,7 @@ class Neo4jManager(object):
             for record in recds:
                 item = SabCodeTermRuiCode(sab=record.get('OrganSAB'), code=record.get('OrganCode'),
                                           term=record.get('OrganName'),
-                                          rui_code=record.get('OrganTwoCharacterCode')).serialize()
+                                          rui_code=record.get('OrganTwoCharacterCode'),
+                                          organ_uberon=record.get('OrganUBERON')).serialize()
                 result.append(item)
         return result
