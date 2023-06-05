@@ -20,9 +20,11 @@ def assaytype_get():
     application_context = validate_application_context()
     return jsonify(current_app.neo4jManager.assaytype_get(primary, application_context))
 
+
 @assaytype_blueprint.route('/<name>', methods=['GET'])
 def assaytype_name_get(name):
     """Get all of the assaytypes with name.
+    This is a replacement for search-src endpoint of the same name.
 
     :param name: AssayType name
     :type name: str
