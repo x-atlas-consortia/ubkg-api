@@ -22,7 +22,12 @@ def assayname_post():
         abort(400, "A JSON body with a 'Content-Type: application/json' header are required")
     if 'name' not in request.json:
         abort(400, 'request contains no "name" field')
-    name = request.json['name']
-    if type(name) == list:
-        name = name[0]
-    return jsonify(current_app.neo4jManager.assaytype_name_get(name, application_context))
+    req_name = request.json['name']
+    if type(req_name) == list:
+        name = req_name[0]
+        alt_names = req_name[1:]
+    elif type(req_name) == str:
+        name = req_name
+        alt_names = None
+    result = current_app.neo4jManager.assaytype_name_get(name, alt_names, application_context)
+    return jsonify(result)
