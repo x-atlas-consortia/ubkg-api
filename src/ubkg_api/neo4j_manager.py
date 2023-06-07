@@ -976,7 +976,7 @@ class Neo4jManager(object):
                 if record.get('data_type') == name and (alt_names is None or record.get('alt_names') == alt_names):
                     # Accessing the record by .get('str') does not appear to work?! :-(
                     return make_assaytype_property_info(record).serialize()
-        return AssayTypePropertyInfo().serialize()
+        return None
 
     # Objectives: Provide crosswalk information between SenNet and RUI for organ types. Replicate the original organ_types.yaml.
     # 1.FindSAB, code, and term for all organs.

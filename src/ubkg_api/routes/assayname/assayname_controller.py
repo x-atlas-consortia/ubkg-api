@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, current_app, request, abort, make_response
+from flask import Blueprint, jsonify, current_app, request, make_response
 
 from routes.validate import validate_application_context
 
@@ -19,9 +19,9 @@ def assayname_post():
     """
     application_context = validate_application_context()
     if not request.is_json:
-        abort(400, "A JSON body with a 'Content-Type: application/json' header are required")
+        return make_response("A JSON body with a 'Content-Type: application/json' header are required", 400)
     if 'name' not in request.json:
-        abort(400, 'request contains no "name" field')
+        return make_response('Request contains no "name" field', 400)
     req_name = request.json['name']
     if type(req_name) == list:
         name = req_name[0]
@@ -30,4 +30,6 @@ def assayname_post():
         name = req_name
         alt_names = None
     result = current_app.neo4jManager.assaytype_name_get(name, alt_names, application_context)
+    if result is None:
+        return make_response(f"No such assay_type {req_name}, even as alternate name", 400)
     return jsonify(result)
