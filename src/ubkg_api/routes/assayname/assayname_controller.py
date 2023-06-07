@@ -7,11 +7,9 @@ assayname_blueprint = Blueprint('assayname', __name__, url_prefix='/assayname')
 
 @assayname_blueprint.route('', methods=['POST'])
 def assayname_post():
-    """Get all of the assaytypes with name.
+    """Get the assaytypes with name and alt-names as found in the request body with key 'name'.
     This is a replacement for search-src endpoint of the same name.
 
-    :param name: AssayType name
-    :type name: str
     :param application_context: Filter to indicate application context
     :type application_context: str
 
