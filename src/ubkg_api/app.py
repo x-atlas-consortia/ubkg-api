@@ -2,7 +2,7 @@ import os
 import sys
 import logging
 from pathlib import Path
-from flask import Flask, jsonify
+from flask import Flask
 
 # To fix the ModuleNotFoundError when used as a package
 path_root = Path(__file__).parents[0]
@@ -11,6 +11,7 @@ sys.path.append(str(path_root))
 # Local modules
 from neo4j_manager import Neo4jManager
 from routes.assaytype.assaytype_controller import assaytype_blueprint
+from routes.assayname.assayname_controller import assayname_blueprint
 from routes.codes.codes_controller import codes_blueprint
 from routes.concepts.concepts_controller import concepts_blueprint
 from routes.datasets.datasets_controller import datasets_blueprint
@@ -31,6 +32,7 @@ class UbkgAPI:
         self.app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'), instance_relative_config=True)
 
         self.app.register_blueprint(assaytype_blueprint)
+        self.app.register_blueprint(assayname_blueprint)
         self.app.register_blueprint(codes_blueprint)
         self.app.register_blueprint(concepts_blueprint)
         self.app.register_blueprint(datasets_blueprint)
