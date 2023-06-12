@@ -28,4 +28,4 @@ ubkg_api/instance/app.cfg
 
 **/.pytest_cache
 **/dist
-/tests/
+/tests/*/*.json
