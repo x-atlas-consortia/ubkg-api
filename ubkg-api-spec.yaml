@@ -630,10 +630,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/HGNCIdRelationships'
               example:
-                aymbol-approved: ["MMRN1"]
+                symbol-approved: ["MMRN1"]
                 symbol-previous: ["MMRN"]
                 symbol-alias: ["EMILIN4", "GPIa*", "ECM"]
-                name-approved: ["multimerin 1"]
   /organs:
     get:
       operationId: get_organ_types
@@ -1039,9 +1038,3 @@ components:
           items:
             type: string
             example: ["EMILIN4", "GPIa*", "ECM"]
-        name-approved:
-          description: HGNC data Approved Names
-          type: array
-          items:
-            type: string
-            example: ["multimerin 1"]

@@ -1031,12 +1031,12 @@ class Neo4jManager(object):
         Provide: Relationships for the gene target_symbol.
 
         The target_symbol can be a name, symbol, alias, or prior symbol,
-        You will get all information on the matched gene:
-        Approved Symbol(s), Previous Symbols, Alias Symbols, and Approved Name(s).
-        You will get back 'None' if no information is found on the target_symbol.
+        You will get this information on the matched gene if it exists:
+        Approved Symbol(s), Previous Symbols, and Alias Symbols.
+        You will get back 'None' if none of this information is found on the target_symbol.
 
-        In theory there should be only one Approved Symbol, Previous Symbol, and Approved Name,
-        but all types returned as arrays just in case.
+        In theory there should be only one Approved Symbol, and Previous Symbol,
+        but all types are returned as arrays just in case.
 
         Also, other relationships may exist but only those mentioned will be returned.
         """
