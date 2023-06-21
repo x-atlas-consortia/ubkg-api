@@ -9,7 +9,7 @@ relationships_blueprint = Blueprint('relationships', __name__, url_prefix='/rela
 def relationships_for_gene_target_symbol_get(target_symbol):
     """
     Returns relationships associated with the gene target_symbol:
-    Approved Symbol(s), Previous Symbols, Alias Symbols, and Approved Name(s).
+    Approved Symbol(s), Previous Symbols, and Alias Symbols.
 
     :param target_symbol: one of gene name, symbol, alias, or prior symbol
     :type target_symbol: str
