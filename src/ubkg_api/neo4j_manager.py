@@ -1025,3 +1025,105 @@ class Neo4jManager(object):
                                           organ_uberon=record.get('OrganUBERON')).serialize()
                 result.append(item)
         return result
+
+    def relationships_for_HGNC_id_get(self, hgnc_id: str) -> dict:
+        """
+        Provide: Relationships for the HGNC ID (e.g., "HGNC:7178"):
+        Approved Symbol(s), Previous Symbols, Alias Symbols, and Approved Name(s).
+
+        In theory there should be only one Approved Symbol, Previous Symbol, and Approved Name,
+        but all types returned as arrays just in case.
+
+        Also, other relationships may exist but only those mentioned will be returned.
+        """
+        # Answer the question: return all terms related to an HGNC ID.
+        query: str = "MATCH (t:Term)<-[r]-(c:Code) " \
+                     f"WHERE type(r) in ['ACR','NS','SYN','PT'] AND c.CodeID='{hgnc_id}' " \
+                     "RETURN " \
+                     "c.CODE AS code, " \
+                     "CASE type(r) " \
+                     "WHEN 'ACR' THEN 'symbol-approved' " \
+                     "WHEN 'NS' THEN 'symbol-previous' " \
+                     "WHEN 'SYN' THEN 'symbol-alias' " \
+                     "WHEN 'PT' THEN 'name-approved' " \
+                     "ELSE type(r) " \
+                     "END AS type, " \
+                     "t.name AS value " \
+                     "ORDER BY type(r)"
+        result: dict = {
+            'symbol-approved': [],
+            'symbol-previous': [],
+            'symbol-alias': [],
+            'name-approved': []
+        }
+        with self.driver.session() as session:
+            recs: neo4j.Result = session.run(query)
+            if recs.peek() is None:
+                return None
+            for rec in recs:
+                try:
+                    type_name: str = rec['type']
+                    value: str = rec['value']
+                    if type_name == 'symbol-approved' or type_name == 'symbol-previous' or \
+                            type_name == 'symbol-alias' or type_name == 'name-approved':
+                        result[type_name].append(value)
+                except KeyError:
+                    pass
+        return result
+
+    def relationships_for_gene_target_symbol_get(self, target_symbol: str) -> dict:
+        """
+        Provide: Relationships for the gene target_symbol.
+
+        The target_symbol can be a name, symbol, alias, or prior symbol,
+        You will get all information on the matched gene:
+        Approved Symbol(s), Previous Symbols, Alias Symbols, and Approved Name(s).
+        You will get back 'None' if no information is found on the target_symbol.
+
+        In theory there should be only one Approved Symbol, Previous Symbol, and Approved Name,
+        but all types returned as arrays just in case.
+
+        Also, other relationships may exist but only those mentioned will be returned.
+        """
+        query: str = "CALL {" \
+                     "MATCH (tSearch:Term)<-[rSearch]-(cSearch:Code)<-[:CODE]-(pSearch:Concept) " \
+                     f"WHERE toUpper(tSearch.name)='{target_symbol.upper()}' AND " \
+                     "cSearch.SAB='HGNC' AND " \
+                     "rSearch.CUI=pSearch.CUI " \
+                     "RETURN DISTINCT cSearch.CodeID AS HGNCCodeID" \
+                     "} " \
+                     "WITH HGNCCodeID " \
+                     "MATCH (pHGNC:Concept)-[:CODE]->(cHGNC:Code)-[r]-(tHGNC:Term) " \
+                     "WHERE cHGNC.CodeID=HGNCCodeID AND " \
+                     "r.CUI=pHGNC.CUI AND " \
+                     "type(r) IN ['ACR','NS','SYN','PT'] " \
+                     "RETURN cHGNC.CODE AS code, " \
+                     "CASE type(r) " \
+                     "WHEN 'ACR' THEN 'symbol-approved' " \
+                     "WHEN 'NS' THEN 'symbol-previous' " \
+                     "WHEN 'SYN' THEN 'symbol-alias' " \
+                     "WHEN 'PT' THEN 'name-approved' " \
+                     "ELSE type(r) " \
+                     "END AS type, " \
+                     "tHGNC.name AS value " \
+                     "order by type(r)"
+        result: dict = {
+            'symbol-approved': [],
+            'symbol-previous': [],
+            'symbol-alias': [],
+            'name-approved': []
+        }
+        with self.driver.session() as session:
+            recs: neo4j.Result = session.run(query)
+            if recs.peek() is None:
+                return None
+            for rec in recs:
+                try:
+                    type_name: str = rec['type']
+                    value: str = rec['value']
+                    if type_name == 'symbol-approved' or type_name == 'symbol-previous' or \
+                            type_name == 'symbol-alias' or type_name == 'name-approved':
+                        result[type_name].append(value)
+                except KeyError:
+                    pass
+        return result

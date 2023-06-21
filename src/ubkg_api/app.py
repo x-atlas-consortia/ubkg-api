@@ -16,6 +16,7 @@ from routes.codes.codes_controller import codes_blueprint
 from routes.concepts.concepts_controller import concepts_blueprint
 from routes.datasets.datasets_controller import datasets_blueprint
 from routes.organs.organs_controller import organs_blueprint
+from routes.relationships.relationships_controller import relationships_blueprint
 from routes.semantics.semantics_controller import semantics_blueprint
 from routes.terms.terms_controller import terms_blueprint
 from routes.tui.tui_controller import tui_blueprint
@@ -36,11 +37,12 @@ class UbkgAPI:
         self.app.register_blueprint(codes_blueprint)
         self.app.register_blueprint(concepts_blueprint)
         self.app.register_blueprint(datasets_blueprint)
+        self.app.register_blueprint(organs_blueprint)
+        self.app.register_blueprint(relationships_blueprint)
         self.app.register_blueprint(semantics_blueprint)
+        self.app.register_blueprint(terms_blueprint)
         self.app.register_blueprint(tui_blueprint)
         self.app.register_blueprint(valueset_blueprint)
-        self.app.register_blueprint(terms_blueprint)
-        self.app.register_blueprint(organs_blueprint)
 
         neo4j = None
 

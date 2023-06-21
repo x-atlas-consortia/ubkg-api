@@ -610,6 +610,30 @@ paths:
                 vitessce-hints: ["pyramid","anndata"]
                 contains-pii: true
                 vis-only: true
+  /relationships/gene/{target_symbol}:
+    get:
+      operationId: relationships_for_gene_target_symbol_get
+      summary: Returns relationships associated with the gene
+      parameters:
+        - name: target-symbol
+          in: path
+          required: true
+          description: one of gene name, symbol, alias, or prior symbol
+          schema:
+            type: string
+            example: MMRN1
+      responses:
+        '200':
+          description: A JSON array of the HGNCIdRelationships
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HGNCIdRelationships'
+              example:
+                aymbol-approved: ["MMRN1"]
+                symbol-previous: ["MMRN"]
+                symbol-alias: ["EMILIN4", "GPIa*", "ECM"]
+                name-approved: ["multimerin 1"]
   /organs:
     get:
       operationId: get_organ_types
@@ -993,3 +1017,31 @@ components:
           type: string
           description: Organ type
           example: "Uterus"
+    HGNCIdRelationships:
+      type: object
+      description: Response Body for relationships/hgnc-id/{id} GET request
+      properties:
+        symbol-approved:
+          description: HGNC data Approved Symbols, but should only be one
+          type: array
+          items:
+            type: string
+            example: ["MMRN1"]
+        symbol-previous:
+          description: HGNC data Previous Symbols
+          type: array
+          items:
+            type: string
+            example: ["MMRN"]
+        symbol-alias:
+          description: HGNC data Alias Symbols
+          type: array
+          items:
+            type: string
+            example: ["EMILIN4", "GPIa*", "ECM"]
+        name-approved:
+          description: HGNC data Approved Names
+          type: array
+          items:
+            type: string
+            example: ["multimerin 1"]
