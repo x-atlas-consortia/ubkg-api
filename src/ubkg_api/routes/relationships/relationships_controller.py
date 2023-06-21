@@ -14,8 +14,6 @@ def relationships_for_gene_target_symbol_get(target_symbol):
     :param target_symbol: one of gene name, symbol, alias, or prior symbol
     :type target_symbol: str
     """
-    if re.match('HGNC:\d+', target_symbol):
-        target_symbol = f'HGNC {target_symbol}'
     result = current_app.neo4jManager.relationships_for_gene_target_symbol_get(target_symbol)
     if result is None:
         return make_response(f"Nothing found for gene target symbol: {target_symbol}", 404)

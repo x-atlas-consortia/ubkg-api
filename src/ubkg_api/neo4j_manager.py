@@ -1026,51 +1026,6 @@ class Neo4jManager(object):
                 result.append(item)
         return result
 
-    def relationships_for_HGNC_id_get(self, hgnc_id: str) -> dict:
-        """
-        Provide: Relationships for the HGNC ID (e.g., "HGNC:7178"):
-        Approved Symbol(s), Previous Symbols, Alias Symbols, and Approved Name(s).
-
-        In theory there should be only one Approved Symbol, Previous Symbol, and Approved Name,
-        but all types returned as arrays just in case.
-
-        Also, other relationships may exist but only those mentioned will be returned.
-        """
-        # Answer the question: return all terms related to an HGNC ID.
-        query: str = "MATCH (t:Term)<-[r]-(c:Code) " \
-                     f"WHERE type(r) in ['ACR','NS','SYN','PT'] AND c.CodeID='{hgnc_id}' " \
-                     "RETURN " \
-                     "c.CODE AS code, " \
-                     "CASE type(r) " \
-                     "WHEN 'ACR' THEN 'symbol-approved' " \
-                     "WHEN 'NS' THEN 'symbol-previous' " \
-                     "WHEN 'SYN' THEN 'symbol-alias' " \
-                     "WHEN 'PT' THEN 'name-approved' " \
-                     "ELSE type(r) " \
-                     "END AS type, " \
-                     "t.name AS value " \
-                     "ORDER BY type(r)"
-        result: dict = {
-            'symbol-approved': [],
-            'symbol-previous': [],
-            'symbol-alias': [],
-            'name-approved': []
-        }
-        with self.driver.session() as session:
-            recs: neo4j.Result = session.run(query)
-            if recs.peek() is None:
-                return None
-            for rec in recs:
-                try:
-                    type_name: str = rec['type']
-                    value: str = rec['value']
-                    if type_name == 'symbol-approved' or type_name == 'symbol-previous' or \
-                            type_name == 'symbol-alias' or type_name == 'name-approved':
-                        result[type_name].append(value)
-                except KeyError:
-                    pass
-        return result
-
     def relationships_for_gene_target_symbol_get(self, target_symbol: str) -> dict:
         """
         Provide: Relationships for the gene target_symbol.
@@ -1110,8 +1065,7 @@ class Neo4jManager(object):
         result: dict = {
             'symbol-approved': [],
             'symbol-previous': [],
-            'symbol-alias': [],
-            'name-approved': []
+            'symbol-alias': []
         }
         with self.driver.session() as session:
             recs: neo4j.Result = session.run(query)
@@ -1121,8 +1075,9 @@ class Neo4jManager(object):
                 try:
                     type_name: str = rec['type']
                     value: str = rec['value']
-                    if type_name == 'symbol-approved' or type_name == 'symbol-previous' or \
-                            type_name == 'symbol-alias' or type_name == 'name-approved':
+                    if type_name == 'symbol-approved' or \
+                            type_name == 'symbol-previous' or \
+                            type_name == 'symbol-alias':
                         result[type_name].append(value)
                 except KeyError:
                     pass
