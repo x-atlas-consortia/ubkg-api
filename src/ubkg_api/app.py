@@ -14,12 +14,9 @@ from routes.assaytype.assaytype_controller import assaytype_blueprint
 from routes.assayname.assayname_controller import assayname_blueprint
 from routes.codes.codes_controller import codes_blueprint
 from routes.concepts.concepts_controller import concepts_blueprint
-from routes.datasets.datasets_controller import datasets_blueprint
-from routes.organs.organs_controller import organs_blueprint
 from routes.semantics.semantics_controller import semantics_blueprint
 from routes.terms.terms_controller import terms_blueprint
 from routes.tui.tui_controller import tui_blueprint
-from routes.valueset.valueset_controller import valueset_blueprint
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -35,12 +32,9 @@ class UbkgAPI:
         self.app.register_blueprint(assayname_blueprint)
         self.app.register_blueprint(codes_blueprint)
         self.app.register_blueprint(concepts_blueprint)
-        self.app.register_blueprint(datasets_blueprint)
         self.app.register_blueprint(semantics_blueprint)
         self.app.register_blueprint(tui_blueprint)
-        self.app.register_blueprint(valueset_blueprint)
         self.app.register_blueprint(terms_blueprint)
-        self.app.register_blueprint(organs_blueprint)
 
         neo4j = None
 
