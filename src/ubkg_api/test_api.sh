@@ -20,7 +20,13 @@ SEARCH_URL=$SEARCH_URL_DEV
 UUID_URL_DEV=https://uuid-api.dev.hubmapconsortium.org
 UUID_URL=$UUID_URL_DEV
 
-TOKEN=[You fill this in]
+
+# To get the BEARER_TOKEN, login through the UI (https://ingest.hubmapconsortium.org/) to get the credentials...
+# In Firefox open 'Tools > Browser Tools > Web Developer Tools'.
+# Click on "Storage" then the dropdown for "Local Storage" and then the url,
+# Applications use the "groups_token" from the returned information.
+# UI times-out in 15 min so close the browser window, and the token will last for a day or so.
+TOKEN="groups_token"
 
 echo "assayname_POST..."
 curl --request POST \
@@ -37,7 +43,6 @@ curl --request GET \
  --header "Authorization: Bearer ${TOKEN}"
 echo
 
-# TODO THIS APPEARS TO BE BROKEN???
 echo "assaytype/<name> GET"
 curl --request GET \
  --url "${UBKG_URL}/assaytype/bulk-RNA?application_context=HUBMAP" \

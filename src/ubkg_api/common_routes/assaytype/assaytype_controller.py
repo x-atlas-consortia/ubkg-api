@@ -36,7 +36,7 @@ def assaytype_name_get(name):
     """
     application_context = validate_application_context()
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
-    result = assaytype_name_get_logic(neo4j_instance, name, application_context)
+    result = assaytype_name_get_logic(neo4j_instance, name, None, application_context)
     if result is None:
         return make_response(f"No such assay_type {name}", 400)
     return jsonify(result)
