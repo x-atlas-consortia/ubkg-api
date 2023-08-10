@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, current_app, request, make_response
+from ..neo4j_logic import assaytype_name_get_logic
 
 assayname_blueprint = Blueprint('assayname', __name__, url_prefix='/assayname')
 
@@ -33,7 +34,8 @@ def assayname_post():
     else:
         return make_response("The 'name' field is incorrectly specified "
                              "(see AssayNameRequest in ubkg-api-spec.yaml)", 400)
-    result = current_app.neo4jManager.assaytype_name_get(name, alt_names, application_context)
+    neo4j_instance = current_app.neo4jConnectionHelper.instance()
+    result = assaytype_name_get_logic(neo4j_instance, name, alt_names, application_context)
     if result is None:
         return make_response(f"No such assay_type {req_name}, even as alternate name", 400)
     return jsonify(result)

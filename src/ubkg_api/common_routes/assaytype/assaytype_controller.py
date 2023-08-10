@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, current_app, request, make_response
-
-from routes.validate import validate_application_context
+from ..validate import validate_application_context
+from ..neo4j_logic import assaytype_get_logic, assaytype_name_get_logic
 
 assaytype_blueprint = Blueprint('assaytype', __name__, url_prefix='/assaytype')
 
@@ -18,7 +18,8 @@ def assaytype_get():
     if primary is not None:
         primary = primary.lower() == 'true'
     application_context = validate_application_context()
-    return jsonify(current_app.neo4jManager.assaytype_get(primary, application_context))
+    neo4j_instance = current_app.neo4jConnectionHelper.instance()
+    return jsonify(assaytype_get_logic(neo4j_instance, primary, application_context))
 
 
 @assaytype_blueprint.route('/<name>', methods=['GET'])
@@ -34,7 +35,8 @@ def assaytype_name_get(name):
     :rtype: Union[AssayTypePropertyInfo, Tuple[AssayTypePropertyInfo, int], Tuple[AssayTypePropertyInfo, int, Dict[str, str]]
     """
     application_context = validate_application_context()
-    result = current_app.neo4jManager.assaytype_name_get(name, application_context)
+    neo4j_instance = current_app.neo4jConnectionHelper.instance()
+    result = assaytype_name_get_logic(neo4j_instance, name, application_context)
     if result is None:
         return make_response(f"No such assay_type {name}", 400)
     return jsonify(result)

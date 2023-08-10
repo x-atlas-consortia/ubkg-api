@@ -9,14 +9,15 @@ path_root = Path(__file__).parents[0]
 sys.path.append(str(path_root))
 
 # Local modules
-from neo4j_manager import Neo4jManager
-from routes.assaytype.assaytype_controller import assaytype_blueprint
-from routes.assayname.assayname_controller import assayname_blueprint
-from routes.codes.codes_controller import codes_blueprint
-from routes.concepts.concepts_controller import concepts_blueprint
-from routes.semantics.semantics_controller import semantics_blueprint
-from routes.terms.terms_controller import terms_blueprint
-from routes.tui.tui_controller import tui_blueprint
+from neo4j_connection_helper import Neo4jConnectionHelper
+
+from common_routes.assaytype.assaytype_controller import assaytype_blueprint
+from common_routes.assayname.assayname_controller import assayname_blueprint
+from common_routes.codes.codes_controller import codes_blueprint
+from common_routes.concepts.concepts_controller import concepts_blueprint
+from common_routes.semantics.semantics_controller import semantics_blueprint
+from common_routes.terms.terms_controller import terms_blueprint
+from common_routes.tui.tui_controller import tui_blueprint
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -24,10 +25,18 @@ logger = logging.getLogger(__name__)
 
 
 class UbkgAPI:
-    def __init__(self, config = None):
+    def __init__(self, config_file):
+        """
+        Create a flask app using the config_file provided. Attach the blueprints to the app, as well as an
+        instance to the Neo4JConnectionHelper.
+        """
+        self.app = Flask(__name__,
+                         instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'),
+                         instance_relative_config=True)
 
-        self.app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'), instance_relative_config=True)
-
+        if not self.app.config.from_pyfile(config_file):
+            logger.error(f'Failed to load config file: {config_file}')
+            raise ValueError(f'Failed to load config file: {config_file}')
         self.app.register_blueprint(assaytype_blueprint)
         self.app.register_blueprint(assayname_blueprint)
         self.app.register_blueprint(codes_blueprint)
@@ -36,29 +45,21 @@ class UbkgAPI:
         self.app.register_blueprint(tui_blueprint)
         self.app.register_blueprint(terms_blueprint)
 
-        neo4j = None
+        self.app.neo4jConnectionHelper = None
 
-        try:
-            if Neo4jManager.is_initialized():
-                neo4j = Neo4jManager.instance()
-                logger.info("Neo4jManager has already been initialized")
-            else:
-                if not config:
-                    logger.info('Config not provided. Looking for app.cfg ...')
-                    self.app.config.from_pyfile('app.cfg')
-                    neo4j = Neo4jManager.create(self.app.config['SERVER'], self.app.config['USERNAME'], self.app.config['PASSWORD'])
-                else:
-                    logger.info('Using provided config.')
-                    # Set self based on passed in config parameters
-                    for key, value in config.items():
-                        setattr(self, key, value)
-                    neo4j = Neo4jManager.create(self.SERVER, self.USERNAME, self.PASSWORD)
-                logger.info("Initialized Neo4jManager successfully :)")
-        except Exception:
-            logger.exception('Failed to initialize the Neo4jManager :(. Please check that the provided config dictionary is correct or the instance/app.cfg is '
-                             'correct')
-
-        self.app.neo4jManager = neo4j
+        if Neo4jConnectionHelper.is_initialized():
+            self.app.neo4jConnectionHelper = Neo4jConnectionHelper.instance()
+            logger.info("Neo4jManager has already been initialized")
+        else:
+            try:
+                self.app.neo4jConnectionHelper = \
+                    Neo4jConnectionHelper.create(self.app.config['SERVER'],
+                                                 self.app.config['USERNAME'],
+                                                 self.app.config['PASSWORD'])
+                logger.info("Initialized Neo4jManager successfully")
+            except Exception as e:
+                logger.exception('Failed to initialize the Neo4jManager')
+                raise e
 
         @self.app.route('/', methods=['GET'])
         def index():
@@ -71,7 +72,7 @@ class UbkgAPI:
 
 if __name__ == "__main__":
     try:
-        ubkg_app = UbkgAPI().app
+        ubkg_app = UbkgAPI('./app.cfg').app
         ubkg_app.run(host='0.0.0.0', port="5002")
     except Exception as e:
         print("Error during starting debug server.")
