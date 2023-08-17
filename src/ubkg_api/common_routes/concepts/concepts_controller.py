@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, current_app, request
-from ..neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
+from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
     concepts_concept_id_definitions_get_logic, concepts_concept_id_semantics_get_logic, concepts_expand_post_logic,\
     concepts_path_post_logic, concepts_shortestpaths_post_logic, concepts_trees_post_logic
 

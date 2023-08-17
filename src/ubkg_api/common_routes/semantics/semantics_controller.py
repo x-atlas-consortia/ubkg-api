@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, current_app
-from ..neo4j_logic import semantics_semantic_id_semantics_get_logic
+from ..common_neo4j_logic import semantics_semantic_id_semantics_get_logic
 
 semantics_blueprint = Blueprint('semantics', __name__, url_prefix='/semantics')
 

@@ -744,8 +744,6 @@ def assaytype_name_get_logic(neo4j_instance, name: str, alt_names: list = None, 
     The only difference is the optional application_contect to make it consistent with a HUBMAP or SENNET
     environment.
     """
-    # datasets: List[DatasetPropertyInfo] = dataset_get(application_context, name)
-
     # Build the Cypher query that will return the table of data.
     query = __query_cypher_dataset_info(application_context)
 

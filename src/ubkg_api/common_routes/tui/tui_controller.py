@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, current_app
-from ..neo4j_logic import tui_tui_id_semantics_get_logic
+from ..common_neo4j_logic import tui_tui_id_semantics_get_logic
 
 tui_blueprint = Blueprint('tui', __name__, url_prefix='/tui')
 

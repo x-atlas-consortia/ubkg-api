@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, current_app, request, make_response
-from ..neo4j_logic import assaytype_name_get_logic
+from ..common_neo4j_logic import assaytype_name_get_logic
 
 assayname_blueprint = Blueprint('assayname', __name__, url_prefix='/assayname')
 

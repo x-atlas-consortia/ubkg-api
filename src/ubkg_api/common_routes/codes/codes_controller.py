@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, current_app
-from ..neo4j_logic import codes_code_id_codes_get_logic, codes_code_id_concepts_get_logic
+from ..common_neo4j_logic import codes_code_id_codes_get_logic, codes_code_id_concepts_get_logic
 
 codes_blueprint = Blueprint('codes', __name__, url_prefix='/codes')
 
