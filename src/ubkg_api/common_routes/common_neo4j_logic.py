@@ -624,7 +624,7 @@ def __subquery_dataset_cuis(sab: str, cuialias: str, returnalias: str) -> str:
     return qry
 
 
-def __query_cypher_dataset_info(sab: str) -> str:
+def query_cypher_dataset_info(sab: str) -> str:
     # JAS FEB 2023
     # Returns a Cypher query string that will return property information on the datasets in an application
     # context (SAB in the KG), keyed by the data_type.
@@ -719,7 +719,7 @@ def __query_cypher_dataset_info(sab: str) -> str:
 
 def assaytype_get_logic(neo4j_instance, primary: bool, application_context: str = 'HUBMAP') -> AssayTypePropertyInfo:
     # Build the Cypher query that will return the table of data.
-    query = __query_cypher_dataset_info(application_context)
+    query = query_cypher_dataset_info(application_context)
 
     assaytypes: List[dict] = []
     # Execute Cypher query and return result.
@@ -745,7 +745,7 @@ def assaytype_name_get_logic(neo4j_instance, name: str, alt_names: list = None, 
     environment.
     """
     # Build the Cypher query that will return the table of data.
-    query = __query_cypher_dataset_info(application_context)
+    query = query_cypher_dataset_info(application_context)
 
     # Execute Cypher query and return result.
     with neo4j_instance.driver.session() as session:
