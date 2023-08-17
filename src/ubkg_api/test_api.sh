@@ -26,7 +26,9 @@ UUID_URL=$UUID_URL_DEV
 # Click on "Storage" then the dropdown for "Local Storage" and then the url,
 # Applications use the "groups_token" from the returned information.
 # UI times-out in 15 min so close the browser window, and the token will last for a day or so.
-TOKEN="groups_token"
+#
+# Run this with....
+# export TOKEN="xxx"; ./src/ubkg_api/test_api.sh
 
 echo "assayname_POST..."
 curl --request POST \
