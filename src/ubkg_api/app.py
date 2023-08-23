@@ -25,18 +25,22 @@ logger = logging.getLogger(__name__)
 
 
 class UbkgAPI:
-    def __init__(self, config_file):
+    def __init__(self, config):
         """
-        Create a flask app using the config_file provided. Attach the blueprints to the app, as well as an
-        instance to the Neo4JConnectionHelper.
+        If config is a string then it will be treated as a local file path from which to load a file, e.g.
+        ubkg_app = UbkgAPI('./app.cfg').app
+
+        If config is a Flask.config then it will be used directly, e.g.
+        config =  Flask(__name__,
+                instance_path=path.join(path.abspath(path.dirname(__file__)), 'instance'),
+                instance_relative_config=True)\
+            .config.from_pyfile('app.cfg')
         """
+
         self.app = Flask(__name__,
                          instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'),
                          instance_relative_config=True)
 
-        if not self.app.config.from_pyfile(config_file):
-            logger.error(f'Failed to load config file: {config_file}')
-            raise ValueError(f'Failed to load config file: {config_file}')
         self.app.register_blueprint(assaytype_blueprint)
         self.app.register_blueprint(assayname_blueprint)
         self.app.register_blueprint(codes_blueprint)
@@ -47,19 +51,29 @@ class UbkgAPI:
 
         self.app.neo4jConnectionHelper = None
 
-        if Neo4jConnectionHelper.is_initialized():
-            self.app.neo4jConnectionHelper = Neo4jConnectionHelper.instance()
-            logger.info("Neo4jManager has already been initialized")
-        else:
-            try:
-                self.app.neo4jConnectionHelper = \
-                    Neo4jConnectionHelper.create(self.app.config['SERVER'],
-                                                 self.app.config['USERNAME'],
-                                                 self.app.config['PASSWORD'])
-                logger.info("Initialized Neo4jManager successfully")
-            except Exception as e:
-                logger.exception('Failed to initialize the Neo4jManager')
-                raise e
+        try:
+            if Neo4jConnectionHelper.is_initialized():
+                self.app.neo4jConnectionHelper = Neo4jConnectionHelper.instance()
+                logger.info("Neo4jManager has already been initialized")
+            else:
+                if isinstance(config, str):
+                    logger.info(f'Config provided from file: {config}')
+                    self.app.config.from_pyfile(config)
+                    self.app.neo4jConnectionHelper = \
+                        Neo4jConnectionHelper.create(self.app.config['SERVER'],
+                                                     self.app.config['USERNAME'],
+                                                     self.app.config['PASSWORD'])
+                else:
+                    logger.info('Using provided Flask config.')
+                    # Set self based on passed in config parameters
+                    for key, value in config.items():
+                        setattr(self, key, value)
+                    self.app.neo4jConnectionHelper = \
+                        Neo4jConnectionHelper.create(self.SERVER, self.USERNAME, self.PASSWORD)
+                    logger.info("Initialized Neo4jManager successfully")
+        except Exception as e:
+            logger.exception('Failed to initialize the Neo4jManager')
+            raise e
 
         @self.app.route('/', methods=['GET'])
         def index():
