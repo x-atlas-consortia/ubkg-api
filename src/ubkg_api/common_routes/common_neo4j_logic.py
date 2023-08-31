@@ -4,7 +4,6 @@ from typing import List
 
 import neo4j
 
-from models.assay_type_property_info import AssayTypePropertyInfo
 from models.codes_codes_obj import CodesCodesObj
 from models.concept_detail import ConceptDetail
 from models.concept_prefterm import ConceptPrefterm
@@ -84,16 +83,6 @@ def parse_and_check_rel(rel: List[str]) -> List[List]:
         if not re.match(r"\*|[a-zA-Z_]+", r[1]):
             raise Exception(f"Invalid SAB in rel optional parameter list", 400)
     return rel_list
-
-
-def make_assaytype_property_info(record):
-    return AssayTypePropertyInfo(
-        record['data_type'],
-        record['primary'],
-        record['description'],
-        record['vitessce_hints'],
-        record['contains_pii'],
-        record['vis_only'])
 
 
 def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) -> List[CodesCodesObj]:
@@ -715,43 +704,3 @@ def query_cypher_dataset_info(sab: str) -> str:
     qry = qry + 'RETURN data_type, description, alt_names, primary, dataset_provider, vis_only, contains_pii, vitessce_hints '
     qry = qry + 'ORDER BY tolower(data_type)'
     return qry
-
-
-def assaytype_get_logic(neo4j_instance, primary: bool, application_context: str = 'HUBMAP') -> AssayTypePropertyInfo:
-    # Build the Cypher query that will return the table of data.
-    query = query_cypher_dataset_info(application_context)
-
-    assaytypes: List[dict] = []
-    # Execute Cypher query and return result.
-    with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        for record in recds:
-            if primary is None:
-                assaytypes.append(make_assaytype_property_info(record).serialize())
-            elif primary is True and record['primary'] is True:
-                assaytypes.append(make_assaytype_property_info(record).serialize())
-            elif primary is False and record['primary'] is False:
-                assaytypes.append(make_assaytype_property_info(record).serialize())
-    result: dict = {"result": assaytypes}
-    return result
-
-
-def assaytype_name_get_logic(neo4j_instance, name: str, alt_names: list = None, application_context: str = 'HUBMAP')\
-        -> AssayTypePropertyInfo:
-    """
-    This is intended to be a drop in replacement for the same endpoint in search-src.
-
-    The only difference is the optional application_contect to make it consistent with a HUBMAP or SENNET
-    environment.
-    """
-    # Build the Cypher query that will return the table of data.
-    query = query_cypher_dataset_info(application_context)
-
-    # Execute Cypher query and return result.
-    with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        for record in recds:
-            if record.get('data_type') == name and (alt_names is None or record.get('alt_names') == alt_names):
-                # Accessing the record by .get('str') does not appear to work?! :-(
-                return make_assaytype_property_info(record).serialize()
-    return None

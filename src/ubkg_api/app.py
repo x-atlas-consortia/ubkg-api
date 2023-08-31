@@ -11,8 +11,6 @@ sys.path.append(str(path_root))
 # Local modules
 from neo4j_connection_helper import Neo4jConnectionHelper
 
-from common_routes.assaytype.assaytype_controller import assaytype_blueprint
-from common_routes.assayname.assayname_controller import assayname_blueprint
 from common_routes.codes.codes_controller import codes_blueprint
 from common_routes.concepts.concepts_controller import concepts_blueprint
 from common_routes.semantics.semantics_controller import semantics_blueprint
@@ -41,8 +39,6 @@ class UbkgAPI:
                          instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'),
                          instance_relative_config=True)
 
-        self.app.register_blueprint(assaytype_blueprint)
-        self.app.register_blueprint(assayname_blueprint)
         self.app.register_blueprint(codes_blueprint)
         self.app.register_blueprint(concepts_blueprint)
         self.app.register_blueprint(semantics_blueprint)
