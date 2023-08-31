@@ -219,7 +219,7 @@ def concepts_expand_post_logic(neo4j_instance, concept_sab_rel_depth) -> List[Co
         " WHERE ALL(r IN relationships(path) WHERE r.SAB IN [$sab])" \
         " UNWIND nodes(path) AS con OPTIONAL MATCH (con)-[:PREF_TERM]->(pref:Term)" \
         " RETURN DISTINCT con.CUI as concept, pref.name as prefterm"
-    # TODO: There seems to be a BUG in 'session.run' where it cannot handle arrays correctly?!
+
     sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['sab'])
     query = query.replace('$sab', sab)
     rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['rel'])
@@ -258,7 +258,7 @@ def concepts_path_post_logic(neo4j_instance, concept_sab_rel) -> List[PathItemCo
         " UNWIND rollup[path] as final" \
         " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
         " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
-    # TODO: There seems to be a BUG in 'session.run' where it cannot handle arrays correctly?!
+
     sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel['sab'])
     query = query.replace('$sab', sab)
     rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel['rel'])
@@ -299,7 +299,7 @@ def concepts_shortestpaths_post_logic(neo4j_instance, qconcept_tconcept_sab_rel)
         " UNWIND rollup[path] as final" \
         " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
         " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
-    # TODO: There seems to be a BUG in 'session.run' where it cannot handle arrays correctly?!
+
     sab: str = ', '.join("'{0}'".format(s) for s in qconcept_tconcept_sab_rel['sab'])
     query = query.replace('$sab', sab)
     rel: str = ', '.join("'{0}'".format(s) for s in qconcept_tconcept_sab_rel['rel'])
@@ -340,7 +340,7 @@ def concepts_trees_post_logic(neo4j_instance, concept_sab_rel_depth: ConceptSabR
         " UNWIND rollup[path] as final" \
         " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
         " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
-    # TODO: There seems to be a BUG in 'session.run' where it cannot handle arrays correctly?!
+
     sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['sab'])
     query = query.replace('$sab', sab)
     rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['rel'])
