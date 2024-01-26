@@ -190,15 +190,14 @@ The methods for returning to GET requests and POST requests are slightly differe
 
 #### Loading Cypher query strings
 
-Large or complex Cypher query strings can be stored in files in the _cypher_ directory and loaded using the **loadquerystring** function in the **util_query.py** script.
+Large or complex Cypher query strings can be stored in files in the _cypher_ directory and loaded using the **loadquerystring** function in the **common_neo4j_logic.py** script.
 
-Following is the excerpt from **neo4j_logic.py** that loads the large Cypher query string used for the _genes_ endpoint.
+Following is the excerpt from **common_neo4j_logic.py** that loads the large Cypher query string used for the _genes_ endpoint.
 ```
-   from hs_ontology_api.cypher.util_query import loadquerystring
 
-   # Load query string.
-   queryfile = 'genedetail.cypher'
-   query = loadquerystring(queryfile)
+    # Load Cypher query from file.
+    query: str = loadquerystring('codes_code_id_codes.cypher')
+    
 ```
 #### Nested objects
 

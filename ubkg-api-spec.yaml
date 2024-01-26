@@ -14,20 +14,20 @@ servers:
 paths:
   /codes/{code_id}/codes:
     get:
-      summary: Returns a list of code_ids {Concept, Code, SAB} that code the same concept(s) as the code_id, optionally restricted to source (SAB)
+      summary:  In general, a Concept node in UBKG is associated with Code nodes from multiple source vocabularies (SABs). This endpoint returns the list of Code nodes that share links to the same Concept node to which the specified code links. The list can be filtered to return only those codes from particular SABs.
       operationId: codes_code_id_codes_get
       parameters:
         - name: code_id
           in: path
           required: true
-          description: The code identifier
+          description: the CodeId for the Code node, in format _SAB_:_code_.
           schema:
             type: string
             example: SNOMEDCT_US:254837009
         - name: sab
           in: query
           required: false
-          description: One or more sources (SABs) to return
+          description: A filter for one or more sources (SABs) for the codes that share links to the same Concept to which the code with CodeID=_code_id_ links. Can be either a list of values delimited with URL-encoded commas (?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: array
             uniqueItems: true
@@ -37,13 +37,19 @@ paths:
             default: []
       responses:
         '200':
-          description: A JSON array of dictionaries
+          description: A JSON array of objects that correspond to Code nodes
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/CodesCodesObj'
+        '400':
+          description: invalid parameter name
+        '404':
+          description: no Codes for the specified parameters (_code_id_ and _sab_)
+        '5XX':
+          description: Unknown error
   /codes/{code_id}/concepts:
     get:
       operationId: codes_code_id_concepts_get
@@ -344,7 +350,7 @@ paths:
   /terms/{term_id}/concepts/terms:
     get:
       operationId: terms_term_id_concepts_terms_get
-      summary: Returns an expanded list of concept(s) and preferred term(s) {Concept, Term} from an exact text match 
+      summary: Returns an expanded list of concept(s) and preferred term(s) {Concept, Term} from an exact text match
       parameters:
         - name: term_id
           in: path
@@ -365,15 +371,19 @@ paths:
 components:
   schemas:
     CodesCodesObj: # Schema name
+      description: Code nodes that share links to the same Concept node to which a specified CodeID links.
       type: object
       properties:
         concept:
+          description: The CUI (Concept Unique Identifier) for the shared Concept node.
           type: string
           example: C0006142
         code:
+          description: CodeID of a Code node, in format _SAB_:_CODE_
           type: string
           example: CCS 2.5
         SAB:
+          description: an identifier for the source of the code. Corresponds to the Source Abbreviaion (SAB) of a Code in the UMLS.
           type: string
           example: CCF
     ConceptDetail:    # Schema name
