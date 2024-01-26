@@ -215,15 +215,15 @@ Create a Python package in the __routes__ path.
 Define a Blueprint object and route for your endpoint. Follow examples in the existing controllers.
 
 ### Register your Blueprint
-In *main.py*, 
+In *app.py*, 
 1. Import your Blueprint.
 2. Register your Blueprint with Flask.
 
 The following snippet registers the Blueprint:
 
 ```
-from hs_ontology_api.routes.genedetail.genedetail_controller import genedetail_blueprint
-app.register_blueprint(genedetail_blueprint)
+from common_routes.codes.codes_controller import codes_blueprint
+self.app.register_blueprint(codes_blueprint)
 ```
 
 # Updating SmartAPI documentation

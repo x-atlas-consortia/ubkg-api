@@ -1,8 +1,19 @@
+"""
+January 2024
+Refactored:
+1. to work with neo4j version 5
+2. to work with a neo4j instance with relationship indexes
+3. with new endpoints
+4. to remove some of the more speculative endpoints.
+
+"""
 import logging
 import re
 from typing import List
+import os
 
 import neo4j
+
 
 from models.codes_codes_obj import CodesCodesObj
 from models.concept_detail import ConceptDetail
@@ -59,6 +70,22 @@ cypher_head: str = \
     " OPTIONAL MATCH (matched_term:Term)<-[:PREF_TERM]-(concept:Concept)"
 
 
+def loadquerystring(filename: str) -> str:
+
+    # Load a query string from a file.
+    # filename: filename, without path.
+
+    # Assumes that the file is in the cypher directory.
+
+    fpath = os.path.dirname(os.getcwd())
+    fpath = os.path.join(fpath, 'ubkg_api/cypher', filename)
+
+    f = open(fpath, "r")
+    query = f.read()
+    f.close()
+    return query
+
+
 def rel_str_to_array(rels: List[str]) -> List[List]:
     rel_array: List[List] = []
     for rel in rels:
@@ -86,13 +113,27 @@ def parse_and_check_rel(rel: List[str]) -> List[List]:
 
 
 def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) -> List[CodesCodesObj]:
+    """
+    Returns the set of Code nodes that share Concept links with the specified Code node.
+    :param neo4j_instance: neo4j connection
+    :param code_id: CodeID for the Code node, in format <SAB>:<CODE>
+    :param sab: optional list of SABs from which to select codes that share links to the Concept node linked to the
+    Code node
+    """
     codesCodesObjs: List[CodesCodesObj] = []
-    query: str = \
-        'WITH [$code_id] AS query' \
-        ' MATCH (a:Code)<-[:CODE]-(b:Concept)-[:CODE]->(c:Code)' \
-        ' WHERE a.CodeID IN query AND (c.SAB IN $SAB OR $SAB = [])' \
-        ' RETURN DISTINCT a.CodeID AS Code1, b.CUI as Concept, c.CodeID AS Code2, c.SAB AS Sab2' \
-        ' ORDER BY Code1, Concept ASC, Code2, Sab2'
+
+    # Load Cypher query from file.
+    query: str = loadquerystring('codes_code_id_codes.cypher')
+
+    # Filter by code_id.
+    query = query.replace('$code_id',f"'{code_id}'")
+
+    # Filter by code SAB.
+    if len(sab) == 0:
+        query = query.replace('$sabfilter','')
+    else:
+        query = query.replace('$sabfilter',f" AND c.SAB IN {sab}")
+
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query, code_id=code_id, SAB=sab)
         for record in recds:
@@ -107,6 +148,7 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
 
 def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[ConceptDetail]:
     conceptDetails: List[ConceptDetail] = []
+
     query: str = \
         'WITH [$code_id] AS query' \
         ' MATCH (a:Code)<-[:CODE]-(b:Concept)' \
