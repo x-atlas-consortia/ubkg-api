@@ -26,8 +26,9 @@ from models.qqst import QQST
 from models.sab_definition import SabDefinition
 from models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
 from models.sab_relationship_concept_term import SabRelationshipConceptTerm
-from models.semantic_stn import SemanticStn
-from models.sty_tui_stn import StyTuiStn
+# JAS January 2024 Deprecqting semantic and tui models
+# from models.semantic_stn import SemanticStn
+# from models.sty_tui_stn import StyTuiStn
 from models.termtype_code import TermtypeCode
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
@@ -35,6 +36,7 @@ logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# JAS January 2024 This may be a candidate for removal.
 cypher_tail: str = \
     " CALL apoc.when(rel = []," \
     "  'RETURN concept AS related_concept, NULL AS rel_type, NULL AS rel_sab'," \
@@ -59,6 +61,7 @@ cypher_tail: str = \
     "  code.CODE AS code_code, tty, term.name AS term, related_concept.CUI AS concept" \
     " ORDER BY size(term), code_id, tty DESC, rel_type, rel_sab, concept, matched"
 
+# JAS January 2024 This may be a candidate for removal.
 cypher_head: str = \
     "CALL db.index.fulltext.queryNodes(\"Term_name\", '\\\"'+$queryx+'\\\"')" \
     " YIELD node" \
@@ -233,6 +236,8 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
     return sabDefinitions
 
 
+# JAS January 2024 Deprecated semantics routes.
+"""
 def concepts_concept_id_semantics_get_logic(neo4j_instance, concept_id) -> List[StyTuiStn]:
     styTuiStns: [StyTuiStn] = []
     query: str = \
@@ -250,7 +255,7 @@ def concepts_concept_id_semantics_get_logic(neo4j_instance, concept_id) -> List[
             except KeyError:
                 pass
     return styTuiStns
-
+"""
 
 def concepts_expand_post_logic(neo4j_instance, concept_sab_rel_depth) -> List[ConceptPrefterm]:
     logger.info(f'concepts_expand_post; Request Body: {concept_sab_rel_depth}')
@@ -329,10 +334,14 @@ def concepts_shortestpaths_post_logic(neo4j_instance, qconcept_tconcept_sab_rel)
         -> List[PathItemConceptRelationshipSabPrefterm]:
     logger.info(f'concepts_shortestpath_post; Request Body: {qconcept_tconcept_sab_rel}')
     pathItemConceptRelationshipSabPrefterms: [PathItemConceptRelationshipSabPrefterm] = []
+
+    # JAS January 2024 - apoc.algo.dijkstraWithDefaultWeight was deprecated in version 5. Replaced the function with
+    # dijkstra, and accepted default weight.
+
     query: str = \
         "MATCH (c:Concept {CUI: $query_concept_id})" \
         " MATCH (d:Concept {CUI: $target_concept_id})" \
-        " CALL apoc.algo.dijkstraWithDefaultWeight(c, d, apoc.text.join([x in [$rel] | '<'+x], '|'), 'none', 10)" \
+        " CALL apoc.algo.dijkstra(c, d, apoc.text.join([x in [$rel] | '<'+x], '|'), 'none', 10)" \
         " YIELD path" \
         " WHERE ALL(r IN relationships(path) WHERE r.SAB IN [$sab])" \
         " WITH [n IN nodes(path) | n.CUI] AS concepts, [null]+[r IN relationships(path) |Type(r)] AS relationships, [null]+[r IN relationships(path) | r.SAB] AS sabs" \
@@ -407,7 +416,9 @@ def concepts_trees_post_logic(neo4j_instance, concept_sab_rel_depth: ConceptSabR
                 pass
     return pathItemConceptRelationshipSabPrefterms
 
-
+# JAS January 2024
+# Deprecated semantics and tui routes.
+"""
 def semantics_semantic_id_semantics_get_logic(neo4j_instance, semantic_id: str) -> List[QQST]:
     qqsts: [QQST] = []
     query: str = \
@@ -426,7 +437,7 @@ def semantics_semantic_id_semantics_get_logic(neo4j_instance, semantic_id: str) 
             except KeyError:
                 pass
     return qqsts
-
+"""
 
 def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[TermtypeCode]:
     termtypeCodes: [TermtypeCode] = []
@@ -494,7 +505,9 @@ def terms_term_id_concepts_terms_get_logic(neo4j_instance, term_id: str) -> List
                 pass
     return conceptTerms
 
-
+# JAS January 2024
+# Deprecated semantic and tui routes
+"""
 def tui_tui_id_semantics_get_logic(neo4j_instance, tui_id: str) -> List[SemanticStn]:
     semanticStns: [SemanticStn] = []
     query: str = \
@@ -511,3 +524,4 @@ def tui_tui_id_semantics_get_logic(neo4j_instance, tui_id: str) -> List[Semantic
             except KeyError:
                 pass
     return semanticStns
+"""

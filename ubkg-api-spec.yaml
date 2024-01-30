@@ -117,24 +117,28 @@ paths:
   /concepts/{concept_id}/concepts:
     get:
       operationId: concepts_concept_id_concepts_get
-      summary: Returns a list of concepts {Sab, Relationship, Concept, Prefterm} related to the concept
+      summary: Returns a list of Concepts that have relationships with the specified Concept.
       parameters:
         - name: concept_id
           in: path
           required: true
-          description: The concept identifier
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI)
           schema:
             type: string
             example: C0006142
       responses:
         '200':
-          description: A JSON array of {Sab, Relationship, Concept, Prefterm} dictionaries
+          description: An array of information on Concepts that have relationships with the specified Concept
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/SabRelationshipConceptTerm'
+        '404':
+          description: no Concepts that have relationships with the specified Concept
+        '5XX':
+          description: Unknown error
   /concepts/expand:
     post:
       operationId: concepts_expand_post
@@ -166,7 +170,7 @@ paths:
   /concepts/paths:
     post:
       operationId: concepts_path_post
-      summary: Returns information on the Concept nodes that relate to a specified Concept, based on all paths with a specified relationship pattern within a specified set of sources
+      summary: Returns information on the Concept nodes that are involved in paths that begin with a specified Concept. Paths can be limited to those with specified relationship types or with relationships defined in specified sources.
       requestBody:
         required: true
         content:
@@ -193,7 +197,7 @@ paths:
   /concepts/shortestpaths:
     post:
       operationId: concepts_shortestpaths_post
-      summary: Return all paths of the relationship pattern specified within the selected sources
+      summary: Return the shortest path between two Concepts, using Dykstra's algorithm with default weights. The path can be limited to relationships of specified types or defined in specified sources.
       requestBody:
         required: true
         content:
@@ -207,17 +211,21 @@ paths:
               rel: [isa, part_of]
       responses:
         '200':
-          description: Return all paths of the relationship pattern specified within the selected sources
+          description: Returns the ordered set of Concepts involved in the shortest path, subject to constraints for relationship type and source.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/PathItemConceptRelationshipSabPrefterm'
+        '404':
+          description: No shortest path between _query_concept_id_ and _target_concept_id_ with relationship types in _rel_ filtered by sources in _sab_.
+        '5XX':
+          description: Unknown error
   /concepts/trees:
     post:
       operationId: concepts_trees_post
-      summary: Return all paths of the relationship pattern specified within the selected sources
+      summary: Return information on the Concepts in the spanning tree that originates from a specified Concept, subject to constraints on relationship type, relationship source, and path depth
       requestBody:
         required: true
         content:
@@ -231,133 +239,82 @@ paths:
               depth: 2
       responses:
         '200':
-          description: Return all paths of the relationship pattern specified within the selected sources
+          description: Return information on Concepts in the spanning tree that originates from the specified Concept
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/PathItemConceptRelationshipSabPrefterm'
+        '404':
+          description: No Concepts in a spanning tree originating from Concept _query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_ at depth _depth_.
+        '5XX':
+          description: Unknown error
   /concepts/{concept_id}/definitions:
     get:
       operationId: concepts_concept_id_definitions_get
-      summary: Returns a list of definitions {Sab, Definition} of the concept
+      summary: Returns a list of Definitions for a Concept. A Definition is usually defined for a Code by a source; however, in the UBKG, the Definition is associated with the Code's linked concept. Thus, a Concept may have multiple Definitions.
       parameters:
         - name: concept_id
+          description: Identifier (also known as a Concept Unique Identifier) for a Concept.
           in: path
           required: true
-          description: The concept identifier
           schema:
             type: string
             example: C0006142
       responses:
         '200':
-          description: A JSON array of {Sab, Definition} dictionaries
+          description: An array of Definitions associated with the Concept.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/SabDefinition'
-  /concepts/{concept_id}/semantics:
-    get:
-      operationId: concepts_concept_id_semantics_get
-      summary: Returns a list of semantic_types {Sty, Tui, Stn} of the concept
-      parameters:
-        - name: concept_id
-          in: path
-          required: true
-          description: The concept identifier
-          schema:
-            type: string
-            example: C0304055
-      responses:
-        '200':
-          description: A JSON array of {Sty, Tui, Stn} dictionaries
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/StyTuiStn'
-  /semantics/{semantic_id}/semantics:
-    get:
-      operationId: semantics_semantic_id_semantics_get
-      summary: Returns a list of semantic_types {queryTUI, querySTN ,semantic, TUI_STN} of the semantic type
-      parameters:
-        - name: semantic_id
-          in: path
-          required: true
-          description: The semantic identifier
-          schema:
-            type: string
-            example: Physical Object
-      responses:
-        '200':
-          description: A JSON array of {queryTUI, querySTN ,semantic, TUI_STN} dictionaries
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/QQST'
-  /tui/{tui_id}/semantics:
-    get:
-      operationId: tui_tui_id_semantics_get
-      summary: Returns a list of symantic_types {semantic, STN} of the type unique id (tui)
-      parameters:
-        - name: tui_id
-          in: path
-          required: true
-          description: The TUI identifier
-          schema:
-            type: string
-            example: T200
-      responses:
-        '200':
-          description: A JSON array of {semantic, STN} dictionaries
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SemanticStn'
+        '404':
+          description: No Definitions associated with the Concept _query_concept_id_.
+        '5XX':
+          description: Unknown error
   /terms/{term_id}/codes:
     get:
       operationId: terms_term_id_codes_get
-      summary: Returns a list of Code nodes (TermType, Code} of the text string
+      summary: Returns a list of Code nodes with terms that exactly match the specified string.
       parameters:
         - name: term_id
           in: path
           required: true
-          description: The term identifier
+          description: The string to match
           schema:
             type: string
             example: Breast cancer
       responses:
         '200':
-          description: A JSON array of {TermType, Code} dictionaries
+          description: An array of Codes with terms that match the specified string
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/TermtypeCode'
+        '404':
+          description: No Codes with terms matching the specified string.
+        '5XX':
+          description: Unknown error
   /terms/{term_id}/concepts:
     get:
       operationId: terms_term_id_concepts_get
-      summary: Returns a list of concepts associated with the text string
+      summary: Returns a list of Concept nodes with preferred terms that exactly match the specified string.
       parameters:
         - name: term_id
           in: path
           required: true
-          description: The term identifier
+          description: The string to match
           schema:
             type: string
             example: Breast cancer
       responses:
         '200':
-          description: A JSON array of concepts associated with the term
+          description: An array of concepts with preferred terms that match the specified string
           content:
             application/json:
               schema:
@@ -365,6 +322,10 @@ paths:
                 items:
                   type: string
                   example: C0794811
+        '404':
+          description: No Concepts with terms matching the specified string.
+        '5XX':
+          description: Unknown error
   /terms/{term_id}/concepts/terms:
     get:
       operationId: terms_term_id_concepts_terms_get
@@ -480,22 +441,29 @@ components:
           example: LNC LA14283-8
     PathItemConceptRelationshipSabPrefterm: # Schema name
       type: object
+      description: Information on a Concept that is part of a path--i.e., a directed set of relationships starting from a specified Concept.
       properties:
         path:
-          type: string
+          type: integer
+          description: Ordinal number for a path. Endpoints using this response schema organize Concepts by path.
         item:
-          type: string
+          type: integer
+          description: Zero-based, ordinal position of the Concept in path=_path_, relative to the starting concept. For example, if item=3, then the Concept is 3 hops away from the starting concept. The starting Concept of a path has item=0 in all paths.
         concept:
           type: string
+          description: Identifier (also known as the Concept Unique Identifier, or CUI) for the Concept
           example: C0006826
         relationship:
           type: string
+          description: The relationship type that relates the Concept to the precursor Concept node in the path.
           example: CHD
         sab:
           type: string
+          description: Source that defines the relationship type.
           example: ICD10AM
         prefterm:
           type: string
+          description: preferred term for the Concept.
           example: Malignant Neoplasms
     QconceptTconceptSabRel:    # Schema name
       type: object
@@ -536,27 +504,35 @@ components:
           example: A
     SabDefinition: # Schema name
       type: object
+      description: A Definition associated with a Concept.
       properties:
         sab:
           type: string
+          description: Source of a Definition.
           example: NCI
         definition:
           type: string
+          description: The definition text.
           example: A primary or metastatic malignant neoplasm involving the breast. The vast majority of cases are carcinomas arising from the breast parenchyma or the nipple. Malignant breast neoplasms occur more frequently in females than in males.
     SabRelationshipConceptTerm: # Schema name
       type: object
+      description: Information on a Concept that has a relationship with another Concept
       properties:
         sab:
           type: string
+          description: the source of the relationship, such as a vocabulary or ontology. Although relationships are usually described in terms of Codes, they actually exist between the Concepts that are linked to the Codes. For example, if an ontology SAB1 shows that code A has relationship r with code B, the associated concepts for A and B will have a relationship with type=r and SAB=SAB1.
           example: ICD10AM
         relationship:
           type: string
+          description: the relationship type--e.g., "isa", "property_of"
           example: CHD
         concept:
           type: string
+          description: the identifier for the Concept, also known as the Concept Unique Identifier (CUI)
           example: C0006826
         prefterm:
           type: string
+          description: the preferred term for the Concept. Note that the preferred term for a Concept may be different than the preferred term for a Code that links to the Concept.
           example: Malignant Neoplasms
     SemanticStn: # Schema name
       type: object
