@@ -35,7 +35,7 @@ def codes_code_id_codes_get(code_id, sab=None):
     result = codes_code_id_codes_get_logic(neo4j_instance, code_id, sab)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string='No codes sharing the Concept linked to the Code specified')
+        err = get_404_error_string(prompt_string='No Codes sharing the Concept linked to the Code specified')
         return make_response(err, 404)
 
     return jsonify(result)

@@ -4,6 +4,7 @@ from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_c
     concepts_path_post_logic, concepts_shortestpaths_post_logic, concepts_trees_post_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum
+from utils.http_parameter import parameter_as_list
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
 
@@ -19,8 +20,24 @@ def concepts_concept_id_codes_get(concept_id, sab=[]):
 
     :rtype: Union[List[str], Tuple[List[str], int], Tuple[List[str], int, Dict[str, str]]
     """
+
+    # Validate sab parameter.
+    err = validate_query_parameter_names(['sab'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Obtain a list of sab parameter values.
+    sab = parameter_as_list(param_name='sab')
+
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
-    return jsonify(concepts_concept_id_codes_get_logic(neo4j_instance, concept_id, sab))
+
+    result = concepts_concept_id_codes_get_logic(neo4j_instance, concept_id, sab)
+    if result is None or result == []:
+        # Empty result
+        err = get_404_error_string(prompt_string='No Codes with link to the specified Concept identifier')
+        return make_response(err, 404)
+
+    return jsonify(result)
 
 
 @concepts_blueprint.route('<concept_id>/concepts', methods=['GET'])

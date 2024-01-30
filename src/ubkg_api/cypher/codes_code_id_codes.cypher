@@ -22,4 +22,4 @@ WITH Code1, Concept
 OPTIONAL MATCH (b:Concept)-[:CODE]->(c:Code)
 WHERE b.CUI=Concept
 $sabfilter
-RETURN Code1, c.CodeID AS Code2, c.SAB AS Sab2 ORDER BY Code1, Concept ASC, Code2, Sab2
+RETURN Concept, c.CodeID AS Code2, c.SAB AS Sab2 ORDER BY Code1, Concept ASC, Code2, Sab2
