@@ -14,7 +14,7 @@ servers:
 paths:
   /codes/{code_id}/codes:
     get:
-      summary:  In general, a Concept node in UBKG is associated with Code nodes from multiple source vocabularies (SABs). This endpoint returns the list of Code nodes that share links to the same Concept node to which the specified code links. The list can be filtered to return only those codes from particular SABs.
+      summary:  In general, a Concept node in UBKG is associated with Code nodes from multiple source vocabularies (SABs). For example, the code "SNOMEDCT_US:254837009" (Malignant neoplasm of breast)  maps to UMLS CUI C0006142, which links to codes such as "NCI:C9335" and "MSH:D001943". This endpoint returns the list of Code nodes that  link to the same Concept node to which the specified code links. The list can be filtered to return only those codes from particular SABs.
       operationId: codes_code_id_codes_get
       parameters:
         - name: code_id
@@ -53,18 +53,18 @@ paths:
   /codes/{code_id}/concepts:
     get:
       operationId: codes_code_id_concepts_get
-      summary: Returns a list of concepts {Concept, Prefterm} that the code_id codes
+      summary: Returns a list of Concept nodes (Concept, Preferred term) with CODE relationships with the specified Code node.
       parameters:
         - name: code_id
           in: path
           required: true
-          description: The code identifier
+          description: The identifier for the Code node, in format _SAB_:_CODE_, where _SAB_ is an identifier for the source of the code.
           schema:
             type: string
-            example: SNOMEDCT_US 254837009
+            example: SNOMEDCT_US:254837009
       responses:
         '200':
-          description: A JSON array of dictionaries
+          description: A JSON array of information on Concept nodes that relate to the specified Code node
           content:
             application/json:
               schema:
@@ -128,7 +128,7 @@ paths:
   /concepts/expand:
     post:
       operationId: concepts_expand_post
-      summary: Returns a unique list of concepts (Concept, Preferred Term) on all paths including starting concept (query_concept_id) restricted by list of relationship types (rel), list of relationship sources (sab), and depth of travel.
+      summary: Returns a unique list of Concepts nodes (Concept, Preferred Term) on all paths including starting concept (query_concept_id) restricted by list of relationship types (rel), list of relationship sources (sab), and depth of travel. Answers the question, "What are the concepts that are within the specified number of hops (depth) away from a particular concept (query_concept_id), where the hops belong to a set of relationship types from a set of source?""
       requestBody:
         required: true
         content:
@@ -137,8 +137,8 @@ paths:
               $ref: "#/components/schemas/ConceptSabRelDepth"
             example:
               query_concept_id: C2720507
-              sab: [SNOMEDCT_US, HGNC]
-              rel: [isa, isa]
+              sab: [SNOMEDCT_US]
+              rel: [isa]
               depth: 2
       responses:
         '200':
@@ -149,10 +149,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ConceptPrefterm'
+        '404':
+          description: No concepts with paths to the Concept=_query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_ up to path depth=_depth_
+        '5XX':
+          description: Unknown error
   /concepts/paths:
     post:
       operationId: concepts_path_post
-      summary: Return all paths of the relationship pattern specified within the selected sources
+      summary: Returns information on the Concept nodes that relate to a specified Concept, based on all paths with a specified relationship pattern within a specified set of sources
       requestBody:
         required: true
         content:
@@ -162,16 +166,20 @@ paths:
             example:
               query_concept_id: C2720507
               sab: [SNOMEDCT_US, HGNC]
-              rel: [isa, isa]
+              rel: [isa]
       responses:
         '200':
-          description: Return all paths of the relationship pattern specified within the selected sources
+          description: Returns information on all Concept nodes in paths of the relationship pattern specified within the selected sources
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/PathItemConceptRelationshipSabPrefterm'
+        '404':
+          description: No concepts with paths to the Concept=_query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_
+        '5XX':
+          description: Unknown error
   /concepts/shortestpaths:
     post:
       operationId: concepts_shortestpaths_post
@@ -307,7 +315,7 @@ paths:
   /terms/{term_id}/codes:
     get:
       operationId: terms_term_id_codes_get
-      summary: Returns a list of codes {TermType, Code} of the text string
+      summary: Returns a list of Code nodes (TermType, Code} of the text string
       parameters:
         - name: term_id
           in: path
@@ -388,47 +396,59 @@ components:
           example: CCF
     ConceptDetail:    # Schema name
       type: object
+      description: Information on a Concept node.
       properties:
         concept:
           type: string
+          description: Concept Unique Identifier (CUI) for the Concept node
           example: C0006142
         prefterm:
           type: string
+          description: Preferred term for the Concept node.
           example: Malignant neoplasm of breast
     ConceptSabRel:    # Schema name
       type: object
+      description: Request body for POST endpoints such as concepts/{concept_id)/paths
       properties:
         query_concept_id:
           type: string
+          description: Concept Unique Identifier (CUI) for the Concept node
           example: C2720507
         sab:
           type: array
+          description: array of identifiers for vocabularies or ontology sources to which to limit Code nodes in the response.
           items:
             type: string
           example: ["SNOMEDCT_US", "HGNC"]
         rel:
           type: array
+          description: array of relationship types to which to limit paths in the response.
           items:
             type: string
-          example: ["isa", "isa"]
+          example: ["isa"]
     ConceptSabRelDepth:    # Schema name
       type: object
+      description: Request body for POST endpoints such as concepts/expand and concepts/paths
       properties:
         query_concept_id:
           type: string
+          description: Concept Unique Identifier (CUI) for a Concept node in the UBKG
           example: C2720507
         sab:
           type: array
+          description: array of identifiers for vocabularies or ontology sources to which to limit Code nodes in the response.
           items:
             type: string
           example: ["SNOMEDCT_US", "HGNC"]
         rel:
           type: array
+          description: array of relationship types to which to limit paths in the response.
           items:
             type: string
-          example: ["isa","isa"]
+          example: ["isa"]
         depth:
           type: integer
+          description: depth of path--i.e., the limit to the number of "hops" to identify between the concept specified by _query_concept_id_ and other concepts. For example, a depth of 2 means to only extend a path search out to 2 hops away from _query_concept_id_.
           example: 2
     ConceptPrefterm: # Schema name
       type: object

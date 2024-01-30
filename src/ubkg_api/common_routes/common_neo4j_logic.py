@@ -3,8 +3,9 @@ January 2024
 Refactored:
 1. to work with neo4j version 5
 2. to work with a neo4j instance with relationship indexes
-3. with new endpoints
-4. to remove some of the more speculative endpoints.
+3. with new endpoints optimized for a fully-indexed v5 instance
+4. to remove some of the more speculative endpoints, especially if the Cypher query uses deprecated
+apoc calls.
 
 """
 import logging
@@ -429,6 +430,10 @@ def semantics_semantic_id_semantics_get_logic(neo4j_instance, semantic_id: str) 
 
 def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[TermtypeCode]:
     termtypeCodes: [TermtypeCode] = []
+
+    """
+    Returns information on Codes with terms that exactly match the specified term_id string.
+    """
     query: str = \
         'WITH [$term_id] AS query' \
         ' MATCH (a:Term)<-[b]-(c:Code)' \
@@ -444,7 +449,6 @@ def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[Termtype
             except KeyError:
                 pass
     return termtypeCodes
-
 
 def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     concepts: [str] = []

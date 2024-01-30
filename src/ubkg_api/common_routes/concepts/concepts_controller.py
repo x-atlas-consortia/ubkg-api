@@ -1,7 +1,9 @@
-from flask import Blueprint, jsonify, current_app, request
+from flask import Blueprint, jsonify, current_app, request, make_response
 from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
     concepts_concept_id_definitions_get_logic, concepts_concept_id_semantics_get_logic, concepts_expand_post_logic,\
     concepts_path_post_logic, concepts_shortestpaths_post_logic, concepts_trees_post_logic
+from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
+    validate_parameter_value_in_enum
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
 
@@ -71,7 +73,14 @@ def concepts_expand_post():
      int, Dict[str, str]]
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
-    return jsonify(concepts_expand_post_logic(neo4j_instance, request.get_json()))
+
+    result = concepts_expand_post_logic(neo4j_instance, request.get_json())
+    if result is None or result == []:
+        # Empty result
+        err = get_404_error_string(prompt_string=f"No Concepts with paths to the Concept='query_concept_id' with relationship types in 'rel' filtered by sources in 'sabs' up to path depth='depth'")
+        return make_response(err, 404)
+
+    return jsonify(result)
 
 
 @concepts_blueprint.route('paths', methods=['POST'])
@@ -82,7 +91,15 @@ def concepts_path_post():
      int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
-    return jsonify(concepts_path_post_logic(neo4j_instance, request.get_json()))
+
+    result = concepts_path_post_logic(neo4j_instance, request.get_json())
+
+    if result is None or result == []:
+        # Empty result
+        err = get_404_error_string(prompt_string=f"No Concepts with paths to the Concept='query_concept_id' with relationship types in 'rel' filtered by sources in 'sabs'")
+        return make_response(err, 404)
+
+    return jsonify(result)
 
 
 @concepts_blueprint.route('shortestpaths', methods=['POST'])

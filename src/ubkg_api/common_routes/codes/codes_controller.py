@@ -35,7 +35,7 @@ def codes_code_id_codes_get(code_id, sab=None):
     result = codes_code_id_codes_get_logic(neo4j_instance, code_id, sab)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string='No codes sharing the Concept linked to the Code')
+        err = get_404_error_string(prompt_string='No codes sharing the Concept linked to the Code specified')
         return make_response(err, 404)
 
     return jsonify(result)
@@ -43,7 +43,7 @@ def codes_code_id_codes_get(code_id, sab=None):
 
 @codes_blueprint.route('/<code_id>/concepts', methods=['GET'])
 def codes_code_id_concepts_get(code_id):
-    """Returns a list of concepts {Concept, Prefterm} that the code_id codes
+    """Returns a list of Concept objects {Concept, Prefterm} linked to the specified Code node.
 
     :param code_id: The code identifier
     :type code_id: str
@@ -51,4 +51,11 @@ def codes_code_id_concepts_get(code_id):
     :rtype: Union[List[ConceptDetail], Tuple[List[ConceptDetail], int], Tuple[List[ConceptDetail], int, Dict[str, str]]
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
-    return jsonify(codes_code_id_concepts_get_logic(neo4j_instance, code_id))
+    result = codes_code_id_concepts_get_logic(neo4j_instance, code_id)
+
+    if result is None or result == []:
+        # Empty result
+        err = get_404_error_string(prompt_string='No Concepts linked to the Code specified')
+        return make_response(err, 404)
+
+    return jsonify(result)

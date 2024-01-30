@@ -20,11 +20,11 @@ def format_request_path():
     else:
         err = err + f" for '{pathsplit[1]}'"
 
-    return err
+    return err + '. '
 
 def format_request_query_string():
     """
-    Formats teh request query string for error messages.
+    Formats the request query string for error messages.
 
     :return:
     """
@@ -32,13 +32,23 @@ def format_request_query_string():
 
     listerr = []
     for req in request.args:
-        listerr.append(f"'{req}'='{request.args[req]}'")
+        listerr.append(f"'{req}'='{request.args[req]}'. ")
 
     if len(listerr) > 0:
-        err = ' and query parameter'
+        err = ' Query parameter'
         if len(listerr) > 1:
             err = err + 's'
         err = err + ' ' + ' ; '.join(listerr) + '.'
+
+    return err
+
+def format_request_body():
+    err = ''
+
+    # Calling request.get_json(silent=True) returns nothing for the case in which there is not a request body.
+    reqjson = request.get_json(silent=True)
+    if not (reqjson is None or reqjson == []):
+        err = f' Request body: {reqjson}'
 
     return err
 
@@ -53,7 +63,7 @@ def get_404_error_string(prompt_string=None):
     else:
         err = prompt_string
 
-    err = err + format_request_path() + format_request_query_string()
+    err = err + format_request_path() + format_request_query_string() + format_request_body()
 
     return err
 
