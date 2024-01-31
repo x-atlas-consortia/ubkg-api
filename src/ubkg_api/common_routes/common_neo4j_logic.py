@@ -1,11 +1,10 @@
 """
 January 2024
 Refactored:
-1. to work with neo4j version 5
-2. to work with a neo4j instance with relationship indexes
-3. with new endpoints optimized for a fully-indexed v5 instance
-4. to remove some of the more speculative endpoints, especially if the Cypher query uses deprecated
-apoc calls.
+1. to work with neo4j version 5 Cypher
+2. with new endpoints optimized for a fully-indexed v5 instance
+3. to deprecate endpoints that either use deprecated Cypher or involve information limited to UMLS data (e.g.,
+   semantic types and TUIs).
 
 """
 import logging
@@ -36,7 +35,7 @@ logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# JAS January 2024 This may be a candidate for removal.
+
 cypher_tail: str = \
     " CALL apoc.when(rel = []," \
     "  'RETURN concept AS related_concept, NULL AS rel_type, NULL AS rel_sab'," \
@@ -61,7 +60,6 @@ cypher_tail: str = \
     "  code.CODE AS code_code, tty, term.name AS term, related_concept.CUI AS concept" \
     " ORDER BY size(term), code_id, tty DESC, rel_type, rel_sab, concept, matched"
 
-# JAS January 2024 This may be a candidate for removal.
 cypher_head: str = \
     "CALL db.index.fulltext.queryNodes(\"Term_name\", '\\\"'+$queryx+'\\\"')" \
     " YIELD node" \
@@ -480,7 +478,9 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
                 pass
     return concepts
 
-
+# JAS January 2024
+# Deprecating. The Cypher is incompatible with version 5.
+"""
 def terms_term_id_concepts_terms_get_logic(neo4j_instance, term_id: str) -> List[ConceptTerm]:
     conceptTerms: [ConceptTerm] = []
     query: str = \
@@ -504,6 +504,7 @@ def terms_term_id_concepts_terms_get_logic(neo4j_instance, term_id: str) -> List
             except KeyError:
                 pass
     return conceptTerms
+"""
 
 # JAS January 2024
 # Deprecated semantic and tui routes

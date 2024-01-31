@@ -14,13 +14,13 @@ servers:
 paths:
   /codes/{code_id}/codes:
     get:
-      summary:  In general, a Concept node in UBKG has CODE relationships with (links to) Code nodes from multiple source vocabularies (SABs). For example, the Code "SNOMEDCT_US:254837009" (Malignant neoplasm of breast) links to the Concept with identifier "C0006142"; this Concept also links to Code nodes with identifiers including "NCI:C9335" and "MSH:D001943". This endpoint returns the list of Code nodes that share the Concept node to which the specified code links. The list of Codes can be filtered to return only those Codes from particular sources (SABs).
+      summary:  A Concept node can have CODE relationships with (links to) Code nodes from multiple source vocabularies (SABs). For example, the Code "SNOMEDCT_US:254837009" (Malignant neoplasm of breast) links to the Concept with identifier "C0006142"; this Concept also links to Code nodes with identifiers including "NCI:C9335" and "MSH:D001943". This endpoint returns the list of Code nodes that share the Concept node to which the specified code links. The list of Codes can be filtered to return only those Codes from particular sources (SABs).
       operationId: codes_code_id_codes_get
       parameters:
         - name: code_id
           in: path
           required: true
-          description: the CodeId for the Code node, in format _SAB_:_code_.
+          description: the identifier for a Code node, in format _SAB_:_code_, where _SAB_ is an identifier for the source of the code.
           schema:
             type: string
             example: SNOMEDCT_US:254837009
@@ -37,7 +37,7 @@ paths:
             default: []
       responses:
         '200':
-          description: A JSON array of objects that correspond to Code nodes that share the Concept associated with the specified Code
+          description: An array of objects that correspond to Code nodes that share links to the Concept associated with the specified Code
           content:
             application/json:
               schema:
@@ -53,7 +53,7 @@ paths:
   /codes/{code_id}/concepts:
     get:
       operationId: codes_code_id_concepts_get
-      summary: In general, a Code node in UBKG has CODE relationships with (or links to) multiple Concept nodes. This endpoint returns a list of Concept nodes (Concept, Preferred term) that have CODE relationships with the specified Code node.
+      summary: A Code node can have CODE relationships with (links to) multiple Concept nodes. This endpoint returns a list of Concept nodes that have CODE relationships with the specified Code node.
       parameters:
         - name: code_id
           in: path
@@ -64,7 +64,7 @@ paths:
             example: SNOMEDCT_US:254837009
       responses:
         '200':
-          description: A JSON array of information on Concept nodes that have CODE relationships to the specified Code node
+          description: An array of Concept nodes that have CODE relationships with the specified Code node
           content:
             application/json:
               schema:
@@ -72,13 +72,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/ConceptDetail'
         '404':
-          description: no Concept nodes for the specified code
+          description: no Concept nodes for the specified Code
         '5XX':
           description: Unknown error
   /concepts/{concept_id}/codes:
     get:
       operationId: concepts_concept_id_codes_get
-      summary: In general, a Concept node has CODE relationships with (links to) muliple Code nodes. This endpoint returns information on the set of Code nodes that link to the specified Concept.
+      summary: A Concept node can have CODE relationships with (links to) muliple Code nodes. This endpoint returns information on the set of Code nodes that link to the specified Concept.
       parameters:
         - name: concept_id
           in: path
@@ -100,7 +100,7 @@ paths:
             default: []
       responses:
         '200':
-          description: A JSON array of code_id(s) (in format _SAB_:_CODE), for the Codes that link to the specified Concept
+          description: An array of code_ids in format _SAB_:_CODE for the Codes that link to the specified Concept
           content:
             application/json:
               schema:
@@ -142,7 +142,7 @@ paths:
   /concepts/expand:
     post:
       operationId: concepts_expand_post
-      summary: Returns a unique list of Concepts nodes (Concept, Preferred Term) on all paths including starting concept (query_concept_id) restricted by list of relationship types (rel), list of relationship sources (sab), and depth of travel. Answers the question, "What are the concepts that are within the specified number of hops (depth) away from a particular concept (query_concept_id), where the hops belong to a set of relationship types from a set of source?""
+      summary: Returns a unique list of Concepts nodes (Concept, Preferred Term) in all paths starting with the specified Concept, subject to constraints on relationship types (rel), relationship sources (sab), and depth of travel. Answers the question, "What are the concepts that are within the specified number of hops (depth) away from a particular concept (query_concept_id), where the hops belong to a set of relationship types from a set of sources?""
       requestBody:
         required: true
         content:
@@ -156,7 +156,7 @@ paths:
               depth: 2
       responses:
         '200':
-          description: Return all {concept, prefterm}
+          description: Return the Concepts in all paths starting with the specified Concept, subject to constraints
           content:
             application/json:
               schema:
@@ -164,13 +164,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/ConceptPrefterm'
         '404':
-          description: No concepts with paths to the Concept=_query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_ up to path depth=_depth_
+          description: No Concepts with paths starting with the Concept=_query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_ up to path depth=_depth_
         '5XX':
           description: Unknown error
   /concepts/paths:
     post:
       operationId: concepts_path_post
-      summary: Returns information on the Concept nodes that are involved in paths that begin with a specified Concept. Paths can be limited to those with specified relationship types or with relationships defined in specified sources.
+      summary: Returns information on the Concepts that are involved in paths that begin with the specified Concept, subject to constraints on relationship types (rel) and relationship sources (sab).
       requestBody:
         required: true
         content:
@@ -183,7 +183,7 @@ paths:
               rel: [isa]
       responses:
         '200':
-          description: Returns information on all Concept nodes in paths of the relationship pattern specified within the selected sources
+          description: Returns information on all Concept nodes in paths that begin with the specified Concept, subject to constraints on relationship types (rel) and relationship sources (sab)
           content:
             application/json:
               schema:
@@ -191,13 +191,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/PathItemConceptRelationshipSabPrefterm'
         '404':
-          description: No concepts with paths to the Concept=_query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_
+          description: No concepts with paths that being with Concept=_query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_
         '5XX':
           description: Unknown error
   /concepts/shortestpaths:
     post:
       operationId: concepts_shortestpaths_post
-      summary: Return the shortest path between two Concepts, using Dykstra's algorithm with default weights. The path can be limited to relationships of specified types or defined in specified sources.
+      summary: Return the shortest path between two Concepts, using Dykstra's algorithm with default weights, subject to constraints on relationship types (rel) and relationship sources (sab).
       requestBody:
         required: true
         content:
@@ -239,7 +239,7 @@ paths:
               depth: 2
       responses:
         '200':
-          description: Return information on Concepts in the spanning tree that originates from the specified Concept
+          description: Return information on Concepts in the spanning tree that originates from the specified Concept, subject to constraints on relationship type, relationship source, and path depth
           content:
             application/json:
               schema:
@@ -253,7 +253,7 @@ paths:
   /concepts/{concept_id}/definitions:
     get:
       operationId: concepts_concept_id_definitions_get
-      summary: Returns a list of Definitions for a Concept. A Definition is usually defined for a Code by a source; however, in the UBKG, the Definition is associated with the Code's linked concept. Thus, a Concept may have multiple Definitions.
+      summary: Returns a list of Definitions for a Concept. A Definition is usually defined for a Code by a source (SAB); however, in the UBKG, the Definition is associated with the Code's linked Concept. Thus, a Concept may have multiple Definitions.
       parameters:
         - name: concept_id
           description: Identifier (also known as a Concept Unique Identifier) for a Concept.
@@ -278,7 +278,7 @@ paths:
   /terms/{term_id}/codes:
     get:
       operationId: terms_term_id_codes_get
-      summary: Returns a list of Code nodes with terms that exactly match the specified string.
+      summary: Returns a list of Code nodes with terms that exactly match the specified string. Terms can be of differnt types--e.g., preferred terms (PT), synonyms (SY), etc.
       parameters:
         - name: term_id
           in: path
@@ -289,7 +289,7 @@ paths:
             example: Breast cancer
       responses:
         '200':
-          description: An array of Codes with terms that match the specified string
+          description: An array of Codes with terms that exactly match the specified string
           content:
             application/json:
               schema:
@@ -314,7 +314,7 @@ paths:
             example: Breast cancer
       responses:
         '200':
-          description: An array of concepts with preferred terms that match the specified string
+          description: An array of Concepts with preferred terms that exactly match the specified string
           content:
             application/json:
               schema:
@@ -350,7 +350,7 @@ paths:
 components:
   schemas:
     CodesCodesObj: # Schema name
-      description: Code nodes that share links to the same Concept node to which a specified CodeID links.
+      description: Code nodes that link to the same Concept node to which a specified Code links.
       type: object
       properties:
         concept:
@@ -432,13 +432,15 @@ components:
           example: Malignant Neoplasms
     ConceptTerm: # Schema name
       type: object
+      description: A Concept with a preferred term that matches a string
       properties:
         concept:
           type: string
+          description: the identifier for the concept (Concept Unique Identifier)
           example: C0006826
         term:
           type: string
-          example: LNC LA14283-8
+          example: LNC:LA14283-8
     PathItemConceptRelationshipSabPrefterm: # Schema name
       type: object
       description: Information on a Concept that is part of a path--i.e., a directed set of relationships starting from a specified Concept.
@@ -467,41 +469,28 @@ components:
           example: Malignant Neoplasms
     QconceptTconceptSabRel:    # Schema name
       type: object
+      description: Request body for the /concepts/shortestpath endpoint.
       properties:
         query_concept_id:
           type: string
+          description: Identifier (Concept Unique Identifier, or CUI) for the Concept at the start of the shortest path.
           example: C2720507
         target_concept_id:
           type: string
+          description: Identifier (Concept Unique Identifier, or CUI) for the Concept at the end of the shortest path.
           example: C1272753
         sab:
           type: array
+          description: Array of source vocabularies (SABs) to which to limit the relationships in the shortest path.
           items:
             type: string
           example: ["SNOMEDCT_US", "HGNC"]
         rel:
           type: array
+          description: Array of relationship types to which to limit the relationships in the shortest path.
           items:
             type: string
           example: ["isa", "part_of"]
-    QQST: # Schema name
-      type: object
-      properties:
-        queryTUI:
-          type: string
-          example: T072
-        querySTN:
-          type: string
-          example: A1
-        semantic:
-          type: string
-          example: Entity
-        TUI:
-          type: string
-          example: T071
-        STN:
-          type: string
-          example: A
     SabDefinition: # Schema name
       type: object
       description: A Definition associated with a Concept.
@@ -520,7 +509,7 @@ components:
       properties:
         sab:
           type: string
-          description: the source of the relationship, such as a vocabulary or ontology. Although relationships are usually described in terms of Codes, they actually exist between the Concepts that are linked to the Codes. For example, if an ontology SAB1 shows that code A has relationship r with code B, the associated concepts for A and B will have a relationship with type=r and SAB=SAB1.
+          description: The source of the relationship, such as a vocabulary or ontology. Although relationships are usually described in terms of Codes, they actually exist between the Concepts that are linked to the Codes. For example, if an ontology SAB1 shows that code A has relationship r with code B, the associated concepts for A and B will have a relationship with type=r and SAB=SAB1.
           example: ICD10AM
         relationship:
           type: string
@@ -532,57 +521,17 @@ components:
           example: C0006826
         prefterm:
           type: string
-          description: the preferred term for the Concept. Note that the preferred term for a Concept may be different than the preferred term for a Code that links to the Concept.
+          description: The preferred term for the Concept. Note that the preferred term for a Concept may be different than the preferred term for a Code that links to the Concept.
           example: Malignant Neoplasms
-    SemanticStn: # Schema name
-      type: object
-      properties:
-        semantic:
-          type: string
-          example: Entity
-        STN:
-          type: string
-          example: A
-    StyTuiStn: # Schema name
-      type: object
-      properties:
-        sty:
-          type: string
-          example: Organic Chemical
-        tui:
-          type: string
-          example: T109
-        stn:
-          type: string
-          example: A1.4.1.2.1
     TermtypeCode: # Schema name
       type: object
+      description: A Code with a term that matches a specified string
       properties:
         termtype:
           type: string
+          description: Term type--i.e., the relationship between the Code and the Term
           example: LA
         code:
           type: string
-          example: LNC LA14283-8
-    AssayNameRequest: # Schema name CPK MR 2023.
-      type: object
-      description: Request body for assaytype POST request
-      properties:
-        name:
-          anyOf:
-            - type: string
-            - type: array
-              items:
-                type: string
-          description: AssayType name which can be a string or an array of strings
-          example: [ PAS, Image Pyramid ]
-        application_context:
-          type: string
-          default: HUBMAP
-          enum:
-            - HUBMAP
-            - SENNET
-            - hubmap
-            - sennet
-            - HuBMAP
-            - SenNet
+          description: Identifier for the Code ID, in the format _SAB_:_CODE_.
+          example: LNC:LA14283-8

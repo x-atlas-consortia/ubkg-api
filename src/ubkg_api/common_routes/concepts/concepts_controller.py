@@ -114,7 +114,9 @@ def concepts_expand_post():
     result = concepts_expand_post_logic(neo4j_instance, request.get_json())
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concepts with paths to the Concept='query_concept_id' with relationship types in 'rel' filtered by sources in 'sab' up to path depth='depth'")
+        err = get_404_error_string(prompt_string=f"No Concepts in paths starting with the "
+                                                 f"Concept='query_concept_id' with relationship types "
+                                                 f"in 'rel' filtered by sources in 'sab' up to path depth='depth'")
         return make_response(err, 404)
 
     return jsonify(result)
@@ -133,7 +135,9 @@ def concepts_path_post():
 
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concepts with paths to the Concept='query_concept_id' with relationship types in 'rel' filtered by sources in 'sab'")
+        err = get_404_error_string(prompt_string=f"No Concepts with paths that begin with the "
+                                                 f"Concept='query_concept_id' with relationship types "
+                                                 f"in 'rel' filtered by sources in 'sab'")
         return make_response(err, 404)
 
     return jsonify(result)
@@ -151,7 +155,9 @@ def concepts_shortestpaths_post():
     result = concepts_shortestpaths_post_logic(neo4j_instance, request.get_json())
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concepts in shortest paths between the Concepts 'query_concept_id' and 'target_concept_id' with relationship types in 'rel' filtered by sources in 'sab'")
+        err = get_404_error_string(prompt_string=f"No Concepts in shortest paths between the "
+                                                 f"Concepts 'query_concept_id' and 'target_concept_id' "
+                                                 f"with relationship types in 'rel' filtered by sources in 'sab'")
         return make_response(err, 404)
 
     return jsonify(result)
@@ -170,7 +176,9 @@ def concepts_trees_post():
     result = concepts_trees_post_logic(neo4j_instance, request.get_json())
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concepts in spanning tree starting from Concept 'query_concept_id' with relationship types in 'rel' filtered by sources in 'sab' for specified depth")
+        err = get_404_error_string(prompt_string=f"No Concepts in spanning tree starting "
+                                                 f"from Concept 'query_concept_id' with relationship types "
+                                                 f"in 'rel' filtered by sources in 'sab' for specified depth")
         return make_response(err, 404)
 
     return jsonify(result)
