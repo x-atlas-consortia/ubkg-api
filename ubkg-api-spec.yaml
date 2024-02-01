@@ -20,7 +20,7 @@ paths:
         - name: code_id
           in: path
           required: true
-          description: the identifier for a Code node, in format _SAB_:_code_, where _SAB_ is an identifier for the source of the code.
+          description: the identifier for a Code node, in format _SAB_:_code_ (or SAB%3Acode) where _SAB_ is an identifier for the source of the code.
           schema:
             type: string
             example: SNOMEDCT_US:254837009
@@ -58,7 +58,7 @@ paths:
         - name: code_id
           in: path
           required: true
-          description: The identifier for the Code node, in format _SAB_:_CODE_, where _SAB_ is an identifier for the source of the code.
+          description: The identifier for the Code node, in format _SAB_:_CODE_ (or SAB%3Acode), where _SAB_ is an identifier for the source of the code.
           schema:
             type: string
             example: SNOMEDCT_US:254837009
@@ -226,21 +226,39 @@ paths:
           description: No concepts with paths that being with Concept=_query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_
         '5XX':
           description: Unknown error
-  /concepts/shortestpaths:
-    post:
-      operationId: concepts_shortestpaths_post
+  /concepts/{concept_id}/shortestpaths:
+    get:
+      operationId: concepts_shortestpaths_get
       summary: Return the shortest path between two Concepts, using Dykstra's algorithm with default weights, subject to constraints on relationship types (rel) and relationship sources (sab).
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/QconceptTconceptSabRel"
-            example:
-              query_concept_id: C2720507
-              target_concept_id: C1272753
-              sab: [SNOMEDCT_US, HGNC]
-              rel: [isa, part_of]
+      parameters:
+        - name: concept_id
+          in: path
+          required: true
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the starting node of the shortestpath calculation.
+          schema:
+            type: string
+            example: C2720507
+        - name: target_concept_id
+          in: query
+          required: true
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the ending node of the shortestpath calculation.
+          schema:
+            type: string
+            example: C1272753
+        - name: sab
+          in: query
+          required: true
+          description: A filter for one or more sources (SABs) that define relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: SNOMEDCT_US
+        - name: rel
+          in: query
+          required: true
+          description: A filter for one or more relationship types that are involved in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          schema:
+            type: string
+            example: isa
       responses:
         '200':
           description: Returns the ordered set of Concepts involved in the shortest path, subject to constraints for relationship type and source.
@@ -256,30 +274,50 @@ paths:
           description: No shortest path between _query_concept_id_ and _target_concept_id_ with relationship types in _rel_ filtered by sources in _sab_.
         '5XX':
           description: Unknown error
-  /concepts/trees:
-    post:
-      operationId: concepts_trees_post
+  /concepts/{concept_id}/trees:
+    get:
+      operationId: concepts_trees_get
       summary: Return information on the Concepts in the spanning tree that originates from a specified Concept, subject to constraints on relationship type, relationship source, and path depth
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ConceptSabRelDepth"
-            example:
-              query_concept_id: C2720507
-              sab: [SNOMEDCT_US, HGNC]
-              rel: [isa, isa]
-              depth: 2
+      parameters:
+        - name: concept_id
+          in: path
+          required: true
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI)
+          schema:
+            type: string
+            example: C0006142
+        - name: sab
+          in: query
+          required: true
+          description: A filter for one or more sources (SABs) that define relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: SNOMEDCT_US
+        - name: rel
+          in: query
+          required: true
+          description: A filter for one or more relationship types that are involved in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          schema:
+            type: string
+            example: isa
+        - name: depth
+          in: query
+          required: true
+          description: The number of hops which to span. Limited to 2 to prevent timeout.
+          schema:
+            type: string
+            example: 2
       responses:
         '200':
-          description: Return information on Concepts in the spanning tree that originates from the specified Concept, subject to constraints on relationship type, relationship source, and path depth
+          description: Return information on Concepts in the spanning tree that originates from the specified Concept, subject to constraints on relationship type, relationship source, and spanning depth
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/PathItemConceptRelationshipSabPrefterm'
+        '400':
+          description: invalid parameter name; missing required parameter name; invalid type (_depth_ is not numeric); depth greater than 2
         '404':
           description: No Concepts in a spanning tree originating from Concept _query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_ at depth _depth_.
         '5XX':
@@ -312,12 +350,12 @@ paths:
   /terms/{term_id}/codes:
     get:
       operationId: terms_term_id_codes_get
-      summary: Returns a list of Code nodes with terms that exactly match the specified string. Terms can be of differnt types--e.g., preferred terms (PT), synonyms (SY), etc.
+      summary: Returns a list of Code nodes with terms that exactly match the specified string. Terms can be of different types--e.g., preferred terms (PT), synonyms (SY), etc.
       parameters:
         - name: term_id
           in: path
           required: true
-          description: The string to match
+          description: The string to match. Subject to timeout.
           schema:
             type: string
             example: Breast cancer

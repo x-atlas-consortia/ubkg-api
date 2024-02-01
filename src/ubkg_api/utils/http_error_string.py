@@ -56,10 +56,11 @@ def format_request_body():
     return err
 
 
-def get_404_error_string(prompt_string=None):
+def get_404_error_string(prompt_string=None, timeout=None):
     """
     Formats an error string for a 404 response, accounting for optional parameters.
-    :param: prompt_string - optional description of error
+    :param prompt_string: - optional description of error
+    :param timeout: optional timeout for timeboxed endpoints
     :return: string
     """
     if prompt_string is None:
@@ -68,6 +69,10 @@ def get_404_error_string(prompt_string=None):
         err = prompt_string
 
     err = err + format_request_path() + format_request_query_string() + format_request_body()
+
+    if timeout is not None:
+        err = err + f" Note that this endpoint is limited to an execution time of {int(timeout/1000)} " \
+                    f" seconds to prevent timeout."
 
     return err
 

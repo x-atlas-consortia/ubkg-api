@@ -18,10 +18,12 @@ def terms_term_id_codes_get(term_id):
     :rtype: Union[List[TermtypeCode], Tuple[List[TermtypeCode], int], Tuple[List[TermtypeCode], int, Dict[str, str]]
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
+
     result = terms_term_id_codes_get_logic(neo4j_instance, term_id)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string="No Codes with terms that match the 'term_id' string")
+        err = get_404_error_string(prompt_string="No Codes with terms that exactly match the string parameter",
+                                   timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
     return jsonify(result)
@@ -37,7 +39,15 @@ def terms_term_id_concepts_get(term_id):
     :rtype: Union[List[str], Tuple[List[str], int], Tuple[List[str], int, Dict[str, str]]
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
-    return jsonify(terms_term_id_concepts_get_logic(neo4j_instance, term_id))
+
+    result = terms_term_id_concepts_get_logic(neo4j_instance, term_id)
+    if result is None or result == []:
+        # Empty result
+        err = get_404_error_string(prompt_string="No Concepts with preferred terms that match the string parameter",
+                                   timeout=neo4j_instance.timeout)
+        return make_response(err, 404)
+
+    return jsonify(result)
 
 # JAS January 2024 Deprecating
 #@terms_blueprint.route('<term_id>/concepts/terms', methods=['GET'])

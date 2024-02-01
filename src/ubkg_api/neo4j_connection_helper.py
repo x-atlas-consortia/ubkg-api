@@ -1,3 +1,5 @@
+# JAS February 2024 - Added configurable timeout to allow for timeboxed queries.
+
 import logging
 import neo4j
 
@@ -11,12 +13,12 @@ instance = None
 
 class Neo4jConnectionHelper(object):
     @staticmethod
-    def create(server, username, password):
+    def create(server, username, password, timeout):
         if instance is not None:
             raise Exception(
                 "An instance of Neo4jConnectionHelper exists already. Use the Neo4jConnectionHelper.instance() method to retrieve it.")
 
-        return Neo4jConnectionHelper(server, username, password)
+        return Neo4jConnectionHelper(server, username, password, timeout)
 
     @staticmethod
     def instance():
@@ -30,11 +32,13 @@ class Neo4jConnectionHelper(object):
     def is_initialized():
         return instance is not None
 
-    def __init__(self, server, username, password):
+    def __init__(self, server, username, password, timeout):
+
         global instance
         self.driver = neo4j.GraphDatabase.driver(server, auth=(username, password))
         if instance is None:
             instance = self
+        self._timeout = timeout
 
     # https://neo4j.com/docs/api/python-driver/current/api.html
     def close(self):
@@ -59,3 +63,22 @@ class Neo4jConnectionHelper(object):
         logger.info("Neo4j is NOT connected :(")
 
         return False
+
+    @property
+    def timeout(self):
+        """Gets the timeout of this Neo4jConnectionHelper
+
+        :return: The timeout of this Neo4jConnectionHelper.
+        :rtype: int
+        """
+        return self._timeout
+
+    @timeout.setter
+    def timeout(self, timeout):
+        """Sets the timeout of this Neo4jConnectionHelper.
+
+        :param timeout: The timeout of this Neo4jConnectionHelper.
+        :type timeout: int
+        """
+
+        self._timeout = timeout

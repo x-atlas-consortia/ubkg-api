@@ -7,7 +7,7 @@ from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_c
 """
 from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
     concepts_concept_id_definitions_get_logic, concepts_expand_get_logic,\
-    concepts_path_get_logic, concepts_shortestpaths_post_logic, concepts_trees_post_logic
+    concepts_path_get_logic, concepts_shortestpaths_get_logic, concepts_trees_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric
 from utils.http_parameter import parameter_as_list
@@ -86,7 +86,7 @@ def concepts_concept_id_definitions_get(concept_id):
 
 # JAS January 2024 deprecating semantics endpoints.
 # @concepts_blueprint.route('<concept_id>/semantics', methods=['GET'])
-#def concepts_concept_id_semantics_get(concept_id):
+# def concepts_concept_id_semantics_get(concept_id):
 #    """Returns a list of semantic_types {Sty, Tui, Stn} of the concept
 #
 #    :param concept_id: The concept identifier
@@ -96,6 +96,7 @@ def concepts_concept_id_definitions_get(concept_id):
 #    """
 #    neo4j_instance = current_app.neo4jConnectionHelper.instance()
 #    return jsonify(concepts_concept_id_semantics_get_logic(neo4j_instance, concept_id))
+
 
 # JAS January 2024 Converted from POST to GET.
 @concepts_blueprint.route('<concept_id>/expand', methods=['GET'])
@@ -111,12 +112,12 @@ def concepts_expand_get(concept_id):
 
     # Validate parameters.
     # Check for invalid parameter names.
-    err = validate_query_parameter_names(parameter_name_list=['sab','rel','depth'])
+    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel', 'depth'])
     if err != 'ok':
         return make_response(err, 400)
 
     # Check for required parameters.
-    err = validate_required_parameters(required_parameter_list=['sab','rel','depth'])
+    err = validate_required_parameters(required_parameter_list=['sab', 'rel', 'depth'])
     if err != 'ok':
         return make_response(err, 400)
 
@@ -126,14 +127,14 @@ def concepts_expand_get(concept_id):
     if err != 'ok':
         return make_response(err, 400)
 
-    neo4j_instance = current_app.neo4jConnectionHelper.instance()
-
     # Get remaining parameter values from the path or query string.
     query_concept_id = concept_id
     sab = parameter_as_list(param_name='sab')
     rel = parameter_as_list(param_name='rel')
 
-    #result = concepts_expand_post_logic(neo4j_instance, request.get_json())
+    neo4j_instance = current_app.neo4jConnectionHelper.instance()
+
+    # result = concepts_expand_post_logic(neo4j_instance, request.get_json())
     result = concepts_expand_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel, depth=depth)
     if result is None or result == []:
         # Empty result
@@ -172,7 +173,6 @@ def concepts_path_get(concept_id):
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
-    # result = concepts_path_post_logic(neo4j_instance, request.get_json())
     result = concepts_path_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel)
 
     if result is None or result == []:
@@ -185,8 +185,9 @@ def concepts_path_get(concept_id):
     return jsonify(result)
 
 
-@concepts_blueprint.route('shortestpaths', methods=['POST'])
-def concepts_shortestpaths_post():
+# JAS February 2024 Replaced POST with GET
+@concepts_blueprint.route('<concept_id>/shortestpaths', methods=['GET'])
+def concepts_shortestpaths_get(concept_id):
     """Return all paths of the relationship pattern specified within the selected sources
 
     :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm],
@@ -194,7 +195,25 @@ def concepts_shortestpaths_post():
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
-    result = concepts_shortestpaths_post_logic(neo4j_instance, request.get_json())
+    # Validate parameters.
+    # Check for invalid parameter names.
+    err = validate_query_parameter_names(parameter_name_list=['target_concept_id', 'sab', 'rel'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Check for required parameters.
+    err = validate_required_parameters(required_parameter_list=['target_concept_id', 'sab', 'rel'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Get remaining parameter values from the path or query string.
+    query_concept_id = concept_id
+    sab = parameter_as_list(param_name='sab')
+    rel = parameter_as_list(param_name='rel')
+    target_concept_id = request.args.get('target_concept_id')
+
+    result = concepts_shortestpaths_get_logic(neo4j_instance, query_concept_id=query_concept_id,
+                                              target_concept_id=target_concept_id, sab=sab, rel=rel)
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No Concepts in shortest paths between the "
@@ -205,22 +224,52 @@ def concepts_shortestpaths_post():
     return jsonify(result)
 
 
-@concepts_blueprint.route('trees', methods=['POST'])
-def concepts_trees_post():
+# JAS February 2024 Converted POST to GET.
+@concepts_blueprint.route('<concept_id>/trees', methods=['GET'])
+def concepts_trees_get(concept_id):
     """Return nodes in a spanning tree from a specified concept, based on
     the relationship pattern specified within the selected sources, to a specified path depth.
 
     :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm],
      int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
     """
+
+    # Validate parameters.
+    # Check for invalid parameter names.
+    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel', 'depth'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Check for required parameters.
+    err = validate_required_parameters(required_parameter_list=['sab', 'rel', 'depth'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Check that depth is numeric.
+    depth = request.args.get('depth')
+    err = validate_parameter_is_numeric(param_name='depth', param_value=depth)
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # To prevent timeout, limit depth to 2.
+    if int(depth) > 2:
+        err = f'Invalid parameter. A depth of {depth} will likely result in a long-running query that will time out. ' \
+              f'To identify spanning trees of depths greater than 2, work with a local instance of the UBKG.'
+        return make_response(err, 400)
+
+    # Get remaining parameter values from the path or query string.
+    query_concept_id = concept_id
+    sab = parameter_as_list(param_name='sab')
+    rel = parameter_as_list(param_name='rel')
+
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
-    result = concepts_trees_post_logic(neo4j_instance, request.get_json())
+    result = concepts_trees_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel, depth=depth)
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No Concepts in spanning tree starting "
                                                  f"from Concept 'query_concept_id' with relationship types "
-                                                 f"in 'rel' filtered by sources in 'sab' for specified depth")
+                                                 f"in 'rel' filtered by sources in 'sab' for specified depth. ")
         return make_response(err, 404)
 
     return jsonify(result)

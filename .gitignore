@@ -17,3 +17,4 @@ venv/
 **/.pytest_cache
 **/dist
 /tests/*/*.json
+/tests/*/*.out

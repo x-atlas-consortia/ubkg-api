@@ -5,6 +5,9 @@ Refactored:
 2. with new endpoints optimized for a fully-indexed v5 instance
 3. to deprecate endpoints that either use deprecated Cypher or involve information limited to UMLS data (e.g.,
    semantic types and TUIs).
+4. to replace all POST-based functions with GET-based functions.
+5. to allow for timeboxing of queries that may exceed timeout (e.g., term searches)
+
 
 """
 import logging
@@ -36,40 +39,40 @@ logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d
 logger = logging.getLogger(__name__)
 
 
-cypher_tail: str = \
-    " CALL apoc.when(rel = []," \
-    "  'RETURN concept AS related_concept, NULL AS rel_type, NULL AS rel_sab'," \
-    "  'MATCH (concept)-[matched_rel]->(related_concept)" \
-    "   WHERE any(x IN rel WHERE x IN [[Type(matched_rel),matched_rel.SAB],[Type(matched_rel),\"*\"],[\"*\",matched_rel.SAB],[\"*\",\"*\"]])" \
-    "   RETURN related_concept, Type(matched_rel) AS rel_type, matched_rel.SAB AS rel_sab'," \
-    "  {concept:concept,rel:rel})" \
-    " YIELD value" \
-    " WITH matched, value.related_concept AS related_concept, value.rel_type AS rel_type, value.rel_sab AS rel_sab" \
-    " MATCH (code:Code)<-[:CODE]-(related_concept:Concept)-[:PREF_TERM]->(prefterm:Term)" \
-    " WHERE (code.SAB IN $sab OR $sab = [])" \
-    " OPTIONAL MATCH (code:Code)-[code2term]->(term:Term)" \
-    " WHERE (code2term.CUI = related_concept.CUI) AND (Type(code2term) IN $tty OR $tty = [])" \
-    " WITH *" \
-    " CALL apoc.when(term IS NULL," \
-    "  'RETURN \"PREF_TERM\" AS tty, prefterm as term'," \
-    "  'RETURN Type(code2term) AS tty, term'," \
-    "  {term:term,prefterm:prefterm,code2term:code2term})" \
-    " YIELD value" \
-    " WITH *, value.tty AS tty, value.term AS term" \
-    " RETURN DISTINCT matched, rel_type, rel_sab, code.CodeID AS code_id, code.SAB AS code_sab," \
-    "  code.CODE AS code_code, tty, term.name AS term, related_concept.CUI AS concept" \
-    " ORDER BY size(term), code_id, tty DESC, rel_type, rel_sab, concept, matched"
+#cypher_tail: str = \
+#    " CALL apoc.when(rel = []," \
+#    "  'RETURN concept AS related_concept, NULL AS rel_type, NULL AS rel_sab'," \
+#    "  'MATCH (concept)-[matched_rel]->(related_concept)" \
+#    "   WHERE any(x IN rel WHERE x IN [[Type(matched_rel),matched_rel.SAB],[Type(matched_rel),\"*\"],[\"*\",matched_rel.SAB],[\"*\",\"*\"]])" \
+#    "   RETURN related_concept, Type(matched_rel) AS rel_type, matched_rel.SAB AS rel_sab'," \
+#    "  {concept:concept,rel:rel})" \
+#    " YIELD value" \
+#    " WITH matched, value.related_concept AS related_concept, value.rel_type AS rel_type, value.rel_sab AS rel_sab" \
+#    " MATCH (code:Code)<-[:CODE]-(related_concept:Concept)-[:PREF_TERM]->(prefterm:Term)" \
+#    " WHERE (code.SAB IN $sab OR $sab = [])" \
+#    " OPTIONAL MATCH (code:Code)-[code2term]->(term:Term)" \
+#    " WHERE (code2term.CUI = related_concept.CUI) AND (Type(code2term) IN $tty OR $tty = [])" \
+#    " WITH *" \
+#    " CALL apoc.when(term IS NULL," \
+#    "  'RETURN \"PREF_TERM\" AS tty, prefterm as term'," \
+#    "  'RETURN Type(code2term) AS tty, term'," \
+#    "  {term:term,prefterm:prefterm,code2term:code2term})" \
+#    " YIELD value" \
+#    " WITH *, value.tty AS tty, value.term AS term" \
+#    " RETURN DISTINCT matched, rel_type, rel_sab, code.CodeID AS code_id, code.SAB AS code_sab," \
+#    "  code.CODE AS code_code, tty, term.name AS term, related_concept.CUI AS concept" \
+#    " ORDER BY size(term), code_id, tty DESC, rel_type, rel_sab, concept, matched"
 
-cypher_head: str = \
-    "CALL db.index.fulltext.queryNodes(\"Term_name\", '\\\"'+$queryx+'\\\"')" \
-    " YIELD node" \
-    " WITH node AS matched_term" \
-    " MATCH (matched_term)" \
-    " WHERE size(matched_term.name) = size($queryx)" \
-    " WITH matched_term" \
-    " OPTIONAL MATCH (matched_term:Term)<-[relationship]-(:Code)<-[:CODE]-(concept:Concept)" \
-    " WHERE relationship.CUI = concept.CUI" \
-    " OPTIONAL MATCH (matched_term:Term)<-[:PREF_TERM]-(concept:Concept)"
+# cypher_head: str = \
+#    "CALL db.index.fulltext.queryNodes(\"Term_name\", '\\\"'+$queryx+'\\\"')" \
+#    " YIELD node" \
+#    " WITH node AS matched_term" \
+#    " MATCH (matched_term)" \
+#    " WHERE size(matched_term.name) = size($queryx)" \
+#    " WITH matched_term" \
+#    " OPTIONAL MATCH (matched_term:Term)<-[relationship]-(:Code)<-[:CODE]-(concept:Concept)" \
+#    " WHERE relationship.CUI = concept.CUI" \
+#    " OPTIONAL MATCH (matched_term:Term)<-[:PREF_TERM]-(concept:Concept)"
 
 
 def loadquerystring(filename: str) -> str:
@@ -87,6 +90,16 @@ def loadquerystring(filename: str) -> str:
     f.close()
     return query
 
+def timebox_query(query: str, timeout: int=10000) -> str:
+
+    """
+    Limits the execution of a query to a specified timeout.
+    :param query: query string to timebox
+    :param timeout: timeout in ms
+    """
+
+    # Use simple string concatenation.
+    return "CALL apoc.cypher.runTimeboxed('" + query + "',{}," + str(timeout) + ")"
 
 def rel_str_to_array(rels: List[str]) -> List[List]:
     rel_array: List[List] = []
@@ -139,7 +152,6 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     else:
         query = query.replace('$sabfilter',f" AND c.SAB IN {sab}")
 
-    print(query)
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query, code_id=code_id, SAB=sab)
         for record in recds:
@@ -278,22 +290,13 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
         " UNWIND nodes(path) AS con OPTIONAL MATCH (con)-[:PREF_TERM]->(pref:Term)" \
         " RETURN DISTINCT con.CUI as concept, pref.name as prefterm"
 
-    # sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['sab'])
     sabjoin: str = ', '.join("'{0}'".format(s) for s in sab)
     query = query.replace('$sab', sabjoin)
-    # rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['rel'])
     reljoin: str = ', '.join("'{0}'".format(r) for r in rel)
-    # logger.info(f'Converted from array to string... sab: {sab} ; rel: {rel}')
     query = query.replace('$rel', reljoin)
     depthint = int(depth)
-    logger.info(f'query: "{query}"')
+
     with neo4j_instance.driver.session() as session:
-        #recds: neo4j.Result = session.run(query,
-                                          #query_concept_id=concept_sab_rel_depth['query_concept_id'],
-                                          # sab=sab,
-                                          # rel=rel,
-                                          #depth=concept_sab_rel_depth['depth']
-                                          #)
         recds: neo4j.Result = session.run(query,
                                       query_concept_id=query_concept_id,
                                       depth=depthint
@@ -309,7 +312,6 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
 
 # JAS January 2024 Converted from POST to GET
 def concepts_path_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None) -> List[PathItemConceptRelationshipSabPrefterm]:
-    #logger.info(f'concepts_path_post; Request Body: {concept_sab_rel}')
 
     """
     :param neo4j_instance: UBKG connection
@@ -333,21 +335,13 @@ def concepts_path_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel
         " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
         " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
 
-    #sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel['sab'])
     sabjoin: str = ', '.join("'{0}'".format(s) for s in sab)
     query = query.replace('$sab', sabjoin)
 
-    #rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel['rel'])
     reljoin: str = ', '.join("'{0}'".format(r) for r in rel)
     query = query.replace('$rel', reljoin)
 
-    logger.info(f'query: "{query}"')
     with neo4j_instance.driver.session() as session:
-        #recds: neo4j.Result = session.run(query,
-                                          #query_concept_id=concept_sab_rel['query_concept_id'],
-                                          # sab=concept_sab_rel.sab,
-                                          # rel=concept_sab_rel.rel
-                                          #)
         recds: neo4j.Result = session.run(query,
                                           query_concept_id=query_concept_id
                                           )
@@ -362,10 +356,10 @@ def concepts_path_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel
                 pass
     return pathItemConceptRelationshipSabPrefterms
 
+# JAS February 2024 - replaced POST with GET.
+def concepts_shortestpaths_get_logic(neo4j_instance, query_concept_id=None, target_concept_id=None,
+                                     sab=None, rel=None) -> List[PathItemConceptRelationshipSabPrefterm]:
 
-def concepts_shortestpaths_post_logic(neo4j_instance, qconcept_tconcept_sab_rel) \
-        -> List[PathItemConceptRelationshipSabPrefterm]:
-    logger.info(f'concepts_shortestpath_post; Request Body: {qconcept_tconcept_sab_rel}')
     pathItemConceptRelationshipSabPrefterms: [PathItemConceptRelationshipSabPrefterm] = []
 
     # JAS January 2024 - apoc.algo.dijkstraWithDefaultWeight was deprecated in version 5. Replaced the function with
@@ -385,18 +379,17 @@ def concepts_shortestpaths_post_logic(neo4j_instance, qconcept_tconcept_sab_rel)
         " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
         " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
 
-    sab: str = ', '.join("'{0}'".format(s) for s in qconcept_tconcept_sab_rel['sab'])
-    query = query.replace('$sab', sab)
-    rel: str = ', '.join("'{0}'".format(s) for s in qconcept_tconcept_sab_rel['rel'])
-    query = query.replace('$rel', rel)
-    logger.info(f'query: "{query}"')
+    sabjoin: str = ', '.join("'{0}'".format(s) for s in sab)
+    query = query.replace('$sab', sabjoin)
+
+    reljoin: str = ', '.join("'{0}'".format(r) for r in rel)
+    query = query.replace('$rel', reljoin)
+
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query,
-                                          query_concept_id=qconcept_tconcept_sab_rel['query_concept_id'],
-                                          # sab=concept_sab_rel.sab,
-                                          # rel=concept_sab_rel.rel,
-                                          target_concept_id=qconcept_tconcept_sab_rel['target_concept_id']
-                                          )
+                                      query_concept_id=query_concept_id,
+                                      target_concept_id=target_concept_id
+                                      )
         for record in recds:
             try:
                 pathItemConceptRelationshipSabPrefterm: PathItemConceptRelationshipSabPrefterm = \
@@ -409,9 +402,17 @@ def concepts_shortestpaths_post_logic(neo4j_instance, qconcept_tconcept_sab_rel)
     return pathItemConceptRelationshipSabPrefterms
 
 
-def concepts_trees_post_logic(neo4j_instance, concept_sab_rel_depth: ConceptSabRelDepth)\
+# JAS February 2024 Replaced POST with GET.
+def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, depth=None)\
         -> List[PathItemConceptRelationshipSabPrefterm]:
-    logger.info(f'concepts_trees_post; Request Body: {concept_sab_rel_depth}')
+    """
+        :param neo4j_instance: UBKG connection
+        :param query_concept_id: CUI of concept from which to expand paths
+        :param sab: list of SABs by which to filter relationship types in the paths.
+        :param rel: list of relationship types by which to filter relationship types in the paths.
+        :param dept: maximum number of hops in the set of paths
+    """
+
     pathItemConceptRelationshipSabPrefterms: [PathItemConceptRelationshipSabPrefterm] = []
     query: str = \
         "MATCH (c:Concept {CUI: $query_concept_id})" \
@@ -426,17 +427,16 @@ def concepts_trees_post_logic(neo4j_instance, concept_sab_rel_depth: ConceptSabR
         " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
         " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
 
-    sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['sab'])
-    query = query.replace('$sab', sab)
-    rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['rel'])
-    query = query.replace('$rel', rel)
-    logger.info(f'query: "{query}"')
+    sabjoin: str = ', '.join("'{0}'".format(s) for s in sab)
+    query = query.replace('$sab', sabjoin)
+
+    reljoin: str = ', '.join("'{0}'".format(r) for r in rel)
+    query = query.replace('$rel', reljoin)
+
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query,
-                                          query_concept_id=concept_sab_rel_depth['query_concept_id'],
-                                          # sab=concept_sab_rel_depth.sab,
-                                          # rel=concept_sab_rel_depth.rel,
-                                          depth=concept_sab_rel_depth['depth']
+                                          query_concept_id=query_concept_id,
+                                          depth=depth
                                           )
         for record in recds:
             try:
@@ -478,17 +478,25 @@ def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[Termtype
     """
     Returns information on Codes with terms that exactly match the specified term_id string.
     """
+
     query: str = \
         'WITH [$term_id] AS query' \
         ' MATCH (a:Term)<-[b]-(c:Code)' \
         ' WHERE a.name IN query' \
         ' RETURN DISTINCT a.name AS Term, Type(b) AS TermType, c.CodeID AS Code' \
         ' ORDER BY Term, TermType, Code'
+
+    # JAS February 2024
+    # To prevent timeout errors, limit the query execution time to a value specified in the app.cfg.
+    query = query.replace('$term_id', f'"{term_id}"')
+    query = timebox_query(query,timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query, term_id=term_id)
+        recds: neo4j.Result = session.run(query)
         for record in recds:
+            # The timeboxed query returns query results as values of a dict instead of as a dict.
+            val = record.get('value')
             try:
-                termtypeCode: TermtypeCode = TermtypeCode(record.get('TermType'), record.get('Code')).serialize()
+                termtypeCode: TermtypeCode = TermtypeCode(val.get('TermType'), val.get('Code')).serialize()
                 termtypeCodes.append(termtypeCode)
             except KeyError:
                 pass
@@ -498,19 +506,27 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     concepts: [str] = []
     query: str = \
         'WITH [$term_id] AS query' \
-        ' OPTIONAL MATCH (a:Term)<-[b]-(c:Code)<-[:CODE]-(d:Concept)' \
+        ' MATCH (a:Term)<-[b]-(c:Code)<-[:CODE]-(d:Concept)' \
         ' WHERE a.name IN query AND b.CUI = d.CUI' \
         ' OPTIONAL MATCH (a:Term)<--(d:Concept) WHERE a.name IN query' \
         ' RETURN DISTINCT a.name AS Term, d.CUI AS Concept' \
         ' ORDER BY Concept ASC'
+
+    # JAS February 2024
+    # To prevent timeout errors, limit the query execution time to a value specified in the app.cfg.
+    query = query.replace('$term_id', f'"{term_id}"')
+    query = timebox_query(query, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query, term_id=term_id)
+        recds: neo4j.Result = session.run(query)
         for record in recds:
+            # The timeboxed query returns query results as values of a dict instead of as a dict.
+            val = record.get('value')
             try:
-                concept: str = record.get('Concept')
+                concept: str = val.get('Concept')
                 concepts.append(concept)
             except KeyError:
                 pass
+
     return concepts
 
 # JAS January 2024
