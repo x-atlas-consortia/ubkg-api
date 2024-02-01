@@ -398,27 +398,6 @@ paths:
           description: No Concepts with terms matching the specified string.
         '5XX':
           description: Unknown error
-  /terms/{term_id}/concepts/terms:
-    get:
-      operationId: terms_term_id_concepts_terms_get
-      summary: Returns an expanded list of concept(s) and preferred term(s) {Concept, Term} from an exact text match
-      parameters:
-        - name: term_id
-          in: path
-          required: true
-          description: The term identifier
-          schema:
-            type: string
-            example: Breast cancer
-      responses:
-        '200':
-          description: A JSON array of {Concept, Term} dictionaries
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ConceptTerm'
 components:
   schemas:
     CodesCodesObj: # Schema name
@@ -449,50 +428,6 @@ components:
           type: string
           description: Preferred term for the Concept node.
           example: Malignant neoplasm of breast
-    ConceptSabRel:    # Schema name
-      type: object
-      description: Request body for POST endpoints such as concepts/{concept_id)/paths
-      properties:
-        query_concept_id:
-          type: string
-          description: Concept Unique Identifier (CUI) for the Concept node
-          example: C2720507
-        sab:
-          type: array
-          description: array of identifiers for vocabularies or ontology sources to which to limit Code nodes in the response.
-          items:
-            type: string
-          example: ["SNOMEDCT_US", "HGNC"]
-        rel:
-          type: array
-          description: array of relationship types to which to limit paths in the response.
-          items:
-            type: string
-          example: ["isa"]
-    ConceptSabRelDepth:    # Schema name
-      type: object
-      description: Request body for POST endpoints such as concepts/expand and concepts/paths
-      properties:
-        query_concept_id:
-          type: string
-          description: Concept Unique Identifier (CUI) for a Concept node in the UBKG
-          example: C2720507
-        sab:
-          type: array
-          description: array of identifiers for vocabularies or ontology sources to which to limit Code nodes in the response.
-          items:
-            type: string
-          example: ["SNOMEDCT_US", "HGNC"]
-        rel:
-          type: array
-          description: array of relationship types to which to limit paths in the response.
-          items:
-            type: string
-          example: ["isa"]
-        depth:
-          type: integer
-          description: depth of path--i.e., the limit to the number of "hops" to identify between the concept specified by _query_concept_id_ and other concepts. For example, a depth of 2 means to only extend a path search out to 2 hops away from _query_concept_id_.
-          example: 2
     ConceptPrefterm: # Schema name
       type: object
       properties:
@@ -502,17 +437,6 @@ components:
         prefterm:
           type: string
           example: Malignant Neoplasms
-    ConceptTerm: # Schema name
-      type: object
-      description: A Concept with a preferred term that matches a string
-      properties:
-        concept:
-          type: string
-          description: the identifier for the concept (Concept Unique Identifier)
-          example: C0006826
-        term:
-          type: string
-          example: LNC:LA14283-8
     PathItemConceptRelationshipSabPrefterm: # Schema name
       type: object
       description: Information on a Concept that is part of a path--i.e., a directed set of relationships starting from a specified Concept.
@@ -539,30 +463,6 @@ components:
           type: string
           description: preferred term for the Concept.
           example: Malignant Neoplasms
-    QconceptTconceptSabRel:    # Schema name
-      type: object
-      description: Request body for the /concepts/shortestpath endpoint.
-      properties:
-        query_concept_id:
-          type: string
-          description: Identifier (Concept Unique Identifier, or CUI) for the Concept at the start of the shortest path.
-          example: C2720507
-        target_concept_id:
-          type: string
-          description: Identifier (Concept Unique Identifier, or CUI) for the Concept at the end of the shortest path.
-          example: C1272753
-        sab:
-          type: array
-          description: Array of source vocabularies (SABs) to which to limit the relationships in the shortest path.
-          items:
-            type: string
-          example: ["SNOMEDCT_US", "HGNC"]
-        rel:
-          type: array
-          description: Array of relationship types to which to limit the relationships in the shortest path.
-          items:
-            type: string
-          example: ["isa", "part_of"]
     SabDefinition: # Schema name
       type: object
       description: A Definition associated with a Concept.
