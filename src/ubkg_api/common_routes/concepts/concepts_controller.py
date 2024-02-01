@@ -1,34 +1,32 @@
 from flask import Blueprint, jsonify, current_app, request, make_response
-# JAS January 2024 Deprecating semantic and tui routes
+# JAS January 2024 Deprecating semantic and tui routes; converting POST methods to GET.
 """
 from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
     concepts_concept_id_definitions_get_logic, concepts_concept_id_semantics_get_logic, concepts_expand_post_logic,\
     concepts_path_post_logic, concepts_shortestpaths_post_logic, concepts_trees_post_logic
 """
 from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
-    concepts_concept_id_definitions_get_logic, concepts_expand_post_logic,\
-    concepts_path_post_logic, concepts_shortestpaths_post_logic, concepts_trees_post_logic
+    concepts_concept_id_definitions_get_logic, concepts_expand_get_logic,\
+    concepts_path_get_logic, concepts_shortestpaths_post_logic, concepts_trees_post_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
-    validate_parameter_value_in_enum
+    validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric
 from utils.http_parameter import parameter_as_list
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
 
 
 @concepts_blueprint.route('<concept_id>/codes', methods=['GET'])
-def concepts_concept_id_codes_get(concept_id, sab=[]):
+def concepts_concept_id_codes_get(concept_id):
     """Returns a distinct list of code_id(s) that code the concept
 
     :param concept_id: The concept identifier
     :type concept_id: str
-    :param sab: One or more sources (SABs) to return
-    :type sab: List[str]
 
     :rtype: Union[List[str], Tuple[List[str], int], Tuple[List[str], int, Dict[str, str]]
     """
 
     # Validate sab parameter.
-    err = validate_query_parameter_names(['sab'])
+    err = validate_query_parameter_names(parameter_name_list=['sab'])
     if err != 'ok':
         return make_response(err, 400)
 
@@ -86,22 +84,23 @@ def concepts_concept_id_definitions_get(concept_id):
 
     return jsonify(result)
 
+# JAS January 2024 deprecating semantics endpoints.
+# @concepts_blueprint.route('<concept_id>/semantics', methods=['GET'])
+#def concepts_concept_id_semantics_get(concept_id):
+#    """Returns a list of semantic_types {Sty, Tui, Stn} of the concept
+#
+#    :param concept_id: The concept identifier
+#    :type concept_id: str
+#
+#    :rtype: Union[List[StyTuiStn], Tuple[List[StyTuiStn], int], Tuple[List[StyTuiStn], int, Dict[str, str]]
+#    """
+#    neo4j_instance = current_app.neo4jConnectionHelper.instance()
+#    return jsonify(concepts_concept_id_semantics_get_logic(neo4j_instance, concept_id))
 
-@concepts_blueprint.route('<concept_id>/semantics', methods=['GET'])
-def concepts_concept_id_semantics_get(concept_id):
-    """Returns a list of semantic_types {Sty, Tui, Stn} of the concept
+# JAS January 2024 Converted from POST to GET.
+@concepts_blueprint.route('<concept_id>/expand', methods=['GET'])
+def concepts_expand_get(concept_id):
 
-    :param concept_id: The concept identifier
-    :type concept_id: str
-
-    :rtype: Union[List[StyTuiStn], Tuple[List[StyTuiStn], int], Tuple[List[StyTuiStn], int, Dict[str, str]]
-    """
-    neo4j_instance = current_app.neo4jConnectionHelper.instance()
-    return jsonify(concepts_concept_id_semantics_get_logic(neo4j_instance, concept_id))
-
-
-@concepts_blueprint.route('expand', methods=['POST'])
-def concepts_expand_post():
     """Returns a unique list of concepts (Concept, Preferred Term) on all paths including starting concept
     (query_concept_id) restricted by list of relationship types (rel), list of relationship sources (sab),
      and depth of travel.
@@ -109,9 +108,33 @@ def concepts_expand_post():
     :rtype: Union[List[ConceptPrefterm], Tuple[List[ConceptPrefterm], int], Tuple[List[ConceptPrefterm],
      int, Dict[str, str]]
     """
+
+    # Validate parameters.
+    # Check for invalid parameter names.
+    err = validate_query_parameter_names(parameter_name_list=['sab','rel','depth'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Check for required parameters.
+    err = validate_required_parameters(required_parameter_list=['sab','rel','depth'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Check that depth is numeric.
+    depth = request.args.get('depth')
+    err = validate_parameter_is_numeric(param_name='depth', param_value=depth)
+    if err != 'ok':
+        return make_response(err, 400)
+
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
-    result = concepts_expand_post_logic(neo4j_instance, request.get_json())
+    # Get remaining parameter values from the path or query string.
+    query_concept_id = concept_id
+    sab = parameter_as_list(param_name='sab')
+    rel = parameter_as_list(param_name='rel')
+
+    #result = concepts_expand_post_logic(neo4j_instance, request.get_json())
+    result = concepts_expand_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel, depth=depth)
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No Concepts in paths starting with the "
@@ -122,20 +145,39 @@ def concepts_expand_post():
     return jsonify(result)
 
 
-@concepts_blueprint.route('paths', methods=['POST'])
-def concepts_path_post():
+# JAS January 2024 Replaced POST with GET
+@concepts_blueprint.route('<concept_id>/paths', methods=['GET'])
+def concepts_path_get(concept_id):
     """Return all paths of the relationship pattern specified within the selected sources
 
     :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm],
      int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
     """
+
+    # Validate parameters.
+    # Check for invalid parameter names.
+    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Check for required parameters.
+    err = validate_required_parameters(required_parameter_list=['sab', 'rel'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Get remaining parameter values from the path or query string.
+    query_concept_id = concept_id
+    sab = parameter_as_list(param_name='sab')
+    rel = parameter_as_list(param_name='rel')
+
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
-    result = concepts_path_post_logic(neo4j_instance, request.get_json())
+    # result = concepts_path_post_logic(neo4j_instance, request.get_json())
+    result = concepts_path_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel)
 
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concepts with paths that begin with the "
+        err = get_404_error_string(prompt_string=f"No Concepts in paths that begin with the "
                                                  f"Concept='query_concept_id' with relationship types "
                                                  f"in 'rel' filtered by sources in 'sab'")
         return make_response(err, 404)

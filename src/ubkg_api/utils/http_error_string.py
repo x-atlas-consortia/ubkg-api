@@ -3,6 +3,7 @@
 
 from flask import request
 
+
 def format_request_path():
     """
     Formats the request path for an error sgring.
@@ -21,6 +22,7 @@ def format_request_path():
         err = err + f" for '{pathsplit[1]}'"
 
     return err + '. '
+
 
 def format_request_query_string():
     """
@@ -42,6 +44,7 @@ def format_request_query_string():
 
     return err
 
+
 def format_request_body():
     err = ''
 
@@ -51,6 +54,7 @@ def format_request_body():
         err = f' Request body: {reqjson}'
 
     return err
+
 
 def get_404_error_string(prompt_string=None):
     """
@@ -66,6 +70,7 @@ def get_404_error_string(prompt_string=None):
     err = err + format_request_path() + format_request_query_string() + format_request_body()
 
     return err
+
 
 def get_number_agreement(list_items=None):
     """
@@ -87,11 +92,11 @@ def list_as_single_quoted_string(delim: str = ';', list_elements=None):
     return f'{delim} '.join(f"'{x}'" for x in list_elements)
 
 
-def validate_query_parameter_names(parameter_name_list=None):
+def validate_query_parameter_names(parameter_name_list=None) -> str:
     """
-    Validates query parameter names in the querystring. Prepares the content of a 404 message if the
+    Validates query parameter name in the querystring. Prepares the content of a 400 message if the
     querystring includes an unexpected parameter.
-    :param parameter_name_list:
+    :param parameter_name_list: list of parameter names
     :return:
     - "ok"
     - error string for a 400 error
@@ -100,8 +105,31 @@ def validate_query_parameter_names(parameter_name_list=None):
     for req in request.args:
         if req not in parameter_name_list:
             namelist = list_as_single_quoted_string(list_elements=parameter_name_list)
-            prompt = get_number_agreement(parameter_name_list)
+            prompt = get_number_agreement(list_items=parameter_name_list)
             return f"Invalid query parameter: '{req}'. The possible parameter name{prompt}: {namelist}. " \
+                   f"Refer to the SmartAPI documentation for this endpoint for more information."
+
+    return "ok"
+
+
+def validate_required_parameters(required_parameter_list=None) -> str:
+    """
+    Validates that all required parameters have been specified in the query string. Prepares the content of a
+    400 message unless all required parameters are present.
+
+    :param required_parameter_list: list of names of required parameters.
+
+    :return:
+    - "ok"
+    - error string for a 400 error
+
+    """
+
+    for param in required_parameter_list:
+        if param not in request.args:
+            namelist = list_as_single_quoted_string(list_elements=required_parameter_list)
+            prompt = get_number_agreement(list_items=required_parameter_list)
+            return f"Missing query parameter: '{param}'. The required parameter{prompt}: {namelist}. " \
                    f"Refer to the SmartAPI documentation for this endpoint for more information."
 
     return "ok"
@@ -129,5 +157,20 @@ def validate_parameter_value_in_enum(param_name=None, param_value=None, enum_lis
         prompt = get_number_agreement(enum_list)
         return f"Invalid value for parameter: '{param_name}'. The possible parameter value{prompt}: {namelist}. " \
                f"Refer to the SmartAPI documentation for this endpoint for more information."
+
+    return "ok"
+
+def validate_parameter_is_numeric(param_name=None, param_value: str='') -> str:
+    """
+    Verifies that a request parameter's value is numeric
+    :param param_name: name of the parameter
+    :param param_value: value of the parameter
+    :return:
+    --"ok"
+    --error string suitable for a 400 message
+    """
+
+    if not param_value.isnumeric():
+        return f"Invalid value ({param_value}) for parameter '{param_name}'. Values for the parameter should be numeric."
 
     return "ok"

@@ -124,6 +124,9 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     """
     codesCodesObjs: List[CodesCodesObj] = []
 
+    # JAS January 2024.
+    # Fixed issue with SAB filtering.
+
     # Load Cypher query from file.
     query: str = loadquerystring('codes_code_id_codes.cypher')
 
@@ -136,6 +139,7 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     else:
         query = query.replace('$sabfilter',f" AND c.SAB IN {sab}")
 
+    print(query)
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query, code_id=code_id, SAB=sab)
         for record in recds:
@@ -254,10 +258,18 @@ def concepts_concept_id_semantics_get_logic(neo4j_instance, concept_id) -> List[
                 pass
     return styTuiStns
 """
-
-def concepts_expand_post_logic(neo4j_instance, concept_sab_rel_depth) -> List[ConceptPrefterm]:
-    logger.info(f'concepts_expand_post; Request Body: {concept_sab_rel_depth}')
+# JAS January 2024 - replaced POST with GET.
+def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, depth=None) \
+        -> List[ConceptPrefterm]:
+    """
+    :param neo4j_instance: UBKG connection
+    :param query_concept_id: CUI of concept from which to expand paths
+    :param sab: list of SABs by which to filter relationship types in the paths.
+    :param rel: list of relationship types by which to filter relationship types in the paths.
+    :param dept: maximum number of hops in the set of paths
+    """
     conceptPrefterms: [ConceptPrefterm] = []
+
     query: str = \
         "MATCH (c:Concept {CUI: $query_concept_id})" \
         " CALL apoc.path.expand(c, apoc.text.join([x IN [$rel] | '<'+x], '|'), 'Concept', 1, $depth)" \
@@ -266,19 +278,26 @@ def concepts_expand_post_logic(neo4j_instance, concept_sab_rel_depth) -> List[Co
         " UNWIND nodes(path) AS con OPTIONAL MATCH (con)-[:PREF_TERM]->(pref:Term)" \
         " RETURN DISTINCT con.CUI as concept, pref.name as prefterm"
 
-    sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['sab'])
-    query = query.replace('$sab', sab)
-    rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['rel'])
+    # sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['sab'])
+    sabjoin: str = ', '.join("'{0}'".format(s) for s in sab)
+    query = query.replace('$sab', sabjoin)
+    # rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel_depth['rel'])
+    reljoin: str = ', '.join("'{0}'".format(r) for r in rel)
     # logger.info(f'Converted from array to string... sab: {sab} ; rel: {rel}')
-    query = query.replace('$rel', rel)
+    query = query.replace('$rel', reljoin)
+    depthint = int(depth)
     logger.info(f'query: "{query}"')
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query,
-                                          query_concept_id=concept_sab_rel_depth['query_concept_id'],
+        #recds: neo4j.Result = session.run(query,
+                                          #query_concept_id=concept_sab_rel_depth['query_concept_id'],
                                           # sab=sab,
                                           # rel=rel,
-                                          depth=concept_sab_rel_depth['depth']
-                                          )
+                                          #depth=concept_sab_rel_depth['depth']
+                                          #)
+        recds: neo4j.Result = session.run(query,
+                                      query_concept_id=query_concept_id,
+                                      depth=depthint
+                                      )
         for record in recds:
             try:
                 conceptPrefterm: ConceptPrefterm = \
@@ -288,9 +307,18 @@ def concepts_expand_post_logic(neo4j_instance, concept_sab_rel_depth) -> List[Co
                 pass
     return conceptPrefterms
 
+# JAS January 2024 Converted from POST to GET
+def concepts_path_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None) -> List[PathItemConceptRelationshipSabPrefterm]:
+    #logger.info(f'concepts_path_post; Request Body: {concept_sab_rel}')
 
-def concepts_path_post_logic(neo4j_instance, concept_sab_rel) -> List[PathItemConceptRelationshipSabPrefterm]:
-    logger.info(f'concepts_path_post; Request Body: {concept_sab_rel}')
+    """
+    :param neo4j_instance: UBKG connection
+    :param query_concept_id: CUI of concept from which to expand paths
+    :param sab: list of SABs by which to filter relationship types in the paths.
+    :param rel: list of relationship types by which to filter relationship types in the paths.
+    :param dept: maximum number of hops in the set of paths
+    """
+
     pathItemConceptRelationshipSabPrefterms: [PathItemConceptRelationshipSabPrefterm] = []
     query: str = \
         "MATCH (c:Concept {CUI: $query_concept_id})" \
@@ -305,16 +333,23 @@ def concepts_path_post_logic(neo4j_instance, concept_sab_rel) -> List[PathItemCo
         " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
         " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
 
-    sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel['sab'])
-    query = query.replace('$sab', sab)
-    rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel['rel'])
-    query = query.replace('$rel', rel)
+    #sab: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel['sab'])
+    sabjoin: str = ', '.join("'{0}'".format(s) for s in sab)
+    query = query.replace('$sab', sabjoin)
+
+    #rel: str = ', '.join("'{0}'".format(s) for s in concept_sab_rel['rel'])
+    reljoin: str = ', '.join("'{0}'".format(r) for r in rel)
+    query = query.replace('$rel', reljoin)
+
     logger.info(f'query: "{query}"')
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query,
-                                          query_concept_id=concept_sab_rel['query_concept_id'],
+        #recds: neo4j.Result = session.run(query,
+                                          #query_concept_id=concept_sab_rel['query_concept_id'],
                                           # sab=concept_sab_rel.sab,
                                           # rel=concept_sab_rel.rel
+                                          #)
+        recds: neo4j.Result = session.run(query,
+                                          query_concept_id=query_concept_id
                                           )
         for record in recds:
             try:

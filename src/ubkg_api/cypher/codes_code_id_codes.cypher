@@ -19,7 +19,7 @@ CALL
 // The separate OPTIONAL MATCH forces the response to include the original code that was specified.
 
 WITH Code1, Concept
-OPTIONAL MATCH (b:Concept)-[:CODE]->(c:Code)
+MATCH (b:Concept)-[:CODE]->(c:Code)
 WHERE b.CUI=Concept
 $sabfilter
 RETURN Concept, c.CodeID AS Code2, c.SAB AS Sab2 ORDER BY Code1, Concept ASC, Code2, Sab2

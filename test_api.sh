@@ -10,56 +10,138 @@ UBKG_URL_LOCAL=http://127.0.0.1:5002
 UBKG_URL=$UBKG_URL_LOCAL
 echo "Using UBKG at: ${UBKG_URL}"
 
-echo "codes/<code_id>/codes GET"
+echo "TESTS FOR: codes/<code_id/codes GET"
+echo "1. codes/<code_id>/codes GET with invalid parameter; should return custom 400"
 curl --request GET \
- --url "${UBKG_URL}/codes/SNOMEDCT_US%20254837009/codes?application_context=HUBMAP" \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3C254837009/codes?test=test" \
+ --header "Accept: application/json"
+
+echo "2. codes/<code_id>/codes GET with non-existent sab; should return custom 404"
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3C254837009/codes?sab=999" \
  --header "Accept: application/json"
 echo
 
-echo "codes/<code_id>/concepts GET"
+echo "3. codes/<code_id>/codes GET with non-existent code; should return custom 404"
 curl --request GET \
- --url "${UBKG_URL}/codes/SNOMEDCT_US%20254837009/concepts?application_context=HUBMAP" \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3C254837009X/codes" \
  --header "Accept: application/json"
 echo
 
-echo "concepts/<concept_id>/codes GET"
+echo "4. codes/<code_id>/codes GET with sab as comma-delimited list of existing SABs; should return 200"
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3C254837009/codes?sab=CHV,DOID" \
+ --header "Accept: application/json"
+echo
+
+echo "5. codes/<code_id>/codes GET with individual sabs; should return 200"
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3C254837009/codes?sab=CHV&sab=DOID" \
+ --header "Accept: application/json"
+echo
+
+echo "TESTS FOR: codes/<code_id>/concepts"
+echo "1. codes/<code_id/concepts GET with invalid code; should return custom 404"
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%20254837009X/concepts" \
+ --header "Accept: application/json"
+echo
+
+echo "2. codes/<code_id/concepts GET with valid code; should return 200"
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%20254837009/concepts" \
+ --header "Accept: application/json"
+echo
+
+echo "TESTS FOR: concepts/<concept_id>/codes"
+echo "1. concepts/<concept_id>/codes GET with invalid parameter; should return custom 400"
 curl --request GET \
  --url "${UBKG_URL}/concepts/C0678222/codes?application_context=HUBMAP" \
  --header "Accept: application/json"
 echo
-
-echo "concepts/<concept_id>/concepts GET"
+echo "2. concepts/<concept_id>/codes GET with invalid concept; should return custom 404"
 curl --request GET \
- --url "${UBKG_URL}/concepts/C0678222/concepts?application_context=HUBMAP" \
+ --url "${UBKG_URL}/concepts/C0678222x/codes" \
+ --header "Accept: application/json"
+echo
+echo "3. concepts/<concept_id>/codes GET with valid concept; should return 200"
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0678222/codes" \
  --header "Accept: application/json"
 echo
 
-echo "concepts/<concept_id>/definitions GET"
+echo "TESTS FOR: concepts/<concept_id>/concepts GET"
+echo "1. concepts/<concept_id>/concepts GET with invalid concept; should return custom 404"
 curl --request GET \
- --url "${UBKG_URL}/concepts/C0678222/definitions?application_context=HUBMAP" \
+ --url "${UBKG_URL}/concepts/C0678222X/concepts" \
+ --header "Accept: application/json"
+echo
+echo "2. concepts/<concept_id>/concepts GET with valid concept; should return 200"
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0678222/concepts" \
  --header "Accept: application/json"
 echo
 
-echo "concepts/<concept_id>/semantics GET"
+echo "TESTS FOR:  concepts/<concept_id>/definitions"
+echo "1. concepts/<concept_id>/definitions GET with invalid concept; should return custom 404"
 curl --request GET \
- --url "${UBKG_URL}/concepts/C0678222/semantics?application_context=HUBMAP" \
+ --url "${UBKG_URL}/concepts/C0678222x/definitions" \
+ --header "Accept: application/json"
+echo
+echo "2. concepts/<concept_id>/definitions GET with valid concept; should return 200"
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0678222/definitions" \
  --header "Accept: application/json"
 echo
 
-echo "concepts/expand POST..."
-curl --request POST \
- --url "${UBKG_URL}/concepts/expand" \
- --header "Content-Type: application/json" \
- --data '{"query_concept_id": "C2720507", "sab": ["SNOMEDCT_US", "HGNC"], "rel": ["isa", "isa"], "depth": 2}'
+echo "TESTS FOR: concepts/<concept_id>/expand GET"
+echo "1. concepts/<concept_id>/expand GET with missing required parameters; should return custom 400"
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/expand" \
+ --header "Accept: application/json"
 echo
 
-echo "concepts/paths POST..."
-curl --request POST \
- --url "${UBKG_URL}/concepts/paths" \
- --header "Content-Type: application/json" \
- --data '{"query_concept_id": "C2720507", "sab": ["SNOMEDCT_US", "HGNC"], "rel": ["isa", "isa"]}'
+echo "2. concepts/<concept_id>/expand GET with invalid parameter name; should return custom 400"
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/expand?sab=SNOMEDCT_US&rel=isa&depth2=2" \
+ --header "Accept: application/json"
 echo
 
+echo "3. concepts/<concept_id>/expand GET with invalid concept id; should return custom 404"
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507Z/expand?sab=SNOMEDCT_US&rel=isa&depth=2" \
+ --header "Accept: application/json"
+echo
+echo "4. concepts/<concept_id>/expand GET with valid parameters; should return 200"
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/expand?sab=SNOMEDCT_US&rel=isa&depth=2" \
+ --header "Accept: application/json"
+echo
+
+echo "TESTS FOR: concepts/<concept_id>/paths GET "
+echo "1. concepts/paths GET with missing parameters; should return custom 400"
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths" \
+ --header "Accept: application/json"
+echo
+
+echo "2. concepts/paths GET with invalid parameter name; should return custom 400"
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths?sab=SNOMEDCT_US&rel2=isa" \
+ --header "Accept: application/json"
+echo
+echo "3. concepts/paths GET with invalid concept_id; should return custom 404"
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507z/paths?sab=SNOMEDCT_US&rel=isa" \
+ --header "Accept: application/json"
+echo
+echo "4. concepts/paths GET with valid parameters; should return 200"
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths?sab=SNOMEDCT_US&rel=isa" \
+ --header "Accept: application/json"
+echo
+
+echo "TESTS FOR: concepts/<concept_id>/shortestpaths POST"
 echo "concepts/shortestpaths POST..."
 curl --request POST \
  --url "${UBKG_URL}/concepts/shortestpaths" \

@@ -139,21 +139,39 @@ paths:
           description: no Concepts that have relationships with the specified Concept
         '5XX':
           description: Unknown error
-  /concepts/expand:
-    post:
-      operationId: concepts_expand_post
+  /concepts/{concept_id}/expand:
+    get:
+      operationId: concepts_expand_get
       summary: Returns a unique list of Concepts nodes (Concept, Preferred Term) in all paths starting with the specified Concept, subject to constraints on relationship types (rel), relationship sources (sab), and depth of travel. Answers the question, "What are the concepts that are within the specified number of hops (depth) away from a particular concept (query_concept_id), where the hops belong to a set of relationship types from a set of sources?""
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ConceptSabRelDepth"
-            example:
-              query_concept_id: C2720507
-              sab: [SNOMEDCT_US]
-              rel: [isa]
-              depth: 2
+      parameters:
+        - name: concept_id
+          in: path
+          required: true
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI)
+          schema:
+            type: string
+            example: C0006142
+        - name: sab
+          in: query
+          required: true
+          description: A filter for one or more sources (SABs) that define relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: SNOMEDCT_US
+        - name: rel
+          in: query
+          required: true
+          description: A filter for one or more relationship types that are involved in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          schema:
+            type: string
+            example: isa
+        - name: depth
+          in: query
+          required: true
+          description: the maximum number of hops in the set of expanded paths
+          schema:
+            type: string
+            example: 2
       responses:
         '200':
           description: Return the Concepts in all paths starting with the specified Concept, subject to constraints
@@ -163,24 +181,38 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ConceptPrefterm'
+        '400':
+          description: invalid parameter name; missing required parameter name; invalid type (_depth_ is not numeric)
         '404':
           description: No Concepts with paths starting with the Concept=_query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_ up to path depth=_depth_
         '5XX':
           description: Unknown error
-  /concepts/paths:
-    post:
-      operationId: concepts_path_post
-      summary: Returns information on the Concepts that are involved in paths that begin with the specified Concept, subject to constraints on relationship types (rel) and relationship sources (sab).
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ConceptSabRel"
-            example:
-              query_concept_id: C2720507
-              sab: [SNOMEDCT_US, HGNC]
-              rel: [isa]
+  /concepts/{concept_id}/paths:
+    get:
+      operationId: concepts_path_get
+      summary: Returns information on the Concepts that are in paths that begin with the specified Concept, subject to constraints on relationship types (rel) and relationship sources (sab).
+      parameters:
+        - name: concept_id
+          in: path
+          required: true
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI)
+          schema:
+            type: string
+            example: C0006142
+        - name: sab
+          in: query
+          required: true
+          description: A filter for one or more sources (SABs) that define relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: SNOMEDCT_US
+        - name: rel
+          in: query
+          required: true
+          description: A filter for one or more relationship types that are involved in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          schema:
+            type: string
+            example: isa
       responses:
         '200':
           description: Returns information on all Concept nodes in paths that begin with the specified Concept, subject to constraints on relationship types (rel) and relationship sources (sab)
@@ -218,6 +250,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PathItemConceptRelationshipSabPrefterm'
+        '400':
+          description: invalid parameter name; missing required parameter name
         '404':
           description: No shortest path between _query_concept_id_ and _target_concept_id_ with relationship types in _rel_ filtered by sources in _sab_.
         '5XX':
@@ -509,7 +543,7 @@ components:
       properties:
         sab:
           type: string
-          description: The source of the relationship, such as a vocabulary or ontology. Although relationships are usually described in terms of Codes, they actually exist between the Concepts that are linked to the Codes. For example, if an ontology SAB1 shows that code A has relationship r with code B, the associated concepts for A and B will have a relationship with type=r and SAB=SAB1.
+          description: The source of the relationship, such as a vocabulary or ontology, that asserts the relationship between concepts. Although relationships are usually described in terms of Codes, they actually exist between the Concepts that are linked to the Codes. For example, if an ontology SAB1 shows that code A has relationship r with code B, the associated concepts for A and B will have a relationship with type=r and SAB=SAB1.
           example: ICD10AM
         relationship:
           type: string
