@@ -21,6 +21,7 @@ import neo4j
 from models.codes_codes_obj import CodesCodesObj
 from models.concept_detail import ConceptDetail
 from models.concept_prefterm import ConceptPrefterm
+from models.concept_path import ConceptPath
 from models.concept_sab_rel_depth import ConceptSabRelDepth
 from models.concept_term import ConceptTerm
 from models.path_item_concept_relationship_sab_prefterm import PathItemConceptRelationshipSabPrefterm
@@ -38,49 +39,19 @@ logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
-#cypher_tail: str = \
-#    " CALL apoc.when(rel = []," \
-#    "  'RETURN concept AS related_concept, NULL AS rel_type, NULL AS rel_sab'," \
-#    "  'MATCH (concept)-[matched_rel]->(related_concept)" \
-#    "   WHERE any(x IN rel WHERE x IN [[Type(matched_rel),matched_rel.SAB],[Type(matched_rel),\"*\"],[\"*\",matched_rel.SAB],[\"*\",\"*\"]])" \
-#    "   RETURN related_concept, Type(matched_rel) AS rel_type, matched_rel.SAB AS rel_sab'," \
-#    "  {concept:concept,rel:rel})" \
-#    " YIELD value" \
-#    " WITH matched, value.related_concept AS related_concept, value.rel_type AS rel_type, value.rel_sab AS rel_sab" \
-#    " MATCH (code:Code)<-[:CODE]-(related_concept:Concept)-[:PREF_TERM]->(prefterm:Term)" \
-#    " WHERE (code.SAB IN $sab OR $sab = [])" \
-#    " OPTIONAL MATCH (code:Code)-[code2term]->(term:Term)" \
-#    " WHERE (code2term.CUI = related_concept.CUI) AND (Type(code2term) IN $tty OR $tty = [])" \
-#    " WITH *" \
-#    " CALL apoc.when(term IS NULL," \
-#    "  'RETURN \"PREF_TERM\" AS tty, prefterm as term'," \
-#    "  'RETURN Type(code2term) AS tty, term'," \
-#    "  {term:term,prefterm:prefterm,code2term:code2term})" \
-#    " YIELD value" \
-#    " WITH *, value.tty AS tty, value.term AS term" \
-#    " RETURN DISTINCT matched, rel_type, rel_sab, code.CodeID AS code_id, code.SAB AS code_sab," \
-#    "  code.CODE AS code_code, tty, term.name AS term, related_concept.CUI AS concept" \
-#    " ORDER BY size(term), code_id, tty DESC, rel_type, rel_sab, concept, matched"
-
-# cypher_head: str = \
-#    "CALL db.index.fulltext.queryNodes(\"Term_name\", '\\\"'+$queryx+'\\\"')" \
-#    " YIELD node" \
-#    " WITH node AS matched_term" \
-#    " MATCH (matched_term)" \
-#    " WHERE size(matched_term.name) = size($queryx)" \
-#    " WITH matched_term" \
-#    " OPTIONAL MATCH (matched_term:Term)<-[relationship]-(:Code)<-[:CODE]-(concept:Concept)" \
-#    " WHERE relationship.CUI = concept.CUI" \
-#    " OPTIONAL MATCH (matched_term:Term)<-[:PREF_TERM]-(concept:Concept)"
-
-
 def loadquerystring(filename: str) -> str:
+    """
+    Loads a query string from a file.
 
-    # Load a query string from a file.
-    # filename: filename, without path.
+    Keeping query strings separate from the Python code:
+    1. Separates business logic from the presentation layer.
+    2. Eases the transition from neo4j development to API development--in particular, by elminating the need to
+         reformat a query string in Python
 
-    # Assumes that the file is in the cypher directory.
+    :param filename: filename, without path.
+
+    Assumes that the file is in the cypher directory.
+    """
 
     fpath = os.path.dirname(os.getcwd())
     fpath = os.path.join(fpath, 'ubkg_api/cypher', filename)
@@ -95,11 +66,21 @@ def timebox_query(query: str, timeout: int=10000) -> str:
     """
     Limits the execution of a query to a specified timeout.
     :param query: query string to timebox
-    :param timeout: timeout in ms
+    :param timeout: timeout in ms. This can, for example, be set in the app.cfg file.
     """
 
-    # Use simple string concatenation.
+    # Use simple string concatenation instead of an f-string to wrap the source query in a timebox call.
     return "CALL apoc.cypher.runTimeboxed('" + query + "',{}," + str(timeout) + ")"
+
+def format_list_for_query(listquery) ->str:
+    """
+    Converts a list of string values into a comma-delimited, single-quoted string for use in a Cypher query clause.
+    Example:
+        listquery: ['SNOMEDCT_US', 'HGNC']
+        return: "'SNOMEDCT_US', 'HGNC'"
+
+    """
+    return ', '.join("'{0}'".format(s) for s in listquery)
 
 def rel_str_to_array(rels: List[str]) -> List[List]:
     rel_array: List[List] = []
@@ -141,7 +122,7 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     # Fixed issue with SAB filtering.
 
     # Load Cypher query from file.
-    query: str = loadquerystring('codes_code_id_codes.cypher')
+    query: str = loadquerystring(filename='codes_code_id_codes.cypher')
 
     # Filter by code_id.
     query = query.replace('$code_id',f"'{code_id}'")
@@ -270,48 +251,60 @@ def concepts_concept_id_semantics_get_logic(neo4j_instance, concept_id) -> List[
                 pass
     return styTuiStns
 """
-# JAS January 2024 - replaced POST with GET.
-def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, depth=None) \
-        -> List[ConceptPrefterm]:
+#  JAS February 2024: Refactored
+def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, mindepth=None,
+                              maxdepth=None, skip=None, limit=None) -> List[ConceptPrefterm]:
     """
+    Obtains a subset of paths that originate from the concept with CUI=query_concept_id, subject
+    to constraints specified in parameters.
+
     :param neo4j_instance: UBKG connection
     :param query_concept_id: CUI of concept from which to expand paths
     :param sab: list of SABs by which to filter relationship types in the paths.
     :param rel: list of relationship types by which to filter relationship types in the paths.
-    :param dept: maximum number of hops in the set of paths
+    :param mindepth: minimum path length
+    :param maxdepth: maximum path length
+    :param skip: paths to skip
+    :param limit: maximum number of paths to return
     """
-    conceptPrefterms: [ConceptPrefterm] = []
+    conceptPaths: [ConceptPath] = []
 
-    query: str = \
-        "MATCH (c:Concept {CUI: $query_concept_id})" \
-        " CALL apoc.path.expand(c, apoc.text.join([x IN [$rel] | '<'+x], '|'), 'Concept', 1, $depth)" \
-        " YIELD path" \
-        " WHERE ALL(r IN relationships(path) WHERE r.SAB IN [$sab])" \
-        " UNWIND nodes(path) AS con OPTIONAL MATCH (con)-[:PREF_TERM]->(pref:Term)" \
-        " RETURN DISTINCT con.CUI as concept, pref.name as prefterm"
-
-    sabjoin: str = ', '.join("'{0}'".format(s) for s in sab)
+    # Load query string and associate parameter values to variables.
+    query=loadquerystring(filename='concepts_expand.cypher')
+    query = query.replace('$query_concept_id',f'"{query_concept_id}"')
+    sabjoin = format_list_for_query(sab)
     query = query.replace('$sab', sabjoin)
-    reljoin: str = ', '.join("'{0}'".format(r) for r in rel)
+    reljoin = format_list_for_query(rel)
     query = query.replace('$rel', reljoin)
-    depthint = int(depth)
+    query = query.replace('$mindepth', str(mindepth))
+    query = query.replace('$maxdepth', str(maxdepth))
+    query = query.replace('$skip', str(skip))
+    query = query.replace('$limit', str(limit))
 
+    # Limit query execution time to duration specified in app.cfg.
+    query = timebox_query(query, timeout=neo4j_instance.timeout)
+
+    path_item = int(skip)+1
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query,
-                                      query_concept_id=query_concept_id,
-                                      depth=depthint
-                                      )
+        recds: neo4j.Result = session.run(query)
         for record in recds:
+            # The timebox query wraps each record in a dictionary with the record as the value of a key named 'value.'
+            val = record.get('value')
             try:
-                conceptPrefterm: ConceptPrefterm = \
-                    ConceptPrefterm(record.get('concept'), record.get('prefterm')).serialize()
-                conceptPrefterms.append(conceptPrefterm)
+                path_info = val.get('paths')
+                # Add the position index for this path in the entire set--i.e., the row number from the query return,
+                # based on the value of skip.
+                path_info['item'] = path_item
+                conceptPath: ConceptPath = ConceptPath(path_info=path_info).serialize()
+                conceptPaths.append(conceptPath)
+                path_item = path_item + 1
             except KeyError:
                 pass
-    return conceptPrefterms
+
+    return conceptPaths
 
 # JAS January 2024 Converted from POST to GET
-def concepts_path_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None) -> List[PathItemConceptRelationshipSabPrefterm]:
+def concepts_path_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None ) -> List[PathItemConceptRelationshipSabPrefterm]:
 
     """
     :param neo4j_instance: UBKG connection
@@ -335,11 +328,11 @@ def concepts_path_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel
         " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
         " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
 
-    sabjoin: str = ', '.join("'{0}'".format(s) for s in sab)
+    sabjoin = format_list_for_query(sab)
     query = query.replace('$sab', sabjoin)
-
-    reljoin: str = ', '.join("'{0}'".format(r) for r in rel)
+    reljoin = format_list_for_query(rel)
     query = query.replace('$rel', reljoin)
+
 
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query,
@@ -379,10 +372,9 @@ def concepts_shortestpaths_get_logic(neo4j_instance, query_concept_id=None, targ
         " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
         " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
 
-    sabjoin: str = ', '.join("'{0}'".format(s) for s in sab)
+    sabjoin = format_list_for_query(sab)
     query = query.replace('$sab', sabjoin)
-
-    reljoin: str = ', '.join("'{0}'".format(r) for r in rel)
+    reljoin = format_list_for_query(rel)
     query = query.replace('$rel', reljoin)
 
     with neo4j_instance.driver.session() as session:
@@ -427,10 +419,9 @@ def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, re
         " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
         " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
 
-    sabjoin: str = ', '.join("'{0}'".format(s) for s in sab)
+    sabjoin = format_list_for_query(sab)
     query = query.replace('$sab', sabjoin)
-
-    reljoin: str = ', '.join("'{0}'".format(r) for r in rel)
+    reljoin = format_list_for_query(rel)
     query = query.replace('$rel', reljoin)
 
     with neo4j_instance.driver.session() as session:

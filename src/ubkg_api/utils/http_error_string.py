@@ -4,18 +4,24 @@
 from flask import request
 
 
-def format_request_path():
+def format_request_path(custom_err=None):
     """
-    Formats the request path for an error sgring.
+    Formats the request path for an error string.
+    :param custom_err: a custom error string
     :return:
     """
     # The request path will be one of three types:
     # 1. The final element will correspond to the endpoint (e.g., /field-descriptions)
     # 2. The penultimate element will correspond to the endpoint, and the final element will be a filter.
+    # 3. A more complicated path, for which a custom error string can be provided.
+
     pathsplit = request.path.split('/')
     err = f"{pathsplit[0]} "
     if len(pathsplit) > 3:
-        err = err + f" for query path '{request.path}'"
+        if custom_err is None:
+            err = err + f" for query path '{request.path}'"
+        else:
+            err = f" for {custom_err}"
     elif len(pathsplit) == 3:
         err = err + f" for '{pathsplit[2]}'"
     else:
@@ -34,13 +40,13 @@ def format_request_query_string():
 
     listerr = []
     for req in request.args:
-        listerr.append(f"'{req}'='{request.args[req]}'. ")
+        listerr.append(f"'{req}'='{request.args[req]}' ")
 
     if len(listerr) > 0:
-        err = ' Query parameter'
+        err = ' and query parameter'
         if len(listerr) > 1:
             err = err + 's'
-        err = err + ' ' + ' ; '.join(listerr) + '.'
+        err = err + ' ' + ' ; '.join(listerr)
 
     return err
 
@@ -56,11 +62,13 @@ def format_request_body():
     return err
 
 
-def get_404_error_string(prompt_string=None, timeout=None):
+def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=None):
     """
     Formats an error string for a 404 response, accounting for optional parameters.
     :param prompt_string: - optional description of error
-    :param timeout: optional timeout for timeboxed endpoints
+    :param timeout: optional timeout for timeboxed endpoints, in milliseconds
+    :param custom_request_path: optional string to describe a value embedded in a complex request path
+    --e.g., for /concept/C99999/paths/expand, custom_request_path might be "CUI='C99999'"
     :return: string
     """
     if prompt_string is None:
@@ -68,11 +76,16 @@ def get_404_error_string(prompt_string=None, timeout=None):
     else:
         err = prompt_string
 
-    err = err + format_request_path() + format_request_query_string() + format_request_body()
+    err = err + format_request_path(custom_err=custom_request_path) + format_request_query_string() + format_request_body()
 
     if timeout is not None:
-        err = err + f" Note that this endpoint is limited to an execution time of {int(timeout/1000)} " \
-                    f" seconds to prevent timeout."
+        timeoutsecond = int(timeout/1000)
+        errtimeout = f"{timeoutsecond} second"
+        if timeoutsecond > 1:
+            errtimeout = errtimeout + "s"
+
+        err = err + f". Note that this endpoint is limited to an execution time of {errtimeout} " \
+                    f" to prevent timeout errors."
 
     return err
 
@@ -165,7 +178,8 @@ def validate_parameter_value_in_enum(param_name=None, param_value=None, enum_lis
 
     return "ok"
 
-def validate_parameter_is_numeric(param_name=None, param_value: str='') -> str:
+
+def validate_parameter_is_numeric(param_name=None, param_value: str = '') -> str:
     """
     Verifies that a request parameter's value is numeric
     :param param_name: name of the parameter
@@ -176,6 +190,59 @@ def validate_parameter_is_numeric(param_name=None, param_value: str='') -> str:
     """
 
     if not param_value.isnumeric():
-        return f"Invalid value ({param_value}) for parameter '{param_name}'. Values for the parameter should be numeric."
+        return f"Invalid value ({param_value}) for parameter '{param_name}'.  The parameter must be numeric."
+
+    return "ok"
+
+
+def validate_parameter_is_nonnegative(param_name=None, param_value: str = '') -> str:
+    """
+    Verifies that a request parameter's value is not negative
+    :param param_name: name of the parameter
+    :param param_value: value of the parameter
+    :return:
+    --"ok"
+    --error string suitable for a 400 message
+    """
+
+    if param_value is None:
+        return "ok"
+    err = validate_parameter_is_numeric(param_name=param_name, param_value=param_value)
+    if err != 'ok':
+        return err
+
+    if int(param_value) < 0:
+        return f"Invalid value ({param_value}) for parameter '{param_name}'. The parameter cannot be negative."
+
+    return "ok"
+
+
+def validate_parameter_range_order(min_name: str, min_value: str, max_name: str, max_value: str) -> str:
+    """
+       Verifies that a range of parameter values is properly ordered.
+        :param min_name: name of mininum parameter
+        :param min_value: value for minimum parameter
+        :param max_name: name of maximum parameter
+        :param max_value: value for maximum parameter
+       :return:
+       --"ok"
+       --error string suitable for a 400 message
+       """
+    if int(min_value) > int(max_value):
+        return f"Invalid parameter values: '{min_name}' ({min_value}) greater than '{max_name}' ({max_value}). "
+
+    return "ok"
+
+def check_payload_size(payload: str, max_payload_size: int) -> str:
+    """
+    Verifies that a payload string is within payload limits.
+    :param payload: string from a query response
+    :param max_payload_size: maximum payload size
+    """
+
+    print(f'payload size={len(payload)}')
+    if len(payload) > max_payload_size:
+        return f"The size of the response to the endpoint with the specified parameters exceeds the payload limit" \
+               f" of {int(max_payload_size)/1024} MB."
 
     return "ok"

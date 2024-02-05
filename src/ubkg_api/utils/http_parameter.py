@@ -2,6 +2,7 @@
 
 from flask import request
 
+
 def parameter_as_list(param_name: str) -> list[str]:
     """
     Normalizes varying forms of query strings into a list of strings.
@@ -16,9 +17,44 @@ def parameter_as_list(param_name: str) -> list[str]:
 
     :return: a list of strings--e.g., ['A','B','C']
     """
-    listparam=request.args.getlist(param_name)
+    listparam = request.args.getlist(param_name)
     if len(listparam) == 1:
         # This may be from a URL-escaped list. The result of getlist would be a list with a single value--e.g.,
-        #'A,B,C'. Split this into separate values.
+        # 'A,B,C'. Split this into separate values.
         listparam = listparam[0].split(',')
     return listparam
+
+
+def set_default_minimum(param_value=None, default: int = 0) -> int:
+    """
+    Sets a default minimum for a parameter value.
+    :param param_value: optional value for the parameter
+    :param default: default mininum
+    """
+
+    if default is None:
+        default = 0
+
+    if param_value is None:
+        return default
+
+    return param_value
+
+
+def set_default_maximum(param_value=None, default: int = 0) -> int:
+    """
+    Sets a default maximum for a parameter value.
+    :param param_value: optional value for the parameter
+    :param default: default maximum
+    """
+
+    if default is None:
+        default = 0
+
+    ret = int(param_value)
+    if ret is None:
+        ret = default
+    elif ret > default:
+        ret = default
+
+    return ret

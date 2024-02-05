@@ -9,10 +9,12 @@ from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_c
     concepts_concept_id_definitions_get_logic, concepts_expand_get_logic,\
     concepts_path_get_logic, concepts_shortestpaths_get_logic, concepts_trees_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
-    validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric
-from utils.http_parameter import parameter_as_list
+    validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
+    validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
+from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
+
 
 
 @concepts_blueprint.route('<concept_id>/codes', methods=['GET'])
@@ -99,51 +101,113 @@ def concepts_concept_id_definitions_get(concept_id):
 
 
 # JAS January 2024 Converted from POST to GET.
-@concepts_blueprint.route('<concept_id>/expand', methods=['GET'])
-def concepts_expand_get(concept_id):
+@concepts_blueprint.route('<concept_id>/paths/expand', methods=['GET'])
+def concepts_paths_expand_get(concept_id):
 
-    """Returns a unique list of concepts (Concept, Preferred Term) on all paths including starting concept
-    (query_concept_id) restricted by list of relationship types (rel), list of relationship sources (sab),
-     and depth of travel.
-
-    :rtype: Union[List[ConceptPrefterm], Tuple[List[ConceptPrefterm], int], Tuple[List[ConceptPrefterm],
-     int, Dict[str, str]]
     """
+    Returns a dictionary representing a list of paths that originate with <concept_id>, subject to constraints
+    specified in parameter arguments.
+    Each path is itself a list of dictionaries, each of which represents a hop in the path.
+    Example of output for a path of length 1:
+
+    {
+    "paths": [
+        {
+            "item": 1,
+            "length": 1,
+            "path": [
+                {
+                    "hop": 1,
+                    "sab": "SNOMEDCT_US",
+                    "source": {
+                        "CUI": "C0013227",
+                        "pref_term": "Pharmaceutical Preparations"
+                    },
+                    "target": {
+                        "CUI": "C2720507",
+                        "pref_term": "SNOMED CT Concept (SNOMED RT+CTV3)"
+                    },
+                    "type": "isa"
+                }
+            ]
+        }
+    ]
+}
+
+    """
+
+    neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
     # Validate parameters.
     # Check for invalid parameter names.
-    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel', 'depth'])
+    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel', 'mindepth','maxdepth','skip','limit'])
     if err != 'ok':
         return make_response(err, 400)
 
     # Check for required parameters.
-    err = validate_required_parameters(required_parameter_list=['sab', 'rel', 'depth'])
+    err = validate_required_parameters(required_parameter_list=['sab', 'rel', 'maxdepth'])
     if err != 'ok':
         return make_response(err, 400)
 
-    # Check that depth is numeric.
-    depth = request.args.get('depth')
-    err = validate_parameter_is_numeric(param_name='depth', param_value=depth)
+    # Check that the maximum path depth is non-negative.
+    maxdepth = request.args.get('maxdepth')
+    err = validate_parameter_is_nonnegative(param_name='maxdepth', param_value=maxdepth)
     if err != 'ok':
         return make_response(err, 400)
+
+    # Check that the minimum path depth is non-negative.
+    mindepth = request.args.get('mindepth')
+    err = validate_parameter_is_nonnegative(param_name='mindepth', param_value=mindepth)
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Set default mininum.
+    mindepth = set_default_minimum(param_value=mindepth, default=1)
+
+    # Validate that mindepth is not greater than maxdepth.
+    err = validate_parameter_range_order(min_name='mindepth', min_value=mindepth, max_name='maxdepth', max_value=maxdepth)
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Check that the non-default skip is non-negative.
+    skip = request.args.get('skip')
+    err = validate_parameter_is_nonnegative(param_name='skip', param_value=skip)
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Set default mininum.
+    skip = set_default_minimum(param_value=skip, default=0)
+
+    # Check that non-default limit is non-negative.
+    limit = request.args.get('limit')
+    err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
+    if err != 'ok':
+        return make_response(err, 400)
+    # Set default maximum, based on the app configuration.
+    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
 
     # Get remaining parameter values from the path or query string.
     query_concept_id = concept_id
     sab = parameter_as_list(param_name='sab')
     rel = parameter_as_list(param_name='rel')
 
-    neo4j_instance = current_app.neo4jConnectionHelper.instance()
-
-    # result = concepts_expand_post_logic(neo4j_instance, request.get_json())
-    result = concepts_expand_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel, depth=depth)
+    result = concepts_expand_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel,
+                                       mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concepts in paths starting with the "
-                                                 f"Concept='query_concept_id' with relationship types "
-                                                 f"in 'rel' filtered by sources in 'sab' up to path depth='depth'")
+        err = get_404_error_string(prompt_string=f"No Concepts in paths with specified parameters",
+                                   custom_request_path=f"query_concept_id='{query_concept_id}'",
+                                   timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Limit the size of the payload, based on the app configuration.
+    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
+    if err != "ok":
+        return make_response(err, 400)
+
+    # The result of the query is a list. Wrap in a dictionary to build a proper JSON object.
+    dict_result = {'paths':result}
+    return jsonify(dict_result)
 
 
 # JAS January 2024 Replaced POST with GET
