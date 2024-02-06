@@ -206,9 +206,9 @@ def concepts_paths_expand_get(concept_id):
         return make_response(err, 404)
 
     # Limit the size of the payload, based on the app configuration.
-    #err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    #if err != "ok":
-        #return make_response(err, 400)
+    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
+    if err != "ok":
+        return make_response(err, 400)
 
     # Extract the origin of all paths in the list
     origin = get_origin(result)
@@ -311,51 +311,90 @@ def concepts_shortestpath_get(concept_id):
 
 
 # JAS February 2024 Converted POST to GET.
-@concepts_blueprint.route('<concept_id>/trees', methods=['GET'])
+# Refactored to mirror the /paths/expand route, which differs only in the apoc function called.
+@concepts_blueprint.route('<concept_id>/paths/trees', methods=['GET'])
 def concepts_trees_get(concept_id):
     """Return nodes in a spanning tree from a specified concept, based on
     the relationship pattern specified within the selected sources, to a specified path depth.
 
-    :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm],
-     int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
+    Refer to the docstring for the concept_expand_get function for details on the return.
     """
+
+    neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
     # Validate parameters.
     # Check for invalid parameter names.
-    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel', 'depth'])
+    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel', 'mindepth', 'maxdepth', 'skip', 'limit'])
     if err != 'ok':
         return make_response(err, 400)
 
     # Check for required parameters.
-    err = validate_required_parameters(required_parameter_list=['sab', 'rel', 'depth'])
+    err = validate_required_parameters(required_parameter_list=['sab', 'rel', 'maxdepth'])
     if err != 'ok':
         return make_response(err, 400)
 
-    # Check that depth is numeric.
-    depth = request.args.get('depth')
-    err = validate_parameter_is_numeric(param_name='depth', param_value=depth)
+    # Check that the maximum path depth is non-negative.
+    maxdepth = request.args.get('maxdepth')
+    err = validate_parameter_is_nonnegative(param_name='maxdepth', param_value=maxdepth)
     if err != 'ok':
         return make_response(err, 400)
 
-    # To prevent timeout, limit depth to 2.
-    if int(depth) > 2:
-        err = f'Invalid parameter. A depth of {depth} will likely result in a long-running query that will time out. ' \
-              f'To identify spanning trees of depths greater than 2, work with a local instance of the UBKG.'
+    # Check that the minimum path depth is non-negative.
+    mindepth = request.args.get('mindepth')
+    err = validate_parameter_is_nonnegative(param_name='mindepth', param_value=mindepth)
+    if err != 'ok':
         return make_response(err, 400)
+
+    # Set default mininum.
+    mindepth = set_default_minimum(param_value=mindepth, default=1)
+    # Set default maximum.
+    maxdepth = str(int(mindepth) + 2)
+
+    # Validate that mindepth is not greater than maxdepth.
+    err = validate_parameter_range_order(min_name='mindepth', min_value=mindepth, max_name='maxdepth',
+                                         max_value=maxdepth)
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Check that the non-default skip is non-negative.
+    skip = request.args.get('skip')
+    err = validate_parameter_is_nonnegative(param_name='skip', param_value=skip)
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Set default mininum.
+    skip = set_default_minimum(param_value=skip, default=0)
+
+    # Check that non-default limit is non-negative.
+    limit = request.args.get('limit')
+    err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
+    if err != 'ok':
+        return make_response(err, 400)
+    # Set default row limit, based on the app configuration.
+    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
 
     # Get remaining parameter values from the path or query string.
     query_concept_id = concept_id
     sab = parameter_as_list(param_name='sab')
     rel = parameter_as_list(param_name='rel')
 
-    neo4j_instance = current_app.neo4jConnectionHelper.instance()
-
-    result = concepts_trees_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel, depth=depth)
+    result = concepts_expand_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel,
+                                       mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concepts in spanning tree starting "
-                                                 f"from Concept 'query_concept_id' with relationship types "
-                                                 f"in 'rel' filtered by sources in 'sab' for specified depth. ")
+        err = get_404_error_string(prompt_string=f"No Concepts in spanning tree with specified parameters",
+                                   custom_request_path=f"query_concept_id='{query_concept_id}'",
+                                   timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Limit the size of the payload, based on the app configuration.
+    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
+    if err != "ok":
+        return make_response(err, 400)
+
+    # Extract the origin of all paths in the list
+    origin = get_origin(result)
+
+    # Wrap origin and path list in a dictionary that will become the JSON response.
+    dict_result = {'origin': origin, 'paths': result}
+    return jsonify(dict_result)
