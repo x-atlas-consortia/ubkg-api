@@ -54,7 +54,7 @@ def set_default_maximum(param_value=None, default: int = 0) -> int:
     ret = int(param_value)
     if ret is None:
         ret = default
-    elif ret > default:
-        ret = default
+    #elif ret > default:
+        #ret = default
 
     return ret
