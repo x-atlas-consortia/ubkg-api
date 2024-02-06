@@ -33,6 +33,9 @@ from models.sab_relationship_concept_term import SabRelationshipConceptTerm
 # from models.semantic_stn import SemanticStn
 # from models.sty_tui_stn import StyTuiStn
 from models.termtype_code import TermtypeCode
+# property class
+from models.concept_prefterm import ConceptPrefterm
+
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -253,7 +256,7 @@ def concepts_concept_id_semantics_get_logic(neo4j_instance, concept_id) -> List[
 """
 #  JAS February 2024: Refactored
 def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, mindepth=None,
-                              maxdepth=None, skip=None, limit=None) -> List[ConceptPrefterm]:
+                              maxdepth=None, skip=None, limit=None) -> List[ConceptPath]:
     """
     Obtains a subset of paths that originate from the concept with CUI=query_concept_id, subject
     to constraints specified in parameters.
@@ -267,6 +270,7 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     :param skip: paths to skip
     :param limit: maximum number of paths to return
     """
+
     conceptPaths: [ConceptPath] = []
 
     # Load query string and associate parameter values to variables.
@@ -284,7 +288,7 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     # Limit query execution time to duration specified in app.cfg.
     query = timebox_query(query, timeout=neo4j_instance.timeout)
 
-    path_item = int(skip)+1
+    path_position = int(skip)+1
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
         for record in recds:
@@ -294,10 +298,10 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
                 path_info = val.get('paths')
                 # Add the position index for this path in the entire set--i.e., the row number from the query return,
                 # based on the value of skip.
-                path_info['item'] = path_item
+                path_info['position'] = path_position
                 conceptPath: ConceptPath = ConceptPath(path_info=path_info).serialize()
                 conceptPaths.append(conceptPath)
-                path_item = path_item + 1
+                path_position = path_position + 1
             except KeyError:
                 pass
 

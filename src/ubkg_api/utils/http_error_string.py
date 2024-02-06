@@ -240,7 +240,6 @@ def check_payload_size(payload: str, max_payload_size: int) -> str:
     :param max_payload_size: maximum payload size
     """
 
-    print(f'payload size={len(payload)}')
     if len(payload) > max_payload_size:
         return f"The size of the response to the endpoint with the specified parameters exceeds the payload limit" \
                f" of {int(max_payload_size)/1024} MB."

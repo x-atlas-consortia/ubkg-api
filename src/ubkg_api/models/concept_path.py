@@ -5,9 +5,8 @@ from __future__ import absolute_import
 from . import util
 from .base_model_ import Model
 
-# subclass
+# property class
 from .concept_path_hop import ConceptPathHop
-
 class ConceptPath(Model):
     """
     Class representing a path between two Concept nodes.
@@ -25,18 +24,18 @@ class ConceptPath(Model):
         """
         # Value Types
         self.openapi_types = {
-            'path': list[ConceptPathHop],
-            'item': int,
+            'hops': list[ConceptPathHop],
+            'position': int,
             'length': int
         }
         # Attributes
         self.attribute_map = {
-            'path': 'path',
-            'item': 'item',
+            'hops': 'hops',
+            'position': 'item',
             'length': 'length'
         }
         # Property initialization
-        path = path_info.get('path')
+        path = path_info.get('hops')
 
         pathhops = []
         for hop in path:
@@ -46,23 +45,23 @@ class ConceptPath(Model):
             target = hop.get('target')
 
             # Calculate the hop's position in the path.
-            hop_index = path.index(hop)+1
+            position = path.index(hop)+1
 
-            pathhop = ConceptPathHop(sab=sab, source=source, type=type, target=target, hop=hop_index)
+            pathhop = ConceptPathHop(sab=sab, source=source, type=type, target=target, hop=position)
 
             # Use the to_dict method of the Model base class to obtain a dictionary of the ConceptPathHop object.
             pathhopdict = pathhop.to_dict()
             pathhops.append(pathhopdict)
 
-        self._path = pathhops
-        self._item = path_info.get('item')
+        self._hops = pathhops
+        self._position = path_info.get('position')
         self._length = len(path)
 
     def serialize(self):
         return {
-            "path": self._path,
+            "hops": self._hops,
             "length": self._length,
-            "item": self._item
+            "position": self._position
         }
 
     @classmethod
@@ -78,23 +77,23 @@ class ConceptPath(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def path(self):
-        """Gets the path of this ConceptPath.
+    def hops(self):
+        """Gets the hops of this ConceptPath.
 
         :return: The path of this ConceptPath.
         :rtype: PathHop
         """
-        return self._path
+        return self._hops
 
-    @path.setter
-    def path(self, path):
-        """Sets the path of this ConceptPath.
+    @hops.setter
+    def path(self, hops):
+        """Sets the hops of this ConceptPath.
 
-        :param path: The path of this ConceptPath.
-        :type path: str
+        :param hops: The hops of this ConceptPath.
+        :type hops: str
         """
 
-        self._path = path
+        self._hops = hops
 
     @property
     def length(self):
@@ -116,21 +115,21 @@ class ConceptPath(Model):
         self._length = length
 
     @property
-    def item(self):
-        """Gets the item of this ConceptPath.
+    def position(self):
+        """Gets the position of this ConceptPath.
 
-        :return: The item of this ConceptPath.
+        :return: The position of this ConceptPath.
         :rtype: int
         """
-        return self._item
+        return self._position
 
-    @item.setter
-    def item(self, item):
-        """Sets the item of this ConceptPath.
+    @position.setter
+    def position(self, position):
+        """Sets the position of this ConceptPath.
 
-        :param item: The item of this ConceptPath.
-        :type item: str
+        :param position: The position of this ConceptPath.
+        :type position: str
         """
 
-        self._item = item
+        self._position = position
 

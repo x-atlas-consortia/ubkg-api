@@ -4,7 +4,8 @@ from __future__ import absolute_import
 
 from . import util
 from .base_model_ import Model
-
+# property class
+from .concept_prefterm import ConceptPrefterm
 
 class ConceptPathHop(Model):
     """
@@ -16,12 +17,12 @@ class ConceptPathHop(Model):
         "hop": 1,
         "sab": "SNOMEDCT_US",
         "source": {
-            "CUI": "C0013227",
-            "pref_term": "Pharmaceutical Preparations"
+            "concept": "C0013227",
+            "prefterm": "Pharmaceutical Preparations"
         },
         "target": {
-            "CUI": "C2720507",
-            "pref_term": "SNOMED CT Concept (SNOMED RT+CTV3)
+            "concept": "C2720507",
+            "prefterm": "SNOMED CT Concept (SNOMED RT+CTV3)
         }
         "type": "isa"
     }
@@ -58,13 +59,16 @@ class ConceptPathHop(Model):
 
         # Property initialization
         self._sab = sab
-        self._source = {'CUI': source.get('CUI'),
-                        'pref_term': source.get('pref_term')
-                        }
+
+        source = ConceptPrefterm(concept=source.get('CUI'), prefterm=source.get('prefterm'))
+        sourcedict = source.to_dict()
+        self._source = sourcedict
+
         self._type = type
-        self._target = {'CUI': target.get('CUI'),
-                        'pref_term': target.get('pref_term')
-                        }
+        target = ConceptPrefterm(concept=target.get('CUI'), prefterm=target.get('prefterm'))
+        targetdict = target.to_dict()
+        self._target = targetdict
+
         self._hop = hop
 
     def serialize(self):

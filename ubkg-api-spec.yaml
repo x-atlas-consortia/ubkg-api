@@ -14,7 +14,7 @@ servers:
 paths:
   /codes/{code_id}/codes:
     get:
-      summary:  A Concept node can have CODE relationships with (links to) Code nodes from multiple source vocabularies (SABs). For example, the Code "SNOMEDCT_US:254837009" (Malignant neoplasm of breast) links to the Concept with identifier "C0006142"; this Concept also links to Code nodes with identifiers including "NCI:C9335" and "MSH:D001943". This endpoint returns the list of Code nodes that share the Concept node to which the specified code links. The list of Codes can be filtered to return only those Codes from particular sources (SABs).
+      summary:  A Concept node can have CODE relationships with (links to) Code nodes from multiple sources (SABs). For example, the Code SNOMEDCT_US:254837009 (SAB=SNOMEDCT_US) links to the Concept with identifier C0006142; however, the Code nodes with identifiers including NCI:C9335 and MSH:D001943 also link to C0006142. This endpoint returns information on Code nodes that link to the Concept node to which the specified code links, subject to constraints specified in parameters.
       operationId: codes_code_id_codes_get
       parameters:
         - name: code_id
@@ -27,7 +27,7 @@ paths:
         - name: sab
           in: query
           required: false
-          description: A filter for one or more sources (SABs) for the Codes that share links to the same Concept to which the Code with CodeID=_code_id_ links. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit the set of Codes that share links to the same Concept to which the Code with CodeID=_code_id_ links. This set can be specified either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: array
             uniqueItems: true
@@ -37,7 +37,7 @@ paths:
             default: []
       responses:
         '200':
-          description: An array of objects that correspond to Code nodes that share links to the Concept associated with the specified Code
+          description: An array of objects corresponding to Code nodes that share links to the Concept associated with the specified Code
           content:
             application/json:
               schema:
@@ -53,7 +53,7 @@ paths:
   /codes/{code_id}/concepts:
     get:
       operationId: codes_code_id_concepts_get
-      summary: A Code node can have CODE relationships with (links to) multiple Concept nodes. This endpoint returns a list of Concept nodes that have CODE relationships with the specified Code node.
+      summary: A Code node can have CODE relationships with (links to) multiple Concept nodes. For example, the Code with identifier SNOMEDCT_US:79962008 links to 5 different concepts. This endpoint returns the set of Concept nodes that have CODE relationships with the specified Code node.
       parameters:
         - name: code_id
           in: path
@@ -61,7 +61,7 @@ paths:
           description: The identifier for the Code node, in format _SAB_:_CODE_ (or SAB%3Acode), where _SAB_ is an identifier for the source of the code.
           schema:
             type: string
-            example: SNOMEDCT_US:254837009
+            example: SNOMEDCT_US:79962008
       responses:
         '200':
           description: An array of Concept nodes that have CODE relationships with the specified Code node
@@ -78,7 +78,7 @@ paths:
   /concepts/{concept_id}/codes:
     get:
       operationId: concepts_concept_id_codes_get
-      summary: A Concept node can have CODE relationships with (links to) muliple Code nodes. This endpoint returns information on the set of Code nodes that link to the specified Concept.
+      summary: A Concept node can have CODE relationships with (links to) muliple Code nodes. This endpoint returns information on the set of Code nodes that link directly to the specified Concept, subject to constraints specified in parameters.
       parameters:
         - name: concept_id
           in: path
@@ -90,7 +90,7 @@ paths:
         - name: sab
           in: query
           required: false
-          description: A filter for one or more sources (SABs) for the Codes that link to the specified Concept. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit the set of Codes that link to the specified Concept. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: array
             uniqueItems: true
@@ -117,7 +117,7 @@ paths:
   /concepts/{concept_id}/concepts:
     get:
       operationId: concepts_concept_id_concepts_get
-      summary: Returns a list of Concepts that have relationships with the specified Concept.
+      summary: Returns the set of Concepts that have direct relationships with the specified Concept.
       parameters:
         - name: concept_id
           in: path
@@ -139,52 +139,71 @@ paths:
           description: no Concepts that have relationships with the specified Concept
         '5XX':
           description: Unknown error
-  /concepts/{concept_id}/expand:
+  /concepts/{concept_id}/paths/expand:
     get:
-      operationId: concepts_expand_get
-      summary: Returns a unique list of Concepts nodes (Concept, Preferred Term) in all paths starting with the specified Concept, subject to constraints on relationship types (rel), relationship sources (sab), and depth of travel. Answers the question, "What are the concepts that are within the specified number of hops (depth) away from a particular concept (query_concept_id), where the hops belong to a set of relationship types from a set of sources?""
+      operationId: concepts_paths_expand_get
+      summary: Returns a set of paths originating from the specified concept, subject to constraints specified in parameters. A path is an ordered set of objects representing hops away from the originating concept. Each hop represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A. To prevent exceeding service timeouts or payload limits, this endpoint is limited in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB.
       parameters:
         - name: concept_id
           in: path
           required: true
-          description: The concept identifier (also known as Concept Unique Identifier, or CUI)
+          description: Theidentifier (also known as Concept Unique Identifier, or CUI) for the Concept from which paths originate.
           schema:
             type: string
-            example: C0006142
+            example: C2720507
         - name: sab
           in: query
           required: true
-          description: A filter for one or more sources (SABs) that define relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: string
             example: SNOMEDCT_US
         - name: rel
           in: query
           required: true
-          description: A filter for one or more relationship types that are involved in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
           schema:
             type: string
             example: isa
-        - name: depth
+        - name: mindepth
           in: query
-          required: true
-          description: the maximum number of hops in the set of expanded paths
+          required: false
+          description: The minimum number of hops in the set of expanded paths--e.g., mindepth=2 directs the endpoint to return paths that have at least 2 hops. The minimum must be non-negative and less than the value of _maxdepth_. The default value is 1. Large values of mindepth may result in long queries that exceed the execution time limits.
           schema:
             type: string
-            example: 2
+            example: 1
+        - name: maxdepth
+          in: query
+          required: false
+          description: The maximum number of hops in the set of expanded paths--e.g., maxdepth=4 directs the endpoint to return paths that have no more than 4 hops. The maximum must be non-negative. The default value is _mindepth_ + 2. Large values of maxdepth may result in long queries that exceed the execution time limits.
+          schema:
+            type: string
+            example: 3
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of paths specified by configuration. Values of limit that exceed the maximum number of paths will be set to the maximum.
+          schema:
+            type: string
+            example: 10
       responses:
         '200':
           description: Return the Concepts in all paths starting with the specified Concept, subject to constraints
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ConceptPrefterm'
+                $ref: '#/components/schemas/ConceptPaths'
         '400':
-          description: invalid parameter name; missing required parameter name; invalid type (_depth_ is not numeric)
+          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; mindepth > maxdepth
         '404':
-          description: No Concepts with paths starting with the Concept=_query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_ up to path depth=_depth_
+          description: No Concepts with paths starting with the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
         '5XX':
           description: Unknown error
   /concepts/{concept_id}/paths:
@@ -428,15 +447,78 @@ components:
           type: string
           description: Preferred term for the Concept node.
           example: Malignant neoplasm of breast
-    ConceptPrefterm: # Schema name
+    ConceptPaths: # Schema name
       type: object
+      description: Represents the set of paths originating from a Concept. Each path is an ordered set of objects representing hops away from the originating concept. Each hop represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A.
       properties:
-        concept:
-          type: string
-          example: C0006826
-        prefterm:
-          type: string
-          example: Malignant Neoplasms
+        origin:
+          type: object
+          description: the origin of all paths
+          properties:
+            concept:
+              type: string
+              description: the identifier for the origin Concept
+              example: C2720507
+            prefterm:
+              type: string
+              description: the preferred term for the origin Concept
+              example: SNOMED CT Concept (SNOMED RT+CTV3)
+        paths:
+          type: array
+          description: set of paths originating from a concept.
+          items:
+            type: object
+            properties:
+              position:
+                type: integer
+                description: The position of the path in the complete set of paths that originate from the specified Concept, ordered in terms of Depth First Search (DFS). The item property is invariant with respect to parameters such as skip or limit, but depends on parameters such as mindepth and maxdepth.
+                example: 1
+              length:
+                type: integer
+                description: the length of the path--i.e., the number of items in the _path_ array.
+                example: 1
+              hops:
+                type: array
+                description: the set of individual hops that comprise the path. A hop represents two nodes linked by a relationship.
+                items:
+                  type: object
+                  properties:
+                    hop:
+                      type: integer
+                      description: the position of the hop in the path--i.e., the distance of the hop from the originating Concept.
+                      example: 1
+                    sab:
+                      type: string
+                      description: the identifier for the source of the relationship involved in the hop.
+                      example: SNOMEDCT_US
+                    source:
+                      type: object
+                      description: the source of the hop--i.e., the Concept node from which the relationship starts
+                      properties:
+                        concept:
+                          type: string
+                          description: the identifier for the source Concept
+                          example: C0013227
+                        prefterm:
+                          type: string
+                          description: the preferred term for the source Concept
+                          example: Pharmaceutical Preparations
+                    target:
+                      type: object
+                      description: the target of the hop--i.e., the Concept node in which the relationship ends
+                      properties:
+                        concept:
+                          type: string
+                          description: the identifier for the target Concept
+                          example: C2720507
+                        prefterm:
+                          type: string
+                          description: the preferred term for the target Concept
+                          example: SNOMED CT Concept (SNOMED RT+CTV3)
+                    type:
+                      type: string
+                      description: the type of relationship involved in the hop.
+                      example: isa
     PathItemConceptRelationshipSabPrefterm: # Schema name
       type: object
       description: Information on a Concept that is part of a path--i.e., a directed set of relationships starting from a specified Concept.

@@ -12,10 +12,9 @@ from utils.http_error_string import get_404_error_string, validate_query_paramet
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
+from utils.path_get_origin import get_origin
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
-
-
 
 @concepts_blueprint.route('<concept_id>/codes', methods=['GET'])
 def concepts_concept_id_codes_get(concept_id):
@@ -111,6 +110,10 @@ def concepts_paths_expand_get(concept_id):
     Example of output for a path of length 1:
 
     {
+    "origin":{
+        "CUI": "C2720507",
+        "pref_term": "SNOMED CT Concept (SNOMED RT+CTV3)"
+        },
     "paths": [
         {
             "item": 1,
@@ -163,6 +166,8 @@ def concepts_paths_expand_get(concept_id):
 
     # Set default mininum.
     mindepth = set_default_minimum(param_value=mindepth, default=1)
+    # Set default maximum.
+    maxdepth = str(int(mindepth) + 2)
 
     # Validate that mindepth is not greater than maxdepth.
     err = validate_parameter_range_order(min_name='mindepth', min_value=mindepth, max_name='maxdepth', max_value=maxdepth)
@@ -183,7 +188,7 @@ def concepts_paths_expand_get(concept_id):
     err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
     if err != 'ok':
         return make_response(err, 400)
-    # Set default maximum, based on the app configuration.
+    # Set default row limit, based on the app configuration.
     limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
 
     # Get remaining parameter values from the path or query string.
@@ -205,8 +210,11 @@ def concepts_paths_expand_get(concept_id):
     if err != "ok":
         return make_response(err, 400)
 
-    # The result of the query is a list. Wrap in a dictionary to build a proper JSON object.
-    dict_result = {'paths':result}
+    # Extract the origin of all paths in the list
+    origin = get_origin(result)
+
+    # Wrap origin and path list in a dictionary that will become the JSON response.
+    dict_result = {'origin':origin,'paths':result}
     return jsonify(dict_result)
 
 

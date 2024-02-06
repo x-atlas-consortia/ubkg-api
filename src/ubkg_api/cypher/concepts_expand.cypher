@@ -33,7 +33,14 @@ CALL
   WHERE pStart.CUI=startNode(r).CUI AND pEnd.CUI=endNode(r).CUI
   RETURN DISTINCT tStart, tEnd
 }
-
+// Identify the origin Concept.
+CALL
+{
+    OPTIONAL MATCH (c:Concept {CUI: "C2720507"})-[:PREF_TERM]->(t:Term)
+    RETURN DISTINCT c AS OriginConcept, t AS OriginTerm
+}
 // Collect the ordered hops of each path into objects with properties for source node, end node, and relationships.
-WITH path,COLLECT(DISTINCT {type:type(r),SAB:r.SAB,source:{CUI:startNode(r).CUI,pref_term:tStart.name},target:{CUI:endNode(r).CUI,pref_term:tEnd.name}}) AS path_r
-RETURN {path:path_r} AS paths
+WITH path,COLLECT(DISTINCT {type:type(r),SAB:r.SAB,source:{CUI:startNode(r).CUI,pref_term:tStart.name},target:{CUI:endNode(r).CUI,pref_term:tEnd.name}}) AS path_r,
+{CUI:OriginConcept.CUI, pref_term:OriginTerm.name} AS Origin
+WITH Origin, path_r
+RETURN {hops:path_r,origin:Origin} AS paths
