@@ -75,15 +75,26 @@ def timebox_query(query: str, timeout: int=10000) -> str:
     # Use simple string concatenation instead of an f-string to wrap the source query in a timebox call.
     return "CALL apoc.cypher.runTimeboxed('" + query + "',{}," + str(timeout) + ")"
 
-def format_list_for_query(listquery) ->str:
+def format_list_for_query(listquery: list[str], doublequote: bool =False) ->str:
     """
-    Converts a list of string values into a comma-delimited, single-quoted string for use in a Cypher query clause.
+    Converts a list of string values into a comma-delimited, delimited string for use in a Cypher query clause.
+    :param listquery: list of string values
+    :param doublequote: flag to set the delimiter.
+
+    The default is a single quote; however, when a query
+    is the argument for the apoc.timebox function, the delimiter should be double quote.
+
     Example:
         listquery: ['SNOMEDCT_US', 'HGNC']
-        return: "'SNOMEDCT_US', 'HGNC'"
+        return:
+            doublequote = False: "'SNOMEDCT_US', 'HGNC'"
+            doublequote = True: '"SNOMEDCT_US","HGNC"'
 
     """
-    return ', '.join("'{0}'".format(s) for s in listquery)
+    if doublequote:
+        return ', '.join('"{0}"'.format(s) for s in listquery)
+    else:
+        return ', '.join("'{0}'".format(s) for s in listquery)
 
 def rel_str_to_array(rels: List[str]) -> List[List]:
     rel_array: List[List] = []
@@ -276,9 +287,9 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     # Load query string and associate parameter values to variables.
     query=loadquerystring(filename='concepts_expand.cypher')
     query = query.replace('$query_concept_id',f'"{query_concept_id}"')
-    sabjoin = format_list_for_query(sab)
+    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
     query = query.replace('$sab', sabjoin)
-    reljoin = format_list_for_query(rel)
+    reljoin = format_list_for_query(listquery=rel, doublequote=True)
     query = query.replace('$rel', reljoin)
     query = query.replace('$mindepth', str(mindepth))
     query = query.replace('$maxdepth', str(maxdepth))
@@ -307,96 +318,92 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
 
     return conceptPaths
 
+# JAS February 2024 Deprecated, as the apoc.expandConfig call is identical to the apoc.expand.
+
 # JAS January 2024 Converted from POST to GET
-def concepts_path_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None ) -> List[PathItemConceptRelationshipSabPrefterm]:
+# def concepts_path_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None ) -> List[PathItemConceptRelationshipSabPrefterm]:
+#
+#    """
+#    :param neo4j_instance: UBKG connection
+#    :param query_concept_id: CUI of concept from which to expand paths
+#    :param sab: list of SABs by which to filter relationship types in the paths.
+#    :param rel: list of relationship types by which to filter relationship types in the paths.
+#    :param dept: maximum number of hops in the set of paths
+#    """
+#
+#    pathItemConceptRelationshipSabPrefterms: [PathItemConceptRelationshipSabPrefterm] = []
+#    query: str = \
+#        "MATCH (c:Concept {CUI: $query_concept_id})" \
+#        " CALL apoc.path.expandConfig(c, {relationshipFilter: apoc.text.join([x in [$rel] | '<'+x], ','),minLevel: size([$rel]),maxLevel: size([$rel])})" \
+#        " YIELD path" \
+#        " WHERE ALL(r IN relationships(path) WHERE r.SAB IN [$sab])" \
+#        " WITH [n IN nodes(path) | n.CUI] AS concepts, [null]+[r IN relationships(path) |Type(r)] AS relationships, [null]+[r IN relationships(path) | r.SAB] AS sabs" \
+#        " CALL{WITH concepts,relationships,sabs UNWIND RANGE(0, size(concepts)-1) AS items WITH items AS item, concepts[items] AS concept, relationships[items] AS relationship, sabs[items] AS sab RETURN COLLECT([item,concept,relationship,sab]) AS paths}" \
+#        " WITH COLLECT(paths) AS rollup" \
+#        " UNWIND RANGE(0, size(rollup)-1) AS path" \
+#        " UNWIND rollup[path] as final" \
+#        " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
+#        " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
+#
+#    sabjoin = format_list_for_query(sab)
+#    query = query.replace('$sab', sabjoin)
+#    reljoin = format_list_for_query(rel)
+#    query = query.replace('$rel', reljoin)
+#
+#
+#    with neo4j_instance.driver.session() as session:
+#        recds: neo4j.Result = session.run(query,
+#                                          query_concept_id=query_concept_id
+#                                          )
+#        for record in recds:
+#            try:
+#                pathItemConceptRelationshipSabPrefterm: PathItemConceptRelationshipSabPrefterm = \
+#                    PathItemConceptRelationshipSabPrefterm(record.get('path'), record.get('item'),
+#                                                           record.get('concept'), record.get('relationship'),
+#                                                           record.get('sab'), record.get('prefterm')).serialize()
+#                pathItemConceptRelationshipSabPrefterms.append(pathItemConceptRelationshipSabPrefterm)
+#            except KeyError:
+#               pass
+#    return pathItemConceptRelationshipSabPrefterms
 
-    """
-    :param neo4j_instance: UBKG connection
-    :param query_concept_id: CUI of concept from which to expand paths
-    :param sab: list of SABs by which to filter relationship types in the paths.
-    :param rel: list of relationship types by which to filter relationship types in the paths.
-    :param dept: maximum number of hops in the set of paths
-    """
+# JAS February 2024 - Refactored for v5.
+# apoc.algo.dijkstraWithDefaultWeight was deprecated in version 5.
+# Replaced the function with dijkstra, and accepted default weight.
+def concepts_shortestpath_get_logic(neo4j_instance, query_concept_id=None, target_concept_id=None,
+                                     sab=None, rel=None) \
+        -> List[PathItemConceptRelationshipSabPrefterm]:
 
-    pathItemConceptRelationshipSabPrefterms: [PathItemConceptRelationshipSabPrefterm] = []
-    query: str = \
-        "MATCH (c:Concept {CUI: $query_concept_id})" \
-        " CALL apoc.path.expandConfig(c, {relationshipFilter: apoc.text.join([x in [$rel] | '<'+x], ','),minLevel: size([$rel]),maxLevel: size([$rel])})" \
-        " YIELD path" \
-        " WHERE ALL(r IN relationships(path) WHERE r.SAB IN [$sab])" \
-        " WITH [n IN nodes(path) | n.CUI] AS concepts, [null]+[r IN relationships(path) |Type(r)] AS relationships, [null]+[r IN relationships(path) | r.SAB] AS sabs" \
-        " CALL{WITH concepts,relationships,sabs UNWIND RANGE(0, size(concepts)-1) AS items WITH items AS item, concepts[items] AS concept, relationships[items] AS relationship, sabs[items] AS sab RETURN COLLECT([item,concept,relationship,sab]) AS paths}" \
-        " WITH COLLECT(paths) AS rollup" \
-        " UNWIND RANGE(0, size(rollup)-1) AS path" \
-        " UNWIND rollup[path] as final" \
-        " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
-        " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
+    conceptPaths: [ConceptPath] = []
 
-    sabjoin = format_list_for_query(sab)
+    # Load query string and associate parameter values to variables.
+    query = loadquerystring(filename='concepts_shortestpath.cypher')
+    query = query.replace('$query_concept_id', f'"{query_concept_id}"')
+    query = query.replace('$target_concept_id', f'"{target_concept_id}"')
+    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
     query = query.replace('$sab', sabjoin)
-    reljoin = format_list_for_query(rel)
+    reljoin = format_list_for_query(listquery=rel, doublequote=True)
     query = query.replace('$rel', reljoin)
+    # Limit query execution time to duration specified in app.cfg.
+    query = timebox_query(query, timeout=neo4j_instance.timeout)
 
-
+    path_position = 1
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query,
-                                          query_concept_id=query_concept_id
-                                          )
+        recds: neo4j.Result = session.run(query)
         for record in recds:
+            # The timebox query wraps each record in a dictionary with the record as the value of a key named 'value.'
+            val = record.get('value')
             try:
-                pathItemConceptRelationshipSabPrefterm: PathItemConceptRelationshipSabPrefterm = \
-                    PathItemConceptRelationshipSabPrefterm(record.get('path'), record.get('item'),
-                                                           record.get('concept'), record.get('relationship'),
-                                                           record.get('sab'), record.get('prefterm')).serialize()
-                pathItemConceptRelationshipSabPrefterms.append(pathItemConceptRelationshipSabPrefterm)
+                path_info = val.get('paths')
+                # Add the position index for this path in the entire set--i.e., the row number from the query return,
+                # based on the value of skip.
+                path_info['position'] = path_position
+                conceptPath: ConceptPath = ConceptPath(path_info=path_info).serialize()
+                conceptPaths.append(conceptPath)
+                path_position = path_position + 1
             except KeyError:
                 pass
-    return pathItemConceptRelationshipSabPrefterms
 
-# JAS February 2024 - replaced POST with GET.
-def concepts_shortestpaths_get_logic(neo4j_instance, query_concept_id=None, target_concept_id=None,
-                                     sab=None, rel=None) -> List[PathItemConceptRelationshipSabPrefterm]:
-
-    pathItemConceptRelationshipSabPrefterms: [PathItemConceptRelationshipSabPrefterm] = []
-
-    # JAS January 2024 - apoc.algo.dijkstraWithDefaultWeight was deprecated in version 5. Replaced the function with
-    # dijkstra, and accepted default weight.
-
-    query: str = \
-        "MATCH (c:Concept {CUI: $query_concept_id})" \
-        " MATCH (d:Concept {CUI: $target_concept_id})" \
-        " CALL apoc.algo.dijkstra(c, d, apoc.text.join([x in [$rel] | '<'+x], '|'), 'none', 10)" \
-        " YIELD path" \
-        " WHERE ALL(r IN relationships(path) WHERE r.SAB IN [$sab])" \
-        " WITH [n IN nodes(path) | n.CUI] AS concepts, [null]+[r IN relationships(path) |Type(r)] AS relationships, [null]+[r IN relationships(path) | r.SAB] AS sabs" \
-        " CALL{WITH concepts,relationships,sabs UNWIND RANGE(0, size(concepts)-1) AS items WITH items AS item, concepts[items] AS concept, relationships[items] AS relationship, sabs[items] AS sab RETURN COLLECT([item,concept,relationship,sab]) AS paths}" \
-        " WITH COLLECT(paths) AS rollup" \
-        " UNWIND RANGE(0, size(rollup)-1) AS path" \
-        " UNWIND rollup[path] as final" \
-        " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
-        " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
-
-    sabjoin = format_list_for_query(sab)
-    query = query.replace('$sab', sabjoin)
-    reljoin = format_list_for_query(rel)
-    query = query.replace('$rel', reljoin)
-
-    with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query,
-                                      query_concept_id=query_concept_id,
-                                      target_concept_id=target_concept_id
-                                      )
-        for record in recds:
-            try:
-                pathItemConceptRelationshipSabPrefterm: PathItemConceptRelationshipSabPrefterm = \
-                    PathItemConceptRelationshipSabPrefterm(record.get('path'), record.get('item'),
-                                                           record.get('concept'), record.get('relationship'),
-                                                           record.get('sab'), record.get('prefterm')).serialize()
-                pathItemConceptRelationshipSabPrefterms.append(pathItemConceptRelationshipSabPrefterm)
-            except KeyError:
-                pass
-    return pathItemConceptRelationshipSabPrefterms
-
+    return conceptPaths
 
 # JAS February 2024 Replaced POST with GET.
 def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, depth=None)\

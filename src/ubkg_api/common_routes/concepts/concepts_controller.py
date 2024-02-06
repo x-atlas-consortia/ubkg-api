@@ -7,12 +7,12 @@ from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_c
 """
 from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
     concepts_concept_id_definitions_get_logic, concepts_expand_get_logic,\
-    concepts_path_get_logic, concepts_shortestpaths_get_logic, concepts_trees_get_logic
+    concepts_shortestpath_get_logic, concepts_trees_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
-from utils.path_get_origin import get_origin
+from utils.path_get_endpoints import get_origin, get_terminus
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
 
@@ -111,8 +111,8 @@ def concepts_paths_expand_get(concept_id):
 
     {
     "origin":{
-        "CUI": "C2720507",
-        "pref_term": "SNOMED CT Concept (SNOMED RT+CTV3)"
+        "concept": "C2720507",
+        "prefterm": "SNOMED CT Concept (SNOMED RT+CTV3)"
         },
     "paths": [
         {
@@ -123,12 +123,12 @@ def concepts_paths_expand_get(concept_id):
                     "hop": 1,
                     "sab": "SNOMEDCT_US",
                     "source": {
-                        "CUI": "C0013227",
-                        "pref_term": "Pharmaceutical Preparations"
+                        "concept": "C0013227",
+                        "prefterm": "Pharmaceutical Preparations"
                     },
                     "target": {
-                        "CUI": "C2720507",
-                        "pref_term": "SNOMED CT Concept (SNOMED RT+CTV3)"
+                        "concept": "C2720507",
+                        "prefterm": "SNOMED CT Concept (SNOMED RT+CTV3)"
                     },
                     "type": "isa"
                 }
@@ -206,9 +206,9 @@ def concepts_paths_expand_get(concept_id):
         return make_response(err, 404)
 
     # Limit the size of the payload, based on the app configuration.
-    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    if err != "ok":
-        return make_response(err, 400)
+    #err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
+    #if err != "ok":
+        #return make_response(err, 400)
 
     # Extract the origin of all paths in the list
     origin = get_origin(result)
@@ -217,83 +217,97 @@ def concepts_paths_expand_get(concept_id):
     dict_result = {'origin':origin,'paths':result}
     return jsonify(dict_result)
 
-
+# JAS February 2024 Deprecated, as the paths endpoint is a duplicate of the expand endpoint.
 # JAS January 2024 Replaced POST with GET
-@concepts_blueprint.route('<concept_id>/paths', methods=['GET'])
-def concepts_path_get(concept_id):
-    """Return all paths of the relationship pattern specified within the selected sources
+# @concepts_blueprint.route('<concept_id>/paths', methods=['GET'])
+# def concepts_path_get(concept_id):
+#    """Return all paths of the relationship pattern specified within the selected sources
+#
+#    :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm],
+#     int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
+#    """
 
-    :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm],
-     int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
-    """
-
-    # Validate parameters.
-    # Check for invalid parameter names.
-    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel'])
-    if err != 'ok':
-        return make_response(err, 400)
-
-    # Check for required parameters.
-    err = validate_required_parameters(required_parameter_list=['sab', 'rel'])
-    if err != 'ok':
-        return make_response(err, 400)
-
-    # Get remaining parameter values from the path or query string.
-    query_concept_id = concept_id
-    sab = parameter_as_list(param_name='sab')
-    rel = parameter_as_list(param_name='rel')
-
-    neo4j_instance = current_app.neo4jConnectionHelper.instance()
-
-    result = concepts_path_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel)
-
-    if result is None or result == []:
-        # Empty result
-        err = get_404_error_string(prompt_string=f"No Concepts in paths that begin with the "
-                                                 f"Concept='query_concept_id' with relationship types "
-                                                 f"in 'rel' filtered by sources in 'sab'")
-        return make_response(err, 404)
-
-    return jsonify(result)
+#    # Validate parameters.
+#    # Check for invalid parameter names.
+#    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel'])
+#    if err != 'ok':
+#        return make_response(err, 400)
+#
+#    # Check for required parameters.
+#    err = validate_required_parameters(required_parameter_list=['sab', 'rel'])
+#    if err != 'ok':
+#        return make_response(err, 400)
+#
+#    # Get remaining parameter values from the path or query string.
+#    query_concept_id = concept_id
+#    sab = parameter_as_list(param_name='sab')
+#    rel = parameter_as_list(param_name='rel')
+#
+#    neo4j_instance = current_app.neo4jConnectionHelper.instance()
+#
+#    result = concepts_path_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel)
+#
+#    if result is None or result == []:
+#        # Empty result
+#        err = get_404_error_string(prompt_string=f"No Concepts in paths that begin with the "
+#                                                 f"Concept='query_concept_id' with relationship types "
+#                                                 f"in 'rel' filtered by sources in 'sab'")
+#        return make_response(err, 404)
+#
+#    return jsonify(result)
 
 
 # JAS February 2024 Replaced POST with GET
-@concepts_blueprint.route('<concept_id>/shortestpaths', methods=['GET'])
-def concepts_shortestpaths_get(concept_id):
-    """Return all paths of the relationship pattern specified within the selected sources
+@concepts_blueprint.route('<concept_id>/paths/shortestpath', methods=['GET'])
+def concepts_shortestpath_get(concept_id):
 
-    :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm],
-     int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
+    """
+    Returns the shortest path between a pair of concepts. View the docstring for the concepts_expand_get for an example
+    of a return.
+
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
     # Validate parameters.
     # Check for invalid parameter names.
-    err = validate_query_parameter_names(parameter_name_list=['target_concept_id', 'sab', 'rel'])
+    err = validate_query_parameter_names(parameter_name_list=['target_concept_id','sab', 'rel'])
     if err != 'ok':
         return make_response(err, 400)
 
     # Check for required parameters.
-    err = validate_required_parameters(required_parameter_list=['target_concept_id', 'sab', 'rel'])
+    err = validate_required_parameters(required_parameter_list=['target_concept_id','sab', 'rel'])
     if err != 'ok':
         return make_response(err, 400)
 
     # Get remaining parameter values from the path or query string.
     query_concept_id = concept_id
+    target_concept_id = request.args.get('target_concept_id')
     sab = parameter_as_list(param_name='sab')
     rel = parameter_as_list(param_name='rel')
-    target_concept_id = request.args.get('target_concept_id')
 
-    result = concepts_shortestpaths_get_logic(neo4j_instance, query_concept_id=query_concept_id,
-                                              target_concept_id=target_concept_id, sab=sab, rel=rel)
+    result = concepts_shortestpath_get_logic(neo4j_instance, query_concept_id=query_concept_id,
+                                             target_concept_id=target_concept_id, sab=sab, rel=rel)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concepts in shortest paths between the "
-                                                 f"Concepts 'query_concept_id' and 'target_concept_id' "
-                                                 f"with relationship types in 'rel' filtered by sources in 'sab'")
+        err = get_404_error_string(prompt_string=f"No paths between Concepts",
+                                   custom_request_path=f"query_concept_id='{query_concept_id}'",
+                                   timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Limit the size of the payload, based on the app configuration.
+    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
+    if err != "ok":
+        return make_response(err, 400)
+
+    # Extract the origin of the shortest path.
+    origin = get_origin(result)
+
+    # Extract the terminus of the shortest path.
+    terminus = get_terminus(result)
+
+    # Wrap origin and path list in a dictionary that will become the JSON response.
+    dict_result = {'origin': origin, 'terminus':terminus, 'paths': result}
+    return jsonify(dict_result)
 
 
 # JAS February 2024 Converted POST to GET.

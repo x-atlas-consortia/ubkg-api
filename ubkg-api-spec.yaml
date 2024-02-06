@@ -189,7 +189,7 @@ paths:
         - name: limit
           in: query
           required: false
-          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of paths specified by configuration. Values of limit that exceed the maximum number of paths will be set to the maximum.
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
           schema:
             type: string
             example: 10
@@ -206,61 +206,22 @@ paths:
           description: No Concepts with paths starting with the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
         '5XX':
           description: Unknown error
-  /concepts/{concept_id}/paths:
+  /concepts/{concept_id}/paths/shortestpath:
     get:
-      operationId: concepts_path_get
-      summary: Returns information on the Concepts that are in paths that begin with the specified Concept, subject to constraints on relationship types (rel) and relationship sources (sab).
-      parameters:
-        - name: concept_id
-          in: path
-          required: true
-          description: The concept identifier (also known as Concept Unique Identifier, or CUI)
-          schema:
-            type: string
-            example: C0006142
-        - name: sab
-          in: query
-          required: true
-          description: A filter for one or more sources (SABs) that define relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
-          schema:
-            type: string
-            example: SNOMEDCT_US
-        - name: rel
-          in: query
-          required: true
-          description: A filter for one or more relationship types that are involved in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
-          schema:
-            type: string
-            example: isa
-      responses:
-        '200':
-          description: Returns information on all Concept nodes in paths that begin with the specified Concept, subject to constraints on relationship types (rel) and relationship sources (sab)
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PathItemConceptRelationshipSabPrefterm'
-        '404':
-          description: No concepts with paths that being with Concept=_query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_
-        '5XX':
-          description: Unknown error
-  /concepts/{concept_id}/shortestpaths:
-    get:
-      operationId: concepts_shortestpaths_get
+      operationId: concepts_shortestpath_get
       summary: Return the shortest path between two Concepts, using Dykstra's algorithm with default weights, subject to constraints on relationship types (rel) and relationship sources (sab).
       parameters:
         - name: concept_id
           in: path
           required: true
-          description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the starting node of the shortestpath calculation.
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the origin of the shortestpath calculation.
           schema:
             type: string
             example: C2720507
         - name: target_concept_id
           in: query
           required: true
-          description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the ending node of the shortestpath calculation.
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the terminus of the shortestpath calculation.
           schema:
             type: string
             example: C1272753
@@ -284,9 +245,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PathItemConceptRelationshipSabPrefterm'
+                $ref: '#/components/schemas/ConceptShortestPath'
         '400':
           description: invalid parameter name; missing required parameter name
         '404':
@@ -477,6 +436,91 @@ components:
                 type: integer
                 description: the length of the path--i.e., the number of items in the _path_ array.
                 example: 1
+              hops:
+                type: array
+                description: the set of individual hops that comprise the path. A hop represents two nodes linked by a relationship.
+                items:
+                  type: object
+                  properties:
+                    hop:
+                      type: integer
+                      description: the position of the hop in the path--i.e., the distance of the hop from the originating Concept.
+                      example: 1
+                    sab:
+                      type: string
+                      description: the identifier for the source of the relationship involved in the hop.
+                      example: SNOMEDCT_US
+                    source:
+                      type: object
+                      description: the source of the hop--i.e., the Concept node from which the relationship starts
+                      properties:
+                        concept:
+                          type: string
+                          description: the identifier for the source Concept
+                          example: C0013227
+                        prefterm:
+                          type: string
+                          description: the preferred term for the source Concept
+                          example: Pharmaceutical Preparations
+                    target:
+                      type: object
+                      description: the target of the hop--i.e., the Concept node in which the relationship ends
+                      properties:
+                        concept:
+                          type: string
+                          description: the identifier for the target Concept
+                          example: C2720507
+                        prefterm:
+                          type: string
+                          description: the preferred term for the target Concept
+                          example: SNOMED CT Concept (SNOMED RT+CTV3)
+                    type:
+                      type: string
+                      description: the type of relationship involved in the hop.
+                      example: isa
+
+    ConceptShortestPath: # Schema name
+      type: object
+      description: Represents the shortest path between two Concepts. The path is an ordered set of objects representing hops away from the originating concept. Each hop represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A.
+      properties:
+        origin:
+          type: object
+          description: the origin of the shortest path
+          properties:
+            concept:
+              type: string
+              description: the identifier for the origin Concept
+              example: C2720507
+            prefterm:
+              type: string
+              description: the preferred term for the origin Concept
+              example: SNOMED CT Concept (SNOMED RT+CTV3)
+        terminus:
+          type: object
+          description: the terminal Concept in the shortest path
+          properties:
+            concept:
+              type: string
+              description: the identifier for the terminal Concept
+              example: C1272753
+            prefterm:
+              type: string
+              description: the preferred term for the terminal Concept
+              example: Institution (social concept)
+        paths:
+          type: array
+          description: set of paths originating from a concept.
+          items:
+            type: object
+            properties:
+              position:
+                type: integer
+                description: Always 1.
+                example: 1
+              length:
+                type: integer
+                description: the length of the path--i.e., the number of items in the _path_ array.
+                example: 2
               hops:
                 type: array
                 description: the set of individual hops that comprise the path. A hop represents two nodes linked by a relationship.

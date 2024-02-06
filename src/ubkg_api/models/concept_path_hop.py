@@ -60,12 +60,12 @@ class ConceptPathHop(Model):
         # Property initialization
         self._sab = sab
 
-        source = ConceptPrefterm(concept=source.get('CUI'), prefterm=source.get('prefterm'))
+        source = ConceptPrefterm(concept=source.get('CUI'), prefterm=source.get('pref_term'))
         sourcedict = source.to_dict()
         self._source = sourcedict
 
         self._type = type
-        target = ConceptPrefterm(concept=target.get('CUI'), prefterm=target.get('prefterm'))
+        target = ConceptPrefterm(concept=target.get('CUI'), prefterm=target.get('pref_term'))
         targetdict = target.to_dict()
         self._target = targetdict
 

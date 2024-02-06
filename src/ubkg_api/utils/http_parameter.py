@@ -6,7 +6,7 @@ from flask import request
 def parameter_as_list(param_name: str) -> list[str]:
     """
     Normalizes varying forms of query strings into a list of strings.
-    :param param_name: name of the parameter to format.
+    :param param_name: name of the parameter to format
 
     An endpoint that accepts a multi-value parameter (such as sab) should be able to process values either as key/value
     pairs or as a single, URL-escaped list--i.e., for param_names in {A, B, C}
@@ -15,15 +15,15 @@ def parameter_as_list(param_name: str) -> list[str]:
     ?param_name=A%2CB%2CC
     (%2C = comma)
 
-    :return: a list of strings--e.g., ['A','B','C']
+    :return: a delimited list of strings--e.g., [<delim>A<delim>,<delim>B<delim>,<delim>C<delim>]
     """
     listparam = request.args.getlist(param_name)
     if len(listparam) == 1:
         # This may be from a URL-escaped list. The result of getlist would be a list with a single value--e.g.,
         # 'A,B,C'. Split this into separate values.
         listparam = listparam[0].split(',')
-    return listparam
 
+    return listparam
 
 def set_default_minimum(param_value=None, default: int = 0) -> int:
     """

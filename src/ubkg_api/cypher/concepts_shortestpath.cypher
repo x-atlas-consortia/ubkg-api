@@ -1,13 +1,13 @@
-//Used by the concepts/paths/expand endpoint.
+//Used by the concepts/paths/shortestpath endpoint.
 
-//The concepts_expand_get_logic function in common_neo4j_logic.py will replace variables preceded by the dollar sign.
+//The concepts_shortestpaths_logic function in common_neo4j_logic.py will replace variables preceded by the dollar sign.
 
-// Identify all paths starting from the specified node
-// with path lengths in the specified range.
+// Identify the shortest path between the specified concept nodes, using the Dijkstra Algorithm with default weights.
 CALL
 {
 MATCH (c:Concept {CUI: $query_concept_id})
-CALL apoc.path.expand(c,apoc.text.join([x IN [$rel] | "<"+x], "|"), "Concept", $mindepth, $maxdepth)
+MATCH (d:Concept {CUI: $target_concept_id})
+CALL apoc.algo.dijkstra(c, d, apoc.text.join([x IN [$rel] | "<"+x], "|"), "none", 1)
 YIELD path
 return path
 }
@@ -15,10 +15,6 @@ return path
 // Filter to those paths that involve relationships with the specified values of SAB.
 WITH path
 WHERE ALL(r IN relationships(path) WHERE r.SAB IN [$sab])
-
-// Filter to a specified subset of paths--i.e., to support pagination.
-// The result of the path.expand function is ordered in terms of Depth First Search, so the order of paths is invariant.
-WITH path SKIP $skip LIMIT $limit
 
 // Simplify the representation of a path to an array of JSON objects. Each object represents a single hop
 // in the path, ordered by distance from the starting node.
@@ -33,6 +29,8 @@ CALL
   WHERE pStart.CUI=startNode(r).CUI AND pEnd.CUI=endNode(r).CUI
   RETURN DISTINCT tStart, tEnd
 }
+
 // Collect the ordered hops of each path into objects with properties for source node, end node, and relationships.
 WITH path,COLLECT(DISTINCT {type:type(r),SAB:r.SAB,source:{CUI:startNode(r).CUI,pref_term:tStart.name},target:{CUI:endNode(r).CUI,pref_term:tEnd.name}}) AS path_r
+WITH path_r
 RETURN {hops:path_r} AS paths
