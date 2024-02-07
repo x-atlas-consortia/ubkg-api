@@ -36,6 +36,9 @@ display a custom explanation. For endpoints with timeboxed queries, the custom 4
 If the size of an endpoint's response payload exceeds the maximum, the UBKG API will 
 raise a HTTP 404 message, explaining the reason.
 
+### POSTs are now GETs
+All endpoints in Version 2 of the UBKG API use GET instead of POST.
+
 ### List parameter options
 A number of endpoints feature parameters that can be lists: for example, the 
 _rel_ parameter can be used to specify a set of relationship types with 
@@ -103,6 +106,10 @@ This response describes the relationship **(C0013227) - _isa_ -> (C2720507)**.
   ]
 }
 ```
+#### _/semantics/semantictypes_
+The _/semantics/<term_id>/semantics_ endpoint has been updated to the _/semantics/semantictypes_ endpoint.
+The endpoint now allows searching by either semantic type name or Type Unique Identifier (TUI).
+
 
 #### New endpoints
 The following endpoints were introduced in Version 2 of the UBKG API. Refer to the
@@ -121,9 +128,9 @@ archived in folders named **deprecated** in the appropriate folders.
 
 Endpoints can be returned to the UBKG API if an appropriate use case is identified.
 
-| Endpoint                        | Reason for deprecating                                         |
-|---------------------------------|----------------------------------------------------------------|
-| _/concepts/<concept_id>/paths_  | Duplicates _/concepts/<concept_id>/paths/expand_               |
-| /tui/{tui_id}/semantics         | Type Unique Identifiers are a feature primarily of UMLS terms. |
-| /terms/{term_id}/concepts/terms | Incompatible with Cypher version 5                             |
+| Endpoint                          | Reason for deprecating                           |
+|-----------------------------------|--------------------------------------------------|
+| _/concepts/<concept_id>/paths_    | Duplicates _/concepts/<concept_id>/paths/expand_ |
+| _/tui/{tui_id}/semantics_         |                                                  |
+| _/terms/{term_id}/concepts/terms_ | Incompatible with Cypher version 5               |
 

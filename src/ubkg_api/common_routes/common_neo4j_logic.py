@@ -25,7 +25,8 @@ from models.concept_path import ConceptPath
 from models.concept_sab_rel_depth import ConceptSabRelDepth
 from models.concept_term import ConceptTerm
 from models.path_item_concept_relationship_sab_prefterm import PathItemConceptRelationshipSabPrefterm
-from models.qqst import QQST
+# from models.qqst import QQST
+from models.semantictype import SemanticType
 from models.sab_definition import SabDefinition
 from models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
 from models.sab_relationship_concept_term import SabRelationshipConceptTerm
@@ -505,30 +506,51 @@ def concepts_subgraph_get_logic(neo4j_instance, sab=None, rel=None, skip=None, l
 
     return conceptPaths
 
-# JAS January 2024
-# Deprecated semantics and tui routes.
-"""
-def semantics_semantic_id_semantics_get_logic(neo4j_instance, semantic_id: str) -> List[QQST]:
-    qqsts: [QQST] = []
-    query: str = \
-        'WITH [$semantic_id] AS query' \
-        ' MATCH (a:Semantic)-[:ISA_STY]->(b:Semantic)' \
-        ' WHERE (a.name IN query OR query = [])' \
-        ' RETURN DISTINCT a.name AS querySemantic, a.TUI as queryTUI, a.STN as querySTN, b.name AS semantic,' \
-        '  b.TUI AS TUI, b.STN as STN'
+
+def semantics_semantic_id_semantictypes_get_logic(neo4j_instance, types=None, skip=None, limit=None) -> List[SemanticType]:
+    """
+    Obtains information on the set of Semantic (semantic type) nodes that are subtypes (have ISA_STY relationships
+    with) the semantic types identified in the types list.
+    The list can contain two types of identifiers:
+    1. Name (e.g., "Anatomical Structure")
+    2. Type Unique Identifier (e.g., "T017")
+
+    If types is empty, return all semantic types.
+
+    :param types: a list string prepared by the controller.
+    :param skip: SKIP value for the query
+    :param limit: LIMIT value for the query
+
+    """
+    semantictypes: [SemanticType] = []
+    # Load and parameterize base query.
+    query = loadquerystring('semantics_semantictypes.cypher')
+
+    if types is None:
+        # Load all semantic types
+        query = query.replace('$types','')
+    else:
+        typesjoin = format_list_for_query(listquery=types, doublequote=True)
+        query = query.replace('$types', typesjoin)
+
+    query = query.replace('$skip',str(skip))
+    query = query.replace('$limit',str(limit))
+
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query, semantic_id=semantic_id)
+        recds: neo4j.Result = session.run(query)
+        position = skip + 1
         for record in recds:
+            semantic_type = record.get('semantic_type')
             try:
-                qqst: QQST = QQST(record.get('queryTUI'), record.get('querySTN'), record.get('semantic'),
-                                  record.get('TUI'), record.get('STN')).serialize()
-                qqsts.append(qqst)
+                semantictype: SemanticType = SemanticType(semantic_type,position).serialize()
+                semantictypes.append(semantictype)
+                position = position + 1
             except KeyError:
                 pass
-    return qqsts
-"""
+    return semantictypes
 
 def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[TermtypeCode]:
+
     termtypeCodes: [TermtypeCode] = []
 
     """

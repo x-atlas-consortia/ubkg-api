@@ -11,12 +11,10 @@ sys.path.append(str(path_root))
 # Local modules
 from neo4j_connection_helper import Neo4jConnectionHelper
 
-# JAS January 2024 Deprecating semantics and tui routes
 from common_routes.codes.codes_controller import codes_blueprint
 from common_routes.concepts.concepts_controller import concepts_blueprint
-# from src.ubkg_api.common_routes.deprecated.semantics.semantics_controller import semantics_blueprint
 from common_routes.terms.terms_controller import terms_blueprint
-# from src.ubkg_api.common_routes.deprecated.tui import tui_blueprint
+from common_routes.semantics.semantics_controller import semantics_blueprint
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -42,8 +40,7 @@ class UbkgAPI:
 
         self.app.register_blueprint(codes_blueprint)
         self.app.register_blueprint(concepts_blueprint)
-        # JAS January 2024 Deprecating semantics and tui blueprints
-        # self.app.register_blueprint(semantics_blueprint)
+        self.app.register_blueprint(semantics_blueprint)
         # self.app.register_blueprint(tui_blueprint)
         self.app.register_blueprint(terms_blueprint)
 
