@@ -27,7 +27,7 @@ def format_request_path(custom_err=None):
     else:
         err = err + f" for '{pathsplit[1]}'"
 
-    return err + '. '
+    return err #+ '. '
 
 
 def format_request_query_string():

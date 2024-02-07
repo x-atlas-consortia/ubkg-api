@@ -458,6 +458,53 @@ def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, re
 
         return conceptPaths
 
+def concepts_subgraph_get_logic(neo4j_instance, sab=None, rel=None, skip=None, limit=None) \
+        -> List[ConceptPath]:
+    """
+    Obtains the set of concept pairs (one-hop paths) that involve relationships of specified types and defined by specified source
+    SABs. For exammple, if sab="UBERON" and rel="part_of", then the endpoint returns all pairs of concepts
+    with the part_of relationship defined by UBERON.
+
+    :param neo4j_instance: UBKG connection
+    :param sab: list of SABs by which to filter relationship types in the paths.
+    :param rel: list of relationship types by which to filter relationship types in the paths.
+    :param skip: paths to skip
+    :param limit: maximum number of paths to return
+    """
+
+    conceptPaths: [ConceptPath] = []
+
+    # Load query string and associate parameter values to variables.
+    query=loadquerystring(filename='concepts_subgraph.cypher')
+    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
+    query = query.replace('$sab', sabjoin)
+    reljoin = format_list_for_query(listquery=rel, doublequote=True)
+    query = query.replace('$rel', reljoin)
+    query = query.replace('$skip', str(skip))
+    query = query.replace('$limit', str(limit))
+
+    # Limit query execution time to duration specified in app.cfg.
+    query = timebox_query(query, timeout=neo4j_instance.timeout)
+
+    path_position = int(skip)+1
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+        for record in recds:
+            # The timebox query wraps each record in a dictionary with the record as the value of a key named 'value.'
+            val = record.get('value')
+            try:
+                path_info = val.get('paths')
+                # Add the position index for this path in the entire set--i.e., the row number from the query return,
+                # based on the value of skip.
+                path_info['position'] = path_position
+                conceptPath: ConceptPath = ConceptPath(path_info=path_info).serialize()
+                conceptPaths.append(conceptPath)
+                path_position = path_position + 1
+            except KeyError:
+                pass
+
+    return conceptPaths
+
 # JAS January 2024
 # Deprecated semantics and tui routes.
 """

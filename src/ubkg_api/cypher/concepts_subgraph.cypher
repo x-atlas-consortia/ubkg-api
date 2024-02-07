@@ -1,23 +1,19 @@
-//Used by the concepts/paths/trees endpoint.
+//Used by the concepts/paths/subgraph endpoint.
 
-//The concepts_trees_get_logic function in common_neo4j_logic.py will replace variables preceded by the dollar sign.
+//The concepts_subgraph_get_logic function in common_neo4j_logic.py will replace variables preceded by the dollar sign.
 
-// Identify the spanning tree starting from the specified node
-// with path lengths in the specified range.
+// Find all relationships of specified types defined by the specified set of SABs.
 CALL
 {
-MATCH (c:Concept {CUI: $query_concept_id})
-CALL apoc.path.spanningTree(c,{relationshipFilter:apoc.text.join([x IN [$rel] | "<"+x], "|"), labelFilter:"Concept", minLevel:$mindepth, maxLevel:$maxdepth})
-YIELD path
-return path
+WITH apoc.text.join([x in [$sab] | x ], " OR ") AS sabs
+CALL db.index.fulltext.queryRelationships("r_SAB",sabs)
+YIELD relationship AS r WHERE TYPE(r) IN [$rel]
+MATCH path=((n1)-[r]->(n2))
+RETURN path
+ORDER BY n1.CUI, n2.CUI
 }
 
-// Filter to those paths that involve relationships with the specified values of SAB.
-WITH path
-WHERE ALL(r IN relationships(path) WHERE r.SAB IN [$sab])
-
 // Filter to a specified subset of paths--i.e., to support pagination.
-// The result of the path.expand function is ordered in terms of Depth First Search, so the order of paths is invariant.
 WITH path SKIP $skip LIMIT $limit
 
 // Simplify the representation of a path to an array of JSON objects. Each object represents a single hop

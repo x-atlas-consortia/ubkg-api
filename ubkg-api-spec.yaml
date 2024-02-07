@@ -75,6 +75,38 @@ paths:
           description: no Concept nodes for the specified Code
         '5XX':
           description: Unknown error
+  /concepts/subgraphs:
+    get:
+      operationId: concepts_subgraphs_get
+      summary: Returns the set of pairs of Concept nodes that are connected by specified relationship types defined by specified sources.
+      parameters:
+        - name: sab
+          in: query
+          required: true
+          description: The set of sources (SABs) to which to limit the relationships in the subgraph. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: SNOMEDCT_US
+        - name: rel
+          in: query
+          required: true
+          description: The set of relationship types to which to limit the relationships in the subgraph. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          schema:
+            type: string
+            example: isa
+      responses:
+        '200':
+          description: Return an array of pairs of Concepts linked by the specified relationships from the specified SABs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptPaths'
+        '400':
+          description: invalid parameter name; missing required parameter name
+        '404':
+          description: No pairs of Concepts linked by specified relationship types. Includes responses from queries with execution times that exceed the maximum.
+        '5XX':
+          description: Unknown error
   /concepts/{concept_id}/codes:
     get:
       operationId: concepts_concept_id_codes_get
@@ -252,52 +284,71 @@ paths:
           description: No shortest path between _query_concept_id_ and _target_concept_id_ with relationship types in _rel_ filtered by sources in _sab_.
         '5XX':
           description: Unknown error
-  /concepts/{concept_id}/trees:
+  /concepts/{concept_id}/paths/trees:
     get:
       operationId: concepts_trees_get
-      summary: Return information on the Concepts in the spanning tree that originates from a specified Concept, subject to constraints on relationship type, relationship source, and path depth
+      summary: Return information on the Concepts in the spanning tree that originates from a specified Concept, subject to constraints on relationship type, relationship source, and range of path depths. A spanning tree is the set of paths originating from node that traverse all of the other nodes of a graph. A path is an ordered set of objects representing hops away from the originating concept. Each hop represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A. To prevent exceeding service timeouts or payload limits, this endpoint is limited in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB.
       parameters:
         - name: concept_id
           in: path
           required: true
-          description: The concept identifier (also known as Concept Unique Identifier, or CUI)
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI) of the origin of the spanning tree.
           schema:
             type: string
             example: C0006142
         - name: sab
           in: query
           required: true
-          description: A filter for one or more sources (SABs) that define relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: A filter for one or more sources (SABs) that define relationships in the spanning tree. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: string
             example: SNOMEDCT_US
         - name: rel
           in: query
           required: true
-          description: A filter for one or more relationship types that are involved in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          description: A filter for one or more relationship types that are involved in the spanning tree. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
           schema:
             type: string
             example: isa
-        - name: depth
+        - name: mindepth
           in: query
-          required: true
-          description: The number of hops which to span. Limited to 2 to prevent timeout.
+          required: false
+          description: The minimum number of hops in the spanning tree--e.g., mindepth=2 directs the endpoint to return paths that have at least 2 hops. The minimum must be non-negative and less than the value of _maxdepth_. The default value is 1. Large values of mindepth may result in long queries that exceed the execution time limits.
           schema:
             type: string
-            example: 2
+            example: 1
+        - name: maxdepth
+          in: query
+          required: false
+          description: The maximum number of hops in spanning tree--e.g., maxdepth=4 directs the endpoint to return paths that have no more than 4 hops. The maximum must be non-negative. The default value is _mindepth_ + 2. Large values of maxdepth may result in long queries that exceed the execution time limits.
+          schema:
+            type: string
+            example: 3
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
       responses:
         '200':
           description: Return information on Concepts in the spanning tree that originates from the specified Concept, subject to constraints on relationship type, relationship source, and spanning depth
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PathItemConceptRelationshipSabPrefterm'
+                $ref: '#/components/schemas/ConceptPaths'
         '400':
-          description: invalid parameter name; missing required parameter name; invalid type (_depth_ is not numeric); depth greater than 2
+          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; mindepth > maxdepth
         '404':
-          description: No Concepts in a spanning tree originating from Concept _query_concept_id_ with relationship types in _rel_ filtered by sources in _sab_ at depth _depth_.
+          description: No Concepts in a spanning tree originating from specified Concept subject to constraints from parameters
         '5XX':
           description: Unknown error
   /concepts/{concept_id}/definitions:

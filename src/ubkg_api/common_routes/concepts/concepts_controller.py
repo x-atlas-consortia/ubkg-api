@@ -7,7 +7,7 @@ from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_c
 """
 from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
     concepts_concept_id_definitions_get_logic, concepts_expand_get_logic,\
-    concepts_shortestpath_get_logic, concepts_trees_get_logic
+    concepts_shortestpath_get_logic, concepts_trees_get_logic,concepts_subgraph_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
@@ -345,8 +345,13 @@ def concepts_trees_get(concept_id):
     if err != 'ok':
         return make_response(err, 400)
 
-    # Set default mininum.
-    mindepth = set_default_minimum(param_value=mindepth, default=1)
+    # Limit the minimum to 0 or 1.
+    if int(mindepth) > 1:
+        err = f"Invalid value for 'mindepth' {mindepth}. The 'mindepth' parameter value for a spanning tree " \
+              f"can be either 0 or 1."
+        return make_response(err, 400)
+
+    mindepth = set_default_minimum(param_value=mindepth, default=0)
     # Set default maximum.
     maxdepth = str(int(mindepth) + 2)
 
@@ -362,7 +367,7 @@ def concepts_trees_get(concept_id):
     if err != 'ok':
         return make_response(err, 400)
 
-    # Set default mininum.
+    # Set default mininum for the skip.
     skip = set_default_minimum(param_value=skip, default=0)
 
     # Check that non-default limit is non-negative.
@@ -378,7 +383,7 @@ def concepts_trees_get(concept_id):
     sab = parameter_as_list(param_name='sab')
     rel = parameter_as_list(param_name='rel')
 
-    result = concepts_expand_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel,
+    result = concepts_trees_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel,
                                        mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
     if result is None or result == []:
         # Empty result
@@ -397,4 +402,64 @@ def concepts_trees_get(concept_id):
 
     # Wrap origin and path list in a dictionary that will become the JSON response.
     dict_result = {'origin': origin, 'paths': result}
+    return jsonify(dict_result)
+
+@concepts_blueprint.route('/subgraph', methods=['GET'])
+def concepts_subgraph_get():
+    """
+    Returns the paths in the subgraph specified by relationship types and SABs, constrained by
+    depth parameters.
+
+    Refer to the docstring for the concept_expand_get function for details on the return.
+    """
+
+    neo4j_instance = current_app.neo4jConnectionHelper.instance()
+
+    # Validate parameters.
+    # Check for invalid parameter names.
+    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel', 'skip', 'limit'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Check for required parameters.
+    err = validate_required_parameters(required_parameter_list=['sab', 'rel'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Check that the non-default skip is non-negative.
+    skip = request.args.get('skip')
+    err = validate_parameter_is_nonnegative(param_name='skip', param_value=skip)
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Set default mininum for the skip.
+    skip = set_default_minimum(param_value=skip, default=0)
+
+    # Check that non-default limit is non-negative.
+    limit = request.args.get('limit')
+    err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
+    if err != 'ok':
+        return make_response(err, 400)
+    # Set default row limit, based on the app configuration.
+    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
+
+    # Get remaining parameter values from the path or query string.
+    sab = parameter_as_list(param_name='sab')
+    rel = parameter_as_list(param_name='rel')
+
+    result = concepts_subgraph_get_logic(neo4j_instance, sab=sab, rel=rel,
+                                       skip=skip, limit=limit)
+    if result is None or result == []:
+        # Empty result
+        err = get_404_error_string(prompt_string=f"No pairs of Concepts linked by relationships of "
+                                                 f"specified relationship types",timeout=neo4j_instance.timeout)
+        return make_response(err, 404)
+
+    # Limit the size of the payload, based on the app configuration.
+    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
+    if err != "ok":
+        return make_response(err, 400)
+
+    # Wrap origin and path list in a dictionary that will become the JSON response.
+    dict_result = {'paths': result}
     return jsonify(dict_result)
