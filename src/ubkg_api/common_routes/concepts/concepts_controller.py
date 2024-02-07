@@ -164,15 +164,16 @@ def concepts_paths_expand_get(concept_id):
     if err != 'ok':
         return make_response(err, 400)
 
+    # Validate that mindepth is not greater than maxdepth.
+    err = validate_parameter_range_order(min_name='mindepth', min_value=mindepth, max_name='maxdepth',
+                                             max_value=maxdepth)
+    if err != 'ok':
+        return make_response(err, 400)
+
     # Set default mininum.
     mindepth = set_default_minimum(param_value=mindepth, default=1)
     # Set default maximum.
     maxdepth = str(int(mindepth) + 2)
-
-    # Validate that mindepth is not greater than maxdepth.
-    err = validate_parameter_range_order(min_name='mindepth', min_value=mindepth, max_name='maxdepth', max_value=maxdepth)
-    if err != 'ok':
-        return make_response(err, 400)
 
     # Check that the non-default skip is non-negative.
     skip = request.args.get('skip')
@@ -451,7 +452,7 @@ def concepts_subgraph_get():
                                        skip=skip, limit=limit)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No pairs of Concepts linked by relationships of "
+        err = get_404_error_string(prompt_string=f"No subgraphs (pairs of Concepts linked by relationships) for "
                                                  f"specified relationship types",timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 

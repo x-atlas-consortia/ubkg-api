@@ -32,13 +32,12 @@ def set_default_minimum(param_value=None, default: int = 0) -> int:
     :param default: default mininum
     """
 
-    if default is None:
-        default = 0
-
     if param_value is None:
         return default
-
-    return param_value
+    elif int(param_value) > default:
+        return param_value
+    else:
+        return default
 
 
 def set_default_maximum(param_value=None, default: int = 0) -> int:
@@ -48,13 +47,9 @@ def set_default_maximum(param_value=None, default: int = 0) -> int:
     :param default: default maximum
     """
 
-    if default is None:
-        default = 0
-
-    ret = int(param_value)
-    if ret is None:
-        ret = default
-    #elif ret > default:
-        #ret = default
-
-    return ret
+    if param_value is None:
+        return default
+    elif int(param_value) < default:
+        return param_value
+    else:
+        return default

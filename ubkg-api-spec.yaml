@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: UBKG API
-  description: The UBKG API provides REST endpoints that return results from queries against an instance of the [Unified Biomedical Knowledge Graph (UBKG)](https://ubkg.docs.xconsortia.org/).
-  version: "1.4"
+  description: The UBKG API provides REST endpoints that return results from queries against an instance of the [Unified Biomedical Knowledge Graph (UBKG)](https://ubkg.docs.xconsortia.org/). To prevent exceeding service timeouts or payload limits, some endpoints are throttled in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB.
+  version: "2.0"
   contact:
     name: GitHub repository
     url: https://github.com/x-atlas-consortia/ubkg-api
@@ -75,10 +75,10 @@ paths:
           description: no Concept nodes for the specified Code
         '5XX':
           description: Unknown error
-  /concepts/subgraphs:
+  /concepts/subgraph:
     get:
-      operationId: concepts_subgraphs_get
-      summary: Returns the set of pairs of Concept nodes that are connected by specified relationship types defined by specified sources.
+      operationId: concepts_subgraph_get
+      summary: Returns a subgraph--the set of pairs of Concept nodes that are connected by a set of specified relationship types defined by a set of specified sources. For example, if the endpoint can return the set of all pairs of nodes that are linked by UBERON's "part_of" relationship.
       parameters:
         - name: sab
           in: query
@@ -94,17 +94,31 @@ paths:
           schema:
             type: string
             example: isa
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
       responses:
         '200':
           description: Return an array of pairs of Concepts linked by the specified relationships from the specified SABs.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConceptPaths'
+                $ref: '#/components/schemas/ConceptSubgraph'
         '400':
-          description: invalid parameter name; missing required parameter name
+          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value
         '404':
-          description: No pairs of Concepts linked by specified relationship types. Includes responses from queries with execution times that exceed the maximum.
+          description: No subgraph for specified relationship types. Includes responses from queries with execution times that exceed the maximum.
         '5XX':
           description: Unknown error
   /concepts/{concept_id}/codes:
@@ -174,7 +188,7 @@ paths:
   /concepts/{concept_id}/paths/expand:
     get:
       operationId: concepts_paths_expand_get
-      summary: Returns a set of paths originating from the specified concept, subject to constraints specified in parameters. A path is an ordered set of objects representing hops away from the originating concept. Each hop represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A. To prevent exceeding service timeouts or payload limits, this endpoint is limited in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB.
+      summary: Returns a set of paths originating from the specified concept, subject to constraints specified in parameters.
       parameters:
         - name: concept_id
           in: path
@@ -200,14 +214,14 @@ paths:
         - name: mindepth
           in: query
           required: false
-          description: The minimum number of hops in the set of expanded paths--e.g., mindepth=2 directs the endpoint to return paths that have at least 2 hops. The minimum must be non-negative and less than the value of _maxdepth_. The default value is 1. Large values of mindepth may result in long queries that exceed the execution time limits.
+          description: The minimum number of hops in the returned set of expanded paths--e.g., mindepth=2 directs the endpoint to return paths that have at least 2 hops. The minimum must be non-negative and less than the value of _maxdepth_. The default value is 1. Large values of mindepth may result in long queries that exceed the execution time limits.
           schema:
             type: string
             example: 1
         - name: maxdepth
           in: query
           required: false
-          description: The maximum number of hops in the set of expanded paths--e.g., maxdepth=4 directs the endpoint to return paths that have no more than 4 hops. The maximum must be non-negative. The default value is _mindepth_ + 2. Large values of maxdepth may result in long queries that exceed the execution time limits.
+          description: The maximum number of hops in the returned set of expanded paths--e.g., maxdepth=4 directs the endpoint to return paths that have no more than 4 hops. The maximum must be non-negative. The default value is _mindepth_ + 2. Large values of maxdepth may result in long queries that exceed the execution time limits.
           schema:
             type: string
             example: 3
@@ -227,7 +241,7 @@ paths:
             example: 10
       responses:
         '200':
-          description: Return the Concepts in all paths starting with the specified Concept, subject to constraints
+          description: Return the Concepts in all paths originating from the specified Concept, subject to constraints. Each path is an ordered set of objects representing hops away from the originating concept. Each hop in a path represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A.
           content:
             application/json:
               schema:
@@ -235,7 +249,7 @@ paths:
         '400':
           description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; mindepth > maxdepth
         '404':
-          description: No Concepts with paths starting with the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
+          description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
         '5XX':
           description: Unknown error
   /concepts/{concept_id}/paths/shortestpath:
@@ -260,20 +274,20 @@ paths:
         - name: sab
           in: query
           required: true
-          description: A filter for one or more sources (SABs) that define relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: string
             example: SNOMEDCT_US
         - name: rel
           in: query
           required: true
-          description: A filter for one or more relationship types that are involved in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2).
           schema:
             type: string
             example: isa
       responses:
         '200':
-          description: Returns the ordered set of Concepts involved in the shortest path, subject to constraints for relationship type and source.
+          description: Returns the ordered set of Concepts involved in the shortest path, subject to constraints for relationship type and source. This path is an ordered set of objects representing hops away from the originating concept, to the terminal concept. Each hop in a path represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A.
           content:
             application/json:
               schema:
@@ -287,7 +301,7 @@ paths:
   /concepts/{concept_id}/paths/trees:
     get:
       operationId: concepts_trees_get
-      summary: Return information on the Concepts in the spanning tree that originates from a specified Concept, subject to constraints on relationship type, relationship source, and range of path depths. A spanning tree is the set of paths originating from node that traverse all of the other nodes of a graph. A path is an ordered set of objects representing hops away from the originating concept. Each hop represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A. To prevent exceeding service timeouts or payload limits, this endpoint is limited in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB.
+      summary: Return information on the Concepts in the spanning tree that originates from a specified Concept, subject to constraints on relationship type, relationship source, and range of path depths. A spanning tree is the set of paths originating from node that traverse all of the other nodes of a graph.
       parameters:
         - name: concept_id
           in: path
@@ -299,24 +313,27 @@ paths:
         - name: sab
           in: query
           required: true
-          description: A filter for one or more sources (SABs) that define relationships in the spanning tree. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: string
             example: SNOMEDCT_US
         - name: rel
           in: query
           required: true
-          description: A filter for one or more relationship types that are involved in the spanning tree. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2).
           schema:
             type: string
             example: isa
         - name: mindepth
           in: query
           required: false
-          description: The minimum number of hops in the spanning tree--e.g., mindepth=2 directs the endpoint to return paths that have at least 2 hops. The minimum must be non-negative and less than the value of _maxdepth_. The default value is 1. Large values of mindepth may result in long queries that exceed the execution time limits.
+          description: The minimum number of hops in the spanning tree--e.g., mindepth=1 directs the endpoint to return paths that have at least 1 hop. The minimum must be non-negative and less than the value of _maxdepth_. The only allowed values are 0 or 1. The default value is 0.
           schema:
-            type: string
-            example: 1
+            type: integer
+            enum:
+              - 0
+              - 1
+            default: 0
         - name: maxdepth
           in: query
           required: false
@@ -340,7 +357,7 @@ paths:
             example: 10
       responses:
         '200':
-          description: Return information on Concepts in the spanning tree that originates from the specified Concept, subject to constraints on relationship type, relationship source, and spanning depth
+          description: Return information the paths in the spanning tree that originates from the specified Concept, subject to constraints on relationship type, relationship source, and spanning depth. A path is an ordered set of objects representing hops away from the originating concept. Each hop represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A.
           content:
             application/json:
               schema:
@@ -529,7 +546,6 @@ components:
                       type: string
                       description: the type of relationship involved in the hop.
                       example: isa
-
     ConceptShortestPath: # Schema name
       type: object
       description: Represents the shortest path between two Concepts. The path is an ordered set of objects representing hops away from the originating concept. Each hop represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A.
@@ -614,32 +630,66 @@ components:
                       type: string
                       description: the type of relationship involved in the hop.
                       example: isa
-    PathItemConceptRelationshipSabPrefterm: # Schema name
+    ConceptSubgraph: # Schema name
       type: object
-      description: Information on a Concept that is part of a path--i.e., a directed set of relationships starting from a specified Concept.
+      description: Represents a subgraph--a set of one-hop paths involving a set of relationship types. The path is an ordered set of objects representing hops away from the originating concept. Each hop represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A.
       properties:
-        path:
-          type: integer
-          description: Ordinal number for a path. Endpoints using this response schema organize Concepts by path.
-        item:
-          type: integer
-          description: Zero-based, ordinal position of the Concept in path=_path_, relative to the starting concept. For example, if item=3, then the Concept is 3 hops away from the starting concept. The starting Concept of a path has item=0 in all paths.
-        concept:
-          type: string
-          description: Identifier (also known as the Concept Unique Identifier, or CUI) for the Concept
-          example: C0006826
-        relationship:
-          type: string
-          description: The relationship type that relates the Concept to the precursor Concept node in the path.
-          example: CHD
-        sab:
-          type: string
-          description: Source that defines the relationship type.
-          example: ICD10AM
-        prefterm:
-          type: string
-          description: preferred term for the Concept.
-          example: Malignant Neoplasms
+        paths:
+          type: array
+          description: set of paths originating from a concept.
+          items:
+            type: object
+            properties:
+              position:
+                type: integer
+                description: The position of the path in the complete subgraph. The item property is invariant with respect to parameters such as skip or limit.
+                example: 1
+              length:
+                type: integer
+                description: Always 1.
+                example: 1
+              hops:
+                type: array
+                description: the set of individual hops that comprise the path. A hop represents two nodes linked by a relationship.
+                items:
+                  type: object
+                  properties:
+                    hop:
+                      type: integer
+                      description: the position of the hop in the path--i.e., the distance of the hop from the originating Concept.
+                      example: 1
+                    sab:
+                      type: string
+                      description: the identifier for the source of the relationship involved in the hop.
+                      example: SNOMEDCT_US
+                    source:
+                      type: object
+                      description: the source of the hop--i.e., the Concept node from which the relationship starts
+                      properties:
+                        concept:
+                          type: string
+                          description: the identifier for the source Concept
+                          example: C0013227
+                        prefterm:
+                          type: string
+                          description: the preferred term for the source Concept
+                          example: Pharmaceutical Preparations
+                    target:
+                      type: object
+                      description: the target of the hop--i.e., the Concept node in which the relationship ends
+                      properties:
+                        concept:
+                          type: string
+                          description: the identifier for the target Concept
+                          example: C2720507
+                        prefterm:
+                          type: string
+                          description: the preferred term for the target Concept
+                          example: SNOMED CT Concept (SNOMED RT+CTV3)
+                    type:
+                      type: string
+                      description: the type of relationship involved in the hop.
+                      example: isa
     SabDefinition: # Schema name
       type: object
       description: A Definition associated with a Concept.
