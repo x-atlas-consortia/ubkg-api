@@ -280,8 +280,8 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
-echo "TESTS FOR: terms/Breast%20cancerz/concepts GET" | tee -a test.out
-echo "1. terms/<term_id>/concepts GET with no match; should return custom 404" | tee -a test.out
+echo "TESTS FOR: terms/<term_id>concepts GET" | tee -a test.out
+echo "1. terms/Breast%20cancerz/concepts GET with no match; should return custom 404" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/terms/Breast%20cancerz/concepts" \
  --header "Accept: application/json" | tee -a test.out
@@ -291,4 +291,25 @@ curl --request GET \
  --url "${UBKG_URL}/terms/Breast%20cancer/concepts" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
+
+echo "TESTS FOR: semantics/semantictypes GET" | tee -a test.out
+echo "1. semantics/semantictypes => invalid parameters; should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/semantics/semantictypes?test=test" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "2. semantics/semantictypes?type=Anatomical%20Structurez => invalid semantic type; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/semantics/semantictypes?type=Anatomical%20Structurez" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "3. semantics/semantictypes?type=Anatomical%20Structure&skip=-1 => invalid skip; should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/semantics/semantictypes?type=Anatomical%20Structure&skip=-1" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "4. semantics/semantictypes?type=Anatomical%20Structure => valid parameters; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/semantics/semantictypes?type=Anatomical%20Structure" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 
