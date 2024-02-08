@@ -14,7 +14,7 @@ servers:
 paths:
   /codes/{code_id}/codes:
     get:
-      summary:  A Concept node can have CODE relationships with (links to) Code nodes from multiple sources (SABs). For example, the Code SNOMEDCT_US:254837009 (SAB=SNOMEDCT_US) links to the Concept with identifier C0006142; however, the Code nodes with identifiers including NCI:C9335 and MSH:D001943 also link to C0006142. This endpoint returns information on Code nodes that link to the Concept node to which the specified code links, subject to constraints specified in parameters.
+      summary:  A Concept node can have CODE relationships with (links to) Code nodes from multiple sources (SABs). For example, the Code SNOMEDCT_US:254837009 links to the Concept with identifier C0006142; Concept C0006142 also links to Codes NCI:C9335 and MSH:D001943. This endpoint returns information on Code nodes that link to the Concept node to which the specified code links, subject to constraints specified in parameters.
       operationId: codes_code_id_codes_get
       parameters:
         - name: code_id
@@ -37,7 +37,7 @@ paths:
             default: []
       responses:
         '200':
-          description: An array of objects corresponding to Code nodes that share links to the Concept associated with the specified Code
+          description: An array of objects corresponding to Code nodes that share links to the Concept associated with the specified Code, subject to constraints specified in parameters.
           content:
             application/json:
               schema:
@@ -58,7 +58,7 @@ paths:
         - name: code_id
           in: path
           required: true
-          description: The identifier for the Code node, in format _SAB_:_CODE_ (or SAB%3Acode), where _SAB_ is an identifier for the source of the code.
+          description: The identifier for the Code node, in format _SAB_:_CODE_ (or SAB%3Acode), where _SAB_ is an identifier for the source of the code. (%3A = colon)
           schema:
             type: string
             example: SNOMEDCT_US:79962008
@@ -78,7 +78,7 @@ paths:
   /concepts/subgraph:
     get:
       operationId: concepts_subgraph_get
-      summary: Returns a subgraph--the set of pairs of Concept nodes that are connected by a set of specified relationship types defined by a set of specified sources. For example, if the endpoint can return the set of all pairs of nodes that are linked by UBERON's "part_of" relationship.
+      summary: Returns a subgraph--the set of pairs of Concept nodes that are connected by a set of specified relationship types defined by a set of specified sources. For example, the endpoint can return the set of all pairs of nodes that are linked by UBERON's "part_of" relationship.
       parameters:
         - name: sab
           in: query
@@ -124,7 +124,7 @@ paths:
   /concepts/{concept_id}/codes:
     get:
       operationId: concepts_concept_id_codes_get
-      summary: A Concept node can have CODE relationships with (links to) muliple Code nodes. This endpoint returns information on the set of Code nodes that link directly to the specified Concept, subject to constraints specified in parameters.
+      summary: A Concept node can have CODE relationships with (links to) multiple Code nodes. This endpoint returns information on the set of Code nodes that link directly to the specified Concept, subject to constraints specified in parameters.
       parameters:
         - name: concept_id
           in: path
@@ -146,7 +146,7 @@ paths:
             default: []
       responses:
         '200':
-          description: An array of code_ids in format _SAB_:_CODE for the Codes that link to the specified Concept
+          description: An array of code_ids in format _SAB_:_CODE for the Codes that link to the specified Concept, subject to constraints specified in parameters.
           content:
             application/json:
               schema:
@@ -188,12 +188,12 @@ paths:
   /concepts/{concept_id}/paths/expand:
     get:
       operationId: concepts_paths_expand_get
-      summary: Returns a set of paths originating from the specified concept, subject to constraints specified in parameters.
+      summary: Returns a set of paths originating from the specified Concept, subject to constraints specified in parameters.
       parameters:
         - name: concept_id
           in: path
           required: true
-          description: Theidentifier (also known as Concept Unique Identifier, or CUI) for the Concept from which paths originate.
+          description: The identifier (also known as Concept Unique Identifier, or CUI) for the Concept from which paths originate.
           schema:
             type: string
             example: C2720507
@@ -369,14 +369,14 @@ paths:
         - name: sab
           in: query
           required: true
-          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3). (%2C = comma)
           schema:
             type: string
             example: SNOMEDCT_US
         - name: rel
           in: query
           required: true
-          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2).
+          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2). (%2C = comma)
           schema:
             type: string
             example: isa
@@ -444,6 +444,45 @@ paths:
           description: No Concepts with terms matching the specified string.
         '5XX':
           description: Unknown error
+  /semantics/{identifier}/semantic_types:
+    get:
+      operationId: semantics_identifier_semantic_types_get
+      summary: Returns the set of Semantic Type nodes with identifiers that are subtypes (have ISA_STY relationship with) the specified Semantic Type.
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          description: The identifier for a Semantic Type node. An identifier may be either a URL-encoded string corresponding to the name of the name of the Semantic Type (e.g., Anatomical%20Structure, with %20 representing the space character) or the Type Unique Identifier (TUI) of the Semantic Type (e.g., T017). (%20 = space; %2C = comma; %3A = colon)
+          schema:
+            type: string
+            example: Anatomical%20Structure
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Semantic Types to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns the set of Semantic Type nodes that are subtypes of the specified Semantic Type node.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemanticTypes'
+        '400':
+          description: invalid parameter name; non-numeric parameter value; negative value
+        '404':
+          description: No subtypes of the specified Semantic Type.
+        '5XX':
+          description: Unknown error
 components:
   schemas:
     CodesCodesObj: # Schema name
@@ -498,7 +537,7 @@ components:
             properties:
               position:
                 type: integer
-                description: The position of the path in the complete set of paths that originate from the specified Concept, ordered in terms of Depth First Search (DFS). The item property is invariant with respect to parameters such as skip or limit, but depends on parameters such as mindepth and maxdepth.
+                description: The position of the path in the complete set of paths that originate from the specified Concept, ordered in terms of Depth First Search (DFS). The item property is invariant with respect to parameters such as skip or limit, but depends on parameters such as mindepth and maxdepth. For example, if skip = 5, the position of the first path will be 6.
                 example: 1
               length:
                 type: integer
@@ -642,7 +681,7 @@ components:
             properties:
               position:
                 type: integer
-                description: The position of the path in the complete subgraph. The item property is invariant with respect to parameters such as skip or limit.
+                description: The position of the path in the complete subgraph. The item property is invariant with respect to parameters such as skip or limit. For example, if skip = 5, the position of the first path in the response will be 6.
                 example: 1
               length:
                 type: integer
@@ -734,3 +773,39 @@ components:
           type: string
           description: Identifier for the Code ID, in the format _SAB_:_CODE_.
           example: LNC:LA14283-8
+    SemanticTypes: # Schema name
+      type: object
+      description: Array of Semantic Type nodes
+      properties:
+        position:
+          type: integer
+          description: absolute position of the Semantic Type in the list of all possible values in the response. Invariant relative to skip--e.g., if skip = 5, the position of the first element in the list will be 6.
+          example: 1
+        semantic_types:
+          type: array
+          items:
+            type: object
+            properties:
+              semantic_type:
+                type: object
+                description: A Semantic Type node
+                properties:
+                  DEF:
+                    type: string
+                    description: the definition for the Semantic Type
+                    example: An anatomical structure that exists...
+                  STN:
+                    type: string
+                    description: the Semantic Type's identifier in the Semantic Type Network
+                    example: A1.2.1
+                  STY:
+                    type: string
+                    description: the Semantic Type name
+                    example: Embryonic Structure
+                  TUI:
+                    type: string
+                    description: the Type Unique Identifier (TUI) for the Semantic Type node
+                    example: T018
+
+
+

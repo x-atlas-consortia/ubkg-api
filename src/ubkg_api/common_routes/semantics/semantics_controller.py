@@ -8,21 +8,23 @@ from utils.http_parameter import parameter_as_list, set_default_minimum, set_def
 semantics_blueprint = Blueprint('semantics', __name__, url_prefix='/semantics')
 
 
-@semantics_blueprint.route('/semantictypes', methods=['GET'])
-def semantics_semantic_id_semantics_get():
+@semantics_blueprint.route('<semantic_type_id>/semantictypes', methods=['GET'])
+def semantics_semantic_id_semantics_get(semantic_type_id):
     """
-    Returns a set of semantic types that are subtypes (have a IS_STY relationship with) the semantic types with
-    identifiers in a specified list. Identifiers can be of two types:
+    Returns a set of semantic types that are subtypes (have a IS_STY relationship with) the specified semantic type
+    identifier. Identifiers can be of two types:
 
     1. Name (e.g., "Anatomical Structure")
     2. Type Unique Identifier (TUI) (e.g., "T017")
+
+    :param semantic_type_id: single identifier
 
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
     # Validate parameters.
     # Check for invalid parameter names.
-    err = validate_query_parameter_names(parameter_name_list=['type', 'skip', 'limit'])
+    err = validate_query_parameter_names(parameter_name_list=['skip', 'limit'])
     if err != 'ok':
         return make_response(err, 400)
 
@@ -43,12 +45,13 @@ def semantics_semantic_id_semantics_get():
     limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
 
     # Get remaining parameter values from the path or query string.
-    types = parameter_as_list(param_name='type')
+    semtype = semantic_type_id
 
-    result = semantics_semantic_id_semantictypes_get_logic(neo4j_instance, types=types, skip=skip, limit=limit)
+    result = semantics_semantic_id_semantictypes_get_logic(neo4j_instance, semtype=semtype, skip=skip, limit=limit)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Semantic Types")
+        err = get_404_error_string(prompt_string=f"No subtypes of the specified Semantic Type",
+                                   custom_request_path=f"{semantic_type_id}'")
         return make_response(err, 404)
 
     # Wrap origin and path list in a dictionary that will become the JSON response.

@@ -507,17 +507,17 @@ def concepts_subgraph_get_logic(neo4j_instance, sab=None, rel=None, skip=None, l
     return conceptPaths
 
 
-def semantics_semantic_id_semantictypes_get_logic(neo4j_instance, types=None, skip=None, limit=None) -> List[SemanticType]:
+def semantics_semantic_id_semantictypes_get_logic(neo4j_instance, semtype=None, skip=None, limit=None) -> List[SemanticType]:
     """
     Obtains information on the set of Semantic (semantic type) nodes that are subtypes (have ISA_STY relationships
-    with) the semantic types identified in the types list.
-    The list can contain two types of identifiers:
+    with) the semantic type identified with type.
+    The identifier can contain be either of the following types of identifiers:
     1. Name (e.g., "Anatomical Structure")
     2. Type Unique Identifier (e.g., "T017")
 
-    If types is empty, return all semantic types.
+    If type is empty, return all semantic types.
 
-    :param types: a list string prepared by the controller.
+    :param semtype: a string OR list string prepared by the controller.
     :param skip: SKIP value for the query
     :param limit: LIMIT value for the query
 
@@ -526,19 +526,26 @@ def semantics_semantic_id_semantictypes_get_logic(neo4j_instance, types=None, sk
     # Load and parameterize base query.
     query = loadquerystring('semantics_semantictypes.cypher')
 
-    if types is None:
+    # The query can handle a list of multiple type identifiers (with proper formatting using format_list_for_query) or
+    # no values; however, the route in the controller limits the type identifier to a single path variable.
+    if semtype is None:
         # Load all semantic types
-        query = query.replace('$types','')
+        semtypes = ''
+    elif type(semtype) is list:
+        semtypes = semtype
     else:
-        typesjoin = format_list_for_query(listquery=types, doublequote=True)
-        query = query.replace('$types', typesjoin)
+        # Convert single value to a list with one element.
+        semtypes = [semtype]
+    types = format_list_for_query(listquery=semtypes, doublequote=True)
+    query = query.replace('$types', types)
 
     query = query.replace('$skip',str(skip))
     query = query.replace('$limit',str(limit))
 
+    print(query)
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
-        position = skip + 1
+        position = int(skip) + 1
         for record in recds:
             semantic_type = record.get('semantic_type')
             try:
