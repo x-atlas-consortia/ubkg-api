@@ -370,7 +370,7 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
 # JAS February 2024 - Refactored for v5.
 # apoc.algo.dijkstraWithDefaultWeight was deprecated in version 5.
 # Replaced the function with dijkstra, and accepted default weight.
-def concepts_shortestpath_get_logic(neo4j_instance, query_concept_id=None, target_concept_id=None,
+def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, terminus_concept_id=None,
                                      sab=None, rel=None) \
         -> List[PathItemConceptRelationshipSabPrefterm]:
 
@@ -378,8 +378,8 @@ def concepts_shortestpath_get_logic(neo4j_instance, query_concept_id=None, targe
 
     # Load query string and associate parameter values to variables.
     query = loadquerystring(filename='concepts_shortestpath.cypher')
-    query = query.replace('$query_concept_id', f'"{query_concept_id}"')
-    query = query.replace('$target_concept_id', f'"{target_concept_id}"')
+    query = query.replace('$origin_concept_id', f'"{origin_concept_id}"')
+    query = query.replace('$terminus_concept_id', f'"{terminus_concept_id}"')
     sabjoin = format_list_for_query(listquery=sab, doublequote=True)
     query = query.replace('$sab', sabjoin)
     reljoin = format_list_for_query(listquery=rel, doublequote=True)

@@ -167,7 +167,7 @@ curl --request GET \
  --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=SNOMEDCT_US&rel=isa&mindepth=3&maxdepth=2" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
-echo "6. concepts/C2720507/paths/expand?sab=SNOMEDCT_US&rel=isa&mindepth=9&maxdepth=10 => long query; should return custom 400" | tee -a test.out
+echo "6. concepts/C2720507/paths/expand?sab=SNOMEDCT_US&rel=isa&mindepth=9&maxdepth=10 => long query; should return custom 404" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=SNOMEDCT_US&rel=isa&mindepth=9&maxdepth=10" \
  --header "Accept: application/json" | tee -a test.out
@@ -187,25 +187,25 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
-echo "TESTS FOR: concepts/<concept_id>/paths/shortestpath GET" | tee -a test.out
-echo "1. concepts/C2720507/paths/shortestpath => missing parameters; should return custom 400" | tee -a test.out
+echo "TESTS FOR: concepts/<origin_concept_id>/paths/<terminus_concept_id>/shortestpath GET" | tee -a test.out
+echo "1. concepts/C2720507/paths/C1272753/shortestpath => missing parameters; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/shortestpath" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/C1272753/shortestpath" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
-echo "2. concepts/C2720507/paths/shortestpath?target_concept_id=C1272753&sab=SNOMEDCT_US&rel2=isa => invalid parameter name; should return custom 400" | tee -a test.out
+echo "2. concepts/C2720507/paths/C1272753/shortestpath?sab=SNOMEDCT_US&rel2=isa => invalid parameter name; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/shortestpath?target_concept_id=C1272753&sab=SNOMEDCT_US&rel2=isa" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/C1272753/shortestpath?sab=SNOMEDCT_US&rel2=isa" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
-echo "3. concepts/C2720507Z/paths/shortestpath?target_concept_id=C1272753&sab=SNOMEDCT_US&rel=isa => invalid concept_id; should return custom 404" | tee -a test.out
+echo "3. concepts/C2720507Z/paths/C1272753/shortestpath?sab=SNOMEDCT_US&rel=isa => invalid concept_id; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507Z/paths/shortestpath?target_concept_id=C1272753&sab=SNOMEDCT_US&rel=isa" \
+ --url "${UBKG_URL}/concepts/C2720507Z/paths/C1272753/shortestpath?sab=SNOMEDCT_US&rel=isa" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
-echo "4. concepts/C2720507/paths/shortestpath?target_concept_id=C1272753&sab=SNOMEDCT_US&rel=isa => valid parameters; should return 200" | tee -a test.out
+echo "4. concepts/C2720507/paths/C1272753/shortestpath?sab=SNOMEDCT_US&rel=isa => valid parameters; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/shortestpath?target_concept_id=C1272753&sab=SNOMEDCT_US&rel=isa" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/C1272753/shortestpath?sab=SNOMEDCT_US&rel=isa" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 

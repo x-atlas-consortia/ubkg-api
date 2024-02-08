@@ -5,8 +5,8 @@
 // Identify the shortest path between the specified concept nodes, using the Dijkstra Algorithm with default weights.
 CALL
 {
-MATCH (c:Concept {CUI: $query_concept_id})
-MATCH (d:Concept {CUI: $target_concept_id})
+MATCH (c:Concept {CUI: $origin_concept_id})
+MATCH (d:Concept {CUI: $terminus_concept_id})
 CALL apoc.algo.dijkstra(c, d, apoc.text.join([x IN [$rel] | "<"+x], "|"), "none", 1)
 YIELD path
 return path

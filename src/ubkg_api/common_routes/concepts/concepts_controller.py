@@ -259,39 +259,43 @@ def concepts_paths_expand_get(concept_id):
 
 
 # JAS February 2024 Replaced POST with GET
-@concepts_blueprint.route('<concept_id>/paths/shortestpath', methods=['GET'])
-def concepts_shortestpath_get(concept_id):
+@concepts_blueprint.route('<origin_concept_id>/paths/<terminus_concept_id>/shortestpath', methods=['GET'])
+def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
 
     """
     Returns the shortest path between a pair of concepts. View the docstring for the concepts_expand_get for an example
     of a return.
+
+    origin_concept_id: origin of the shortest path
+    terminus_concept_id: terminus of the shortest path
 
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
     # Validate parameters.
     # Check for invalid parameter names.
-    err = validate_query_parameter_names(parameter_name_list=['target_concept_id','sab', 'rel'])
+    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel'])
     if err != 'ok':
         return make_response(err, 400)
 
     # Check for required parameters.
-    err = validate_required_parameters(required_parameter_list=['target_concept_id','sab', 'rel'])
+    err = validate_required_parameters(required_parameter_list=['sab', 'rel'])
     if err != 'ok':
         return make_response(err, 400)
 
     # Get remaining parameter values from the path or query string.
-    query_concept_id = concept_id
-    target_concept_id = request.args.get('target_concept_id')
+    origin_concept_id = origin_concept_id
+    terminus_concept_id = terminus_concept_id
     sab = parameter_as_list(param_name='sab')
     rel = parameter_as_list(param_name='rel')
 
-    result = concepts_shortestpath_get_logic(neo4j_instance, query_concept_id=query_concept_id,
-                                             target_concept_id=target_concept_id, sab=sab, rel=rel)
+    result = concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=origin_concept_id,
+                                             terminus_concept_id=terminus_concept_id, sab=sab, rel=rel)
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No paths between Concepts",
-                                   custom_request_path=f"query_concept_id='{query_concept_id}'",
+                                   custom_request_path=f"origin_concept_id='{origin_concept_id}' and "
+                                                       f"terminus_concept_id='{terminus_concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
