@@ -252,52 +252,6 @@ paths:
           description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
         '5XX':
           description: Unknown error
-  /concepts/{origin_concept_id}/paths/{terminus_concept_id}/shortestpath:
-    get:
-      operationId: concepts_shortestpath_get
-      summary: Return the shortest path between two Concepts, using Dykstra's algorithm with default weights, subject to constraints on relationship types (rel) and relationship sources (sab).
-      parameters:
-        - name: origin_concept_id
-          in: path
-          required: true
-          description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the origin of the shortestpath calculation.
-          schema:
-            type: string
-            example: C2720507
-        - name: terminus_concept_id
-          in: path
-          required: true
-          description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the terminus of the shortestpath calculation.
-          schema:
-            type: string
-            example: C1272753
-        - name: sab
-          in: query
-          required: true
-          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
-          schema:
-            type: string
-            example: SNOMEDCT_US
-        - name: rel
-          in: query
-          required: true
-          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2).
-          schema:
-            type: string
-            example: isa
-      responses:
-        '200':
-          description: Returns the ordered set of Concepts involved in the shortest path, subject to constraints for relationship type and source. This path is an ordered set of objects representing hops away from the originating concept, to the terminal concept. Each hop in a path represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ConceptShortestPath'
-        '400':
-          description: invalid parameter name; missing required parameter name
-        '404':
-          description: No shortest path between _origin_concept_id_ and _terminus_concept_id_ with relationship types in _rel_ filtered by sources in _sab_.
-        '5XX':
-          description: Unknown error
   /concepts/{concept_id}/paths/trees:
     get:
       operationId: concepts_trees_get
@@ -391,6 +345,52 @@ paths:
                   $ref: '#/components/schemas/SabDefinition'
         '404':
           description: No Definitions associated with the Concept _query_concept_id_.
+        '5XX':
+          description: Unknown error
+  /concepts/{origin_concept_id}/paths/{terminus_concept_id}/shortestpath:
+    get:
+      operationId: concepts_shortestpath_get
+      summary: Return the shortest path between two Concepts, using Dykstra's algorithm with default weights, subject to constraints on relationship types (rel) and relationship sources (sab).
+      parameters:
+        - name: origin_concept_id
+          in: path
+          required: true
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the origin of the shortestpath calculation.
+          schema:
+            type: string
+            example: C2720507
+        - name: terminus_concept_id
+          in: path
+          required: true
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the terminus of the shortestpath calculation.
+          schema:
+            type: string
+            example: C1272753
+        - name: sab
+          in: query
+          required: true
+          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: SNOMEDCT_US
+        - name: rel
+          in: query
+          required: true
+          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2).
+          schema:
+            type: string
+            example: isa
+      responses:
+        '200':
+          description: Returns the ordered set of Concepts involved in the shortest path, subject to constraints for relationship type and source. This path is an ordered set of objects representing hops away from the originating concept, to the terminal concept. Each hop in a path represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptShortestPath'
+        '400':
+          description: invalid parameter name; missing required parameter name
+        '404':
+          description: No shortest path between _origin_concept_id_ and _terminus_concept_id_ with relationship types in _rel_ filtered by sources in _sab_.
         '5XX':
           description: Unknown error
   /terms/{term_id}/codes:
