@@ -542,7 +542,6 @@ def semantics_semantic_id_semantictypes_get_logic(neo4j_instance, semtype=None, 
     query = query.replace('$skip',str(skip))
     query = query.replace('$limit',str(limit))
 
-    print(query)
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
         position = int(skip) + 1

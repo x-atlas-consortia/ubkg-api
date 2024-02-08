@@ -444,10 +444,42 @@ paths:
           description: No Concepts with terms matching the specified string.
         '5XX':
           description: Unknown error
+  /semantics/semantic_types:
+    get:
+      operationId: semantics_semantic_types_get
+      summary: Returns the set of Semantic Type nodes, subject to constraints specified in parameters.
+      parameters:
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Semantic Types to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns the set of Semantic Type nodes, subject to constaints specified in the parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemanticTypes'
+        '400':
+          description: invalid parameter name; non-numeric parameter value; negative value
+        '404':
+          description: No subtypes of the specified Semantic Type.
+        '5XX':
+          description: Unknown error
   /semantics/{identifier}/semantic_types:
     get:
       operationId: semantics_identifier_semantic_types_get
-      summary: Returns the set of Semantic Type nodes with identifiers that are subtypes (have ISA_STY relationship with) the specified Semantic Type.
+      summary: Returns the set of Semantic Type nodes that are subtypes (have ISA_STY relationship with) the specified Semantic Type, subject to constraints specified in parameters.
       parameters:
         - name: identifier
           in: path

@@ -7,6 +7,10 @@ from utils.http_parameter import parameter_as_list, set_default_minimum, set_def
 
 semantics_blueprint = Blueprint('semantics', __name__, url_prefix='/semantics')
 
+@semantics_blueprint.route('semantictypes', methods=['GET'])
+def semantics_semantic_semantics_get():
+    # Return information on all semantic types.
+    return semantics_semantic_id_semantics_get(semantic_type_id=None)
 
 @semantics_blueprint.route('<semantic_type_id>/semantictypes', methods=['GET'])
 def semantics_semantic_id_semantics_get(semantic_type_id):
