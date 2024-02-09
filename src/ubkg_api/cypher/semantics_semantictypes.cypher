@@ -15,5 +15,5 @@ CALL apoc.do.when((query = []),
 {})
 YIELD value
 WITH value.s as s ORDER BY s.STN SKIP $skip LIMIT $limit
-WITH DISTINCT {STY:s.name,TUI:s.TUI,DEF:s.DEF,STN:s.STN}  AS stys
+WITH DISTINCT {sty:s.name,tui:s.TUI,def:s.DEF,stn:s.STN}  AS stys
 RETURN stys AS semantic_type

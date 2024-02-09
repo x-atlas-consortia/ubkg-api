@@ -822,19 +822,19 @@ components:
                 type: object
                 description: A Semantic Type node
                 properties:
-                  DEF:
+                  def:
                     type: string
                     description: the definition for the Semantic Type
                     example: An anatomical structure that exists...
-                  STN:
+                  stn:
                     type: string
                     description: the Semantic Type's identifier in the Semantic Type Network
                     example: A1.2.1
-                  STY:
+                  sty:
                     type: string
                     description: the Semantic Type name
                     example: Embryonic Structure
-                  TUI:
+                  tui:
                     type: string
                     description: the Type Unique Identifier (TUI) for the Semantic Type node
                     example: T018

@@ -1,17 +1,16 @@
 from flask import Blueprint, jsonify, current_app, request, make_response
-# JAS January 2024 Deprecating semantic and tui routes; converting POST methods to GET.
-"""
-from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
-    concepts_concept_id_definitions_get_logic, concepts_concept_id_semantics_get_logic, concepts_expand_post_logic,\
-    concepts_path_post_logic, concepts_shortestpaths_post_logic, concepts_trees_post_logic
-"""
+
+# Cypher query functions
 from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
     concepts_concept_id_definitions_get_logic, concepts_expand_get_logic,\
-    concepts_shortestpath_get_logic, concepts_trees_get_logic,concepts_subgraph_get_logic
+    concepts_shortestpath_get_logic, concepts_trees_get_logic,concepts_subgraph_get_logic, concepts_identfier_node_get_logic
+# Functions to validate query parameters
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
+# Functions to format query parameters for use in Cypher queries
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
+# Functions common to paths routes
 from utils.path_get_endpoints import get_origin, get_terminus
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
@@ -467,4 +466,33 @@ def concepts_subgraph_get():
 
     # Wrap origin and path list in a dictionary that will become the JSON response.
     dict_result = {'paths': result}
+    return jsonify(dict_result)
+
+@concepts_blueprint.route('<identifier>/nodes', methods=['GET'])
+def concepts_concept_identifier_nodes_get(identifier):
+    """
+    Returns an object representing complete information on the Concepts that match the identifier.
+
+    :param identifier: A string that can correspond to one or more of the following:
+    1. The preferred term for a Concept.
+    2. A term linked to a Code that is linked to a Concept.
+    3. The CodeId of a Code that is linked to a Concept.
+    4. The CUI of a Concept.
+    """
+
+    neo4j_instance = current_app.neo4jConnectionHelper.instance()
+
+    search = identifier
+    result = concepts_identfier_node_get_logic(neo4j_instance, search=search)
+    if result is None or result == []:
+        # Empty result
+        err = get_404_error_string(prompt_string=f"No Concepts that can be associated with the identifier", timeout=neo4j_instance.timeout)
+        return make_response(err, 404)
+
+    # Limit the size of the payload, based on the app configuration.
+    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
+    if err != "ok":
+        return make_response(err, 400)
+
+    dict_result = {'concepts': result}
     return jsonify(dict_result)

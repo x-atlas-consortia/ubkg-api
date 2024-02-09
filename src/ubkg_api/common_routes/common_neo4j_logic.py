@@ -20,7 +20,6 @@ import neo4j
 
 from models.codes_codes_obj import CodesCodesObj
 from models.concept_detail import ConceptDetail
-from models.concept_prefterm import ConceptPrefterm
 from models.concept_path import ConceptPath
 from models.concept_sab_rel_depth import ConceptSabRelDepth
 from models.concept_term import ConceptTerm
@@ -34,14 +33,14 @@ from models.sab_relationship_concept_term import SabRelationshipConceptTerm
 # from models.semantic_stn import SemanticStn
 # from models.sty_tui_stn import StyTuiStn
 from models.termtype_code import TermtypeCode
-# property class
 from models.concept_prefterm import ConceptPrefterm
-
+from models.concept_node import ConceptNode
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 def loadquerystring(filename: str) -> str:
     """
@@ -65,7 +64,8 @@ def loadquerystring(filename: str) -> str:
     f.close()
     return query
 
-def timebox_query(query: str, timeout: int=10000) -> str:
+
+def timebox_query(query: str, timeout: int = 10000) -> str:
 
     """
     Limits the execution of a query to a specified timeout.
@@ -76,7 +76,8 @@ def timebox_query(query: str, timeout: int=10000) -> str:
     # Use simple string concatenation instead of an f-string to wrap the source query in a timebox call.
     return "CALL apoc.cypher.runTimeboxed('" + query + "',{}," + str(timeout) + ")"
 
-def format_list_for_query(listquery: list[str], doublequote: bool =False) ->str:
+
+def format_list_for_query(listquery: list[str], doublequote: bool = False) -> str:
     """
     Converts a list of string values into a comma-delimited, delimited string for use in a Cypher query clause.
     :param listquery: list of string values
@@ -96,6 +97,7 @@ def format_list_for_query(listquery: list[str], doublequote: bool =False) ->str:
         return ', '.join('"{0}"'.format(s) for s in listquery)
     else:
         return ', '.join("'{0}'".format(s) for s in listquery)
+
 
 def rel_str_to_array(rels: List[str]) -> List[List]:
     rel_array: List[List] = []
@@ -131,7 +133,7 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     :param sab: optional list of SABs from which to select codes that share links to the Concept node linked to the
     Code node
     """
-    codesCodesObjs: List[CodesCodesObj] = []
+    codescodesobjs: List[CodesCodesObj] = []
 
     # JAS January 2024.
     # Fixed issue with SAB filtering.
@@ -140,28 +142,28 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     query: str = loadquerystring(filename='codes_code_id_codes.cypher')
 
     # Filter by code_id.
-    query = query.replace('$code_id',f"'{code_id}'")
+    query = query.replace('$code_id', f"'{code_id}'")
 
     # Filter by code SAB.
     if len(sab) == 0:
-        query = query.replace('$sabfilter','')
+        query = query.replace('$sabfilter', '')
     else:
-        query = query.replace('$sabfilter',f" AND c.SAB IN {sab}")
+        query = query.replace('$sabfilter', f" AND c.SAB IN {sab}")
 
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query, code_id=code_id, SAB=sab)
         for record in recds:
             try:
-                codesCodesObj: CodesCodesObj = \
+                codescodesobj: CodesCodesObj = \
                     CodesCodesObj(record.get('Concept'), record.get('Code2'), record.get('Sab2')).serialize()
-                codesCodesObjs.append(codesCodesObj)
+                codescodesobjs.append(codescodesobj)
             except KeyError:
                 pass
-    return codesCodesObjs
+    return codescodesobjs
 
 
 def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[ConceptDetail]:
-    conceptDetails: List[ConceptDetail] = []
+    conceptdetails: List[ConceptDetail] = []
 
     query: str = \
         'WITH [$code_id] AS query' \
@@ -174,12 +176,12 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[Conce
         recds: neo4j.Result = session.run(query, code_id=code_id)
         for record in recds:
             try:
-                conceptDetail: ConceptDetail = ConceptDetail(record.get('Concept'),
+                conceptdetail: ConceptDetail = ConceptDetail(record.get('Concept'),
                                                              record.get('Prefterm')).serialize()
-                conceptDetails.append(conceptDetail)
+                conceptdetails.append(conceptdetail)
             except KeyError:
                 pass
-    return conceptDetails
+    return conceptdetails
 
 
 # https://neo4j.com/docs/api/python-driver/current/api.html#explicit-transactions
@@ -203,7 +205,7 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
 
 
 def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> List[SabRelationshipConceptTerm]:
-    sabRelationshipConceptPrefterms: [SabRelationshipConceptPrefterm] = []
+    sabrelationshipconceptprefterms: [SabRelationshipConceptPrefterm] = []
     query: str = \
         'WITH [$concept_id] AS query' \
         ' MATCH (b:Concept)<-[c]-(d:Concept)' \
@@ -217,17 +219,17 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
         recds: neo4j.Result = session.run(query, concept_id=concept_id)
         for record in recds:
             try:
-                sabRelationshipConceptPrefterm: SabRelationshipConceptPrefterm = \
+                sabrelationshipconceptprefterm: SabRelationshipConceptPrefterm = \
                     SabRelationshipConceptPrefterm(record.get('SAB'), record.get('Relationship'),
                                                    record.get('Concept2'), record.get('Prefterm2')).serialize()
-                sabRelationshipConceptPrefterms.append(sabRelationshipConceptPrefterm)
+                sabrelationshipconceptprefterms.append(sabrelationshipconceptprefterm)
             except KeyError:
                 pass
-    return sabRelationshipConceptPrefterms
+    return sabrelationshipconceptprefterms
 
 
 def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -> List[SabDefinition]:
-    sabDefinitions: [SabDefinition] = []
+    sabdefinitions: [SabDefinition] = []
     query: str = \
         'WITH [$concept_id] AS query' \
         ' MATCH (a:Concept)-[:DEF]->(b:Definition)' \
@@ -238,12 +240,12 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
         recds: neo4j.Result = session.run(query, concept_id=concept_id)
         for record in recds:
             try:
-                sabDefinition: SabDefinition = SabDefinition(record.get('SAB'),
+                sabdefinition: SabDefinition = SabDefinition(record.get('SAB'),
                                                              record.get('Definition')).serialize()
-                sabDefinitions.append(sabDefinition)
+                sabdefinitions.append(sabdefinition)
             except KeyError:
                 pass
-    return sabDefinitions
+    return sabdefinitions
 
 
 # JAS January 2024 Deprecated semantics routes.
@@ -266,6 +268,8 @@ def concepts_concept_id_semantics_get_logic(neo4j_instance, concept_id) -> List[
                 pass
     return styTuiStns
 """
+
+
 #  JAS February 2024: Refactored
 def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, mindepth=None,
                               maxdepth=None, skip=None, limit=None) -> List[ConceptPath]:
@@ -283,11 +287,11 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     :param limit: maximum number of paths to return
     """
 
-    conceptPaths: [ConceptPath] = []
+    conceptpaths: [ConceptPath] = []
 
     # Load query string and associate parameter values to variables.
-    query=loadquerystring(filename='concepts_expand.cypher')
-    query = query.replace('$query_concept_id',f'"{query_concept_id}"')
+    query = loadquerystring(filename='concepts_expand.cypher')
+    query = query.replace('$query_concept_id', f'"{query_concept_id}"')
     sabjoin = format_list_for_query(listquery=sab, doublequote=True)
     query = query.replace('$sab', sabjoin)
     reljoin = format_list_for_query(listquery=rel, doublequote=True)
@@ -307,22 +311,24 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
             # The timebox query wraps each record in a dictionary with the record as the value of a key named 'value.'
             val = record.get('value')
             try:
+                # Each row from the query includes a dict that contains the actual response content.
                 path_info = val.get('paths')
                 # Add the position index for this path in the entire set--i.e., the row number from the query return,
                 # based on the value of skip.
                 path_info['position'] = path_position
-                conceptPath: ConceptPath = ConceptPath(path_info=path_info).serialize()
-                conceptPaths.append(conceptPath)
+                conceptpath: ConceptPath = ConceptPath(path_info=path_info).serialize()
+                conceptpaths.append(conceptpath)
                 path_position = path_position + 1
             except KeyError:
                 pass
 
-    return conceptPaths
+    return conceptpaths
 
 # JAS February 2024 Deprecated, as the apoc.expandConfig call is identical to the apoc.expand.
 
 # JAS January 2024 Converted from POST to GET
-# def concepts_path_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None ) -> List[PathItemConceptRelationshipSabPrefterm]:
+# def concepts_path_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None )
+# -> List[PathItemConceptRelationshipSabPrefterm]:
 #
 #    """
 #    :param neo4j_instance: UBKG connection
@@ -370,11 +376,13 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
 # JAS February 2024 - Refactored for v5.
 # apoc.algo.dijkstraWithDefaultWeight was deprecated in version 5.
 # Replaced the function with dijkstra, and accepted default weight.
+
+
 def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, terminus_concept_id=None,
-                                     sab=None, rel=None) \
+                                    sab=None, rel=None) \
         -> List[PathItemConceptRelationshipSabPrefterm]:
 
-    conceptPaths: [ConceptPath] = []
+    conceptpaths: [ConceptPath] = []
 
     # Load query string and associate parameter values to variables.
     query = loadquerystring(filename='concepts_shortestpath.cypher')
@@ -394,21 +402,23 @@ def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, term
             # The timebox query wraps each record in a dictionary with the record as the value of a key named 'value.'
             val = record.get('value')
             try:
+                # Each row from the query includes a dict that contains the actual response content.
                 path_info = val.get('paths')
                 # Add the position index for this path in the entire set--i.e., the row number from the query return,
                 # based on the value of skip.
                 path_info['position'] = path_position
-                conceptPath: ConceptPath = ConceptPath(path_info=path_info).serialize()
-                conceptPaths.append(conceptPath)
+                conceptpath: ConceptPath = ConceptPath(path_info=path_info).serialize()
+                conceptpaths.append(conceptpath)
                 path_position = path_position + 1
             except KeyError:
                 pass
 
-    return conceptPaths
+    return conceptpaths
+
 
 # JAS February 2024 Refactored to mirror concepts_expand_get_logic
 def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, mindepth=None,
-                                  maxdepth=None, skip=None, limit=None) -> List[ConceptPath]:
+                             maxdepth=None, skip=None, limit=None) -> List[ConceptPath]:
     """
     Obtains the spanning tree of paths that originate from the concept with CUI=query_concept_id, subject
     to constraints specified in parameters.
@@ -423,7 +433,7 @@ def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, re
     :param limit: maximum number of paths to return
     """
 
-    conceptPaths: [ConceptPath] = []
+    conceptpaths: [ConceptPath] = []
 
     # Load query string and associate parameter values to variables.
     query = loadquerystring(filename='concepts_spanning_tree.cypher')
@@ -447,24 +457,26 @@ def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, re
             # The timebox query wraps each record in a dictionary with the record as the value of a key named 'value.'
             val = record.get('value')
             try:
+                # Each row from the query includes a dict that contains the actual response content.
                 path_info = val.get('paths')
                 # Add the position index for this path in the entire set--i.e., the row number from the query return,
                 # based on the value of skip.
                 path_info['position'] = path_position
-                conceptPath: ConceptPath = ConceptPath(path_info=path_info).serialize()
-                conceptPaths.append(conceptPath)
+                conceptpath: ConceptPath = ConceptPath(path_info=path_info).serialize()
+                conceptpaths.append(conceptpath)
                 path_position = path_position + 1
             except KeyError:
                 pass
 
-        return conceptPaths
+        return conceptpaths
+
 
 def concepts_subgraph_get_logic(neo4j_instance, sab=None, rel=None, skip=None, limit=None) \
         -> List[ConceptPath]:
     """
-    Obtains the set of concept pairs (one-hop paths) that involve relationships of specified types and defined by specified source
-    SABs. For exammple, if sab="UBERON" and rel="part_of", then the endpoint returns all pairs of concepts
-    with the part_of relationship defined by UBERON.
+    Obtains the set of concept pairs (one-hop paths) that involve relationships of specified types and
+    defined by specified source SABs. For exammple, if sab="UBERON" and rel="part_of", then the endpoint
+    returns all pairs of concepts with the part_of relationship defined by UBERON.
 
     :param neo4j_instance: UBKG connection
     :param sab: list of SABs by which to filter relationship types in the paths.
@@ -473,10 +485,10 @@ def concepts_subgraph_get_logic(neo4j_instance, sab=None, rel=None, skip=None, l
     :param limit: maximum number of paths to return
     """
 
-    conceptPaths: [ConceptPath] = []
+    conceptpaths: [ConceptPath] = []
 
     # Load query string and associate parameter values to variables.
-    query=loadquerystring(filename='concepts_subgraph.cypher')
+    query = loadquerystring(filename='concepts_subgraph.cypher')
     sabjoin = format_list_for_query(listquery=sab, doublequote=True)
     query = query.replace('$sab', sabjoin)
     reljoin = format_list_for_query(listquery=rel, doublequote=True)
@@ -494,20 +506,22 @@ def concepts_subgraph_get_logic(neo4j_instance, sab=None, rel=None, skip=None, l
             # The timebox query wraps each record in a dictionary with the record as the value of a key named 'value.'
             val = record.get('value')
             try:
+                # Each row from the query includes a dict that contains the actual response content.
                 path_info = val.get('paths')
                 # Add the position index for this path in the entire set--i.e., the row number from the query return,
                 # based on the value of skip.
                 path_info['position'] = path_position
-                conceptPath: ConceptPath = ConceptPath(path_info=path_info).serialize()
-                conceptPaths.append(conceptPath)
+                conceptpath: ConceptPath = ConceptPath(path_info=path_info).serialize()
+                conceptpaths.append(conceptpath)
                 path_position = path_position + 1
             except KeyError:
                 pass
 
-    return conceptPaths
+    return conceptpaths
 
 
-def semantics_semantic_id_semantictypes_get_logic(neo4j_instance, semtype=None, skip=None, limit=None) -> List[SemanticType]:
+def semantics_semantic_id_semantictypes_get_logic(neo4j_instance, semtype=None, skip=None,
+                                                  limit=None) -> List[SemanticType]:
     """
     Obtains information on the set of Semantic (semantic type) nodes that are subtypes (have ISA_STY relationships
     with) the semantic type identified with type.
@@ -520,6 +534,7 @@ def semantics_semantic_id_semantictypes_get_logic(neo4j_instance, semtype=None, 
     :param semtype: a string OR list string prepared by the controller.
     :param skip: SKIP value for the query
     :param limit: LIMIT value for the query
+    :param neo4j_instance: neo4j connection
 
     """
     semantictypes: [SemanticType] = []
@@ -539,25 +554,28 @@ def semantics_semantic_id_semantictypes_get_logic(neo4j_instance, semtype=None, 
     types = format_list_for_query(listquery=semtypes, doublequote=True)
     query = query.replace('$types', types)
 
-    query = query.replace('$skip',str(skip))
-    query = query.replace('$limit',str(limit))
+    query = query.replace('$skip', str(skip))
+    query = query.replace('$limit', str(limit))
 
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
+        # Identify the absolute position of the semantic type in the return.
         position = int(skip) + 1
         for record in recds:
+            # Each row from the query includes a dict that contains the actual response content.
             semantic_type = record.get('semantic_type')
             try:
-                semantictype: SemanticType = SemanticType(semantic_type,position).serialize()
+                semantictype: SemanticType = SemanticType(semantic_type, position).serialize()
                 semantictypes.append(semantictype)
                 position = position + 1
             except KeyError:
                 pass
     return semantictypes
 
+
 def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[TermtypeCode]:
 
-    termtypeCodes: [TermtypeCode] = []
+    termtypecodes: [TermtypeCode] = []
 
     """
     Returns information on Codes with terms that exactly match the specified term_id string.
@@ -573,18 +591,19 @@ def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[Termtype
     # JAS February 2024
     # To prevent timeout errors, limit the query execution time to a value specified in the app.cfg.
     query = query.replace('$term_id', f'"{term_id}"')
-    query = timebox_query(query,timeout=neo4j_instance.timeout)
+    query = timebox_query(query=query, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
         for record in recds:
             # The timeboxed query returns query results as values of a dict instead of as a dict.
             val = record.get('value')
             try:
-                termtypeCode: TermtypeCode = TermtypeCode(val.get('TermType'), val.get('Code')).serialize()
-                termtypeCodes.append(termtypeCode)
+                termtypecode: TermtypeCode = TermtypeCode(val.get('TermType'), val.get('Code')).serialize()
+                termtypecodes.append(termtypecode)
             except KeyError:
                 pass
-    return termtypeCodes
+    return termtypecodes
+
 
 def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     concepts: [str] = []
@@ -612,6 +631,78 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
                 pass
 
     return concepts
+
+def remove_null_placeholder_objects(listdict: list[dict]) -> list[dict]:
+    """
+    If a Concept node identified in the query behind the concepts_identfier_node_get_logic does not have semantic types
+    or definitions, the return will contain objects with null values--e.g.,
+    "semantic_types": [
+        {"def": null,
+         "sty": null,
+         "tui": null,
+         "stn": null}
+         ],
+    "definitions": [
+        {"def": null,
+        "sab": null}
+        ]
+
+    This function removes the null objects from the list--e.g., to "semantic_types":[],"definitions":[]
+
+    :param listdict: a list of dictionaries
+
+    """
+
+    listpop = []
+    # Loop through the list and indentify placeholder dictionaries.
+    for d in listdict:
+        allnull = True
+        for key, val in d.items():
+            if val is not None:
+                allnull = False
+        if allnull:
+            listpop.append(listdict.index(d))
+
+    # Remove the placeholder dictionaries from the list.
+    if len(listpop) > 0:
+        for l in listpop:
+            listdict.pop(l)
+
+    return listdict
+
+def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[ConceptNode]:
+    """
+    Obtains information on the set of Concept nodes with identifiers that match search parameter string.
+
+    """
+    conceptnodes: [ConceptNode] = []
+    query = loadquerystring(filename='concepts_nodes.cypher')
+
+    # Format the search parameter for the Cypher query.
+    list_identifier = [search]
+    list_identifier_join = format_list_for_query(listquery=list_identifier, doublequote=True)
+    query = query.replace('$search', list_identifier_join)
+
+    # Timebox the query.
+    query = timebox_query(query, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+        for record in recds:
+            # The timeboxed query returns query results as values of a dict instead of as a dict.
+            val = record.get('value')
+            concept = val.get('concept')
+            # Remove null placeholder dictionaries from nested list objects.
+            concept['semantic_types'] = remove_null_placeholder_objects(concept.get('semantic_types'))
+            concept['definitions'] = remove_null_placeholder_objects(concept.get('definitions'))
+            try:
+                conceptnode: ConceptNode = ConceptNode(concept).serialize()
+                conceptnodes.append(conceptnode)
+            except KeyError:
+                pass
+
+    return conceptnodes
+
 
 # JAS January 2024
 # Deprecating. The Cypher is incompatible with version 5.
@@ -642,7 +733,7 @@ def terms_term_id_concepts_terms_get_logic(neo4j_instance, term_id: str) -> List
 """
 
 # JAS January 2024
-# Deprecated semantic and tui routes
+# Deprecated tui routes
 """
 def tui_tui_id_semantics_get_logic(neo4j_instance, tui_id: str) -> List[SemanticStn]:
     semanticStns: [SemanticStn] = []
