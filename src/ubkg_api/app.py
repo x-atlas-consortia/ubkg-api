@@ -15,6 +15,7 @@ from common_routes.codes.codes_controller import codes_blueprint
 from common_routes.concepts.concepts_controller import concepts_blueprint
 from common_routes.terms.terms_controller import terms_blueprint
 from common_routes.semantics.semantics_controller import semantics_blueprint
+from common_routes.database.database_controller import database_blueprint
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -43,6 +44,7 @@ class UbkgAPI:
         self.app.register_blueprint(semantics_blueprint)
         # self.app.register_blueprint(tui_blueprint)
         self.app.register_blueprint(terms_blueprint)
+        self.app.register_blueprint(database_blueprint)
 
         self.app.neo4jConnectionHelper = None
 

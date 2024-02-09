@@ -248,3 +248,23 @@ def check_payload_size(payload: str, max_payload_size: int) -> str:
                f" of {int(max_payload_size)/1024} MB."
 
     return "ok"
+
+def check_neo4j_version_compatibility(query_version: str, instance_version:str) -> str:
+    """
+    Checks whether a query can be executed against the instance of UBKG.
+
+    :param query_version: version of minimal version of neo4j Cypher that the query requires
+    :instance_version: the version of the current UBKG instance
+
+    Assumes that version strings are in format major.minor.subminor--e.g., 5.11.0
+
+    """
+
+    int_instance_version = int(instance_version.replace('.',''))
+    int_query_version = int(query_version.replace('.',''))
+
+    if int_instance_version < int_query_version:
+        return f"This functionality requires at least version {query_version} of neo4j."
+
+    return "ok"
+

@@ -703,6 +703,16 @@ def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[Conce
 
     return conceptnodes
 
+def database_info_server_get_logic(neo4j_instance) -> dict:
+    # Obtains neo4j database server information
+
+    # The version was obtained from the instance at startup.
+    dictret = {"version": neo4j_instance.database_version,
+               "name": neo4j_instance.database_name,
+               "edition": neo4j_instance.database_edition}
+
+    return dictret
+
 
 # JAS January 2024
 # Deprecating. The Cypher is incompatible with version 5.

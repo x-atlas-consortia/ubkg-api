@@ -7,7 +7,8 @@ from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_c
 # Functions to validate query parameters
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
-    validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
+    validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size, \
+    check_neo4j_version_compatibility
 # Functions to format query parameters for use in Cypher queries
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 # Functions common to paths routes
@@ -139,6 +140,7 @@ def concepts_paths_expand_get(concept_id):
     """
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
+
 
     # Validate parameters.
     # Check for invalid parameter names.
@@ -418,6 +420,12 @@ def concepts_subgraph_get():
     """
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
+
+    # The query for this endpoint relies on db.index.fulltext.queryRelationships, which was introduced in version 5 of
+    # neo4j.
+    err = check_neo4j_version_compatibility(query_version='5.11.0',instance_version=neo4j_instance.database_version)
+    if err != 'ok':
+        return make_response(err, 400)
 
     # Validate parameters.
     # Check for invalid parameter names.

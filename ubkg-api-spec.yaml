@@ -12,6 +12,17 @@ servers:
   - url: https://ontology-api.dev.hubmapconsortium.org/
     description: Development server
 paths:
+  /database/info/server:
+    get:
+      summary: Returns basic information on the UBKG neo4j database.
+      operationId: database_info_server_get
+      responses:
+        '200':
+          description: basic information on the UBKG neo4j database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseInfo'
   /codes/{code_id}/codes:
     get:
       summary:  A Concept node can have CODE relationships with (links to) Code nodes from multiple sources (SABs). For example, the Code SNOMEDCT_US:254837009 links to the Concept with identifier C0006142; Concept C0006142 also links to Codes NCI:C9335 and MSH:D001943. This endpoint returns information on Code nodes that link to the Concept node to which the specified code links, subject to constraints specified in parameters.
@@ -116,7 +127,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConceptSubgraph'
         '400':
-          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value
+          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; incompatible version of neo4j (this endpoint requires at least 5.11.0)
         '404':
           description: No subgraph for specified relationship types. Includes responses from queries with execution times that exceed the maximum.
         '5XX':
@@ -946,3 +957,23 @@ components:
                           type: string
                           description: the Type Unique Identifier (TUI) for the Semantic Type node
                           example: T018
+    DatabaseInfo: # Schema name
+      type: object
+      description: basic information on the neo4j database server instance
+      properties:
+        name:
+          type: string
+          description: name of the UBKG database. Should be the default database name (neo4j)
+          example: neo4j
+        version:
+          type: string
+          description: neo4j version
+          example: "5.11.0"
+        edition:
+          type: string
+          description: type of neo4j instance
+          example: community
+
+
+
+
