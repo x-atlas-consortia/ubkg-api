@@ -22,6 +22,14 @@ For endpoints with the potential for execution times that exceed the maximum, th
 "timeboxes" the associated Cypher queries. Timeboxed queries terminate after a set time and 
 return nothing, instead of continuing until timeout
 
+### neo4j Version compatibility checking
+Endpoints in Version 2 of the UBKG API use features of neo4j that were introduced in version 5:
+for example, the _/concepts/subgraphs_ endpoint searches on full text relationship indexes. 
+
+The UBKG API compares the version of the UBKG instance with the minimal version required
+for an endpoint, returning a HTTP 400 error message if the instance version is 
+not compatible.
+
 ### Parameter validation and exception handling (HTTP 400 and 404 errors)
 Version 2 of the UBKG API features extensive parameter validation, returning 
 HTTP 400 messages with explanations. Examples of parameter validation include:
@@ -115,10 +123,10 @@ The endpoint now allows searching by either semantic type name or Type Unique Id
 The following endpoints were introduced in Version 2 of the UBKG API. Refer to the
 SmartAPI documentation for details.
 
-| Endpoint              | Purpose                                                                                            |
-|-----------------------|----------------------------------------------------------------------------------------------------|
-| _/concepts/subgraph/_ | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type |
-|                       |                                                                                                    |
+| Endpoint                | Purpose                                                                                            |
+|-------------------------|----------------------------------------------------------------------------------------------------|
+| _/concepts/subgraph/_   | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type |
+| _/database/info/server_ | Returns basic information on the UBKG neo4j database                                               |
 
 #### Deprecated endpoints
 
