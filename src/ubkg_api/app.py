@@ -59,6 +59,7 @@ class UbkgAPI:
                         Neo4jConnectionHelper.create(self.app.config['SERVER'],
                                                      self.app.config['USERNAME'],
                                                      self.app.config['PASSWORD'])
+                    logger.info(f"Initialized Neo4jManager successfully for: {self.app.config['SERVER']}")
                 else:
                     logger.info('Using provided Flask config.')
                     # Set self based on passed in config parameters
@@ -66,7 +67,7 @@ class UbkgAPI:
                         setattr(self, key, value)
                     self.app.neo4jConnectionHelper = \
                         Neo4jConnectionHelper.create(self.SERVER, self.USERNAME, self.PASSWORD)
-                    logger.info("Initialized Neo4jManager successfully")
+                    logger.info("Initialized Neo4jManager successfully for: {self.SERVER}")
         except Exception as e:
             logger.exception('Failed to initialize the Neo4jManager')
             raise e

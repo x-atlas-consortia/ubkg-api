@@ -19,7 +19,10 @@ scripts/.openapi-generator
 api/.openapi-generator/*
 
 # config file
-ubkg_api/instance/app.cfg
+/src/ubkg_api/instance/app.cfg
+
+# Ignore the generated BUILD file
+BUILD
 
 # log files in any path
 **/*.log
