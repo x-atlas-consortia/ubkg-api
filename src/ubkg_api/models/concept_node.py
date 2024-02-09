@@ -8,30 +8,31 @@ from .base_model_ import Model
 class ConceptNode(Model):
 
     """
-    Model class representing a fully-translated Concept node
+    Model class representing a "Concept node" object that translates and consolidates information from the
+    subgraph that originates from a Concept node, involving Code, Term, Defintion, and Semantic Type nodes.
 
     """
 
-    def __init__(self,concept=None):
+    def __init__(self,node=None):
         """
-        :param concept: a dictionary representing a set of semantic type nodes.
+        :param node: a dictionary representing a Concept node.
 
         """
         # Value Types
         self.openapi_types = {
-            'concept': list[dict]
+            'node': list[dict]
         }
         # Attributes
         self.attribute_map = {
-            'concept': 'concept'
+            'node': 'node'
         }
         # Property initialization.
-        self._concept = concept
+        self._node = node
 
 
     def serialize(self):
         return {
-            "concept": self._concept
+            "node": self._node
         }
 
     @classmethod
@@ -47,19 +48,19 @@ class ConceptNode(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def concept(self):
-        """Gets the concept of this ConceptNode.
+    def node(self):
+        """Gets the node of this ConceptNode.
 
-        :return: The concept of this ConceptNode.
+        :return: The node of this ConceptNode.
         """
-        return self._semantic_type
+        return self._node
 
-    @concept.setter
-    def concept(self, concept):
+    @node.setter
+    def node(self, node):
         """Sets the concept of this ConceptNode.
 
-        :param concept: The concept of this ConceptNode.
+        :param node: The concept of this ConceptNode.
         :type conceptNode: dict
         """
 
-        self._concept = concept
+        self._node = node

@@ -468,12 +468,14 @@ def concepts_subgraph_get():
     dict_result = {'paths': result}
     return jsonify(dict_result)
 
-@concepts_blueprint.route('<identifier>/nodes', methods=['GET'])
-def concepts_concept_identifier_nodes_get(identifier):
+@concepts_blueprint.route('<search>/nodes', methods=['GET'])
+def concepts_concept_identifier_nodes_get(search):
     """
-    Returns an object representing complete information on the Concepts that match the identifier.
+    Returns a "nodes" object representing a set of "Concept node" object.
+    Each Concept node object translates and consolidates information about a Concept node in the UBKG.
+    (Each Concept node is the origin of a subgraph that includes Code, Term, Definition, and Semantic Type nodes.)
 
-    :param identifier: A string that can correspond to one or more of the following:
+    :param search: A string that can correspond to one or more of the following:
     1. The preferred term for a Concept.
     2. A term linked to a Code that is linked to a Concept.
     3. The CodeId of a Code that is linked to a Concept.
@@ -482,11 +484,10 @@ def concepts_concept_identifier_nodes_get(identifier):
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
-    search = identifier
     result = concepts_identfier_node_get_logic(neo4j_instance, search=search)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concepts that can be associated with the identifier", timeout=neo4j_instance.timeout)
+        err = get_404_error_string(prompt_string=f"No Concept nodes that can be associated with the search string", timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Limit the size of the payload, based on the app configuration.
@@ -494,5 +495,5 @@ def concepts_concept_identifier_nodes_get(identifier):
     if err != "ok":
         return make_response(err, 400)
 
-    dict_result = {'concepts': result}
+    dict_result = {'nodes': result}
     return jsonify(dict_result)

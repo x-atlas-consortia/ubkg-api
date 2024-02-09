@@ -672,7 +672,7 @@ def remove_null_placeholder_objects(listdict: list[dict]) -> list[dict]:
 
 def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[ConceptNode]:
     """
-    Obtains information on the set of Concept nodes with identifiers that match search parameter string.
+    Obtains information on the set of Concept subgraphs with identifiers that match the search parameter string.
 
     """
     conceptnodes: [ConceptNode] = []
@@ -691,7 +691,7 @@ def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[Conce
         for record in recds:
             # The timeboxed query returns query results as values of a dict instead of as a dict.
             val = record.get('value')
-            concept = val.get('concept')
+            concept = val.get('node')
             # Remove null placeholder dictionaries from nested list objects.
             concept['semantic_types'] = remove_null_placeholder_objects(concept.get('semantic_types'))
             concept['definitions'] = remove_null_placeholder_objects(concept.get('definitions'))
