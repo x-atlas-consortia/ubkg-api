@@ -12,7 +12,7 @@ servers:
   - url: https://ontology-api.dev.hubmapconsortium.org/
     description: Development server
 paths:
-  /database/info/server:
+  /database/server:
     get:
       summary: Returns basic information on the UBKG neo4j database.
       operationId: database_info_server_get
@@ -481,8 +481,47 @@ paths:
   /semantics/semantic_types:
     get:
       operationId: semantics_semantic_types_get
-      summary: Returns the set of Semantic Type nodes, subject to constraints specified in parameters.
+      summary: Returns the complete set of Semantic Type nodes, subject to constraints specified in parameters.
       parameters:
+        - name: skip
+          in: query
+          required: false
+          description: the number of Semantic Types to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Semantic Types to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns the set of Semantic Type nodes, subject to constaints specified in the parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemanticTypes'
+        '400':
+          description: invalid parameter name; non-numeric parameter value; negative value
+        '404':
+          description: No subtypes of the specified Semantic Type.
+        '5XX':
+          description: Unknown error
+  /semantics/{identifier}/semantic_types:
+    get:
+      operationId: semantics_identifier_semantic_types_get
+      summary: Returns the Semantic Type node that matches the identifier, subject to constraints specified in parameters.
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          description: The identifier for a Semantic Type node. An identifier may be either a URL-encoded string corresponding to either the name of the Semantic Type (e.g., Anatomical%20Structure, with %20 representing the space character) or the Type Unique Identifier (TUI) of the Semantic Type (e.g., T017). (%20 = space; %2C = comma; %3A = colon)
+          schema:
+            type: string
+            example: T017
         - name: skip
           in: query
           required: false
@@ -510,29 +549,29 @@ paths:
           description: No subtypes of the specified Semantic Type.
         '5XX':
           description: Unknown error
-  /semantics/{identifier}/semantic_types:
+  /semantics/{identifier}/semantic_subtypes:
     get:
-      operationId: semantics_identifier_semantic_types_get
+      operationId: semantics_identifier_semantic_subtypes_get
       summary: Returns the set of Semantic Type nodes that are subtypes (have ISA_STY relationship with) the specified Semantic Type, subject to constraints specified in parameters.
       parameters:
         - name: identifier
           in: path
           required: true
-          description: The identifier for a Semantic Type node. An identifier may be either a URL-encoded string corresponding to the name of the name of the Semantic Type (e.g., Anatomical%20Structure, with %20 representing the space character) or the Type Unique Identifier (TUI) of the Semantic Type (e.g., T017). (%20 = space; %2C = comma; %3A = colon)
+          description: The identifier for a Semantic Type node. An identifier may be either a URL-encoded string corresponding to either the name of the Semantic Type (e.g., Anatomical%20Structure, with %20 representing the space character) or the Type Unique Identifier (TUI) of the Semantic Type (e.g., T017). (%20 = space; %2C = comma; %3A = colon)
           schema:
             type: string
             example: Anatomical%20Structure
         - name: skip
           in: query
           required: false
-          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          description: the number of semantic sub-types to skip in the returned set. The value must be non-negative. The default value is 0.
           schema:
             type: string
             example: 0
         - name: limit
           in: query
           required: false
-          description: the maximum number of Semantic Types to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          description: the maximum number of semantic sub-types to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
           schema:
             type: string
             example: 10

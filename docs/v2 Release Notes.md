@@ -115,7 +115,7 @@ This response describes the relationship **(C0013227) - _isa_ -> (C2720507)**.
 }
 ```
 #### _/semantics/semantictypes_
-The _/semantics/<term_id>/semantics_ endpoint has been updated to the _/semantics/semantictypes_ endpoint.
+The _/semantics/<term_id>/semantics_ endpoint has been updated to a pair of endpoints as described in the **New Endpoints** section.
 The endpoint now allows searching by either semantic type name or Type Unique Identifier (TUI).
 
 
@@ -123,10 +123,14 @@ The endpoint now allows searching by either semantic type name or Type Unique Id
 The following endpoints were introduced in Version 2 of the UBKG API. Refer to the
 SmartAPI documentation for details.
 
-| Endpoint                | Purpose                                                                                            |
-|-------------------------|----------------------------------------------------------------------------------------------------|
-| _/concepts/subgraph/_   | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type |
-| _/database/info/server_ | Returns basic information on the UBKG neo4j database                                               |
+| Endpoint                                    | Purpose                                                                                                |
+|---------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| _/concepts/subgraph/_                       | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type     |
+| _/database/server_                          | Returns basic information on the UBKG neo4j database                                                   |
+| _/semantics/semantic_types                  | Returns information on all Semantic Type nodes                                                         |
+| _/semantics/{identifier}/semantic_types_    | Returns information on a specified Semantic Type                                                       |
+| _/semantics/{identifier}/semantic_subtypes_ | Returns information on the set of Semantic Type nodes that are subtypes of the specified Semantic Type |
+
 
 #### Deprecated endpoints
 

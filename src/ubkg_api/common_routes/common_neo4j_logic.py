@@ -519,38 +519,40 @@ def concepts_subgraph_get_logic(neo4j_instance, sab=None, rel=None, skip=None, l
 
     return conceptpaths
 
-
-def semantics_semantic_id_semantictypes_get_logic(neo4j_instance, semtype=None, skip=None,
-                                                  limit=None) -> List[SemanticType]:
+def semantics_semantic_id_semantic_get_logic(neo4j_instance, semtype=None, skip=None,
+                                                  limit=None, isforsubtypes:bool=False) -> List[SemanticType]:
     """
-    Obtains information on the set of Semantic (semantic type) nodes that are subtypes (have ISA_STY relationships
-    with) the semantic type identified with type.
+    Obtains information on either:
+    1. the set of Semantic (semantic type) nodes that match the identifier semtype
+    2. the set of Semantic (semantic type) nodes that are subtypes (have ISA_STY relationships
+    with) the semantic type identified with semtype
+
     The identifier can contain be either of the following types of identifiers:
     1. Name (e.g., "Anatomical Structure")
     2. Type Unique Identifier (e.g., "T017")
-
-    If type is empty, return all semantic types.
 
     :param semtype: a string OR list string prepared by the controller.
     :param skip: SKIP value for the query
     :param limit: LIMIT value for the query
     :param neo4j_instance: neo4j connection
+    :param isforsubtypes: flag for type of query
 
     """
     semantictypes: [SemanticType] = []
     # Load and parameterize base query.
-    query = loadquerystring('semantics_semantictypes.cypher')
+    if isforsubtypes:
+        query = loadquerystring('semantics_semantic_subtypes.cypher')
+    else:
+        query = loadquerystring('semantics_semantic_types.cypher')
 
     # The query can handle a list of multiple type identifiers (with proper formatting using format_list_for_query) or
-    # no values; however, the route in the controller limits the type identifier to a single path variable.
+    # no values; however, the routes in the controller limit the type identifier to a single path variable.
+    # Convert single value to a list with one element.
     if semtype is None:
-        # Load all semantic types
-        semtypes = ''
-    elif type(semtype) is list:
-        semtypes = semtype
+        semtypes = []
     else:
-        # Convert single value to a list with one element.
         semtypes = [semtype]
+
     types = format_list_for_query(listquery=semtypes, doublequote=True)
     query = query.replace('$types', types)
 
