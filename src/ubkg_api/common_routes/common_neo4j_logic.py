@@ -710,7 +710,7 @@ def database_info_server_get_logic(neo4j_instance) -> dict:
 
     # The version was obtained from the instance at startup.
     dictret = {"version": neo4j_instance.database_version,
-               "name": neo4j_instance.database_name,
+               #"name": neo4j_instance.database_name,
                "edition": neo4j_instance.database_edition}
 
     return dictret

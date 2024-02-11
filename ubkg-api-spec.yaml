@@ -1000,10 +1000,6 @@ components:
       type: object
       description: basic information on the neo4j database server instance
       properties:
-        name:
-          type: string
-          description: name of the UBKG database. Should be the default database name (neo4j)
-          example: neo4j
         version:
           type: string
           description: neo4j version
