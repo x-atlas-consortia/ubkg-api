@@ -128,8 +128,8 @@ SmartAPI documentation for details.
 | _/concepts/subgraph/_                       | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type     |
 | _/database/server_                          | Returns basic information on the UBKG neo4j database                                                   |
 | _/semantics/semantic_types                  | Returns information on all Semantic Type nodes                                                         |
-| _/semantics/{identifier}/semantic_types_    | Returns information on a specified Semantic Type                                                       |
-| _/semantics/{identifier}/semantic_subtypes_ | Returns information on the set of Semantic Type nodes that are subtypes of the specified Semantic Type |
+| _/semantics/semantic_types/{identifier}_    | Returns information on a specified Semantic Type                                                       |
+| _/semantics/semantic_subtypes/{identifier}_ | Returns information on the set of Semantic Type nodes that are subtypes of the specified Semantic Type |
 
 
 #### Deprecated endpoints
@@ -140,9 +140,9 @@ archived in folders named **deprecated** in the appropriate folders.
 
 Endpoints can be returned to the UBKG API if an appropriate use case is identified.
 
-| Endpoint                          | Reason for deprecating                           |
-|-----------------------------------|--------------------------------------------------|
-| _/concepts/<concept_id>/paths_    | Duplicates _/concepts/<concept_id>/paths/expand_ |
-| _/tui/{tui_id}/semantics_         |                                                  |
-| _/terms/{term_id}/concepts/terms_ | Incompatible with Cypher version 5               |
+| Endpoint                          | Reason for deprecating                                |
+|-----------------------------------|-------------------------------------------------------|
+| _/concepts/<concept_id>/paths_    | Duplicates _/concepts/<concept_id>/paths/expand_      |
+| _/tui/{tui_id}/semantics_         | Functionality now part of _/semantic_types_ endpoints |
+| _/terms/{term_id}/concepts/terms_ | Incompatible with Cypher version 5                    |
 
