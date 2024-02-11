@@ -12,13 +12,13 @@ def semantics_semantic_types_get():
     # Return information on all semantic types.
     return semantics_semantic_get(identifier=None, isforsubtypes=False)
 
-@semantics_blueprint.route('<identifier>/semantic_types', methods=['GET'])
-def semantics_identifier_semantic_types_get(identifier):
+@semantics_blueprint.route('semantic_types/<identifier>', methods=['GET'])
+def semantics_semantic_types_identifier_get(identifier):
     # Return information on specified semantic type.
     return semantics_semantic_get(identifier, isforsubtypes=False)
 
-@semantics_blueprint.route('<identifier>/semantic_subtypes', methods=['GET'])
-def semantics_identifier_semantic_subtypes_get(identifier):
+@semantics_blueprint.route('semantic_subtypes/<identifier>', methods=['GET'])
+def semantics_semantic_subtypes_identifier_get(identifier):
     # Return information on semantic subtypes.
     return semantics_semantic_get(identifier, isforsubtypes=True)
 

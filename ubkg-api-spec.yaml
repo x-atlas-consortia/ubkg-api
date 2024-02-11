@@ -510,7 +510,7 @@ paths:
           description: No subtypes of the specified Semantic Type.
         '5XX':
           description: Unknown error
-  /semantics/{identifier}/semantic_types:
+  /semantics/semantic_types/{identifier}:
     get:
       operationId: semantics_identifier_semantic_types_get
       summary: Returns the Semantic Type node that matches the identifier, subject to constraints specified in parameters.
@@ -549,7 +549,7 @@ paths:
           description: No subtypes of the specified Semantic Type.
         '5XX':
           description: Unknown error
-  /semantics/{identifier}/semantic_subtypes:
+  /semantics/semantic_subtypes/{identifier}:
     get:
       operationId: semantics_identifier_semantic_subtypes_get
       summary: Returns the set of Semantic Type nodes that are subtypes (have ISA_STY relationship with) the specified Semantic Type, subject to constraints specified in parameters.
