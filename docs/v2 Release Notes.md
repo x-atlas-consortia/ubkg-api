@@ -132,6 +132,7 @@ SmartAPI documentation for details.
 | _/node_types/counts_by_sab_                 | Returns counts of nodes in the database for all node types (labels), grouped by source (SAB).See Note 1. |  
 | _/node_types/counts_by_sab/{node_type}_     | Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB).      |
 | _/property_types_                           | Returns list of property types (keys)                                                                    |
+| _/relationship_types_                       | Returns list of relationship types                                                                       |
 | _/semantics/semantic_types_                 | Returns information on all Semantic Type nodes                                                           |
 | _/semantics/semantic_types/{identifier}_    | Returns information on a specified Semantic Type                                                         |
 | _/semantics/semantic_subtypes/{identifier}_ | Returns information on the set of Semantic Type nodes that are subtypes of the specified Semantic Type   |
@@ -153,3 +154,26 @@ Endpoints can be returned to the UBKG API if an appropriate use case is identifi
 | _/tui/{tui_id}/semantics_         | Functionality now part of _/semantic_types_ endpoints |
 | _/terms/{term_id}/concepts/terms_ | Incompatible with Cypher version 5                    |
 
+# Known Limitations and Possible Enhancements
+
+## Statistical endpoints
+The current set of endpoints execute real-time Cypher queries. 
+For very large UBKG instances (e.g., the Data Distillery), endpoints 
+that calculate statistics such as count by type can result in errors of two types:
+1. memory-related errors
+2. timeout errors
+
+Because a UBKG instance is static, it should be possible to calculate relevant
+statistics during generation in some analytical structure (e.g., summary
+tables). The UBKG API would then be able to obtain statistical information 
+about a UBKG instance by consulting the relevant summary data instead of attempting to 
+calculate in real time.
+
+## Other potential enhancements
+### _/paths_ endpoints based on Code nodes instead of Concept nodes
+Examples include _/expand_ for a Code node, or  _/shortest_path_ endpoint between two Code nodes.
+The challenge is the many:many relationship between Concept nodes and Code nodes. This requires
+additional analysis.
+
+### _/paths_ endpoints based on Semantic nodes
+The challenge is that the subgraph of Semantic nodes appears to be cyclic.

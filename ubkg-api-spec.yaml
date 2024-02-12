@@ -525,6 +525,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PropertyTypes'
+        '5XX':
+          description: Unknown error
+  /relationship_types:
+    get:
+      operationId: relationship_types_get
+      summary: Returns the set of relationship types
+      responses:
+        '200':
+          description: List of relationship types
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipTypes'
+        '5XX':
+          description: Unknown error
   /semantics/semantic_types:
     get:
       operationId: semantics_semantic_types_get
@@ -1212,5 +1227,15 @@ components:
             type: string
             description: a property type
             example: CODE
-
+    RelationshipTypes: #Schema name
+      type: object
+      description: list of relationship types
+      properties:
+        relationship_types:
+          description: list of relationship types
+          type: array
+          items:
+            type: string
+            description: relationship type
+            example: isa
 

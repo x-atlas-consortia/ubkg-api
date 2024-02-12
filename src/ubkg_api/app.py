@@ -18,6 +18,7 @@ from common_routes.semantics.semantics_controller import semantics_blueprint
 from common_routes.database.database_controller import database_blueprint
 from common_routes.node_types.node_types_controller import node_types_blueprint
 from common_routes.property_types.property_types_controller import property_types_blueprint
+from common_routes.relationship_types.relationship_types_controller import relationship_types_blueprint
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -49,6 +50,7 @@ class UbkgAPI:
         self.app.register_blueprint(database_blueprint)
         self.app.register_blueprint(node_types_blueprint)
         self.app.register_blueprint(property_types_blueprint)
+        self.app.register_blueprint(relationship_types_blueprint)
 
         self.app.neo4jConnectionHelper = None
 

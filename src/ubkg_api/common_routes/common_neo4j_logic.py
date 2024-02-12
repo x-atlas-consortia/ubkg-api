@@ -866,6 +866,8 @@ def property_types_get_logic(neo4j_instance) -> dict:
     """
     Obtains information on property types.
 
+    The return from the query is simple, and there is no need for a model class.
+
     :param neo4j_instance: neo4j connection
 
     """
@@ -875,12 +877,40 @@ def property_types_get_logic(neo4j_instance) -> dict:
 
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
+
         for record in recds:
             try:
                 propertytype = record.get('properties')
                 propertytypes.append(propertytype)
             except KeyError:
                 pass
-
+    # The query returns a single record.
     dictret = {'property_types':propertytype}
+    return dictret
+
+def relationship_types_get_logic(neo4j_instance) -> dict:
+    """
+    Obtains information on relationship types.
+
+    The return from the query is simple, and there is no need for a model class.
+
+    :param neo4j_instance: neo4j connection
+
+    """
+    reltypes: [dict] = []
+
+    query = 'CALL db.relationshipTypes() YIELD relationshipType ' \
+            'RETURN apoc.coll.sort(COLLECT(relationshipType)) AS relationship_types'
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+        for record in recds:
+            try:
+                reltype = record.get('relationship_types')
+                reltypes.append(reltype)
+            except KeyError:
+                pass
+
+    # The query has a single record.
+    dictret = {'relationship_types':reltype}
     return dictret

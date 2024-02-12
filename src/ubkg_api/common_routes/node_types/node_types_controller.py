@@ -51,9 +51,15 @@ def node_types_counts_get(node_type=None):
 def node_types_counts_by_sab_get():
     """
     Although it is possible to obtain counts for all node types by SAB, the query response time for large
-    databases (such as the Data Distillery) is likely to exceed the API server timeout. Instead of
+    databases (such as the Data Distillery) is likely to exceed the API server timeout. (Running the query
+    against an instance of Data Distillery requires around 36 s on a MacBook Pro with 64 GB RAM.)
+
+    Instead of
     allowing the execution of an endpoint that is likely to result in timeouts, require the specification of
     a node type.
+
+    If the configured timeout can be increased to above 40 s, then this route can call
+    node_types_counts_by_sab_node_type_get with node_type=None.
     """
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
