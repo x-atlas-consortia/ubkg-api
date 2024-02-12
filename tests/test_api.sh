@@ -334,6 +334,14 @@ curl --request GET \
 echo | tee -a test.out
 
 #--------------------------------------------
+echo "TESTS FOR: relationship_types GET" | tee -a test.out
+echo "1. relationship_types GET => valid; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/relationship_types" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
 echo "TESTS FOR: semantics/semantic_types GET" | tee -a test.out
 echo "1. semantics/semantic_types => should return 200" | tee -a test.out
 curl --request GET \
@@ -353,7 +361,6 @@ echo | tee -a test.out
 
 #--------------------------------------------
 echo "TESTS FOR: semantics/semantic_subtypes GET" | tee -a test.out
-
 echo "1. semantics/semantic_subtypes/Anatomical%20Structurez => invalid semantic type; should return custom 404" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/semantics/semantic_subtypes/Anatomical%20Structurez" \
