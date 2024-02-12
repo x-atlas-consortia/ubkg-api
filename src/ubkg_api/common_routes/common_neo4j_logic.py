@@ -914,3 +914,95 @@ def relationship_types_get_logic(neo4j_instance) -> dict:
     # The query has a single record.
     dictret = {'relationship_types':reltype}
     return dictret
+
+def sab_code_count_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
+    """
+    Obtains information on SABs, including counts of codes associated with them.
+
+    The return from the query is simple, and there is no need for a model class.
+
+    :param neo4j_instance: neo4j connection
+    :param skip: SKIP value for the query
+    :param limit: LIMIT value for the query
+
+    """
+    sabs: [dict] = []
+
+    # Load and parameterize query.
+    query = loadquerystring('sabs_codes_counts.cypher')
+    if sab is None:
+        sabjoin = ''
+    else:
+        sabjoin = format_list_for_query(listquery=[sab], doublequote=True)
+    query = query.replace('$sab', sabjoin)
+
+    query = query.replace('$skip', str(skip))
+    query = query.replace('$limit', str(limit))
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+
+        # Track the position of the sabs in the list, based on the value of skip.
+        position = int(skip) + 1
+        for record in recds:
+            try:
+                sab = record.get('sabs')
+                for s in sab:
+                    s['position'] = position
+                    position = position + 1
+                sabs.append(sab)
+
+            except KeyError:
+                pass
+
+    # The query has a single record.
+    dictret = {'sabs':sab}
+    return dictret
+
+def sab_code_detail_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
+    """
+    Obtains information on the codes for a specified SAB, including counts.
+
+    The return from the query is simple, and there is no need for a model class.
+
+    :param neo4j_instance: neo4j connection
+    :param skip: SKIP value for the query
+    :param limit: LIMIT value for the query
+
+    """
+    codes: [dict] = []
+
+    # Load and parameterize query.
+    query = loadquerystring('sabs_codes_details.cypher')
+    if sab is None:
+        sabjoin = ''
+    else:
+        sabjoin = format_list_for_query(listquery=[sab], doublequote=True)
+    query = query.replace('$sab', sabjoin)
+
+    query = query.replace('$skip', str(skip))
+    query = query.replace('$limit', str(limit))
+
+    query = timebox_query(query=query, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+        # Track the position of the codes in the list, based on the value of skip.
+        position = int(skip) + 1
+        res_codes={}
+        for record in recds:
+            val = record.get('value')
+            output = val.get('output')
+            try:
+                res_codes = output.get('codes')
+                for c in res_codes:
+                    c['position'] = position
+                    position = position + 1
+                codes.append(res_codes)
+
+            except KeyError:
+                pass
+
+    # The query has a single record.
+    dictret = {'codes':res_codes}
+    return dictret

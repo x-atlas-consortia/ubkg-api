@@ -132,6 +132,9 @@ SmartAPI documentation for details.
 | _/node_types/counts_by_sab_                 | Returns counts of nodes in the database for all node types (labels), grouped by source (SAB).See Note 1. |  
 | _/node_types/counts_by_sab/{node_type}_     | Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB).      |
 | _/property_types_                           | Returns list of property types (keys)                                                                    |
+| _/sabs/codes/counts_                        | Returns a set of sources (SABs), including counts of the codes associated with the sources               |
+| _/sabs/codes/counts/{sab}_                  | Returns the specified source (SAB), including the count of the codes associated with the source          |
+| _/sabs/codes/details_                       | Returns details on the codes associated with the specified source(SAB)                                   |
 | _/relationship_types_                       | Returns list of relationship types                                                                       |
 | _/semantics/semantic_types_                 | Returns information on all Semantic Type nodes                                                           |
 | _/semantics/semantic_types/{identifier}_    | Returns information on a specified Semantic Type                                                         |
