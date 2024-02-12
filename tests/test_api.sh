@@ -290,6 +290,50 @@ curl --request GET \
 echo | tee -a test.out
 
 #--------------------------------------------
+echo "TESTS FOR: node_types/counts GET" | tee -a test.out
+echo "1. node_types/counts GET => no match; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/node_types/counts/Codez" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "2. node_types/counts GET => valid; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/node_types/counts/Code" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
+echo "TESTS FOR: node_types/counts_by_sab GET" | tee -a test.out
+echo "1. node_types/counts_by_sab GET => blocked because of likely timeout; should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/node_types/counts_by_sab?test=test" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "2. node_types/counts_by_sab/Codez GET => invalid parameter; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/node_types/counts_by_sab/Codez" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "3. node_types/counts_by_sab/Code GET => valid; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/node_types/counts_by_sab/Code" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo "3. node_types/counts_by_sab/Code?sab=NCI GET => valid parameter; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/node_types/counts_by_sab/Code?sab=NCI" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
+echo "TESTS FOR: property_types GET" | tee -a test.out
+echo "1. property_types GET => valid; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/property_types" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
 echo "TESTS FOR: semantics/semantic_types GET" | tee -a test.out
 echo "1. semantics/semantic_types => should return 200" | tee -a test.out
 curl --request GET \
@@ -348,41 +392,5 @@ echo | tee -a test.out
 echo "2. terms/Breast%20cancer/concepts GET with match; should return 200" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/terms/Breast%20cancer/concepts" \
- --header "Accept: application/json" | cut -c1-60 | tee -a test.out
-echo | tee -a test.out
-
-#--------------------------------------------
-echo "TESTS FOR: node_types/counts GET" | tee -a test.out
-echo "1. node_types/counts GET => no match; should return custom 404" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/node_types/counts/Codez" \
- --header "Accept: application/json" | tee -a test.out
-echo | tee -a test.out
-echo "2. node_types/counts GET => valid; should return 200" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/node_types/counts/Code" \
- --header "Accept: application/json" | cut -c1-60 | tee -a test.out
-echo | tee -a test.out
-
-#--------------------------------------------
-echo "TESTS FOR: node_types/counts_by_sab GET" | tee -a test.out
-echo "1. node_types/counts_by_sab GET => blocked because of likely timeout; should return custom 400" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/node_types/counts_by_sab?test=test" \
- --header "Accept: application/json" | tee -a test.out
-echo | tee -a test.out
-echo "2. node_types/counts_by_sab/Codez GET => invalid parameter; should return custom 404" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/node_types/counts_by_sab/Codez" \
- --header "Accept: application/json" | tee -a test.out
-echo | tee -a test.out
-echo "3. node_types/counts_by_sab/Code GET => valid; should return 200" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/node_types/counts_by_sab/Code" \
- --header "Accept: application/json" | cut -c1-60 | tee -a test.out
-echo | tee -a test.out
-echo "3. node_types/counts_by_sab/Code?sab=NCI GET => valid parameter; should return 200" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/node_types/counts_by_sab/Code?sab=NCI" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out

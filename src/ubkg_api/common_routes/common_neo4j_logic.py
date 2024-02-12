@@ -861,3 +861,26 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> Lis
 
     dictret = {'total_count':total_count, 'node_types':nodetypes}
     return dictret
+
+def property_types_get_logic(neo4j_instance) -> dict:
+    """
+    Obtains information on property types.
+
+    :param neo4j_instance: neo4j connection
+
+    """
+    propertytypes: [dict] = []
+
+    query = 'CALL db.propertyKeys() YIELD propertyKey RETURN apoc.coll.sort(COLLECT(propertyKey)) AS properties'
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+        for record in recds:
+            try:
+                propertytype = record.get('properties')
+                propertytypes.append(propertytype)
+            except KeyError:
+                pass
+
+    dictret = {'property_types':propertytype}
+    return dictret

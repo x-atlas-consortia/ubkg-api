@@ -123,14 +123,21 @@ The endpoint now allows searching by either semantic type name or Type Unique Id
 The following endpoints were introduced in Version 2 of the UBKG API. Refer to the
 SmartAPI documentation for details.
 
-| Endpoint                                    | Purpose                                                                                                |
-|---------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| _/concepts/subgraph/_                       | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type     |
-| _/database/server_                          | Returns basic information on the UBKG neo4j database                                                   |
-| _/semantics/semantic_types                  | Returns information on all Semantic Type nodes                                                         |
-| _/semantics/semantic_types/{identifier}_    | Returns information on a specified Semantic Type                                                       |
-| _/semantics/semantic_subtypes/{identifier}_ | Returns information on the set of Semantic Type nodes that are subtypes of the specified Semantic Type |
+| Endpoint                                    | Purpose                                                                                                  |
+|---------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| _/concepts/subgraph/_                       | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type       |
+| _/database/server_                          | Returns basic information on the UBKG neo4j database                                                     |
+| _/node_types/counts_                        | Returns counts of nodes in the database by node type (label)                                             |
+| _/node_types/counts/{node_type}_            | Returns counts of nodes in the database for a specified node type (label)                                |
+| _/node_types/counts_by_sab_                 | Returns counts of nodes in the database for all node types (labels), grouped by source (SAB).See Note 1. |  
+| _/node_types/counts_by_sab/{node_type}_     | Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB).      |
+| _/property_types_                           | Returns list of property types (keys)                                                                    |
+| _/semantics/semantic_types_                 | Returns information on all Semantic Type nodes                                                           |
+| _/semantics/semantic_types/{identifier}_    | Returns information on a specified Semantic Type                                                         |
+| _/semantics/semantic_subtypes/{identifier}_ | Returns information on the set of Semantic Type nodes that are subtypes of the specified Semantic Type   |
 
+##### Notes on new endpoints
+1. When executed against a large UBKG instance, the execution time of the _/node_types/counts_by_sab_ endpoint will likely exceed the server host timeout. This endpoint exists as a convenience; a custom 400 message will explain the issue and suggest alternatives.
 
 #### Deprecated endpoints
 

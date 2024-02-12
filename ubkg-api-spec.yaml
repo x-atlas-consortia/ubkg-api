@@ -514,6 +514,17 @@ paths:
           description: No nodes with label
         '5XX':
           description: Unknown error
+  /property_types:
+    get:
+      operationId: property_types_get
+      summary: Returns the set of property types (keys) for all nodes and relationships
+      responses:
+        '200':
+          description: List of property types
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyTypes'
   /semantics/semantic_types:
     get:
       operationId: semantics_semantic_types_get
@@ -617,7 +628,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SemanticTypes'
+                $ref: '#/components/schemas/SemanticSubTypes'
         '400':
           description: invalid parameter name; non-numeric parameter value; negative value
         '404':
@@ -998,6 +1009,39 @@ components:
                     type: string
                     description: the Type Unique Identifier (TUI) for the Semantic Type node
                     example: T018
+    SemanticSubTypes: # Schema name
+      type: object
+      description: Array of Semantic Type nodes that are sub-types of a Semantic Type
+      properties:
+        position:
+          type: integer
+          description: absolute position of the Semantic Type in the list of all possible values in the response. Invariant relative to skip--e.g., if skip = 5, the position of the first element in the list will be 6.
+          example: 1
+        semantic_sub_types:
+          type: array
+          items:
+            type: object
+            properties:
+              semantic_type:
+                type: object
+                description: A Semantic Type node that is a sub-type of a specified Semantic Type node
+                properties:
+                  def:
+                    type: string
+                    description: the definition for the Semantic Type
+                    example: An anatomical structure that exists...
+                  stn:
+                    type: string
+                    description: the Semantic Type's identifier in the Semantic Type Network
+                    example: A1.2.1
+                  sty:
+                    type: string
+                    description: the Semantic Type name
+                    example: Embryonic Structure
+                  tui:
+                    type: string
+                    description: the Type Unique Identifier (TUI) for the Semantic Type node
+                    example: T018
     ConceptNodes: # Schema name
       type: object
       description: A set of "Concept node" objects that translate and consolidate information about Concept nodes in the UBKG. Each Concept node in the UBKG is the origin of a subgraph that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. The Concept node object represents information extracted from all of the nodes in the Concept node's subgraph.
@@ -1157,5 +1201,16 @@ components:
                           type: integer
                           description: count of nodes from the SAB with the specified node type
                           example: 170947
+    PropertyTypes: #Schema name
+      type: object
+      description: list of property types (keys)
+      properties:
+        property_types:
+          description: list of property types
+          type: array
+          items:
+            type: string
+            description: a property type
+            example: CODE
 
 
