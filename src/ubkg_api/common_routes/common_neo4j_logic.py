@@ -35,6 +35,7 @@ from models.sab_relationship_concept_term import SabRelationshipConceptTerm
 from models.termtype_code import TermtypeCode
 from models.concept_prefterm import ConceptPrefterm
 from models.concept_node import ConceptNode
+from models.node_type import NodeType
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -716,6 +717,7 @@ def database_info_server_get_logic(neo4j_instance) -> dict:
     return dictret
 
 
+
 # JAS January 2024
 # Deprecating. The Cypher is incompatible with version 5.
 """
@@ -764,3 +766,94 @@ def tui_tui_id_semantics_get_logic(neo4j_instance, tui_id: str) -> List[Semantic
                 pass
     return semanticStns
 """
+
+def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None, sab=None) -> List[dict]:
+    """
+    Obtains information on node types, grouped by SAB.
+
+    :param node_type: an optional filter for node type (label)
+    :param neo4j_instance: neo4j connection
+    :param sab: optional list of sabs
+
+    """
+    nodetypes: [NodeType] = []
+    # Load and parameterize base query.
+    query = loadquerystring('node_types_by_sab.cypher')
+
+    if node_type is None:
+        node_type = ''
+    else:
+        node_type = [node_type]
+    typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
+    query = query.replace('$node_type',typesjoin)
+    if sab is None:
+        sab = ''
+    else:
+        sabjoin = format_list_for_query(listquery=sab, doublequote=True)
+    query = query.replace('$sab', sabjoin)
+
+    # Limit query execution time to duration specified in app.cfg.
+    query = timebox_query(query, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+        total_count = 0
+        for record in recds:
+            # Each row from the query includes a dict that contains the actual response content.
+            val = record.get('value')
+            output = val.get('output')
+            node_types = output.get('node_types')
+            for node_type in node_types:
+                count_by_label = node_type.get('count')
+                total_count = total_count + count_by_label
+
+            try:
+                nodetype: NodeType = NodeType(node_type).serialize()
+                nodetypes.append(nodetype)
+            except KeyError:
+                pass
+
+    dictret = {'total_count':total_count, 'node_types':nodetypes}
+    return dictret
+
+def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> List[dict]:
+    """
+    Obtains information on node types.
+
+    :param node_type: an optional filter for node type (label)
+    :param neo4j_instance: neo4j connection
+
+    """
+    nodetypes: [NodeType] = []
+    # Load and parameterize base query.
+    query = loadquerystring('node_types.cypher')
+
+    if node_type is None:
+        node_type = ''
+    else:
+        node_type = [node_type]
+    typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
+    query = query.replace('$node_type',typesjoin)
+
+    # Limit query execution time to duration specified in app.cfg.
+    query = timebox_query(query, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+        total_count = 0
+        for record in recds:
+            # Each row from the query includes a dict that contains the actual response content.
+            val = record.get('value')
+            output = val.get('output')
+            node_types = output.get('node_types')
+            for node_type in node_types:
+                count_by_label = node_type.get('count')
+                total_count = total_count + count_by_label
+            try:
+                nodetype: NodeType = NodeType(node_type).serialize()
+                nodetypes.append(nodetype)
+            except KeyError:
+                pass
+
+    dictret = {'total_count':total_count, 'node_types':nodetypes}
+    return dictret

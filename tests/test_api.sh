@@ -56,6 +56,7 @@ UBKG_URL=$UBKG_URL_LOCAL
 echo "Using UBKG at: ${UBKG_URL}" | tee test.out
 echo "Only the first 60 characters of output from HTTP 200 returns displayed."
 
+#--------------------------------------------
 echo "TESTS FOR: codes/<code_id/codes GET" | tee -a test.out
 echo "1. /codes/SNOMEDCT_US%3A254837009/codes?test=test =>invalid parameter; should return custom 400" | tee -a test.out
 curl --request GET \
@@ -87,6 +88,7 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
+#--------------------------------------------
 echo "TESTS FOR: codes/<code_id>/concepts" | tee -a test.out
 echo "1. codes/SNOMEDCT_US%3A254837009X/concepts => with invalid code; should return custom 404" | tee -a test.out
 curl --request GET \
@@ -117,6 +119,7 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
+#--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/concepts GET" | tee -a test.out
 echo "1. concepts/C0678222X/concepts => invalid concept; should return custom 404" | tee -a test.out
 curl --request GET \
@@ -129,6 +132,7 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
+#--------------------------------------------
 echo "TESTS FOR:  concepts/<concept_id>/definitions" | tee -a test.out
 echo "1. concepts/C0678222x/definitions => invalid concept; should return custom 404" | tee -a test.out
 curl --request GET \
@@ -141,6 +145,38 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
+#--------------------------------------------
+echo "TESTS FOR: concepts/subgraph"
+echo "1. concepts/subgraph?sab=SNOMEDCT_US&rel=isaz=> invalid parameter value: should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/subgraph?sab=SNOMEDCT_US&rel=isaz" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "2. concepts/subgraph?sab=SNOMEDCT_US&rel=isa&limit=-1 => negative parameter: should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/subgraph?sab=SNOMEDCT_US&rel=isa&skip=0&limit=-1" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "3. concepts/subgraph?sab=SNOMEDCT_US&rel=isa&skip=0&limit=10 => valid parameters: should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/subgraph?sab=SNOMEDCT_US&rel=isa&skip=0&limit=10" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
+echo "TESTS FOR: concepts/<identifier>/nodes GET" | tee -a test.out
+echo "1. concepts/Cellsz/nodes => invalid search term; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/Cellsz/nodes" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "2. concepts/Cells/nodes => valid search term; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/Cells/nodes" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/paths/expand GET" | tee -a test.out
 echo "1. concepts/C2720507/paths/expand => missing required parameters; should return custom 400" | tee -a test.out
 curl --request GET \
@@ -187,28 +223,7 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
-echo "TESTS FOR: concepts/<origin_concept_id>/paths/<terminus_concept_id>/shortestpath GET" | tee -a test.out
-echo "1. concepts/C2720507/paths/C1272753/shortestpath => missing parameters; should return custom 400" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/C1272753/shortestpath" \
- --header "Accept: application/json" | tee -a test.out
-echo | tee -a test.out
-echo "2. concepts/C2720507/paths/C1272753/shortestpath?sab=SNOMEDCT_US&rel2=isa => invalid parameter name; should return custom 400" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/C1272753/shortestpath?sab=SNOMEDCT_US&rel2=isa" \
- --header "Accept: application/json" | tee -a test.out
-echo | tee -a test.out
-echo "3. concepts/C2720507Z/paths/C1272753/shortestpath?sab=SNOMEDCT_US&rel=isa => invalid concept_id; should return custom 404" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507Z/paths/C1272753/shortestpath?sab=SNOMEDCT_US&rel=isa" \
- --header "Accept: application/json" | tee -a test.out
-echo | tee -a test.out
-echo "4. concepts/C2720507/paths/C1272753/shortestpath?sab=SNOMEDCT_US&rel=isa => valid parameters; should return 200" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/C1272753/shortestpath?sab=SNOMEDCT_US&rel=isa" \
- --header "Accept: application/json" | cut -c1-60 | tee -a test.out
-echo | tee -a test.out
-
+#--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/paths/trees GET" | tee -a test.out
 echo "1. concepts/C2720507/paths/trees => missing parameters: should return custom 400" | tee -a test.out
 curl --request GET \
@@ -251,23 +266,66 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
-echo "TESTS FOR: concepts/subgraph"
-echo "1. concepts/subgraph?sab=SNOMEDCT_US&rel=isaz=> invalid parameter value: should return custom 404" | tee -a test.out
+#--------------------------------------------
+echo "TESTS FOR: concepts/<origin_concept_id>/<terminus_concept_id>/shortestpath GET" | tee -a test.out
+echo "1. concepts/C2720507/C1272753/shortestpath => missing parameters; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/subgraph?sab=SNOMEDCT_US&rel=isaz" \
+ --url "${UBKG_URL}/concepts/C2720507/C1272753/shortestpath" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
-echo "2. concepts/subgraph?sab=SNOMEDCT_US&rel=isa&limit=-1 => negative parameter: should return custom 400" | tee -a test.out
+echo "2. concepts/C2720507/C1272753/shortestpath?sab=SNOMEDCT_US&rel2=isa => invalid parameter name; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/subgraph?sab=SNOMEDCT_US&rel=isa&skip=0&limit=-1" \
+ --url "${UBKG_URL}/concepts/C2720507/C1272753/shortestpath?sab=SNOMEDCT_US&rel2=isa" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
-echo "3. concepts/subgraph?sab=SNOMEDCT_US&rel=isa&skip=0&limit=10 => valid parameters: should return 200" | tee -a test.out
+echo "3. concepts/C2720507Z/C1272753/shortestpath?sab=SNOMEDCT_US&rel=isa => invalid concept_id; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/subgraph?sab=SNOMEDCT_US&rel=isa&skip=0&limit=10" \
+ --url "${UBKG_URL}/concepts/C2720507Z/C1272753/shortestpath?sab=SNOMEDCT_US&rel=isa" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "4. concepts/C2720507/C1272753/shortestpath?sab=SNOMEDCT_US&rel=isa => valid parameters; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/C1272753/shortestpath?sab=SNOMEDCT_US&rel=isa" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
+#--------------------------------------------
+echo "TESTS FOR: semantics/semantic_types GET" | tee -a test.out
+echo "1. semantics/semantic_types => should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/semantics/semantic_types" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo "2. semantics/semantic_types?type=Anatomical%20Structurez => invalid semantic type; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/semantics/semantic_types?type=Anatomical%20Structurez" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "3. semantics/semantic_types?type=Anatomical%20Structure => valid semantic type; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/semantics/semantic_types?type=Anatomical%20Structure" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
+echo "TESTS FOR: semantics/semantic_subtypes GET" | tee -a test.out
+
+echo "1. semantics/semantic_subtypes?type=Anatomical%20Structurez => invalid semantic type; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/semantics/semantic_subtypes?type=Anatomical%20Structurez" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "2. semantics/semantic_subtypes?type=Anatomical%20Structure&skip=-1 => invalid skip; should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/semantics/semantic_subtypes?type=Anatomical%20Structure&skip=-1" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "3. semantics/semantic_subtypes?type=Anatomical%20Structure => valid parameters; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/semantics/semantic_subtypes?type=Anatomical%20Structure" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+
+#--------------------------------------------
 echo "TESTS FOR: terms/<term_id>/codes GET" | tee -a test.out
 echo "1. terms/Breast%20cancerz/codes => no match; should return custom 404" | tee -a test.out
 curl --request GET \
@@ -280,6 +338,7 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
+#--------------------------------------------
 echo "TESTS FOR: terms/<term_id>concepts GET" | tee -a test.out
 echo "1. terms/Breast%20cancerz/concepts GET with no match; should return custom 404" | tee -a test.out
 curl --request GET \
@@ -292,24 +351,38 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
-echo "TESTS FOR: semantics/semantictypes GET" | tee -a test.out
-echo "1. semantics/semantictypes => invalid parameters; should return custom 400" | tee -a test.out
+#--------------------------------------------
+echo "TESTS FOR: node_types/counts GET" | tee -a test.out
+echo "1. node_types/counts GET => no match; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantictypes?test=test" \
+ --url "${UBKG_URL}node_types/counts/Codez" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
-echo "2. semantics/semantictypes?type=Anatomical%20Structurez => invalid semantic type; should return custom 404" | tee -a test.out
+echo "2. node_types/counts GET => valid; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantictypes?type=Anatomical%20Structurez" \
+ --url "${UBKG_URL}node_types/counts/Code" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
-echo "3. semantics/semantictypes?type=Anatomical%20Structure&skip=-1 => invalid skip; should return custom 400" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/semantics/semantictypes?type=Anatomical%20Structure&skip=-1" \
- --header "Accept: application/json" | tee -a test.out
-echo | tee -a test.out
-echo "4. semantics/semantictypes?type=Anatomical%20Structure => valid parameters; should return 200" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/semantics/semantictypes?type=Anatomical%20Structure" \
- --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 
+#--------------------------------------------
+echo "TESTS FOR: node_types/counts_by_sab GET" | tee -a test.out
+echo "1. node_types/counts_by_sab GET => invalid parameter; should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}node_types/counts_by_sab?test=test" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "2. node_types/counts_by_sab/Codez GET => invalid parameter; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}node_types/counts_by_sab/Codez" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "3. node_types/counts_by_sab/Code GET => valid; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}node_types/counts_by_sab/Code" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
+echo "3. node_types/counts_by_sab/Code?sab=NCI GET => valid parameter; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}node_types/counts_by_sab/Code?sab=NCI" \
+ --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out

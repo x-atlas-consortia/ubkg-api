@@ -260,7 +260,7 @@ def concepts_paths_expand_get(concept_id):
 
 
 # JAS February 2024 Replaced POST with GET
-@concepts_blueprint.route('<origin_concept_id>/paths/<terminus_concept_id>/shortestpath', methods=['GET'])
+@concepts_blueprint.route('<origin_concept_id>/<terminus_concept_id>/shortestpath', methods=['GET'])
 def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
 
     """

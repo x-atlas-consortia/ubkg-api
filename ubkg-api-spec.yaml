@@ -12,17 +12,6 @@ servers:
   - url: https://ontology-api.dev.hubmapconsortium.org/
     description: Development server
 paths:
-  /database/server:
-    get:
-      summary: Returns basic information on the UBKG neo4j database.
-      operationId: database_info_server_get
-      responses:
-        '200':
-          description: basic information on the UBKG neo4j database
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DatabaseInfo'
   /codes/{code_id}/codes:
     get:
       summary:  A Concept node can have CODE relationships with (links to) Code nodes from multiple sources (SABs). For example, the Code SNOMEDCT_US:254837009 links to the Concept with identifier C0006142; Concept C0006142 also links to Codes NCI:C9335 and MSH:D001943. This endpoint returns information on Code nodes that link to the Concept node to which the specified code links, subject to constraints specified in parameters.
@@ -196,6 +185,54 @@ paths:
           description: no Concepts that have relationships with the specified Concept
         '5XX':
           description: Unknown error
+  /concepts/{concept_id}/definitions:
+    get:
+      operationId: concepts_concept_id_definitions_get
+      summary: Returns a list of Definitions for a Concept. A Definition is usually defined for a Code by a source (SAB); however, in the UBKG, the Definition is associated with the Code's linked Concept. Thus, a Concept may have multiple Definitions.
+      parameters:
+        - name: concept_id
+          description: Identifier (also known as a Concept Unique Identifier) for a Concept.
+          in: path
+          required: true
+          schema:
+            type: string
+            example: C0006142
+      responses:
+        '200':
+          description: An array of Definitions associated with the Concept.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SabDefinition'
+        '404':
+          description: No Definitions associated with the Concept _query_concept_id_.
+        '5XX':
+          description: Unknown error
+  /concepts/{identifier}/nodes:
+    get:
+      operationId: concepts_search_nodes_get
+      summary: Returns a set of "Concept node" objects for Concept nodes that "match" a search term. A Concept node in the UBKG is the origin of a subgraph that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A Concept node object represents information extracted from all of the nodes in the Concept node's subgraph. A "match" is the union of the set of matches on text-based properties of nodes in the subgraph that originates from a Concept node--e.g., the preferred term for the Concept; a term for a Code linked to the concept; etc.
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          description: The string to match against properties related to a Concepts (i.e. properties of the nodes in the subgraph that originate from Concept nodes). Special characters in search should be URL-encoded (%20 = space; %3A = colon, %2C = comma).
+          schema:
+            type: string
+            example: Cells
+      responses:
+        '200':
+          description: The set of Concept node objects that match the search term.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptNodes'
+        '404':
+          description: No Concepts that match the search term
+        '5XX':
+          description: Unknown error
   /concepts/{concept_id}/paths/expand:
     get:
       operationId: concepts_paths_expand_get
@@ -333,32 +370,7 @@ paths:
           description: No Concepts in a spanning tree originating from specified Concept subject to constraints from parameters
         '5XX':
           description: Unknown error
-  /concepts/{concept_id}/definitions:
-    get:
-      operationId: concepts_concept_id_definitions_get
-      summary: Returns a list of Definitions for a Concept. A Definition is usually defined for a Code by a source (SAB); however, in the UBKG, the Definition is associated with the Code's linked Concept. Thus, a Concept may have multiple Definitions.
-      parameters:
-        - name: concept_id
-          description: Identifier (also known as a Concept Unique Identifier) for a Concept.
-          in: path
-          required: true
-          schema:
-            type: string
-            example: C0006142
-      responses:
-        '200':
-          description: An array of Definitions associated with the Concept.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SabDefinition'
-        '404':
-          description: No Definitions associated with the Concept _query_concept_id_.
-        '5XX':
-          description: Unknown error
-  /concepts/{origin_concept_id}/paths/{terminus_concept_id}/shortestpath:
+  /concepts/{origin_concept_id}/{terminus_concept_id}/shortestpath:
     get:
       operationId: concepts_shortestpath_get
       summary: Return the shortest path between two Concepts, using Dykstra's algorithm with default weights, subject to constraints on relationship types (rel) and relationship sources (sab).
@@ -404,78 +416,110 @@ paths:
           description: No shortest path between _origin_concept_id_ and _terminus_concept_id_ with relationship types in _rel_ filtered by sources in _sab_.
         '5XX':
           description: Unknown error
-  /concepts/{search}/nodes:
+  /database/server:
     get:
-      operationId: concepts_search_nodes_get
-      summary: Returns a set of "Concept node" objects for Concept nodes that "match" a search term. A Concept node in the UBKG is the origin of a subgraph that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A Concept node object represents information extracted from all of the nodes in the Concept node's subgraph. A "match" is the union of the set of matches on text-based properties of nodes in the subgraph that originates from a Concept node--e.g., the preferred term for the Concept; a term for a Code linked to the concept; etc.
-      parameters:
-        - name: search
-          in: path
-          required: true
-          description: The string to match against properties related to a Concepts (i.e. properties of the nodes in the subgraph that originate from Concept nodes). Special characters in search should be URL-encoded (%20 = space; %3A = colon, %2C = comma).
-          schema:
-            type: string
-            example: Cells
+      summary: Returns basic information on the UBKG neo4j database.
+      operationId: database_info_server_get
       responses:
         '200':
-          description: The set of Concept node objects that match the search term.
+          description: basic information on the UBKG neo4j database
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConceptNodes'
+                $ref: '#/components/schemas/DatabaseInfo'
+  /node_types/counts:
+    get:
+      summary: Returns counts of nodes in the database by node type (label).
+      operationId: node_type_count_get
+      responses:
+        '200':
+          description: List of counts by node type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeTypeCount'
         '404':
-          description: No Concepts that match the search term
+          description: No nodes with label
         '5XX':
           description: Unknown error
-  /terms/{term_id}/codes:
+  /node_types/counts/{node_type}:
     get:
-      operationId: terms_term_id_codes_get
-      summary: Returns a list of Code nodes with terms that exactly match the specified string. Terms can be of different types--e.g., preferred terms (PT), synonyms (SY), etc.
+      summary: Returns counts of nodes in the database for a specified node type (label).
+      operationId: node_type_count_node_id_get
       parameters:
-        - name: term_id
+        - name: node_type
           in: path
           required: true
-          description: The string to match. Subject to timeout.
+          description: a node type
           schema:
             type: string
-            example: Breast cancer
+            example: Code
       responses:
         '200':
-          description: An array of Codes with terms that exactly match the specified string
+          description: List of counts by node type
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TermtypeCode'
+                $ref: '#/components/schemas/NodeTypeCount'
         '404':
-          description: No Codes with terms matching the specified string.
+          description: No nodes with label
         '5XX':
           description: Unknown error
-  /terms/{term_id}/concepts:
+  /node_types/counts_by_sab:
     get:
-      operationId: terms_term_id_concepts_get
-      summary: Returns a list of Concept nodes with preferred terms that exactly match the specified string.
+      summary: Returns counts of nodes in the database by node type (label), grouped by source (SAB)
+      operationId: node_type_count_by_sab_get
       parameters:
-        - name: term_id
-          in: path
-          required: true
-          description: The string to match
+        - name: sab
+          in: query
+          required: false
+          description: The set of sources (SABs) to which to limit counts by node_type. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: string
-            example: Breast cancer
+            example: NCI
       responses:
         '200':
-          description: An array of Concepts with preferred terms that exactly match the specified string
+          description: List of counts by node type, grouped by source
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
-                  example: C0794811
+                $ref: '#/components/schemas/NodeTypeSabCount'
+        '400':
+          description: invalid parameter
         '404':
-          description: No Concepts with terms matching the specified string.
+          description: No nodes with label
+        '5XX':
+          description: Unknown error
+  /node_types/counts_by_sab/{node_type}:
+    get:
+      summary: Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB), subject to constraints specified in parameters.
+      operationId: node_type_count_by_sab_node_type_get
+      parameters:
+        - name: node_type
+          in: path
+          required: true
+          description: a node type
+          schema:
+            type: string
+            example: Code
+        - name: sab
+          in: query
+          required: false
+          description: The set of sources (SABs) to which to limit counts by node_type. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: NCI
+      responses:
+        '200':
+          description: List of counts by node type, grouped by source, subject to constraints specified in parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeTypeSabCount'
+        '400':
+          description: invalid parameter
+        '404':
+          description: No nodes with label
         '5XX':
           description: Unknown error
   /semantics/semantic_types:
@@ -586,6 +630,57 @@ paths:
           description: invalid parameter name; non-numeric parameter value; negative value
         '404':
           description: No subtypes of the specified Semantic Type.
+        '5XX':
+          description: Unknown error
+  /terms/{term_id}/codes:
+    get:
+      operationId: terms_term_id_codes_get
+      summary: Returns a list of Code nodes with terms that exactly match the specified string. Terms can be of different types--e.g., preferred terms (PT), synonyms (SY), etc.
+      parameters:
+        - name: term_id
+          in: path
+          required: true
+          description: The string to match. Subject to timeout.
+          schema:
+            type: string
+            example: Breast cancer
+      responses:
+        '200':
+          description: An array of Codes with terms that exactly match the specified string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TermtypeCode'
+        '404':
+          description: No Codes with terms matching the specified string.
+        '5XX':
+          description: Unknown error
+  /terms/{term_id}/concepts:
+    get:
+      operationId: terms_term_id_concepts_get
+      summary: Returns a list of Concept nodes with preferred terms that exactly match the specified string.
+      parameters:
+        - name: term_id
+          in: path
+          required: true
+          description: The string to match
+          schema:
+            type: string
+            example: Breast cancer
+      responses:
+        '200':
+          description: An array of Concepts with preferred terms that exactly match the specified string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: C0794811
+        '404':
+          description: No Concepts with terms matching the specified string.
         '5XX':
           description: Unknown error
 components:
@@ -1008,7 +1103,67 @@ components:
           type: string
           description: type of neo4j instance
           example: community
-
-
+    NodeTypeCount: # Schema name
+      type: object
+      description: counts by node type
+      properties:
+        node_types:
+          type: array
+          items:
+            type: object
+            properties:
+              total_count:
+                type: integer
+                description: Count of nodes with any of the labels in node_types. Equal to the total count of nodes in the database if no node_type was specified.
+                example: 1650946
+              node_type:
+                type: object
+                properties:
+                  label:
+                    type: string
+                    description: the label for the node type
+                    example: Code
+                  count:
+                    type: integer
+                    description: count of nodes with the label
+                    example: 16590946
+    NodeTypeSabCount: # Schema name
+      type: object
+      description: counts by node type, grouped by SAB
+      properties:
+        node_types:
+          type: array
+          items:
+            type: object
+            properties:
+              total_count:
+                type: integer
+                description: Count of nodes with any of the labels in node_types. Equal to the total count of nodes in the database if no filters were applied.
+                example: 170947
+              node_type:
+                type: object
+                properties:
+                  label:
+                    type: string
+                    description: the label for the node type
+                    example: Code
+                  count:
+                    type: integer
+                    description: count of nodes with the label
+                    example: 170947
+                  sabs:
+                    type: array
+                    description: array of sources (SABs) for nodes with the specified node types
+                    items:
+                      type: object
+                      properties:
+                        sab:
+                          type: string
+                          description: source name
+                          example: NCI
+                        count:
+                          type: integer
+                          description: count of nodes from the SAB with the specified node type
+                          example: 170947
 
 
