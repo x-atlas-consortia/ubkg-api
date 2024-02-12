@@ -78,6 +78,10 @@ def semantics_semantic_get(identifier, isforsubtypes:bool):
         return make_response(err, 404)
 
     # Wrap origin and path list in a dictionary that will become the JSON response.
-    dict_result = {'semantic_types':result}
+    if isforsubtypes:
+        dict_result = {'semantic_sub_types':result}
+    else:
+        dict_result = {'semantic_types':result}
+
     return jsonify(dict_result)
 

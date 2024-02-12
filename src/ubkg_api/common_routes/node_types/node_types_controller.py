@@ -47,17 +47,28 @@ def node_types_counts_get(node_type=None):
 
     return jsonify(result)
 
-@node_types_blueprint.route('counts_by_sab/<node_type>', methods=['GET'])
-def node_types_counts_by_sab_get(node_type):
+@node_types_blueprint.route('counts_by_sab', methods=['GET'])
+def node_types_counts_by_sab_get():
     """
-    Returns information on a set of node types, grouped by SAB
-
-    :param node_type_id: node_type_id for filtering.
-
     Although it is possible to obtain counts for all node types by SAB, the query response time for large
     databases (such as the Data Distillery) is likely to exceed the API server timeout. Instead of
     allowing the execution of an endpoint that is likely to result in timeouts, require the specification of
     a node type.
+    """
+
+    neo4j_instance = current_app.neo4jConnectionHelper.instance()
+    err = f'The response to this endpoint is likely to exceed the timeout ' \
+          f'of {int(neo4j_instance.timeout/1000)} seconds and so will not be attempted. Execute the node_types/counts_by_sab/(node_type) endpoint ' \
+          f'with the name of a node type (e.g., Codes). To obtain names of node types, execute the ' \
+          f'node_types/counts endpoint.'
+    return make_response(err, 400)
+
+@node_types_blueprint.route('counts_by_sab/<node_type>', methods=['GET'])
+def node_types_counts_by_sab_node_type_get(node_type):
+    """
+    Returns information on a set of node types, grouped by SAB
+
+    :param node_type_id: node_type_id for filtering.
 
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()

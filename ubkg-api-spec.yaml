@@ -467,27 +467,19 @@ paths:
           description: Unknown error
   /node_types/counts_by_sab:
     get:
-      summary: Returns counts of nodes in the database by node type (label), grouped by source (SAB)
+      summary: Returns counts of nodes in the database for all node types (labels), grouped by source (SAB). When executed against a large UBKG instance, the execution time of the underlying query will likely exceed the server host timeout. This endpoint exists as a convenience; a custom 400 message will explain the issue and suggest alternatives.
       operationId: node_type_count_by_sab_get
       parameters:
         - name: sab
           in: query
           required: false
-          description: The set of sources (SABs) to which to limit counts by node_type. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit counts by node_type.
           schema:
             type: string
             example: NCI
       responses:
-        '200':
-          description: List of counts by node type, grouped by source
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NodeTypeSabCount'
         '400':
-          description: invalid parameter
-        '404':
-          description: No nodes with label
+          description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node_types/counts_by_sab/(node_type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node_types/counts endpoint.
         '5XX':
           description: Unknown error
   /node_types/counts_by_sab/{node_type}:

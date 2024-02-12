@@ -7,12 +7,16 @@
 // 1. Name (e.g., "Anatomical Structure")
 // 2. Type Unique Identifier (TUI) (e.g., "T017")
 
+// Optional filter on semantic type
+WITH [$types] as type_query
+WITH type_query
 CALL
 {
+    WITH type_query
     MATCH (s:Semantic)-[:ISA_STY]->(q:Semantic)
-    WHERE q.name IN [$types] OR q.TUI IN [$types]
+    WHERE q.name IN type_query OR q.TUI IN type_query
     RETURN s
 }
-WITH s ORDER BY s.STN SKIP $skip LIMIT $limit
-WITH DISTINCT {sty:s.name,tui:s.TUI,def:s.DEF,stn:s.STN}  AS stys
-RETURN stys AS semantic_type
+WITH type_query, s ORDER BY s.STN SKIP $skip LIMIT $limit
+WITH COLLECT({sty:s.name,tui:s.TUI,def:s.DEF,stn:s.STN})  AS stys
+RETURN stys AS semantic_subtype

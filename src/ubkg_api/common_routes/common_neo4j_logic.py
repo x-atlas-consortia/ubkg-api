@@ -566,13 +566,17 @@ def semantics_semantic_id_semantic_get_logic(neo4j_instance, semtype=None, skip=
         position = int(skip) + 1
         for record in recds:
             # Each row from the query includes a dict that contains the actual response content.
-            semantic_type = record.get('semantic_type')
+            if isforsubtypes:
+                semantic_type = record.get('semantic_subtype')
+            else:
+                semantic_type = record.get('semantic_type')
             try:
                 semantictype: SemanticType = SemanticType(semantic_type, position).serialize()
                 semantictypes.append(semantictype)
                 position = position + 1
             except KeyError:
                 pass
+
     return semantictypes
 
 

@@ -228,7 +228,6 @@ def validate_parameter_range_order(min_name: str, min_value: str, max_name: str,
        --"ok"
        --error string suitable for a 400 message
        """
-    print(f'min_value {min_value}; max_value {max_value}')
     if int(min_value) > int(max_value):
         return f"Invalid parameter values: '{min_name}' ({min_value}) greater than '{max_name}' ({max_value}). "
 
@@ -242,7 +241,6 @@ def check_payload_size(payload: str, max_payload_size: int) -> str:
     """
 
     payload_size = len(str(payload))
-    print(f'Payload size: {payload_size}; limit: {max_payload_size}')
     if payload_size > max_payload_size:
         return f"The size of the response to the endpoint with the specified parameters ({int(payload_size)/1024} MB) exceeds the payload limit" \
                f" of {int(max_payload_size)/1024} MB."

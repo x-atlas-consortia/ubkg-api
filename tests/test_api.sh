@@ -310,19 +310,19 @@ echo | tee -a test.out
 #--------------------------------------------
 echo "TESTS FOR: semantics/semantic_subtypes GET" | tee -a test.out
 
-echo "1. semantics/semantic_subtypes?type=Anatomical%20Structurez => invalid semantic type; should return custom 404" | tee -a test.out
+echo "1. semantics/semantic_subtypes/Anatomical%20Structurez => invalid semantic type; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantic_subtypes?type=Anatomical%20Structurez" \
+ --url "${UBKG_URL}/semantics/semantic_subtypes/Anatomical%20Structurez" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
-echo "2. semantics/semantic_subtypes?type=Anatomical%20Structure&skip=-1 => invalid skip; should return custom 400" | tee -a test.out
+echo "2. semantics/semantic_subtypes/Anatomical%20Structure&skip=-1 => invalid skip; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantic_subtypes?type=Anatomical%20Structure&skip=-1" \
+ --url "${UBKG_URL}/semantics/semantic_subtypes/Anatomical%20Structure&skip=-1" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
-echo "3. semantics/semantic_subtypes?type=Anatomical%20Structure => valid parameters; should return 200" | tee -a test.out
+echo "3. semantics/semantic_subtypes/Anatomical%20Structure => valid parameters; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantic_subtypes?type=Anatomical%20Structure" \
+ --url "${UBKG_URL}/semantics/semantic_subtypes/Anatomical%20Structure" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 
 #--------------------------------------------
@@ -355,34 +355,34 @@ echo | tee -a test.out
 echo "TESTS FOR: node_types/counts GET" | tee -a test.out
 echo "1. node_types/counts GET => no match; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}node_types/counts/Codez" \
+ --url "${UBKG_URL}/node_types/counts/Codez" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo "2. node_types/counts GET => valid; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}node_types/counts/Code" \
- --header "Accept: application/json" | tee -a test.out
+ --url "${UBKG_URL}/node_types/counts/Code" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
 echo "TESTS FOR: node_types/counts_by_sab GET" | tee -a test.out
-echo "1. node_types/counts_by_sab GET => invalid parameter; should return custom 400" | tee -a test.out
+echo "1. node_types/counts_by_sab GET => blocked because of likely timeout; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}node_types/counts_by_sab?test=test" \
+ --url "${UBKG_URL}/node_types/counts_by_sab?test=test" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo "2. node_types/counts_by_sab/Codez GET => invalid parameter; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}node_types/counts_by_sab/Codez" \
+ --url "${UBKG_URL}/node_types/counts_by_sab/Codez" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo "3. node_types/counts_by_sab/Code GET => valid; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}node_types/counts_by_sab/Code" \
- --header "Accept: application/json" | tee -a test.out
+ --url "${UBKG_URL}/node_types/counts_by_sab/Code" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo "3. node_types/counts_by_sab/Code?sab=NCI GET => valid parameter; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}node_types/counts_by_sab/Code?sab=NCI" \
- --header "Accept: application/json" | tee -a test.out
+ --url "${UBKG_URL}/node_types/counts_by_sab/Code?sab=NCI" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
