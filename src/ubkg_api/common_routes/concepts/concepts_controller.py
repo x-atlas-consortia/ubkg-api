@@ -260,7 +260,7 @@ def concepts_paths_expand_get(concept_id):
 
 
 # JAS February 2024 Replaced POST with GET
-@concepts_blueprint.route('<origin_concept_id>/<terminus_concept_id>/shortestpath', methods=['GET'])
+@concepts_blueprint.route('<origin_concept_id>/paths/shortestpath/<terminus_concept_id>', methods=['GET'])
 def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
 
     """
@@ -317,7 +317,7 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
 
 
 # JAS February 2024 Converted POST to GET.
-# Refactored to mirror the /paths/expand route, which differs only in the apoc function called.
+# Refactored to mirror the paths/expand route, which differs only in the apoc function called.
 @concepts_blueprint.route('<concept_id>/paths/trees', methods=['GET'])
 def concepts_trees_get(concept_id):
     """Return nodes in a spanning tree from a specified concept, based on
@@ -410,7 +410,7 @@ def concepts_trees_get(concept_id):
     dict_result = {'origin': origin, 'paths': result}
     return jsonify(dict_result)
 
-@concepts_blueprint.route('/subgraph', methods=['GET'])
+@concepts_blueprint.route('paths/subgraph', methods=['GET'])
 def concepts_subgraph_get():
     """
     Returns the paths in the subgraph specified by relationship types and SABs, constrained by
@@ -474,6 +474,7 @@ def concepts_subgraph_get():
 
     # Wrap origin and path list in a dictionary that will become the JSON response.
     dict_result = {'paths': result}
+
     return jsonify(dict_result)
 
 @concepts_blueprint.route('<search>/nodes', methods=['GET'])

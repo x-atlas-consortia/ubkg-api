@@ -12,7 +12,7 @@ def node_type_counts_get():
     # Return counts of all node_types.
     return node_types_counts_get()
 
-@node_types_blueprint.route('counts/<node_type>', methods=['GET'])
+@node_types_blueprint.route('<node_type>/counts', methods=['GET'])
 def node_type_counts_node_type_get(node_type):
     # Return counts of a specific node type.
     return node_types_counts_get(node_type)
@@ -69,7 +69,7 @@ def node_types_counts_by_sab_get():
           f'node_types/counts endpoint.'
     return make_response(err, 400)
 
-@node_types_blueprint.route('counts_by_sab/<node_type>', methods=['GET'])
+@node_types_blueprint.route('<node_type>/counts_by_sab', methods=['GET'])
 def node_types_counts_by_sab_node_type_get(node_type):
     """
     Returns information on a set of node types, grouped by SAB

@@ -848,16 +848,17 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> Lis
         for record in recds:
             # Each row from the query includes a dict that contains the actual response content.
             val = record.get('value')
+            print(val)
             output = val.get('output')
             node_types = output.get('node_types')
             for node_type in node_types:
                 count_by_label = node_type.get('count')
                 total_count = total_count + count_by_label
-            try:
-                nodetype: NodeType = NodeType(node_type).serialize()
-                nodetypes.append(nodetype)
-            except KeyError:
-                pass
+                try:
+                    nodetype: NodeType = NodeType(node_type).serialize()
+                    nodetypes.append(nodetype)
+                except KeyError:
+                    pass
 
     dictret = {'total_count':total_count, 'node_types':nodetypes}
     return dictret
@@ -1006,3 +1007,35 @@ def sab_code_detail_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict
     # The query has a single record.
     dictret = {'codes':res_codes}
     return dictret
+
+def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
+    """
+    Obtains information on the term types of relationships between codes in a SAB.
+
+    The return from the query is simple, and there is no need for a model class.
+
+    :param neo4j_instance: neo4j connection
+    :param skip: number of term types to skip
+    :param limit: maximum number of term types to return
+
+    """
+    termtypes: [dict] = []
+
+    query = loadquerystring(filename='sabs_term_types.cypher')
+    sabjoin=format_list_for_query(listquery=[sab],doublequote=True)
+    query = query.replace('$sab',sabjoin)
+    query = query.replace('$skip', str(skip))
+    query = query.replace('$limit', str(limit))
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+
+        for record in recds:
+            try:
+                termtype = record.get('sabs')
+                termtypes.append(termtype)
+            except KeyError:
+                pass
+    # The query returns a single record.
+
+    return termtype

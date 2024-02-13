@@ -75,52 +75,6 @@ paths:
           description: no Concept nodes for the specified Code
         '5XX':
           description: Unknown error
-  /concepts/subgraph:
-    get:
-      operationId: concepts_subgraph_get
-      summary: Returns a subgraph--the set of pairs of Concept nodes that are connected by a set of specified relationship types defined by a set of specified sources. For example, the endpoint can return the set of all pairs of nodes that are linked by UBERON's "part_of" relationship.
-      parameters:
-        - name: sab
-          in: query
-          required: true
-          description: The set of sources (SABs) to which to limit the relationships in the subgraph. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
-          schema:
-            type: string
-            example: SNOMEDCT_US
-        - name: rel
-          in: query
-          required: true
-          description: The set of relationship types to which to limit the relationships in the subgraph. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
-          schema:
-            type: string
-            example: isa
-        - name: skip
-          in: query
-          required: false
-          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
-          schema:
-            type: string
-            example: 0
-        - name: limit
-          in: query
-          required: false
-          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
-          schema:
-            type: string
-            example: 10
-      responses:
-        '200':
-          description: Return an array of pairs of Concepts linked by the specified relationships from the specified SABs.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ConceptSubgraph'
-        '400':
-          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; incompatible version of neo4j (this endpoint requires at least 5.11.0)
-        '404':
-          description: No subgraph for specified relationship types. Includes responses from queries with execution times that exceed the maximum.
-        '5XX':
-          description: Unknown error
   /concepts/{concept_id}/codes:
     get:
       operationId: concepts_concept_id_codes_get
@@ -213,12 +167,12 @@ paths:
   /concepts/{identifier}/nodes:
     get:
       operationId: concepts_search_nodes_get
-      summary: Returns a set of "Concept node" objects for Concept nodes that "match" a search term. A Concept node in the UBKG is the origin of a subgraph that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A Concept node object represents information extracted from all of the nodes in the Concept node's subgraph. A "match" is the union of the set of matches on text-based properties of nodes in the subgraph that originates from a Concept node--e.g., the preferred term for the Concept; a term for a Code linked to the concept; etc.
+      summary: Returns a set of "Concept node" objects for Concept nodes that "match" an identifier. A Concept node in the UBKG is the origin of a subgraph that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A Concept node object represents information extracted from all of the nodes in the Concept node's subgraph. A "match" is the union of the set of EXACT matches on text-based properties of nodes in the subgraph that originates from a Concept node.
       parameters:
         - name: identifier
           in: path
           required: true
-          description: The string to match against properties related to a Concepts (i.e. properties of the nodes in the subgraph that originate from Concept nodes). Special characters in search should be URL-encoded (%20 = space; %3A = colon, %2C = comma).
+          description: The string to match against properties related to a Concepts. Related properties include the preferred term for the Concept; the CUI for the Concept; the CodeID for a Code linked to the Concept; and terms for a Code linked to a Concept. Special characters in search should be URL-encoded (%20 = space; %3A = colon, %2C = comma).
           schema:
             type: string
             example: Cells
@@ -370,7 +324,53 @@ paths:
           description: No Concepts in a spanning tree originating from specified Concept subject to constraints from parameters
         '5XX':
           description: Unknown error
-  /concepts/{origin_concept_id}/{terminus_concept_id}/shortestpath:
+  /concepts/paths/subgraph:
+    get:
+      operationId: concepts_subgraph_get
+      summary: Returns a subgraph--the set of pairs of Concept nodes that are connected by a set of specified relationship types defined by a set of specified sources. For example, the endpoint can return the set of all pairs of nodes that are linked by UBERON's "part_of" relationship.
+      parameters:
+        - name: sab
+          in: query
+          required: true
+          description: The set of sources (SABs) to which to limit the relationships in the subgraph. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: SNOMEDCT_US
+        - name: rel
+          in: query
+          required: true
+          description: The set of relationship types to which to limit the relationships in the subgraph. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          schema:
+            type: string
+            example: isa
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Return an array of pairs of Concepts linked by the specified relationships from the specified SABs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptSubgraph'
+        '400':
+          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; incompatible version of neo4j (this endpoint requires at least 5.11.0)
+        '404':
+          description: No subgraph for specified relationship types. Includes responses from queries with execution times that exceed the maximum.
+        '5XX':
+          description: Unknown error
+  /concepts/{origin_concept_id}/paths/shortestpath/{terminus_concept_id}:
     get:
       operationId: concepts_shortestpath_get
       summary: Return the shortest path between two Concepts, using Dykstra's algorithm with default weights, subject to constraints on relationship types (rel) and relationship sources (sab).
@@ -442,7 +442,7 @@ paths:
           description: No nodes with label
         '5XX':
           description: Unknown error
-  /node_types/counts/{node_type}:
+  /node_types/{node_type}/counts:
     get:
       summary: Returns counts of nodes in the database for a specified node type (label).
       operationId: node_type_count_node_id_get
@@ -467,7 +467,7 @@ paths:
           description: Unknown error
   /node_types/counts_by_sab:
     get:
-      summary: Returns counts of nodes in the database for all node types (labels), grouped by source (SAB). When executed against a large UBKG instance, the execution time of the underlying query will likely exceed the server host timeout. This endpoint exists as a convenience; a custom 400 message will explain the issue and suggest alternatives.
+      summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
       operationId: node_type_count_by_sab_get
       parameters:
         - name: sab
@@ -482,7 +482,7 @@ paths:
           description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node_types/counts_by_sab/(node_type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node_types/counts endpoint.
         '5XX':
           description: Unknown error
-  /node_types/counts_by_sab/{node_type}:
+  /node_types/{node_type}/counts_by_sab:
     get:
       summary: Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB), subject to constraints specified in parameters.
       operationId: node_type_count_by_sab_node_type_get
@@ -540,6 +540,173 @@ paths:
                 $ref: '#/components/schemas/RelationshipTypes'
         '5XX':
           description: Unknown error
+  /sabs/codes/counts:
+    get:
+      operationId: sabs_codes_counts_get
+      summary: Returns a set of sources (SABs), including counts of the codes associated with the sources, subject to constraints from parameters
+      parameters:
+        - name: skip
+          in: query
+          required: false
+          description: the number of Codes to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Codes to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns information on a set of sources, subject to constraints from parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SabCodeCounts'
+        '400':
+          description: invalid parameter name; non-numeric parameter value; negative parameter value
+        '404':
+          description: No Codes for the specified parameters
+        '5XX':
+          description: Unknown error
+  /sabs/{sab}/codes/counts:
+    get:
+      operationId: sabs_codes_counts_sab_get
+      summary: Returns information for a specified source (SAB), including counts of the codes associated with the source, subject to constraints from parameters
+      parameters:
+        - name: sab
+          in: path
+          required: true
+          description: A source (SAB) to which to limit the response.
+          schema:
+            type: string
+            example: UBERON
+        - name: skip
+          in: query
+          required: false
+          description: the number of Codes to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Codes to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns information on a source, subject to constraints from parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SabCodeDetails'
+        '400':
+          description: invalid parameter name; non-numeric parameter value; negative parameter value
+        '404':
+          description: No Codes for the specified parameters
+        '5XX':
+          description: Unknown error
+  /sabs/codes/details:
+    get:
+      operationId: sabs_codes_details_get
+      summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
+      responses:
+        '400':
+          description: The response to this endpoint cannot be run for all SABs because of memory limitations. Execute the /sabs/(sab)/codes/details endpoint with the identifier for a SAB. Execute the /sabs/codes/counts endpoint for a list of all SABs in the UBKG.
+        '5XX':
+          description: Unknown error
+  /sabs/{sab}/codes/details:
+    get:
+      operationId: sabs_codes_details_sab_get
+      summary: Returns including details for codes associated with a specified source (SAB), subject to constraints from parameters
+      parameters:
+        - name: sab
+          in: path
+          required: true
+          description: A source (SAB) to which to limit the response.
+          schema:
+            type: string
+            example: UBERON
+        - name: skip
+          in: query
+          required: false
+          description: the number of Codes to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Codes to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns information on a set of sources and their associated Codes, subject to constraints from parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SabCodeDetails'
+        '400':
+          description: invalid parameter name; non-numeric parameter value; negative parameter value
+        '404':
+          description: No Codes for the specified parameters
+        '5XX':
+          description: Unknown error
+  /sabs/term_types:
+    get:
+      operationId: sabs_term_types_get
+      summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
+      responses:
+        '400':
+          description: The response to this endpoint cannot be run for all SABs because of memory limitations. Execute the /sabs/(sab)/codes/term_types endpoint with the identifier for a SAB. Execute the /sabs/codes/counts endpoint for a list of all SABs in the UBKG.
+        '5XX':
+          description: Unknown error
+  /sabs/{sab}/term_types:
+    get:
+      operationId: sabs_sab_term_types_get
+      summary: Returns the list of term types (types of relationship) for relationships between the nodes that are defined by the specified source (SAB)
+      parameters:
+        - name: sab
+          in: path
+          required: true
+          description: A source (SAB) to which to limit the response.
+          schema:
+            type: string
+            example: UBERON
+        - name: skip
+          in: query
+          required: false
+          description: the number of Codes to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Codes to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns information on a set of sources and their associated Codes, subject to constraints from parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SabTermTypes'
+        '400':
+          description: invalid parameter name; non-numeric parameter value; negative parameter value
+        '404':
+          description: No term types for the specified parameters
+        '5XX':
+          description: Unknown error
   /semantics/semantic_types:
     get:
       operationId: semantics_semantic_types_get
@@ -572,7 +739,7 @@ paths:
           description: No subtypes of the specified Semantic Type.
         '5XX':
           description: Unknown error
-  /semantics/semantic_types/{identifier}:
+  /semantics/{identifier}/semantic_types:
     get:
       operationId: semantics_identifier_semantic_types_get
       summary: Returns the Semantic Type node that matches the identifier, subject to constraints specified in parameters.
@@ -611,7 +778,7 @@ paths:
           description: No subtypes of the specified Semantic Type.
         '5XX':
           description: Unknown error
-  /semantics/semantic_subtypes/{identifier}:
+  /semantics/{identifier}/subtypes:
     get:
       operationId: semantics_identifier_semantic_subtypes_get
       summary: Returns the set of Semantic Type nodes that are subtypes (have ISA_STY relationship with) the specified Semantic Type, subject to constraints specified in parameters.
@@ -1238,4 +1405,76 @@ components:
             type: string
             description: relationship type
             example: isa
+    SabCodeCounts: #Schema name
+      type: object
+      description: A set of information on a source (SAB), including counts by codes.
+      properties:
+        sabs:
+          description: list of SABs
+          type: array
+          items:
+            type: object
+            description: a source (SAB)
+            properties:
+              sab:
+                description: source identifier
+                type: string
+                example: UBERON
+              count:
+                description: count of the codes in the SAB
+                type: string
+                example: 14314
+              position:
+                description: ordinal position of the sab in the endpoint's return, with respect to the _skip_ parameter
+                type: integer
+                example: 1
+    SabCodeDetails: #Schema name
+      type: object
+      description: A set of information on the Codes of a source (SAB)
+      properties:
+        codes:
+          description: list of Codes
+          type: array
+          items:
+            type: object
+            description: a Code in a SAB
+            properties:
+              codeid:
+                description: the CodeID of the Code, in format _SAB_:_CODE_.
+                type: string
+                example: "UBERON:0000000"
+              position:
+                description: the position of the Code in the endpoint's return, with respect to the _skip_ parameter
+                type: integer
+                example: 1
+              terms:
+                description: set of terms associated with the Code.
+                type: array
+                items:
+                  type: object
+                  description: a term for a Code
+                  properties:
+                    term:
+                      description: the term string
+                      type: string
+                      example: processual entity
+                    term_type:
+                      description: the term type for the term
+                      type: string
+                      example: PT
+    SabTermTypes: #Schema name
+      type: object
+      description: A set of term types (relationship types) for relationships that originate from the Code nodes that are defined by a source (SAB).
+      properties:
+        sab:
+          type: string
+          description: identifier for a source
+          example: SNOMEDCT_US
+        term_types:
+          type: array
+          description: array of term types
+          items:
+            type: string
+            description: the term type
+            example: PT
 

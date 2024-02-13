@@ -64,20 +64,22 @@ In addition to the aforementioned new features, version 2 of the
 UBKG API updates specific endpoints as follows:
 
 #### Paths related endpoints 
-1. The following endpoints related to paths have been moved from the _concepts/<concept-id>/_ URL base to 
-the _concepts/<concept_id>/paths/_ URL path:
-   - _concepts/<concept_id>/paths/expand
-   - _concepts/<concept_id>/paths/trees
-   - _concepts/<concept_id>/paths/shortestpath
-2. The _../shortestpaths_ endpoint was renamed _../shortestpath_.
-3. The format and content of the responses for these endpoints have been updated. Path-related endpoints 
+1. The following endpoints related to paths have been refactored:
+
+| Old Endpoint            | New Endpoint                                                            | Purpose                                                                                          |
+|-------------------------|-------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| _concepts/expand_       | _concepts/<concept_id>/paths/expand_                                    | Returns a set of paths originating from the specified Concept                                    |
+| _concepts/trees_        | _concepts/<concept_id>/paths/trees_                                     | Return information on the Concepts in the spanning tree that originates from a specified Concept |
+| _concepts/shorestpaths_ | _concepts/<origin_concept_id>/paths/shortestpath/<terminus_concept_id>_ | Return the shortest path between two Concepts, using Dykstra's algorithm with default weights    |
+
+2The format and content of the responses for these endpoints have been updated. Path-related endpoints 
 return JSON arrays that represent a set of _paths_ in the UBKG. A path is an ordered set of objects representing _hops_ 
 away from an originating concept node. Each hop in a path represents a 
 relationship between two concept nodes. 
-4. A new endpoint (_concepts/subgraphs_) returns a _subgraph_ of the UBKG--i.e. the set of pairs of concept nodes (or one-hop paths) linked by a specified relationship type. 
-5. If a set of paths shares a common origin, the response includes an object representing
+3. new endpoint (_concepts/subgraphs_) returns a _subgraph_ of the UBKG--i.e. the set of pairs of concept nodes (or one-hop paths) linked by a specified relationship type. 
+4. If a set of paths shares a common origin, the response includes an object representing
 the originating node. 
-6. For the case of the _concepts/shortestpath_ endpoint, the response includes an object representing the
+5. For the case of the _concepts/shortestpath_ endpoint, the response includes an object representing the
 terminal node.
 
 Following is an example of a response that describes a path with one hop,
@@ -123,25 +125,28 @@ The endpoint now allows searching by either semantic type name or Type Unique Id
 The following endpoints were introduced in Version 2 of the UBKG API. Refer to the
 SmartAPI documentation for details.
 
-| Endpoint                                    | Purpose                                                                                                  |
-|---------------------------------------------|----------------------------------------------------------------------------------------------------------|
-| _/concepts/subgraph/_                       | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type       |
-| _/database/server_                          | Returns basic information on the UBKG neo4j database                                                     |
-| _/node_types/counts_                        | Returns counts of nodes in the database by node type (label)                                             |
-| _/node_types/counts/{node_type}_            | Returns counts of nodes in the database for a specified node type (label)                                |
-| _/node_types/counts_by_sab_                 | Returns counts of nodes in the database for all node types (labels), grouped by source (SAB).See Note 1. |  
-| _/node_types/counts_by_sab/{node_type}_     | Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB).      |
-| _/property_types_                           | Returns list of property types (keys)                                                                    |
-| _/sabs/codes/counts_                        | Returns a set of sources (SABs), including counts of the codes associated with the sources               |
-| _/sabs/codes/counts/{sab}_                  | Returns the specified source (SAB), including the count of the codes associated with the source          |
-| _/sabs/codes/details_                       | Returns details on the codes associated with the specified source(SAB)                                   |
-| _/relationship_types_                       | Returns list of relationship types                                                                       |
-| _/semantics/semantic_types_                 | Returns information on all Semantic Type nodes                                                           |
-| _/semantics/semantic_types/{identifier}_    | Returns information on a specified Semantic Type                                                         |
-| _/semantics/semantic_subtypes/{identifier}_ | Returns information on the set of Semantic Type nodes that are subtypes of the specified Semantic Type   |
+| Endpoint                                    | Purpose                                                                                                                                   |
+|---------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| _/concepts/subgraph/_                       | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type                                        |
+| _/database/server_                          | Returns basic information on the UBKG neo4j database                                                                                      |
+| _/node_types/counts_                        | Returns counts of nodes in the database by node type (label)                                                                              |
+| _/node_types/{node_type}/counts_            | Returns counts of nodes in the database for a specified node type (label)                                                                 |
+| _/node_types/counts_by_sab_                 | See Note 1                                                                                                                                |  
+| _/node_types/{node_type}/counts_by_sab_     | Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB)                                        |
+| _/property_types_                           | Returns list of property types (keys)                                                                                                     |
+| _/sabs/codes/counts_                        | Returns a set of sources (SABs), including counts of the codes associated with the sources                                                |
+| _/sabs/{sab}/codes/counts/_                 | Returns the specified source (SAB), including the count of the codes associated with the source                                           |
+| _/sabs/codes/details_                       | See Note 1                                                                                                                                |
+| _/sabs/{sab}/codes/details_                 | Returns details on the codes associated with the specified source (SAB).                                                                  |    
+| _/sabs/term_types_                          | See Note 1                                                                                                                                |
+| _/sabs/{sab}/term_types_                    | Returns the list of term types (types of relationship) for relationships between the nodes that are defined by the specified source (SAB) |
+| _/relationship_types_                       | Returns list of relationship types                                                                                                        |
+| _/semantics/semantic_types_                 | Returns information on all Semantic Type nodes                                                                                            |
+| _/semantics/semantic_types/{identifier}_    | Returns information on a specified Semantic Type                                                                                          |
+| _/semantics/semantic_subtypes/{identifier}_ | Returns information on the set of Semantic Type nodes that are subtypes of the specified Semantic Type                                    |
 
 ##### Notes on new endpoints
-1. When executed against a large UBKG instance, the execution time of the _/node_types/counts_by_sab_ endpoint will likely exceed the server host timeout. This endpoint exists as a convenience; a custom 400 message will explain the issue and suggest alternatives.
+1. When executed against a large UBKG instance, the execution time of this endpoint will exceed either the server host timeout or server memory. This endpoint exists as a convenience; a custom 400 message will explain the issue and suggest alternatives.
 
 #### Deprecated endpoints
 
@@ -151,11 +156,11 @@ archived in folders named **deprecated** in the appropriate folders.
 
 Endpoints can be returned to the UBKG API if an appropriate use case is identified.
 
-| Endpoint                          | Reason for deprecating                                |
-|-----------------------------------|-------------------------------------------------------|
-| _/concepts/<concept_id>/paths_    | Duplicates _/concepts/<concept_id>/paths/expand_      |
-| _/tui/{tui_id}/semantics_         | Functionality now part of _/semantic_types_ endpoints |
-| _/terms/{term_id}/concepts/terms_ | Incompatible with Cypher version 5                    |
+| Endpoint                          | Reason for deprecating                                            |
+|-----------------------------------|-------------------------------------------------------------------|
+| _/concepts/<concept_id>/paths_    | Duplicates _/concepts/<concept_id>/paths/expand_                  |
+| _/tui/{tui_id}/semantics_         | Functionality now part of _/semantic_types_ endpoints             |
+| _/terms/{term_id}/concepts/terms_ | Functionality now part of _/concepts/<concept_id>/nodes_ endpoint |
 
 # Known Limitations and Possible Enhancements
 
@@ -166,8 +171,14 @@ that calculate statistics such as count by type can result in errors of two type
 1. memory-related errors
 2. timeout errors
 
-Because a UBKG instance is static, it should be possible to calculate relevant
-statistics during generation in some analytical structure (e.g., summary
+Version 2 of the UBKG API does not execute statistical queries that are
+likely to fail; instead, relevant endpoints suggest workarounds using other endpoints.
+
+For example, the query behind the _/sabs/codes/details_ will result in an Out of Memory Error (OOME) 
+in the neo4j instance. The current workaround is to submit the version of the endpoint that accepts a specific SAB.
+
+Because a UBKG instance is static, it would be more efficient to calculate relevant
+statistics during generation in a summary analytical structure (e.g., summary
 tables). The UBKG API would then be able to obtain statistical information 
 about a UBKG instance by consulting the relevant summary data instead of attempting to 
 calculate in real time.
@@ -175,7 +186,7 @@ calculate in real time.
 ## Other potential enhancements
 ### _/paths_ endpoints based on Code nodes instead of Concept nodes
 Examples include _/expand_ for a Code node, or  _/shortest_path_ endpoint between two Code nodes.
-The challenge is the many:many relationship between Concept nodes and Code nodes. This requires
+The challenge is that there is a many:many relationship between Concept nodes and Code nodes. This requires
 additional analysis.
 
 ### _/paths_ endpoints based on Semantic nodes

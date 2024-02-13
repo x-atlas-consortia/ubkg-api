@@ -10,19 +10,19 @@ semantics_blueprint = Blueprint('semantics', __name__, url_prefix='/semantics')
 @semantics_blueprint.route('semantic_types', methods=['GET'])
 def semantics_semantic_types_get():
     # Return information on all semantic types.
-    return semantics_semantic_get(identifier=None, isforsubtypes=False)
+    return semantics_semantic_get(semantic_type=None,isforsubtypes=False)
 
-@semantics_blueprint.route('semantic_types/<identifier>', methods=['GET'])
-def semantics_semantic_types_identifier_get(identifier):
+@semantics_blueprint.route('<semantic_type>/semantic_types', methods=['GET'])
+def semantics_semantic_types_identifier_get(semantic_type):
     # Return information on specified semantic type.
-    return semantics_semantic_get(identifier, isforsubtypes=False)
+    return semantics_semantic_get(semantic_type, isforsubtypes=False)
 
-@semantics_blueprint.route('semantic_subtypes/<identifier>', methods=['GET'])
-def semantics_semantic_subtypes_identifier_get(identifier):
+@semantics_blueprint.route('<semantic_type>/subtypes', methods=['GET'])
+def semantics_semantic_type_subtypes_get(semantic_type):
     # Return information on semantic subtypes.
-    return semantics_semantic_get(identifier, isforsubtypes=True)
+    return semantics_semantic_get(semantic_type, isforsubtypes=True)
 
-def semantics_semantic_get(identifier, isforsubtypes:bool):
+def semantics_semantic_get(semantic_type, isforsubtypes:bool):
     """
     Returns a set of semantic types that either:
     1. match the identifier
@@ -62,9 +62,8 @@ def semantics_semantic_get(identifier, isforsubtypes:bool):
     limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
 
     # Get remaining parameter values from the path or query string.
-    semtype = identifier
 
-    result = semantics_semantic_id_semantic_get_logic(neo4j_instance, semtype=semtype, skip=skip, limit=limit,
+    result = semantics_semantic_id_semantic_get_logic(neo4j_instance, semtype=semantic_type, skip=skip, limit=limit,
                                                            isforsubtypes=isforsubtypes)
     if result is None or result == []:
         # Empty result
@@ -74,7 +73,7 @@ def semantics_semantic_get(identifier, isforsubtypes:bool):
             errtype = "No Semantic Types match the specified identifier"
 
         err = get_404_error_string(prompt_string=f"{errtype}",
-                                       custom_request_path=f"'{identifier}'")
+                                       custom_request_path=f"'{semantic_type}'")
         return make_response(err, 404)
 
     # Wrap origin and path list in a dictionary that will become the JSON response.

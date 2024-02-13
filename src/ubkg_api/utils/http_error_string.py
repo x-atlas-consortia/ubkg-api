@@ -120,6 +120,10 @@ def validate_query_parameter_names(parameter_name_list=None) -> str:
     - error string for a 400 error
     """
 
+    if parameter_name_list is None:
+        return f"Invalid query parameter. This endpoint does not take query parameters. " \
+               f"Refer to the SmartAPI documentation for this endpoint for more information."
+
     for req in request.args:
         if req not in parameter_name_list:
             namelist = list_as_single_quoted_string(list_elements=parameter_name_list)
@@ -189,7 +193,7 @@ def validate_parameter_is_numeric(param_name=None, param_value: str = '') -> str
     --error string suitable for a 400 message
     """
 
-    if not param_value.isnumeric():
+    if not param_value.lstrip('-').isnumeric():
         return f"Invalid value ({param_value}) for parameter '{param_name}'.  The parameter must be numeric."
 
     return "ok"

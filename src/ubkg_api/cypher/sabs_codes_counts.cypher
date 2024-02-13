@@ -1,8 +1,10 @@
 // Used by /sabs/codes/counts
 // The sab_code_count_get routine in common_neo4j_logic.py will replace the sab variable.
 
+// Optional filter on SAB
 WITH [$sab] as sab_query
 WITH sab_query
+// Get counts of codes by SAB.
 CALL
 {
     WITH sab_query
