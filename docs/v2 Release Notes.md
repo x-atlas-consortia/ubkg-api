@@ -14,13 +14,13 @@ This is especially the case for endpoints in _/concepts/paths_. The service host
 on timeout or maximum payload size. 
 
 The UBKG API now features settings that allow for graceful termination of endpoints  
-before they result in server-initiated timeout or payload errors. The settings are:
+before they result in server-initiated timeout or payload errors. The default settings are:
 - maximum query run time (default: 28 seconds)
 - maximum response payload size (default: 9 MB)
 
 For endpoints with the potential for execution times that exceed the maximum, the UBKG API 
 "timeboxes" the associated Cypher queries. Timeboxed queries terminate after a set time and 
-return nothing, instead of continuing until timeout
+return nothing, instead of continuing until timeout.
 
 ### neo4j Version compatibility checking
 Endpoints in Version 2 of the UBKG API use features of neo4j that were introduced in version 5:
@@ -128,6 +128,7 @@ SmartAPI documentation for details.
 | Endpoint                                    | Purpose                                                                                                                                   |
 |---------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | _/concepts/subgraph/_                       | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type                                        |
+| _/concepts/{identifier}/nodeobjects_        | Returns a set of "Concept Node objects" that "match" an identifier.  See _Concept Node objects_ below.                                    |
 | _/database/server_                          | Returns basic information on the UBKG neo4j database                                                                                      |
 | _/node_types_                               | Returns list of node types (node labels)                                                                                                  |
 | _/node_types/counts_                        | See **Workaround for long-running queries**                                                                                               |
@@ -151,6 +152,365 @@ When executed against a large UBKG instance, the execution time of this endpoint
 This endpoint exists as a convenience; a custom 400 message will explain the issue and suggest alternatives.
 
 See _Long-running endpoints_ under _**Known Limitations and Possible Enhancements**_ below.
+
+##### Concept Node objects
+A Concept node in the UBKG is the origin of a subgraph that links the 
+Concept node to a set of Code, Term, Definition, and Semantic Type nodes. 
+A _Concept Node object_ represents this subgraph as a set of Concept 
+properties--i.e., all the Concept's linked Codes, terms, 
+definitions, and semantic types. 
+
+A "match" in the _/concepts/{identifier}/nodeobjects_ endpoint is an 
+exact match between an identifier and a text-based property in a 
+Concept Node object. Because an identifier may match properties in more than one Concept Node object, 
+the endpoint can return multiple Concept Node objects.
+
+Following is an example of the set a Concept Node objects related to the identifer "Cells"
+
+```
+{
+    "nodeobjects": [
+        {
+            "node": {
+                "codes": [
+                    {
+                        "codeid": "CARO:0000013",
+                        "sab": "CARO",
+                        "terms": [
+                            {
+                                "name": "cell",
+                                "tty": "PT_CL"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "CL:0000000",
+                        "sab": "CL",
+                        "terms": [
+                            {
+                                "name": "cell",
+                                "tty": "PT_PATO"
+                            },
+                            {
+                                "name": "cell",
+                                "tty": "PT_UBERON"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "LNC:LP18364-7",
+                        "sab": "LNC",
+                        "terms": [
+                            {
+                                "name": "Unspecified cells",
+                                "tty": "LPN"
+                            },
+                            {
+                                "name": "Unspecified cells",
+                                "tty": "LPDN"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "FMA:68646",
+                        "sab": "FMA",
+                        "terms": [
+                            {
+                                "name": "Cell",
+                                "tty": "PT"
+                            },
+                            {
+                                "name": "Normal cell",
+                                "tty": "SY"
+                            },
+                            {
+                                "name": "Cellula",
+                                "tty": "SY"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "PSY:08080",
+                        "sab": "PSY",
+                        "terms": [
+                            {
+                                "name": "Cells (Biology)",
+                                "tty": "PT"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "CSP:0605-5409",
+                        "sab": "CSP",
+                        "terms": [
+                            {
+                                "name": "cell",
+                                "tty": "PT"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "LNC:MTHU016342",
+                        "sab": "LNC",
+                        "terms": [
+                            {
+                                "name": "Unspecified cells",
+                                "tty": "CN"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "MSH:D002477",
+                        "sab": "MSH",
+                        "terms": [
+                            {
+                                "name": "Cells",
+                                "tty": "MH"
+                            },
+                            {
+                                "name": "Cell",
+                                "tty": "PM"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "LCH_NW:sh85021678",
+                        "sab": "LCH_NW",
+                        "terms": [
+                            {
+                                "name": "Cells",
+                                "tty": "PT"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "FMA:71954",
+                        "sab": "FMA",
+                        "terms": [
+                            {
+                                "name": "Set of cells",
+                                "tty": "PT"
+                            },
+                            {
+                                "name": "Cells set",
+                                "tty": "SY"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "UWDA:71954",
+                        "sab": "UWDA",
+                        "terms": [
+                            {
+                                "name": "Set of cells",
+                                "tty": "PT"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "UWDA:68646",
+                        "sab": "UWDA",
+                        "terms": [
+                            {
+                                "name": "Cell",
+                                "tty": "PT"
+                            },
+                            {
+                                "name": "Cellula",
+                                "tty": "SY"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "LNC:LP174115-8",
+                        "sab": "LNC",
+                        "terms": [
+                            {
+                                "name": "cells",
+                                "tty": "LPDN"
+                            },
+                            {
+                                "name": "cells",
+                                "tty": "LPN"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "CHV:0000002603",
+                        "sab": "CHV",
+                        "terms": [
+                            {
+                                "name": "cell",
+                                "tty": "PT"
+                            },
+                            {
+                                "name": "cells",
+                                "tty": "SY"
+                            },
+                            {
+                                "name": "the cell",
+                                "tty": "SY"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "LNC:LP14738-6",
+                        "sab": "LNC",
+                        "terms": [
+                            {
+                                "name": "Cells",
+                                "tty": "LPDN"
+                            },
+                            {
+                                "name": "Cells",
+                                "tty": "LPN"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "CPM:10",
+                        "sab": "CPM",
+                        "terms": [
+                            {
+                                "name": "Cell",
+                                "tty": "PT"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "LNC:MTHU001933",
+                        "sab": "LNC",
+                        "terms": [
+                            {
+                                "name": "Cells",
+                                "tty": "CN"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "MTH:NOCODE",
+                        "sab": "MTH",
+                        "terms": [
+                            {
+                                "name": "Cells",
+                                "tty": "SY"
+                            },
+                            {
+                                "name": "Cells",
+                                "tty": "PN"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "NCI:C12508",
+                        "sab": "NCI",
+                        "terms": [
+                            {
+                                "name": "Normal Cell",
+                                "tty": "SY"
+                            },
+                            {
+                                "name": "Cell Types",
+                                "tty": "DN"
+                            },
+                            {
+                                "name": "Cellular",
+                                "tty": "AD"
+                            },
+                            {
+                                "name": "Cells",
+                                "tty": "SY"
+                            },
+                            {
+                                "name": "Cell",
+                                "tty": "PT"
+                            },
+                            {
+                                "name": "Cell Type",
+                                "tty": "SY"
+                            }
+                        ]
+                    },
+                    {
+                        "codeid": "SNOMEDCT_US:4421005",
+                        "sab": "SNOMEDCT_US",
+                        "terms": [
+                            {
+                                "name": "Cellular structure",
+                                "tty": "SY"
+                            },
+                            {
+                                "name": "Cellular structures",
+                                "tty": "SY"
+                            },
+                            {
+                                "name": "Cell structure",
+                                "tty": "PT"
+                            },
+                            {
+                                "name": "Cell structure (cell structure)",
+                                "tty": "FN"
+                            },
+                            {
+                                "name": "Cell",
+                                "tty": "SY"
+                            }
+                        ]
+                    }
+                ],
+                "cui": "C0007634",
+                "definitions": [
+                    {
+                        "def": "An anatomical structure that has as its parts a maximally connected cell compartment surrounded by a plasma membrane.",
+                        "sab": "CARO"
+                    },
+                    {
+                        "def": "A material entity of anatomical origin (part of or deriving from an organism) that has as its parts a maximally connected cell compartment surrounded by a plasma membrane.",
+                        "sab": "CL"
+                    },
+                    {
+                        "def": "The smallest units of living structure capable of independent existence, composed of a membrane-enclosed mass of protoplasm and containing a nucleus or nucleoid.",
+                        "sab": "NCI"
+                    },
+                    {
+                        "def": "OBSOLETE. The basic structural and functional unit of all organisms. Includes the plasma membrane and any external encapsulating structures such as the cell wall and cell envelope. [GOC:go_curators]",
+                        "sab": "GO"
+                    },
+                    {
+                        "def": "Anatomical structure that consists of cytoplasm surrounded by a plasma membrane, with or without the cell nucleus; together with other cells and intercellular matrix, it constitutes tissues. Examples: lymphocyte, fibroblast, erythrocyte, neuron.",
+                        "sab": "UWDA"
+                    },
+                    {
+                        "def": "Anatomical set which has as its direct members cells of same type or of different types.",
+                        "sab": "FMA"
+                    },
+                    {
+                        "def": "Anatomical structure, each instance of which has as its boundary the external surface of some maximally connected plasma membrane. Examples: lymphocyte, fibroblast, erythrocyte, neuron.",
+                        "sab": "FMA"
+                    },
+                    {
+                        "def": "minute protoplasmic masses that make up organized tissue, consisting of a nucleus which is surrounded by protoplasm which contains the various organelles and is enclosed in the cell or plasma membrane; cells are the fundamental, structural, and functional units of living organisms.",
+                        "sab": "CSP"
+                    },
+                    {
+                        "def": "The fundamental, structural, and functional units or subunits of living organisms. They are composed of CYTOPLASM containing various ORGANELLES and a CELL MEMBRANE boundary.",
+                        "sab": "MSH"
+                    }
+                ],
+                "pref_term": "Cells",
+                "semantic_types": [
+                    {
+                        "def": "The fundamental structural and functional unit of living organisms.",
+                        "stn": "A1.2.3.3",
+                        "sty": "Cell",
+                        "tui": "T025"
+                    }
+                ]
+            }
+        }
+    ]
+}
+```
 
 ### Deprecated endpoints
 
