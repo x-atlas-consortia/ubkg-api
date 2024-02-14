@@ -72,7 +72,7 @@ UBKG API updates specific endpoints as follows:
 | _concepts/trees_        | _concepts/<concept_id>/paths/trees_                                     | Return information on the Concepts in the spanning tree that originates from a specified Concept |
 | _concepts/shorestpaths_ | _concepts/<origin_concept_id>/paths/shortestpath/<terminus_concept_id>_ | Return the shortest path between two Concepts, using Dykstra's algorithm with default weights    |
 
-2The format and content of the responses for these endpoints have been updated. Path-related endpoints 
+2. The format and content of the responses for these endpoints have been updated. Path-related endpoints 
 return JSON arrays that represent a set of _paths_ in the UBKG. A path is an ordered set of objects representing _hops_ 
 away from an originating concept node. Each hop in a path represents a 
 relationship between two concept nodes. 
