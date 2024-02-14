@@ -72,5 +72,5 @@ collect(DISTINCT{def:d.DEF,sab:d.SAB}) AS defs,
 collect(DISTINCT{sty:s.name,tui:s.TUI,def:s.DEF,stn:s.STN}) AS stys
 
 // Consolidate Codes, Definitions, and Semantic Types objects into an node object representing the Concept subgraph.
-WITH DISTINCT{cui:n.CUI,pref_term:t.name,codes:codes,definitions:defs,semantic_types:stys} AS node
-RETURN node
+WITH DISTINCT{cui:n.CUI,pref_term:t.name,codes:codes,definitions:defs,semantic_types:stys} AS nodeobject
+RETURN nodeobject

@@ -20,7 +20,7 @@ WITH match_label, [$sab] AS sab_query
 CALL
 {
     WITH match_label,sab_query
-    OPTIONAL MATCH (n)
+    MATCH (n)
     WHERE match_label in labels(n)
     AND CASE WHEN sab_query=[] then 1=1 ELSE n.SAB in sab_query END
     RETURN COUNT(*) as label_count_by_sab, n.SAB as sab ORDER BY n.SAB

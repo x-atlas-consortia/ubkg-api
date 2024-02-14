@@ -74,15 +74,14 @@ def concepts_concept_id_definitions_get(concept_id):
 
     :param concept_id: The concept identifier
     :type concept_id: str
-
-    :rtype: Union[List[SabDefinition], Tuple[List[SabDefinition], int], Tuple[List[SabDefinition], int, Dict[str, str]]
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
     result = concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string='No Definitions for specified Concept')
+        err = get_404_error_string(prompt_string='No Definitions for specified Concept',
+                                   custom_request_path=f"concept_id='{concept_id}'")
         return make_response(err, 404)
 
     return jsonify(result)
@@ -480,7 +479,7 @@ def concepts_subgraph_get():
     return jsonify(dict_result)
 
 
-@concepts_blueprint.route('<search>/nodes', methods=['GET'])
+@concepts_blueprint.route('<search>/nodeobjects', methods=['GET'])
 def concepts_concept_identifier_nodes_get(search):
     """
     Returns a "nodes" object representing a set of "Concept node" object.
@@ -499,8 +498,8 @@ def concepts_concept_identifier_nodes_get(search):
     result = concepts_identfier_node_get_logic(neo4j_instance, search=search)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concept nodes that can be associated with "
-                                                 f"the search string", timeout=neo4j_instance.timeout)
+        err = get_404_error_string(prompt_string=f"No Concepts with properties that match the identifier",
+                                   custom_request_path=f"identifier='{search}'", timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Limit the size of the payload, based on the app configuration.
@@ -508,5 +507,5 @@ def concepts_concept_identifier_nodes_get(search):
     if err != "ok":
         return make_response(err, 400)
 
-    dict_result = {'nodes': result}
+    dict_result = {'nodeobjects': result}
     return jsonify(dict_result)

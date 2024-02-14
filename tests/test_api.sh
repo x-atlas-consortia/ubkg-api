@@ -222,18 +222,18 @@ curl --request GET \
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: concepts/<identifier>/nodes GET" | tee -a test.out
-echo "SIGNATURE: /conepts/<identifier>/nodes" | tee -a test.out
+echo "TESTS FOR: concepts/<identifier>/nodeobjects GET" | tee -a test.out
+echo "SIGNATURE: /conepts/<identifier>/nodeobjects" | tee -a test.out
 echo | tee -a test.out
-echo "1. concepts/Cellsz/nodes => invalid identifier; should return custom 404" | tee -a test.out
+echo "1. concepts/Cellsz/nodeobjects => invalid identifier; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/CellsZ/nodes" \
+ --url "${UBKG_URL}/concepts/CellsZ/nodeobjects" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 
-echo "2. concepts/Cells/nodes => valid identifier; should return 200" | tee -a test.out
+echo "2. concepts/Cells/nodeobjects => valid identifier; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/Cells/nodes" \
+ --url "${UBKG_URL}/concepts/Cells/nodeobjects" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
@@ -469,14 +469,26 @@ curl --request GET \
 echo | tee -a test.out
 
 #--------------------------------------------
+echo "TESTS FOR: node_types GET" | tee -a test.out
+echo "SIGNATURE: /node_types " | tee -a test.out
+echo | tee -a test.out
+
+echo "1. node_types GET => valid; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/node_types" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+
+
+#--------------------------------------------
 echo "TESTS FOR: node_types/counts GET" | tee -a test.out
 echo "SIGNATURE: /node_types/counts" | tee -a test.out
 echo | tee -a test.out
 
-echo "1. node_types/counts GET => valid; should return 200" | tee -a test.out
+echo "1. node_types/counts GET => blocked; should return custom 400" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/node_types/counts" \
- --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+ --header "Accept: application/json"  tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
@@ -504,6 +516,7 @@ echo "1. node_types/counts_by_sab GET => blocked because of likely timeout; shou
 curl --request GET \
  --url "${UBKG_URL}/node_types/counts_by_sab?test=test" \
  --header "Accept: application/json" | tee -a test.out
+echo | tee -a test.out
 
 #--------------------------------------------
 echo "TESTS FOR: node_types/<node_type>/counts_by_sab GET" | tee -a test.out
@@ -553,6 +566,15 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
+#--------------------------------------------
+echo "TESTS FOR: sabs GET" | tee -a test.out
+echo "SIGNATURE: /sabs" | tee -a test.out
+
+echo "1. sabs => valid: should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/sabs" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
 
 #--------------------------------------------
 echo "TESTS FOR: sabs/codes/counts GET" | tee -a test.out
@@ -651,6 +673,7 @@ curl --request GET \
  --url "${UBKG_URL}/sabs/codes/details" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
+
 
 #--------------------------------------------
 echo "TESTS FOR: sabs/<SAB>/codes/details GET" | tee -a test.out
@@ -834,32 +857,32 @@ echo | tee -a test.out
 
 echo "3. semantics/Anatomical%20Structure/subtypes?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic_subtypes?skip=1&limit=-1" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=1&limit=-1" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 
 echo "4. semantics/Anatomical%20Structure/subtypes?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic_subtypes?skip=a&limit=10" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=a&limit=10" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 
 echo "5. semantics/Anatomical%20Structure/subtypes?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic_subtypes?skip=1&limit=a" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=1&limit=a" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 
 echo "6. semantics/Anatomical%20Structurez/subtypes?skip=1&limit=10 => invalid semantic type; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structurez/semantic_subtypes?skip=1&limit=10" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structurez/subtypes?skip=1&limit=10" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 
 echo | tee -a test.out
 echo "7. semantics/Anatomical%20Structure/subtypes?skip=1&limit=10 => valid parameters; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic_subtypes?skip=1&limit=10" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=1&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 
 #--------------------------------------------

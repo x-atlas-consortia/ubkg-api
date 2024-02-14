@@ -63,8 +63,8 @@ Version 2 of the UBKG API allows list parameters to be specified in two ways:
 In addition to the aforementioned new features, version 2 of the 
 UBKG API updates specific endpoints as follows:
 
-#### Paths related endpoints 
-1. The following endpoints related to paths have been refactored:
+#### Paths related endpoints
+The following endpoints related to paths have been refactored:
 
 | Old Endpoint            | New Endpoint                                                            | Purpose                                                                                          |
 |-------------------------|-------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
@@ -72,15 +72,14 @@ UBKG API updates specific endpoints as follows:
 | _concepts/trees_        | _concepts/<concept_id>/paths/trees_                                     | Return information on the Concepts in the spanning tree that originates from a specified Concept |
 | _concepts/shorestpaths_ | _concepts/<origin_concept_id>/paths/shortestpath/<terminus_concept_id>_ | Return the shortest path between two Concepts, using Dykstra's algorithm with default weights    |
 
-2. The format and content of the responses for these endpoints have been updated. Path-related endpoints 
+1. The format and content of the responses for these endpoints have been updated. Path-related endpoints 
 return JSON arrays that represent a set of _paths_ in the UBKG. A path is an ordered set of objects representing _hops_ 
 away from an originating concept node. Each hop in a path represents a 
 relationship between two concept nodes. 
-3. new endpoint (_concepts/subgraphs_) returns a _subgraph_ of the UBKG--i.e. the set of pairs of concept nodes (or one-hop paths) linked by a specified relationship type. 
-4. If a set of paths shares a common origin, the response includes an object representing
+2. If a set of paths shares a common origin, the response includes an object representing
 the originating node. 
-5. For the case of the _concepts/shortestpath_ endpoint, the response includes an object representing the
-terminal node.
+3. For the case of the _concepts/shortestpath_ endpoint, the response includes objects representing both the
+originating and terminal nodes.
 
 Following is an example of a response that describes a path with one hop,
 between CUI C0013227 (the _source_ of the hop) to CUI C2720507
@@ -116,12 +115,13 @@ This response describes the relationship **(C0013227) - _isa_ -> (C2720507)**.
   ]
 }
 ```
+
 #### _/semantics/semantictypes_
 The _/semantics/<term_id>/semantics_ endpoint has been updated to a pair of endpoints as described in the **New Endpoints** section.
 The endpoint now allows searching by either semantic type name or Type Unique Identifier (TUI).
 
 
-#### New endpoints
+### New endpoints
 The following endpoints were introduced in Version 2 of the UBKG API. Refer to the
 SmartAPI documentation for details.
 
@@ -129,26 +129,30 @@ SmartAPI documentation for details.
 |---------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | _/concepts/subgraph/_                       | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type                                        |
 | _/database/server_                          | Returns basic information on the UBKG neo4j database                                                                                      |
-| _/node_types/counts_                        | Returns counts of nodes in the database by node type (label)                                                                              |
+| _/node_types_                               | Returns list of node types (node labels)                                                                                                  |
+| _/node_types/counts_                        | See **Workaround for long-running queries**                                                                                               |
 | _/node_types/{node_type}/counts_            | Returns counts of nodes in the database for a specified node type (label)                                                                 |
-| _/node_types/counts_by_sab_                 | See Note 1                                                                                                                                |  
+| _/node_types/counts_by_sab_                 | See **Workaround for long-running queries**                                                                                               |  
 | _/node_types/{node_type}/counts_by_sab_     | Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB)                                        |
 | _/property_types_                           | Returns list of property types (keys)                                                                                                     |
 | _/sabs/codes/counts_                        | Returns a set of sources (SABs), including counts of the codes associated with the sources                                                |
 | _/sabs/{sab}/codes/counts/_                 | Returns the specified source (SAB), including the count of the codes associated with the source                                           |
-| _/sabs/codes/details_                       | See Note 1                                                                                                                                |
+| _/sabs/codes/details_                       | See **Workaround for long-running queries**                                                                                               |
 | _/sabs/{sab}/codes/details_                 | Returns details on the codes associated with the specified source (SAB).                                                                  |    
-| _/sabs/term_types_                          | See Note 1                                                                                                                                |
+| _/sabs/term_types_                          | See **Workaround for long-running queries**                                                                                               |
 | _/sabs/{sab}/term_types_                    | Returns the list of term types (types of relationship) for relationships between the nodes that are defined by the specified source (SAB) |
 | _/relationship_types_                       | Returns list of relationship types                                                                                                        |
 | _/semantics/semantic_types_                 | Returns information on all Semantic Type nodes                                                                                            |
 | _/semantics/semantic_types/{identifier}_    | Returns information on a specified Semantic Type                                                                                          |
 | _/semantics/semantic_subtypes/{identifier}_ | Returns information on the set of Semantic Type nodes that are subtypes of the specified Semantic Type                                    |
 
-##### Notes on new endpoints
-1. When executed against a large UBKG instance, the execution time of this endpoint will exceed either the server host timeout or server memory. This endpoint exists as a convenience; a custom 400 message will explain the issue and suggest alternatives.
+##### Workaround for long-running queries
+When executed against a large UBKG instance, the execution time of this endpoint will exceed either the server host timeout or server memory. 
+This endpoint exists as a convenience; a custom 400 message will explain the issue and suggest alternatives.
 
-#### Deprecated endpoints
+See _Long-running endpoints_ under _**Known Limitations and Possible Enhancements**_ below.
+
+### Deprecated endpoints
 
 The following endpoints were part of the initial release of the ubkg-api, 
 but have been deprecated. Cypher queries and model class files for the deprecated endpoints are 
@@ -164,18 +168,20 @@ Endpoints can be returned to the UBKG API if an appropriate use case is identifi
 
 # Known Limitations and Possible Enhancements
 
-## Statistical endpoints
+## Long-running endpoints
 The current set of endpoints execute real-time Cypher queries. 
-For very large UBKG instances (e.g., the Data Distillery), endpoints 
-that calculate statistics such as count by type can result in errors of two types:
+For very large UBKG instances (e.g., the Data Distillery), some endpoints
+(especially those that calculate statistics such as counts) can result in errors of two types:
 1. memory-related errors
 2. timeout errors
 
-Version 2 of the UBKG API does not execute statistical queries that are
-likely to fail; instead, relevant endpoints suggest workarounds using other endpoints.
+Version 2 of the UBKG API does not execute queries with a known risk of failure; instead, 
+related endpoints suggest workarounds using other endpoints.
 
-For example, the query behind the _/sabs/codes/details_ will result in an Out of Memory Error (OOME) 
-in the neo4j instance. The current workaround is to submit the version of the endpoint that accepts a specific SAB.
+### Examples
+1. The query behind the _/sabs/codes/details_ will result in an Out of Memory Error (OOME) 
+in the neo4j instance. The current workaround is to execute the version of the endpoint that accepts a specific SAB.
+2. The query behind the _/node_type/counts_ will result in a query that is likely to exceed timeout. The current workaround is to execute the version of the endpont that accepts a specific node type. 
 
 Because a UBKG instance is static, it would be more efficient to calculate relevant
 statistics during generation in a summary analytical structure (e.g., summary

@@ -521,11 +521,10 @@ def concepts_subgraph_get_logic(neo4j_instance, sab=None, rel=None, skip=None, l
     return conceptpaths
 
 
-def semantics_semantic_id_semantic_get_logic(neo4j_instance, semtype=None, skip=None,
-                                             limit=None, isforsubtypes: bool = False) -> List[SemanticType]:
+def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None, skip=None,
+                                             limit=None) -> List[SemanticType]:
     """
-    Obtains information on either:
-    1. the set of Semantic (semantic type) nodes that match the identifier semtype
+    Obtains information on the set of Semantic (semantic type) nodes that match the identifier semtype
     2. the set of Semantic (semantic type) nodes that are subtypes (have ISA_STY relationships
     with) the semantic type identified with semtype
 
@@ -537,15 +536,11 @@ def semantics_semantic_id_semantic_get_logic(neo4j_instance, semtype=None, skip=
     :param skip: SKIP value for the query
     :param limit: LIMIT value for the query
     :param neo4j_instance: neo4j connection
-    :param isforsubtypes: flag for type of query
 
     """
     semantictypes: [SemanticType] = []
     # Load and parameterize base query.
-    if isforsubtypes:
-        query = loadquerystring('semantics_semantic_subtypes.cypher')
-    else:
-        query = loadquerystring('semantics_semantic_types.cypher')
+    query = loadquerystring('semantics_semantic_types.cypher')
 
     # The query can handle a list of multiple type identifiers (with proper formatting using format_list_for_query) or
     # no values; however, the routes in the controller limit the type identifier to a single path variable.
@@ -567,10 +562,57 @@ def semantics_semantic_id_semantic_get_logic(neo4j_instance, semtype=None, skip=
         position = int(skip) + 1
         for record in recds:
             # Each row from the query includes a dict that contains the actual response content.
-            if isforsubtypes:
-                semantic_type = record.get('semantic_subtype')
-            else:
-                semantic_type = record.get('semantic_type')
+            semantic_type = record.get('semantic_type')
+            try:
+                semantictype: SemanticType = SemanticType(semantic_type, position).serialize()
+                semantictypes.append(semantictype)
+                position = position + 1
+            except KeyError:
+                pass
+
+    return semantictypes
+
+def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=None,
+                                             limit=None) -> List[SemanticType]:
+    """
+    Obtains information on the set of Semantic (semantic type) nodes that match the set of Semantic (semantic type)
+    nodes that are subtypes (have ISA_STY relationships with) the semantic type identified with semtype
+
+    The identifier can contain be either of the following types of identifiers:
+    1. Name (e.g., "Anatomical Structure")
+    2. Type Unique Identifier (e.g., "T017")
+
+    :param semtype: a string OR list string prepared by the controller.
+    :param skip: SKIP value for the query
+    :param limit: LIMIT value for the query
+    :param neo4j_instance: neo4j connection
+
+    """
+    semantictypes: [SemanticType] = []
+    # Load and parameterize base query.
+    query = loadquerystring('semantics_semantic_subtypes.cypher')
+
+    # The query can handle a list of multiple type identifiers (with proper formatting using format_list_for_query) or
+    # no values; however, the routes in the controller limit the type identifier to a single path variable.
+    # Convert single value to a list with one element.
+    if semtype is None:
+        semtypes = []
+    else:
+        semtypes = [semtype]
+
+    types = format_list_for_query(listquery=semtypes, doublequote=True)
+    query = query.replace('$types', types)
+
+    query = query.replace('$skip', str(skip))
+    query = query.replace('$limit', str(limit))
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+        # Identify the absolute position of the semantic type in the return.
+        position = int(skip) + 1
+        for record in recds:
+            # Each row from the query includes a dict that contains the actual response content.
+            semantic_type = record.get('semantic_subtype')
             try:
                 semantictype: SemanticType = SemanticType(semantic_type, position).serialize()
                 semantictypes.append(semantictype)
@@ -701,7 +743,7 @@ def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[Conce
         for record in recds:
             # The timeboxed query returns query results as values of a dict instead of as a dict.
             val = record.get('value')
-            concept = val.get('node')
+            concept = val.get('nodeobject')
             # Remove null placeholder dictionaries from nested list objects.
             concept['semantic_types'] = remove_null_placeholder_objects(concept.get('semantic_types'))
             concept['definitions'] = remove_null_placeholder_objects(concept.get('definitions'))
@@ -814,7 +856,6 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
             for node_type in node_types:
                 count_by_label = node_type.get('count')
                 total_count = total_count + count_by_label
-
             try:
                 nodetype: NodeType = NodeType(node_type).serialize()
                 nodetypes.append(nodetype)
@@ -853,7 +894,6 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
         for record in recds:
             # Each row from the query includes a dict that contains the actual response content.
             val = record.get('value')
-            print(val)
             output = val.get('output')
             node_types = output.get('node_types')
             for node_type in node_types:
@@ -866,6 +906,32 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
                     pass
 
     dictret = {'total_count': total_count, 'node_types': nodetypes}
+    return dictret
+
+def node_types_get_logic(neo4j_instance) -> dict:
+    """
+    Obtains information on node types.
+
+    The return from the query is simple, and there is no need for a model class.
+
+    :param neo4j_instance: neo4j connection
+
+    """
+    nodetypes: [dict] = []
+
+    query = 'CALL db.labels() YIELD label RETURN apoc.coll.sort(COLLECT(label)) AS node_types'
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+
+        for record in recds:
+            try:
+                nodetype = record.get('node_types')
+                nodetypes.append(nodetype)
+            except KeyError:
+                pass
+    # The query returns a single record.
+    dictret = {'node_types': nodetype}
     return dictret
 
 
@@ -923,6 +989,34 @@ def relationship_types_get_logic(neo4j_instance) -> dict:
     dictret = {'relationship_types': reltype}
     return dictret
 
+
+def sabs_get_logic(neo4j_instance) -> dict:
+    """
+    Obtains information on sources (SABs).
+
+    The return from the query is simple, and there is no need for a model class.
+
+    :param neo4j_instance: neo4j connection
+
+    """
+    sabs: [dict] = []
+
+    # The commented version of the query results in a OOME.
+    # query = 'MATCH (n:Code) RETURN apoc.coll.sort(COLLECT(n.SAB)) AS sab'
+    query = 'CALL {match (n:Code) return distinct n.SAB AS sab ORDER BY sab} WITH COLLECT(sab) AS sabs RETURN sabs'
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+
+        for record in recds:
+            try:
+                sab = record.get('sabs')
+                sabs.append(sab)
+            except KeyError:
+                pass
+    # The query returns a single record.
+    dictret = {'sabs': sab}
+    return dictret
 
 def sab_code_count_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
     """

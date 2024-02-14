@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, current_app, make_response, request
-from ..common_neo4j_logic import sab_code_count_get, sab_code_detail_get, sab_term_type_get_logic
+from ..common_neo4j_logic import sab_code_count_get, sab_code_detail_get, sab_term_type_get_logic,\
+    sabs_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
@@ -7,12 +8,17 @@ from utils.http_parameter import parameter_as_list, set_default_minimum, set_def
 
 sabs_blueprint = Blueprint('sabs', __name__, url_prefix='/sabs')
 
+@sabs_blueprint.route('', methods=['GET'])
+def sabs_get():
+    # Return list of SABS.
+    neo4j_instance = current_app.neo4jConnectionHelper.instance()
+
+    return sabs_get_logic(neo4j_instance)
 
 @sabs_blueprint.route('/codes/counts', methods=['GET'])
 def sabs_codes_counts_get():
     # Return SABs and counts of codes for all SABs.
     return sabs_codes_counts_get()
-
 
 @sabs_blueprint.route('<sab>/codes/counts', methods=['GET'])
 def sabs_codes_counts_sab_get(sab):
@@ -48,10 +54,8 @@ def sabs_codes_counts_get(sab=None):
     limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
 
     result = sab_code_count_get(neo4j_instance, sab=sab, skip=skip, limit=limit)
-    iserr = False
-    if result is None or result == []:
-        iserr = True
-    else:
+    iserr = result is None or result == []
+    if not iserr:
         # Check for empty sab data, which may happen in response either to invalid SAB or a skip > number of records.
         sabscheck = result.get('sabs')
         iserr = len(sabscheck) == 0
@@ -74,8 +78,8 @@ def sabs_codes_details_get():
     """
 
     err = f'The response to this endpoint cannot be run for all SABs because of memory limitations. ' \
-          f'Execute the /sabs/codes/details/(sab) endpoint with the identifier for an SAB. Execute ' \
-          f'the /sabs/codes/counts endpoint for a list of all SABs in the UBKG.'
+          f'Execute the /sabs/codes/details/(sab) endpoint with the identifier for a SAB. Execute ' \
+          f'the /sabs endpoint for a list of all SABs in the UBKG.'
     return make_response(err, 400)
 
 
@@ -132,12 +136,12 @@ def sabs_codes_details_sab_get(sab):
 @sabs_blueprint.route('term_types', methods=['GET'])
 def sabs_term_types_get():
     """
-        The underlying query that returns code details cannot be run for all sabs on large UBKG instances.
+        The underlying query that returns term types cannot be run for all sabs on large UBKG instances.
         """
 
     err = f'The response to this endpoint cannot be run for all SABs because of memory limitations. ' \
-          f'Execute the /sabs/term_types/(sab) endpoint with the identifier for an SAB. Execute ' \
-          f'the /sabs/codes/counts endpoint for a list of all SABs in the UBKG.'
+          f'Execute the /sabs/term_types/(sab) endpoint with the identifier for a SAB. Execute ' \
+          f'the /sabs endpoint for a list of all SABs in the UBKG.'
     return make_response(err, 400)
 
 

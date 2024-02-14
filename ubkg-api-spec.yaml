@@ -14,7 +14,7 @@ servers:
 paths:
   /codes/{code_id}/codes:
     get:
-      summary:  A Concept node can have CODE relationships with (links to) Code nodes from multiple sources (SABs). For example, the Code SNOMEDCT_US:254837009 links to the Concept with identifier C0006142; Concept C0006142 also links to Codes NCI:C9335 and MSH:D001943. This endpoint returns information on Code nodes that link to the Concept node to which the specified code links, subject to constraints specified in parameters.
+      summary:  Returns information on Code nodes that link to the Concept nodes to which the specified code links (i.e., related codes), subject to constraints specified in parameters. [A Concept node in the UBKG can have CODE relationships with (links to) Code nodes from multiple sources (SABs). For example, the Code nodes with code_ids SNOMEDCT_US:254837009, NCI:C9335 and MSH:D001943 link to the Concept with identifier C0006142.]
       operationId: codes_code_id_codes_get
       parameters:
         - name: code_id
@@ -27,7 +27,7 @@ paths:
         - name: sab
           in: query
           required: false
-          description: The set of sources (SABs) to which to limit the set of Codes that share links to the same Concept to which the Code with CodeID=_code_id_ links. This set can be specified either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit the set of Codes that  link to the same Concept to which the Code with CodeID=_code_id_ links. This set can be specified either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: array
             uniqueItems: true
@@ -53,7 +53,7 @@ paths:
   /codes/{code_id}/concepts:
     get:
       operationId: codes_code_id_concepts_get
-      summary: A Code node can have CODE relationships with (links to) multiple Concept nodes. For example, the Code with identifier SNOMEDCT_US:79962008 links to 5 different concepts. This endpoint returns the set of Concept nodes that have CODE relationships with the specified Code node.
+      summary: Returns the set of Concept nodes that link to the specified Code node. [A Code node can have CODE relationships with (links to) multiple Concept nodes. For example, the Code with identifier SNOMEDCT_US:79962008 links to a set of Concepts that includes C0014863 and C1442913.]
       parameters:
         - name: code_id
           in: path
@@ -78,7 +78,7 @@ paths:
   /concepts/{concept_id}/codes:
     get:
       operationId: concepts_concept_id_codes_get
-      summary: A Concept node can have CODE relationships with (links to) multiple Code nodes. This endpoint returns information on the set of Code nodes that link directly to the specified Concept, subject to constraints specified in parameters.
+      summary: Returns information on the set of Code nodes that link to the specified Concept, subject to constraints specified in parameters. [A Concept node can have CODE relationships with (links to) multiple Code nodes. For example, the Concept with identifier C0006142 links to a set of Code nodes that include SNOMEDCT_US:254837009, NCI:C9335 and MSH:D001943.]
       parameters:
         - name: concept_id
           in: path
@@ -142,7 +142,7 @@ paths:
   /concepts/{concept_id}/definitions:
     get:
       operationId: concepts_concept_id_definitions_get
-      summary: Returns a list of Definitions for a Concept. A Definition is usually defined for a Code by a source (SAB); however, in the UBKG, the Definition is associated with the Code's linked Concept. Thus, a Concept may have multiple Definitions.
+      summary: Returns the set of Definitions linked to a Concept. [A Definition is usually defined for a Code by a source (SAB), not a Concept; however, in the UBKG, the Definition is associated with the Code's linked Concept. Thus, a Concept may have multiple Definitions.]
       parameters:
         - name: concept_id
           description: Identifier (also known as a Concept Unique Identifier) for a Concept.
@@ -164,33 +164,33 @@ paths:
           description: No Definitions associated with the Concept _query_concept_id_.
         '5XX':
           description: Unknown error
-  /concepts/{identifier}/nodes:
+  /concepts/{identifier}/nodeobjects:
     get:
-      operationId: concepts_search_nodes_get
-      summary: Returns a set of "Concept node" objects for Concept nodes that "match" an identifier. A Concept node in the UBKG is the origin of a subgraph that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A Concept node object represents information extracted from all of the nodes in the Concept node's subgraph. A "match" is the union of the set of EXACT matches on text-based properties of nodes in the subgraph that originates from a Concept node.
+      operationId: concepts_identifier_nodes_get
+      summary: Returns a set of "Concept Node objects" that "match" an identifier. [A Concept node in the UBKG is the origin of a subgraph that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A "Concept Node object" represents this subgraph as a set of Concept properties--i.e., all of the Concept's linked Codes, terms, definitions, and semantic types. A "match" is an exact match between an identifier and a text-based property in a Concept Node object. Because an identifier may match properties in more than one Concept Node object, the endpoint can return multiple Concept Node objects.]
       parameters:
         - name: identifier
           in: path
           required: true
-          description: The string to match against properties related to a Concepts. Related properties include the preferred term for the Concept; the CUI for the Concept; the CodeID for a Code linked to the Concept; and terms for a Code linked to a Concept. Special characters in search should be URL-encoded (%20 = space; %3A = colon, %2C = comma).
+          description: The string to match against properties related to Concepts. Related properties include the preferred term for the Concept; the CUI for the Concept; the CodeID for a Code linked to the Concept; and terms for a Code linked to a Concept. Special characters in search should be URL-encoded (%20 = space; %3A = colon, %2C = comma).
           schema:
             type: string
             example: Cells
       responses:
         '200':
-          description: The set of Concept node objects that match the search term.
+          description: The set of Concept node objects that match the identifier.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConceptNodes'
         '404':
-          description: No Concepts that match the search term
+          description: No Concepts that match the identifier
         '5XX':
           description: Unknown error
   /concepts/{concept_id}/paths/expand:
     get:
-      operationId: concepts_paths_expand_get
-      summary: Returns a set of paths originating from the specified Concept, subject to constraints specified in parameters.
+      operationId: concepts_concept_id_paths_expand_get
+      summary: Returns a set of paths that originate from the specified Concept, subject to constraints specified in parameters.
       parameters:
         - name: concept_id
           in: path
@@ -327,7 +327,7 @@ paths:
   /concepts/paths/subgraph:
     get:
       operationId: concepts_subgraph_get
-      summary: Returns a subgraph--the set of pairs of Concept nodes that are connected by a set of specified relationship types defined by a set of specified sources. For example, the endpoint can return the set of all pairs of nodes that are linked by UBERON's "part_of" relationship.
+      summary: Returns a subgraph--the set of pairs of Concept nodes that are connected by a set of specified relationship types defined by a set of specified sources. For example, the endpoint can return the subgraph consisiting of all pairs of nodes that are linked by UBERON's "part_of" relationship.
       parameters:
         - name: sab
           in: query
@@ -427,25 +427,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DatabaseInfo'
-  /node_types/counts:
+  /node_types:
     get:
-      summary: Returns counts of nodes in the database by node type (label).
-      operationId: node_type_count_get
+      summary: Returns list of node types (node labels)--e.g., Code, Concept, etc.
+      operationId: node_type_get
       responses:
         '200':
-          description: List of counts by node type
+          description: List of node types
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NodeTypeCount'
+                $ref: '#/components/schemas/NodeTypes'
         '404':
-          description: No nodes with label
+          description: No nodes types
+        '5XX':
+          description: Unknown error
+
+  /node_types/counts:
+    get:
+      summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
+      operationId: node_type_count_get
+      responses:
+        '400':
+          description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node_types/(node_type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node_types endpoint.
         '5XX':
           description: Unknown error
   /node_types/{node_type}/counts:
     get:
       summary: Returns counts of nodes in the database for a specified node type (label).
-      operationId: node_type_count_node_id_get
+      operationId: node_type_id_count_get
       parameters:
         - name: node_type
           in: path
@@ -472,20 +482,20 @@ paths:
       parameters:
         - name: sab
           in: query
-          required: false
+          required: true
           description: The set of sources (SABs) to which to limit counts by node_type.
           schema:
             type: string
             example: NCI
       responses:
         '400':
-          description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node_types/counts_by_sab/(node_type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node_types/counts endpoint.
+          description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node_types/counts_by_sab/(node_type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node_types endpoint.
         '5XX':
           description: Unknown error
   /node_types/{node_type}/counts_by_sab:
     get:
       summary: Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB), subject to constraints specified in parameters.
-      operationId: node_type_count_by_sab_node_type_get
+      operationId: node_type_id_count_by_sab_get
       parameters:
         - name: node_type
           in: path
@@ -496,7 +506,7 @@ paths:
             example: Code
         - name: sab
           in: query
-          required: false
+          required: true
           description: The set of sources (SABs) to which to limit counts by node_type. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: string
@@ -540,10 +550,25 @@ paths:
                 $ref: '#/components/schemas/RelationshipTypes'
         '5XX':
           description: Unknown error
+  /sabs:
+    get:
+      operationId: sabs_get
+      summary: Returns a list of sources (SABs) in the UBKG. [A source corresponds to a vocabulary, an ontology, or reference. The Source Abbreviation (SAB) is unique acronym that identifies the source.]
+      responses:
+        '200':
+          description: Returns information on a set of sources.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sabs'
+        '404':
+          description: No Sources
+        '5XX':
+          description: Unknown error
   /sabs/codes/counts:
     get:
       operationId: sabs_codes_counts_get
-      summary: Returns a set of sources (SABs), including counts of the codes associated with the sources, subject to constraints from parameters
+      summary: Returns a list of sources (SABs), including counts of the codes associated with the sources, subject to constraints from parameters
       parameters:
         - name: skip
           in: query
@@ -617,7 +642,7 @@ paths:
       summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
       responses:
         '400':
-          description: The response to this endpoint cannot be run for all SABs because of memory limitations. Execute the /sabs/(sab)/codes/details endpoint with the identifier for a SAB. Execute the /sabs/codes/counts endpoint for a list of all SABs in the UBKG.
+          description: The response to this endpoint cannot be run for all SABs because of memory limitations. Execute the /sabs/(sab)/codes/details endpoint with the identifier for a single SAB. Execute the /sabs endpoint for a list of all SABs in the UBKG.
         '5XX':
           description: Unknown error
   /sabs/{sab}/codes/details:
@@ -665,12 +690,12 @@ paths:
       summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
       responses:
         '400':
-          description: The response to this endpoint cannot be run for all SABs because of memory limitations. Execute the /sabs/(sab)/codes/term_types endpoint with the identifier for a SAB. Execute the /sabs/codes/counts endpoint for a list of all SABs in the UBKG.
+          description: The response to this endpoint cannot be run for all SABs because of memory limitations. Execute the /sabs/(sab)/term_types endpoint with the identifier for a single SAB. Execute the /sabs endpoint for a list of all SABs in the UBKG.
         '5XX':
           description: Unknown error
   /sabs/{sab}/term_types:
     get:
-      operationId: sabs_sab_term_types_get
+      operationId: sabs_term_types_sab_get
       summary: Returns the list of term types (types of relationship) for relationships between the nodes that are defined by the specified source (SAB)
       parameters:
         - name: sab
@@ -739,9 +764,9 @@ paths:
           description: No subtypes of the specified Semantic Type.
         '5XX':
           description: Unknown error
-  /semantics/{identifier}/semantic_types:
+  /semantics/semantic_types/{identifier}:
     get:
-      operationId: semantics_identifier_semantic_types_get
+      operationId: semantics_semantic_types_identifier_get
       summary: Returns the Semantic Type node that matches the identifier, subject to constraints specified in parameters.
       parameters:
         - name: identifier
@@ -778,7 +803,7 @@ paths:
           description: No subtypes of the specified Semantic Type.
         '5XX':
           description: Unknown error
-  /semantics/{identifier}/subtypes:
+  /semantics/semantic_types/{identifier}/subtypes:
     get:
       operationId: semantics_identifier_semantic_subtypes_get
       summary: Returns the set of Semantic Type nodes that are subtypes (have ISA_STY relationship with) the specified Semantic Type, subject to constraints specified in parameters.
@@ -1477,4 +1502,23 @@ components:
             type: string
             description: the term type
             example: PT
-
+    NodeTypes: #Schema name
+      type: object
+      description: The set of node types (labels) for all nodes in the UBKG
+      properties:
+        node_types:
+          type: array
+          items:
+            type: string
+            description: node type
+            example: Code
+    Sabs: #Schema name
+      type: object
+      description: The set of sources (SABs) for all Code nodes in the UBKG
+      properties:
+        sabs:
+          type: array
+          items:
+            type: string
+            description: a source (SAB)
+            example: SNOMEDCT_US
