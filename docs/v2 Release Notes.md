@@ -165,7 +165,7 @@ exact match between an identifier and a text-based property in a
 Concept Node object. Because an identifier may match properties in more than one Concept Node object, 
 the endpoint can return multiple Concept Node objects.
 
-Following is an example of the set a Concept Node objects related to the identifer "Cells"
+Following is an example of the set a Concept Node objects related to the identifer "Cells":
 
 ```
 {
