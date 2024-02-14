@@ -41,7 +41,8 @@ def concepts_concept_id_codes_get(concept_id):
     result = concepts_concept_id_codes_get_logic(neo4j_instance, concept_id, sab)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string='No Codes with link to the specified Concept identifier')
+        err = get_404_error_string(prompt_string='No Codes with link to the specified Concept',
+                                   custom_request_path=f'concept_id = {concept_id}')
         return make_response(err, 404)
 
     return jsonify(result)
@@ -62,7 +63,8 @@ def concepts_concept_id_concepts_get(concept_id):
     result = concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string='No Concepts with relationships to the specified Concept')
+        err = get_404_error_string(prompt_string='No Concepts with relationships to the specified Concept',
+                                   custom_request_path=f'concept_id = {concept_id}')
         return make_response(err, 404)
 
     return jsonify(result)

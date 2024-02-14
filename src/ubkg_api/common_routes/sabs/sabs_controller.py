@@ -176,7 +176,17 @@ def sabs_sab_term_types_get(sab):
     limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
 
     result = sab_term_type_get_logic(neo4j_instance, sab=sab, skip=skip, limit=limit)
-    if result is None or result == []:
+
+    iserr = result is None or result == []
+    if not iserr:
+        # Check for empty subtype data.
+        if type(result) == list:
+            termtypes = result[0].get('term_types')
+        else:
+            termtypes = result.get('term_types')
+        iserr = len(termtypes) == 0
+
+    if iserr:
         err = get_404_error_string(prompt_string="No term types", custom_request_path=f"sab='{sab}'")
         return make_response(err, 404)
 

@@ -28,7 +28,8 @@ def codes_code_id_codes_get(code_id):
     result = codes_code_id_codes_get_logic(neo4j_instance, code_id, sab)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string='No Codes sharing the Concept linked to the Code specified')
+        err = get_404_error_string(prompt_string='No Codes sharing the Concept linked to the Code specified',
+                                   custom_request_path=f'CodeID = {code_id}')
         return make_response(err, 404)
 
     return jsonify(result)
@@ -48,7 +49,8 @@ def codes_code_id_concepts_get(code_id):
 
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string='No Concepts linked to the Code specified')
+        err = get_404_error_string(prompt_string='No Concepts linked to the Code specified',
+                                   custom_request_path=f'CodeID = {code_id}')
         return make_response(err, 404)
 
     return jsonify(result)

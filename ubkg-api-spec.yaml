@@ -1522,3 +1522,4 @@ components:
             type: string
             description: a source (SAB)
             example: SNOMEDCT_US
+
