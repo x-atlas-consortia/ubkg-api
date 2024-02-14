@@ -7,6 +7,7 @@ from utils.http_parameter import parameter_as_list, set_default_minimum, set_def
 
 relationship_types_blueprint = Blueprint('relationship_types', __name__, url_prefix='/relationship_types')
 
+
 @relationship_types_blueprint.route('', methods=['GET'])
 def relationship_type_get():
     # Returns relationship types
@@ -18,4 +19,3 @@ def relationship_type_get():
         return make_response(err, 404)
 
     return jsonify(result)
-

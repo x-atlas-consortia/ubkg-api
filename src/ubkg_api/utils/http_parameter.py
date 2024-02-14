@@ -25,6 +25,7 @@ def parameter_as_list(param_name: str) -> list[str]:
 
     return listparam
 
+
 def set_default_minimum(param_value=None, default: int = 0) -> int:
     """
     Sets a default minimum for a parameter value.

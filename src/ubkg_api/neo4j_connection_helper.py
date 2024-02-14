@@ -187,6 +187,7 @@ class Neo4jConnectionHelper(object):
         :type database_version: str
         """
         self._database_version = database_version
+
     @property
     def database_edition(self):
         """Gets the database_edition of this Neo4jConnectionHelper

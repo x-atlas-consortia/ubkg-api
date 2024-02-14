@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, current_app, make_response, request
-from ..common_neo4j_logic import sab_code_count_get,sab_code_detail_get,sab_term_type_get_logic
+from ..common_neo4j_logic import sab_code_count_get, sab_code_detail_get, sab_term_type_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
@@ -7,15 +7,18 @@ from utils.http_parameter import parameter_as_list, set_default_minimum, set_def
 
 sabs_blueprint = Blueprint('sabs', __name__, url_prefix='/sabs')
 
+
 @sabs_blueprint.route('/codes/counts', methods=['GET'])
 def sabs_codes_counts_get():
     # Return SABs and counts of codes for all SABs.
     return sabs_codes_counts_get()
 
+
 @sabs_blueprint.route('<sab>/codes/counts', methods=['GET'])
 def sabs_codes_counts_sab_get(sab):
     # Return SAB and count of codes for specified SAB.
     return sabs_codes_counts_get(sab)
+
 
 def sabs_codes_counts_get(sab=None):
     # Returns relationship types
@@ -63,6 +66,7 @@ def sabs_codes_counts_get(sab=None):
 
     return jsonify(result)
 
+
 @sabs_blueprint.route('/codes/details', methods=['GET'])
 def sabs_codes_details_get():
     """
@@ -73,6 +77,7 @@ def sabs_codes_details_get():
           f'Execute the /sabs/codes/details/(sab) endpoint with the identifier for an SAB. Execute ' \
           f'the /sabs/codes/counts endpoint for a list of all SABs in the UBKG.'
     return make_response(err, 400)
+
 
 @sabs_blueprint.route('<sab>/codes/details', methods=['GET'])
 def sabs_codes_details_sab_get(sab):
@@ -123,6 +128,7 @@ def sabs_codes_details_sab_get(sab):
 
     return jsonify(result)
 
+
 @sabs_blueprint.route('term_types', methods=['GET'])
 def sabs_term_types_get():
     """
@@ -133,6 +139,7 @@ def sabs_term_types_get():
           f'Execute the /sabs/term_types/(sab) endpoint with the identifier for an SAB. Execute ' \
           f'the /sabs/codes/counts endpoint for a list of all SABs in the UBKG.'
     return make_response(err, 400)
+
 
 @sabs_blueprint.route('<sab>/term_types', methods=['GET'])
 def sabs_sab_term_types_get(sab):
@@ -166,7 +173,7 @@ def sabs_sab_term_types_get(sab):
 
     result = sab_term_type_get_logic(neo4j_instance, sab=sab, skip=skip, limit=limit)
     if result is None or result == []:
-        err = get_404_error_string(prompt_string="No term types",custom_request_path=f"sab='{sab}'")
+        err = get_404_error_string(prompt_string="No term types", custom_request_path=f"sab='{sab}'")
         return make_response(err, 404)
 
     return jsonify(result)

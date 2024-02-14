@@ -1,15 +1,17 @@
 # Utility for controllers to extract path origins from ConceptPath responses returned from path-related queries.
 
-import os, sys
+import os
+import sys
 # The following allows for an absolute import from an adjacent script directory--i.e., up and over instead of down.
 # Find the absolute path. (This assumes that this script is being called from build_csv.py.)
 fpath = os.path.dirname(os.getcwd())
 print(fpath)
 fpath = os.path.join(fpath, 'utils')
 sys.path.append(fpath)
-from models.base_model_ import Model
+# from models.base_model_ import Model
 from models.concept_path import ConceptPath
 from models.concept_prefterm import ConceptPrefterm
+
 
 def get_origin(pathlist: list[ConceptPath]) -> ConceptPrefterm:
 
@@ -28,6 +30,7 @@ def get_origin(pathlist: list[ConceptPath]) -> ConceptPrefterm:
     origin = first_path_first_hop.get('target')
 
     return origin
+
 
 def get_terminus(pathlist: list[ConceptPath]) -> ConceptPrefterm:
     """

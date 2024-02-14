@@ -3,7 +3,8 @@ from flask import Blueprint, jsonify, current_app, request, make_response
 # Cypher query functions
 from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
     concepts_concept_id_definitions_get_logic, concepts_expand_get_logic,\
-    concepts_shortestpath_get_logic, concepts_trees_get_logic,concepts_subgraph_get_logic, concepts_identfier_node_get_logic
+    concepts_shortestpath_get_logic, concepts_trees_get_logic, concepts_subgraph_get_logic, \
+    concepts_identfier_node_get_logic
 # Functions to validate query parameters
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
@@ -15,6 +16,7 @@ from utils.http_parameter import parameter_as_list, set_default_minimum, set_def
 from utils.path_get_endpoints import get_origin, get_terminus
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
+
 
 @concepts_blueprint.route('<concept_id>/codes', methods=['GET'])
 def concepts_concept_id_codes_get(concept_id):
@@ -141,10 +143,9 @@ def concepts_paths_expand_get(concept_id):
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
-
     # Validate parameters.
     # Check for invalid parameter names.
-    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel', 'mindepth','maxdepth','skip','limit'])
+    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel', 'mindepth', 'maxdepth', 'skip', 'limit'])
     if err != 'ok':
         return make_response(err, 400)
 
@@ -167,7 +168,7 @@ def concepts_paths_expand_get(concept_id):
 
     # Validate that mindepth is not greater than maxdepth.
     err = validate_parameter_range_order(min_name='mindepth', min_value=mindepth, max_name='maxdepth',
-                                             max_value=maxdepth)
+                                         max_value=maxdepth)
     if err != 'ok':
         return make_response(err, 400)
 
@@ -216,7 +217,7 @@ def concepts_paths_expand_get(concept_id):
     origin = get_origin(result)
 
     # Wrap origin and path list in a dictionary that will become the JSON response.
-    dict_result = {'origin':origin,'paths':result}
+    dict_result = {'origin': origin, 'paths': result}
     return jsonify(dict_result)
 
 # JAS February 2024 Deprecated, as the paths endpoint is a duplicate of the expand endpoint.
@@ -312,7 +313,7 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
     terminus = get_terminus(result)
 
     # Wrap origin and path list in a dictionary that will become the JSON response.
-    dict_result = {'origin': origin, 'terminus':terminus, 'paths': result}
+    dict_result = {'origin': origin, 'terminus': terminus, 'paths': result}
     return jsonify(dict_result)
 
 
@@ -390,7 +391,7 @@ def concepts_trees_get(concept_id):
     rel = parameter_as_list(param_name='rel')
 
     result = concepts_trees_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel,
-                                       mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
+                                      mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No Concepts in spanning tree with specified parameters",
@@ -410,6 +411,7 @@ def concepts_trees_get(concept_id):
     dict_result = {'origin': origin, 'paths': result}
     return jsonify(dict_result)
 
+
 @concepts_blueprint.route('paths/subgraph', methods=['GET'])
 def concepts_subgraph_get():
     """
@@ -423,7 +425,7 @@ def concepts_subgraph_get():
 
     # The query for this endpoint relies on db.index.fulltext.queryRelationships, which was introduced in version 5 of
     # neo4j.
-    err = check_neo4j_version_compatibility(query_version='5.11.0',instance_version=neo4j_instance.database_version)
+    err = check_neo4j_version_compatibility(query_version='5.11.0', instance_version=neo4j_instance.database_version)
     if err != 'ok':
         return make_response(err, 400)
 
@@ -460,11 +462,11 @@ def concepts_subgraph_get():
     rel = parameter_as_list(param_name='rel')
 
     result = concepts_subgraph_get_logic(neo4j_instance, sab=sab, rel=rel,
-                                       skip=skip, limit=limit)
+                                         skip=skip, limit=limit)
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No subgraphs (pairs of Concepts linked by relationships) for "
-                                                 f"specified relationship types",timeout=neo4j_instance.timeout)
+                                                 f"specified relationship types", timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Limit the size of the payload, based on the app configuration.
@@ -476,6 +478,7 @@ def concepts_subgraph_get():
     dict_result = {'paths': result}
 
     return jsonify(dict_result)
+
 
 @concepts_blueprint.route('<search>/nodes', methods=['GET'])
 def concepts_concept_identifier_nodes_get(search):
@@ -496,7 +499,8 @@ def concepts_concept_identifier_nodes_get(search):
     result = concepts_identfier_node_get_logic(neo4j_instance, search=search)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concept nodes that can be associated with the search string", timeout=neo4j_instance.timeout)
+        err = get_404_error_string(prompt_string=f"No Concept nodes that can be associated with "
+                                                 f"the search string", timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Limit the size of the payload, based on the app configuration.

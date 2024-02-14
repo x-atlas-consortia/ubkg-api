@@ -3,6 +3,7 @@ from ..common_neo4j_logic import database_info_server_get_logic
 
 database_blueprint = Blueprint('database', __name__, url_prefix='/database')
 
+
 @database_blueprint.route('server', methods=['GET'])
 def database_info_server_get():
 

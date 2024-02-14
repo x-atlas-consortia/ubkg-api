@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, current_app, make_response, request
+from flask import Blueprint, jsonify, current_app, make_response  #, request
 from ..common_neo4j_logic import codes_code_id_codes_get_logic, codes_code_id_concepts_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum
@@ -8,19 +8,12 @@ codes_blueprint = Blueprint('codes', __name__, url_prefix='/codes')
 
 
 @codes_blueprint.route('/<code_id>/codes', methods=['GET'])
-def codes_code_id_codes_get(code_id, sab=None):
-    """Returns a list of code_ids {Concept, Code, SAB} that code the same concept(s) as the code_id, optionally restricted to source (SAB)
+def codes_code_id_codes_get(code_id):
+    """Returns a list of code_ids {Concept, Code, SAB} that code the same concept(s) as the code_id,
+    optionally restricted to source (SAB)
 
     :param code_id: The code identifier
     :type code_id: str
-    :param sab: One or more sources (SABs) to return. In the URL, sabs can be specified either with individual key-value pairs
-    or a list delimited by a URL-escaped comma--e.g.,
-    ?sab=SAB1&sab=SAB2
-    or
-    ?sab=SAB1%2CSAB2
-    :type sab: List[str]
-
-    :rtype: Union[List[CodesCodesObj], Tuple[List[CodesCodesObj], int], Tuple[List[CodesCodesObj], int, Dict[str, str]]
     """
     # Validate sab parameter.
     err = validate_query_parameter_names(parameter_name_list=['sab'])

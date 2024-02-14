@@ -520,8 +520,9 @@ def concepts_subgraph_get_logic(neo4j_instance, sab=None, rel=None, skip=None, l
 
     return conceptpaths
 
+
 def semantics_semantic_id_semantic_get_logic(neo4j_instance, semtype=None, skip=None,
-                                                  limit=None, isforsubtypes:bool=False) -> List[SemanticType]:
+                                             limit=None, isforsubtypes: bool = False) -> List[SemanticType]:
     """
     Obtains information on either:
     1. the set of Semantic (semantic type) nodes that match the identifier semtype
@@ -639,6 +640,7 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
 
     return concepts
 
+
 def remove_null_placeholder_objects(listdict: list[dict]) -> list[dict]:
     """
     If a Concept node identified in the query behind the concepts_identfier_node_get_logic does not have semantic types
@@ -672,10 +674,11 @@ def remove_null_placeholder_objects(listdict: list[dict]) -> list[dict]:
 
     # Remove the placeholder dictionaries from the list.
     if len(listpop) > 0:
-        for l in listpop:
-            listdict.pop(l)
+        for ld in listpop:
+            listdict.pop(ld)
 
     return listdict
+
 
 def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[ConceptNode]:
     """
@@ -710,16 +713,16 @@ def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[Conce
 
     return conceptnodes
 
+
 def database_info_server_get_logic(neo4j_instance) -> dict:
     # Obtains neo4j database server information
 
     # The version was obtained from the instance at startup.
     dictret = {"version": neo4j_instance.database_version,
-               #"name": neo4j_instance.database_name,
+               # "name": neo4j_instance.database_name,
                "edition": neo4j_instance.database_edition}
 
     return dictret
-
 
 
 # JAS January 2024
@@ -771,7 +774,8 @@ def tui_tui_id_semantics_get_logic(neo4j_instance, tui_id: str) -> List[Semantic
     return semanticStns
 """
 
-def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None, sab=None) -> List[dict]:
+
+def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None, sab=None) -> dict:
     """
     Obtains information on node types, grouped by SAB.
 
@@ -789,7 +793,7 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
     else:
         node_type = [node_type]
     typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
-    query = query.replace('$node_type',typesjoin)
+    query = query.replace('$node_type', typesjoin)
     if sab is None:
         sab = ''
     else:
@@ -817,10 +821,11 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
             except KeyError:
                 pass
 
-    dictret = {'total_count':total_count, 'node_types':nodetypes}
+    dictret = {'total_count': total_count, 'node_types': nodetypes}
     return dictret
 
-def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> List[dict]:
+
+def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dict:
     """
     Obtains information on node types.
 
@@ -837,7 +842,7 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> Lis
     else:
         node_type = [node_type]
     typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
-    query = query.replace('$node_type',typesjoin)
+    query = query.replace('$node_type', typesjoin)
 
     # Limit query execution time to duration specified in app.cfg.
     query = timebox_query(query, timeout=neo4j_instance.timeout)
@@ -860,8 +865,9 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> Lis
                 except KeyError:
                     pass
 
-    dictret = {'total_count':total_count, 'node_types':nodetypes}
+    dictret = {'total_count': total_count, 'node_types': nodetypes}
     return dictret
+
 
 def property_types_get_logic(neo4j_instance) -> dict:
     """
@@ -886,8 +892,9 @@ def property_types_get_logic(neo4j_instance) -> dict:
             except KeyError:
                 pass
     # The query returns a single record.
-    dictret = {'property_types':propertytype}
+    dictret = {'property_types': propertytype}
     return dictret
+
 
 def relationship_types_get_logic(neo4j_instance) -> dict:
     """
@@ -913,8 +920,9 @@ def relationship_types_get_logic(neo4j_instance) -> dict:
                 pass
 
     # The query has a single record.
-    dictret = {'relationship_types':reltype}
+    dictret = {'relationship_types': reltype}
     return dictret
+
 
 def sab_code_count_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
     """
@@ -925,6 +933,7 @@ def sab_code_count_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
     :param neo4j_instance: neo4j connection
     :param skip: SKIP value for the query
     :param limit: LIMIT value for the query
+    :param sab: identifier for a source (SAB)
 
     """
     sabs: [dict] = []
@@ -957,8 +966,9 @@ def sab_code_count_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
                 pass
 
     # The query has a single record.
-    dictret = {'sabs':sab}
+    dictret = {'sabs': sab}
     return dictret
+
 
 def sab_code_detail_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
     """
@@ -969,6 +979,7 @@ def sab_code_detail_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict
     :param neo4j_instance: neo4j connection
     :param skip: SKIP value for the query
     :param limit: LIMIT value for the query
+    :param sab: source (SAB)
 
     """
     codes: [dict] = []
@@ -990,7 +1001,7 @@ def sab_code_detail_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict
         recds: neo4j.Result = session.run(query)
         # Track the position of the codes in the list, based on the value of skip.
         position = int(skip) + 1
-        res_codes={}
+        res_codes = {}
         for record in recds:
             val = record.get('value')
             output = val.get('output')
@@ -1005,8 +1016,9 @@ def sab_code_detail_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict
                 pass
 
     # The query has a single record.
-    dictret = {'codes':res_codes}
+    dictret = {'codes': res_codes}
     return dictret
+
 
 def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
     """
@@ -1017,13 +1029,14 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
     :param neo4j_instance: neo4j connection
     :param skip: number of term types to skip
     :param limit: maximum number of term types to return
+    :param sab: source (SAB)
 
     """
     termtypes: [dict] = []
 
     query = loadquerystring(filename='sabs_term_types.cypher')
-    sabjoin=format_list_for_query(listquery=[sab],doublequote=True)
-    query = query.replace('$sab',sabjoin)
+    sabjoin = format_list_for_query(listquery=[sab], doublequote=True)
+    query = query.replace('$sab', sabjoin)
     query = query.replace('$skip', str(skip))
     query = query.replace('$limit', str(limit))
 

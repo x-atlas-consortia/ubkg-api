@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, current_app, make_response, request
-from ..common_neo4j_logic import node_types_node_type_counts_by_sab_get_logic,node_types_node_type_counts_get_logic
+from ..common_neo4j_logic import node_types_node_type_counts_by_sab_get_logic, node_types_node_type_counts_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
@@ -7,20 +7,23 @@ from utils.http_parameter import parameter_as_list, set_default_minimum, set_def
 
 node_types_blueprint = Blueprint('node_types', __name__, url_prefix='/node_types')
 
+
 @node_types_blueprint.route('counts', methods=['GET'])
 def node_type_counts_get():
     # Return counts of all node_types.
     return node_types_counts_get()
+
 
 @node_types_blueprint.route('<node_type>/counts', methods=['GET'])
 def node_type_counts_node_type_get(node_type):
     # Return counts of a specific node type.
     return node_types_counts_get(node_type)
 
+
 def node_types_counts_get(node_type=None):
     """
     Returns information on a set of node types.
-    :param node_type_id: node_type_id for filtering.
+    :param node_type: node_type for filtering.
 
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
@@ -47,6 +50,7 @@ def node_types_counts_get(node_type=None):
 
     return jsonify(result)
 
+
 @node_types_blueprint.route('counts_by_sab', methods=['GET'])
 def node_types_counts_by_sab_get():
     """
@@ -64,17 +68,19 @@ def node_types_counts_by_sab_get():
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
     err = f'The response to this endpoint is likely to exceed the timeout ' \
-          f'of {int(neo4j_instance.timeout/1000)} seconds and so will not be attempted. Execute the node_types/counts_by_sab/(node_type) endpoint ' \
+          f'of {int(neo4j_instance.timeout/1000)} seconds and so will not be attempted. ' \
+          f'Execute the node_types/counts_by_sab/(node_type) endpoint ' \
           f'with the name of a node type (e.g., Codes). To obtain names of node types, execute the ' \
           f'node_types/counts endpoint.'
     return make_response(err, 400)
+
 
 @node_types_blueprint.route('<node_type>/counts_by_sab', methods=['GET'])
 def node_types_counts_by_sab_node_type_get(node_type):
     """
     Returns information on a set of node types, grouped by SAB
 
-    :param node_type_id: node_type_id for filtering.
+    :param node_type: node_type for filtering.
 
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
@@ -88,7 +94,7 @@ def node_types_counts_by_sab_node_type_get(node_type):
     # Get remaining parameter values from the path or query string.
     sab = parameter_as_list(param_name='sab')
 
-    result = node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=node_type,sab=sab)
+    result = node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=node_type, sab=sab)
     iserr = False
     if result is None or result == []:
         iserr = True
@@ -109,4 +115,3 @@ def node_types_counts_by_sab_node_type_get(node_type):
         return make_response(err, 404)
 
     return jsonify(result)
-

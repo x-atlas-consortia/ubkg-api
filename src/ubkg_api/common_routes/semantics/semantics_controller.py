@@ -7,26 +7,30 @@ from utils.http_parameter import parameter_as_list, set_default_minimum, set_def
 
 semantics_blueprint = Blueprint('semantics', __name__, url_prefix='/semantics')
 
+
 @semantics_blueprint.route('semantic_types', methods=['GET'])
 def semantics_semantic_types_get():
     # Return information on all semantic types.
-    return semantics_semantic_get(semantic_type=None,isforsubtypes=False)
+    return semantics_semantic_get(semantic_type=None, isforsubtypes=False)
+
 
 @semantics_blueprint.route('<semantic_type>/semantic_types', methods=['GET'])
 def semantics_semantic_types_identifier_get(semantic_type):
     # Return information on specified semantic type.
     return semantics_semantic_get(semantic_type, isforsubtypes=False)
 
+
 @semantics_blueprint.route('<semantic_type>/subtypes', methods=['GET'])
 def semantics_semantic_type_subtypes_get(semantic_type):
     # Return information on semantic subtypes.
     return semantics_semantic_get(semantic_type, isforsubtypes=True)
 
-def semantics_semantic_get(semantic_type, isforsubtypes:bool):
+
+def semantics_semantic_get(semantic_type, isforsubtypes: bool):
     """
     Returns a set of semantic types that either:
     1. match the identifier
-    2. are subtypes (have a IS_STY relationship with) the specified semantic type
+    2. are subtypes (have an IS_STY relationship with) the specified semantic type
     identifier.
 
     Identifiers can be of two types:
@@ -34,7 +38,8 @@ def semantics_semantic_get(semantic_type, isforsubtypes:bool):
     1. Name (e.g., "Anatomical Structure")
     2. Type Unique Identifier (TUI) (e.g., "T017")
 
-    :param semantic_type_id: single identifier
+    :param semantic_type: single identifier
+    :param isforsubtypes: flag - True if this is to return subtypes instead of semantic types
 
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
@@ -64,7 +69,7 @@ def semantics_semantic_get(semantic_type, isforsubtypes:bool):
     # Get remaining parameter values from the path or query string.
 
     result = semantics_semantic_id_semantic_get_logic(neo4j_instance, semtype=semantic_type, skip=skip, limit=limit,
-                                                           isforsubtypes=isforsubtypes)
+                                                      isforsubtypes=isforsubtypes)
     if result is None or result == []:
         # Empty result
         if isforsubtypes:
@@ -73,14 +78,13 @@ def semantics_semantic_get(semantic_type, isforsubtypes:bool):
             errtype = "No Semantic Types match the specified identifier"
 
         err = get_404_error_string(prompt_string=f"{errtype}",
-                                       custom_request_path=f"'{semantic_type}'")
+                                   custom_request_path=f"'{semantic_type}'")
         return make_response(err, 404)
 
     # Wrap origin and path list in a dictionary that will become the JSON response.
     if isforsubtypes:
-        dict_result = {'semantic_sub_types':result}
+        dict_result = {'semantic_sub_types': result}
     else:
-        dict_result = {'semantic_types':result}
+        dict_result = {'semantic_types': result}
 
     return jsonify(dict_result)
-

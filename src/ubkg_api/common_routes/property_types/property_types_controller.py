@@ -7,6 +7,7 @@ from utils.http_parameter import parameter_as_list, set_default_minimum, set_def
 
 property_types_blueprint = Blueprint('property_types', __name__, url_prefix='/property_types')
 
+
 @property_types_blueprint.route('', methods=['GET'])
 def property_type_get():
     # Returns property types
@@ -18,4 +19,3 @@ def property_type_get():
         return make_response(err, 404)
 
     return jsonify(result)
-
