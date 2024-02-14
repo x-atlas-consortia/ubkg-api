@@ -34,7 +34,7 @@ services:
       # Mount conf.d on host machine to the nginx conf.d on container
       - "./nginx/conf.d:/etc/nginx/conf.d"
     networks:
-      - gateway_hubmap
+      - data_distillary_network
 
 networks:
   # This is the network created by gateway to enable communicaton between multiple docker-compose projects
