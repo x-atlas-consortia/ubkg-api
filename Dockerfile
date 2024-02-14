@@ -59,7 +59,8 @@ RUN yum install -y yum-utils && \
     chmod +x start.sh && \
     yum clean all
 
-# Install gosu for de-elevating root to hubmap user
+# Install gosu for de-elevating from root to the user which will
+# execute the startup script in entrypoint.sh
 RUN curl -o /usr/local/bin/gosu -SL "https://github.com/tianon/gosu/releases/download/1.14/gosu-amd64" && \
     curl -o /usr/local/bin/gosu.asc -SL "https://github.com/tianon/gosu/releases/download/1.14/gosu-amd64.asc" && \
     rm -r /usr/local/bin/gosu.asc && \

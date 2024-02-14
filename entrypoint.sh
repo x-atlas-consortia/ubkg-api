@@ -16,8 +16,8 @@ echo "Starting ubkg-api container with the host user UID: $HOST_UID and GID: $HO
 getent passwd $HOST_UID > /dev/null 2&>1
 # $? is a special variable that captures the exit status of last task
 if [ $? -ne 0 ]; then
-    groupadd -r -g $HOST_GID data-distillary
-    useradd -r -u $HOST_UID -g $HOST_GID -m data-distillary
+    groupadd -g $HOST_GID data-distillary
+    useradd -u $HOST_UID -g $HOST_GID -m data-distillary
 fi
 touch /var/run/nginx.pid
 chown -R data-distillary:data-distillary /var/run/nginx.pid
