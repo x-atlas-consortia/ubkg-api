@@ -9,13 +9,13 @@ from utils.http_parameter import parameter_as_list, set_default_minimum, set_def
 semantics_blueprint = Blueprint('semantics', __name__, url_prefix='/semantics')
 
 
-@semantics_blueprint.route('semantic_types', methods=['GET'])
+@semantics_blueprint.route('semantic-types', methods=['GET'])
 def semantics_semantic_types_get():
     # Return information on all semantic types.
     return semantics_semantic_type_semantic_types_get(semantic_type=None)
 
 
-@semantics_blueprint.route('<semantic_type>/semantic_types', methods=['GET'])
+@semantics_blueprint.route('<semantic_type>/semantic-types', methods=['GET'])
 def semantics_semantics_id_tyeps_get(semantic_type):
     # Return information on the specified semantic type.
     return semantics_semantic_type_semantic_types_get(semantic_type)

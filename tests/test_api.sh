@@ -1044,8 +1044,8 @@ curl --request GET \
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: terms/<term-id>/codes GET" | tee -a test.out
-echo "SIGNATURE: /terms/<term-id>/codes" | tee -a test.out
+echo "TESTS FOR: terms/<term_id>/codes GET" | tee -a test.out
+echo "SIGNATURE: /terms/<term_id>/codes" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 

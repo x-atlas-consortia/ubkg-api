@@ -427,7 +427,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DatabaseInfo'
-  /node_types:
+  /node-types:
     get:
       summary: Returns list of node types (node labels)--e.g., Code, Concept, etc.
       operationId: node_type_get
@@ -443,16 +443,16 @@ paths:
         '5XX':
           description: Unknown error
 
-  /node_types/counts:
+  /node-types/counts:
     get:
       summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
       operationId: node_type_count_get
       responses:
         '400':
-          description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node_types/(node_type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node_types endpoint.
+          description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node-types/(node-type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node-types endpoint.
         '5XX':
           description: Unknown error
-  /node_types/{node_type}/counts:
+  /node-types/{node_type}/counts:
     get:
       summary: Returns counts of nodes in the database for a specified node type (label).
       operationId: node_type_id_count_get
@@ -475,7 +475,7 @@ paths:
           description: No nodes with label
         '5XX':
           description: Unknown error
-  /node_types/counts_by_sab:
+  /node-types/counts-by-sab:
     get:
       summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
       operationId: node_type_count_by_sab_get
@@ -483,16 +483,16 @@ paths:
         - name: sab
           in: query
           required: true
-          description: The set of sources (SABs) to which to limit counts by node_type.
+          description: The set of sources (SABs) to which to limit counts by node type.
           schema:
             type: string
             example: NCI
       responses:
         '400':
-          description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node_types/counts_by_sab/(node_type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node_types endpoint.
+          description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node-types/counts-by-sab/(node-type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node-types endpoint.
         '5XX':
           description: Unknown error
-  /node_types/{node_type}/counts_by_sab:
+  /node-types/{node_type}/counts-by-sab:
     get:
       summary: Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB), subject to constraints specified in parameters.
       operationId: node_type_id_count_by_sab_get
@@ -507,7 +507,7 @@ paths:
         - name: sab
           in: query
           required: true
-          description: The set of sources (SABs) to which to limit counts by node_type. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit counts by node type. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: string
             example: NCI
@@ -524,7 +524,7 @@ paths:
           description: No nodes with label
         '5XX':
           description: Unknown error
-  /property_types:
+  /property-types:
     get:
       operationId: property_types_get
       summary: Returns the set of property types (keys) for all nodes and relationships
@@ -537,7 +537,7 @@ paths:
                 $ref: '#/components/schemas/PropertyTypes'
         '5XX':
           description: Unknown error
-  /relationship_types:
+  /relationship-types:
     get:
       operationId: relationship_types_get
       summary: Returns the set of relationship types
@@ -684,16 +684,16 @@ paths:
           description: No Codes for the specified parameters
         '5XX':
           description: Unknown error
-  /sabs/term_types:
+  /sabs/term-types:
     get:
       operationId: sabs_term_types_get
       summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
       responses:
         '400':
-          description: The response to this endpoint cannot be run for all SABs because of memory limitations. Execute the /sabs/(sab)/term_types endpoint with the identifier for a single SAB. Execute the /sabs endpoint for a list of all SABs in the UBKG.
+          description: The response to this endpoint cannot be run for all SABs because of memory limitations. Execute the /sabs/(sab)/term-types endpoint with the identifier for a single SAB. Execute the /sabs endpoint for a list of all SABs in the UBKG.
         '5XX':
           description: Unknown error
-  /sabs/{sab}/term_types:
+  /sabs/{sab}/term-types:
     get:
       operationId: sabs_term_types_sab_get
       summary: Returns the list of term types (types of relationship) for relationships between the nodes that are defined by the specified source (SAB)
@@ -732,7 +732,7 @@ paths:
           description: No term types for the specified parameters
         '5XX':
           description: Unknown error
-  /semantics/semantic_types:
+  /semantics/semantic-types:
     get:
       operationId: semantics_semantic_types_get
       summary: Returns the complete set of Semantic Type nodes, subject to constraints specified in parameters.
@@ -764,7 +764,7 @@ paths:
           description: No subtypes of the specified Semantic Type.
         '5XX':
           description: Unknown error
-  /semantics/semantic_types/{identifier}:
+  /semantics/semantic-types/{identifier}:
     get:
       operationId: semantics_semantic_types_identifier_get
       summary: Returns the Semantic Type node that matches the identifier, subject to constraints specified in parameters.
@@ -803,7 +803,7 @@ paths:
           description: No subtypes of the specified Semantic Type.
         '5XX':
           description: Unknown error
-  /semantics/semantic_types/{identifier}/subtypes:
+  /semantics/semantic-types/{identifier}/subtypes:
     get:
       operationId: semantics_identifier_semantic_subtypes_get
       summary: Returns the set of Semantic Type nodes that are subtypes (have ISA_STY relationship with) the specified Semantic Type, subject to constraints specified in parameters.
@@ -1381,7 +1381,7 @@ components:
             properties:
               total_count:
                 type: integer
-                description: Count of nodes with any of the labels in node_types. Equal to the total count of nodes in the database if no filters were applied.
+                description: Count of nodes with any of the labels in node-types. Equal to the total count of nodes in the database if no filters were applied.
                 example: 170947
               node_type:
                 type: object
