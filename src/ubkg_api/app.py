@@ -13,9 +13,13 @@ from neo4j_connection_helper import Neo4jConnectionHelper
 
 from common_routes.codes.codes_controller import codes_blueprint
 from common_routes.concepts.concepts_controller import concepts_blueprint
-from common_routes.semantics.semantics_controller import semantics_blueprint
 from common_routes.terms.terms_controller import terms_blueprint
-from common_routes.tui.tui_controller import tui_blueprint
+from common_routes.semantics.semantics_controller import semantics_blueprint
+from common_routes.database.database_controller import database_blueprint
+from common_routes.node_types.node_types_controller import node_types_blueprint
+from common_routes.property_types.property_types_controller import property_types_blueprint
+from common_routes.relationship_types.relationship_types_controller import relationship_types_blueprint
+from common_routes.sabs.sabs_controller import sabs_blueprint
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -42,8 +46,13 @@ class UbkgAPI:
         self.app.register_blueprint(codes_blueprint)
         self.app.register_blueprint(concepts_blueprint)
         self.app.register_blueprint(semantics_blueprint)
-        self.app.register_blueprint(tui_blueprint)
+        # self.app.register_blueprint(tui_blueprint)
         self.app.register_blueprint(terms_blueprint)
+        self.app.register_blueprint(database_blueprint)
+        self.app.register_blueprint(node_types_blueprint)
+        self.app.register_blueprint(property_types_blueprint)
+        self.app.register_blueprint(relationship_types_blueprint)
+        self.app.register_blueprint(sabs_blueprint)
 
         self.app.neo4jConnectionHelper = None
 
@@ -58,14 +67,22 @@ class UbkgAPI:
                     self.app.neo4jConnectionHelper = \
                         Neo4jConnectionHelper.create(self.app.config['SERVER'],
                                                      self.app.config['USERNAME'],
-                                                     self.app.config['PASSWORD'])
+                                                     self.app.config['PASSWORD'],
+                                                     self.app.config['TIMEOUT'],
+                                                     self.app.config['ROWLIMIT'],
+                                                     self.app.config['PAYLOADLIMIT'])
                 else:
                     logger.info('Using provided Flask config.')
                     # Set self based on passed in config parameters
                     for key, value in config.items():
                         setattr(self, key, value)
                     self.app.neo4jConnectionHelper = \
-                        Neo4jConnectionHelper.create(self.SERVER, self.USERNAME, self.PASSWORD)
+                        Neo4jConnectionHelper.create(self.SERVER,
+                                                     self.USERNAME,
+                                                     self.PASSWORD,
+                                                     15000,
+                                                     1000,
+                                                     1048576)
                     logger.info("Initialized Neo4jManager successfully")
         except Exception as e:
             logger.exception('Failed to initialize the Neo4jManager')

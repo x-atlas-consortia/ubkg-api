@@ -5,21 +5,9 @@ venv/
 **/*.bak
 \#*\#
 **~
-neo4j/import*
-neo4j/data/
-Generation_framework/builds/logs/*.log
-scripts/resources/
-scripts/pkt_kg/
-scripts/owlnets_output*
-scripts/owl
-scripts/venv
-scripts/.python-version
-scripts/robot
-scripts/.openapi-generator
-api/.openapi-generator/*
 
 # config file
-ubkg_api/instance/app.cfg
+/src/ubkg_api/instance/*/*.cfg
 
 # log files in any path
 **/*.log
@@ -29,3 +17,4 @@ ubkg_api/instance/app.cfg
 **/.pytest_cache
 **/dist
 /tests/*/*.json
+/tests/*/*.out

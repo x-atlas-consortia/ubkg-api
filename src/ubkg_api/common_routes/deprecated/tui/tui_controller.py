@@ -1,5 +1,7 @@
+# JAS January 2024
+# Deprecated. SUIs currently only apply to Concepts managed by the UMLS.
 from flask import Blueprint, jsonify, current_app
-from ..common_neo4j_logic import tui_tui_id_semantics_get_logic
+from src.ubkg_api.common_routes.common_neo4j_logic import tui_tui_id_semantics_get_logic
 
 tui_blueprint = Blueprint('tui', __name__, url_prefix='/tui')
 
