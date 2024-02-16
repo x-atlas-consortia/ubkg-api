@@ -7,7 +7,7 @@ venv/
 **~
 
 # config file
-/src/instance/*/*.cfg
+/src/ubkg_api/instance/*/*.cfg
 
 # log files in any path
 **/*.log
