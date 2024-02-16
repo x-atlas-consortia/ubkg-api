@@ -7,7 +7,7 @@ venv/
 **~
 
 # config file
-/instance/*.cfg
+/src/instance/*/*.cfg
 
 # log files in any path
 **/*.log
