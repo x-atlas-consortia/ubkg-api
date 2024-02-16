@@ -9,6 +9,9 @@ venv/
 # config file
 /src/ubkg_api/instance/*/*.cfg
 
+# Ignore the generated BUILD file
+BUILD
+
 # log files in any path
 **/*.log
 

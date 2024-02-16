@@ -83,7 +83,7 @@ class UbkgAPI:
                                                      15000,
                                                      1000,
                                                      1048576)
-                    logger.info("Initialized Neo4jManager successfully")
+                    logger.info("Initialized Neo4jManager successfully for: {self.SERVER}")
         except Exception as e:
             logger.exception('Failed to initialize the Neo4jManager')
             raise e
