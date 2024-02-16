@@ -491,7 +491,14 @@ curl --request GET \
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "14. concepts/C2720507/paths/trees?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of&mindepth=1&maxdepth=3&skip=1&limit=10 => valid, list sab, rel: should return 200" | tee -a test.out
+echo "15. concepts/C2720507/paths/trees?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of&maxdepth=3&skip=1&limit=10 => valid, list sab, rel, no mindepth: should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&sab=UBERON&rel=isa&rel=part_of&maxdepth=3&skip=1&limit=10" \
+--header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "15. concepts/C2720507/paths/trees?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of&mindepth=1&maxdepth=3&skip=1&limit=10 => valid, list sab, rel: should return 200" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&sab=UBERON&rel=isa&rel=part_of&mindepth=1&maxdepth=3&skip=1&limit=10" \
 --header "Accept: application/json" | cut -c1-60 | tee -a test.out
@@ -548,115 +555,115 @@ echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: node_types GET" | tee -a test.out
-echo "SIGNATURE: /node_types " | tee -a test.out
+echo "TESTS FOR: node-types GET" | tee -a test.out
+echo "SIGNATURE: /node-types " | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. node_types GET => valid; should return 200" | tee -a test.out
+echo "1. node-types GET => valid; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/node_types" \
+ --url "${UBKG_URL}/node-types" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 
 #--------------------------------------------
-echo "TESTS FOR: node_types/counts GET" | tee -a test.out
-echo "SIGNATURE: /node_types/counts" | tee -a test.out
+echo "TESTS FOR: node-types/counts GET" | tee -a test.out
+echo "SIGNATURE: /node-types/counts" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. node_types/counts GET => blocked; should return custom 400" | tee -a test.out
+echo "1. node-types/counts GET => blocked; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/node_types/counts" \
+ --url "${UBKG_URL}/node-types/counts" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: node_types/<node_type>/counts GET" | tee -a test.out
-echo "SIGNATURE: /node_types/<node_type>/counts" | tee -a test.out
+echo "TESTS FOR: node-types/<node-type>/counts GET" | tee -a test.out
+echo "SIGNATURE: /node-types/<node-type>/counts" | tee -a test.out
 echo | tee -a test.out
-echo "1. node_types/Codez/counts GET => no match; should return custom 404" | tee -a test.out
+echo "1. node-types/Codez/counts GET => no match; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/node_types/Codez/counts" \
+ --url "${UBKG_URL}/node-types/Codez/counts" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "2. node_types/Code/counts GET => valid; should return 200" | tee -a test.out
+echo "2. node-types/Code/counts GET => valid; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/node_types/Code/counts" \
+ --url "${UBKG_URL}/node-types/Code/counts" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 
 #--------------------------------------------
-echo "TESTS FOR: node_types/counts_by_sab GET" | tee -a test.out
-echo "SIGNATURE: /node_types/counts_by_sab" | tee -a test.out
+echo "TESTS FOR: node-types/counts-by-sab GET" | tee -a test.out
+echo "SIGNATURE: /node-types/counts-by-sab" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. node_types/counts_by_sab GET => blocked because of likely timeout; should return custom 400" | tee -a test.out
+echo "1. node-types/counts-by-sab GET => blocked because of likely timeout; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/node_types/counts_by_sab?test=test" \
+ --url "${UBKG_URL}/node-types/counts-by-sab?test=test" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: node_types/<node_type>/counts_by_sab GET" | tee -a test.out
-echo "SIGNATURE: /node_types/<node_type>/counts?sab=<SAB>" | tee -a test.out
+echo "TESTS FOR: node-types/<node-type>/counts-by-sab GET" | tee -a test.out
+echo "SIGNATURE: /node-types/<node-type>/counts?sab=<SAB>" | tee -a test.out
 echo "Parameters sab and rel can be %2C-delimited list or indidividual values."  | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. node_types/Codez/counts_by_sab?sab=SNOMEDCT_US GET => no match; should return custom 404" | tee -a test.out
+echo "1. node-types/Codez/counts-by-sab?sab=SNOMEDCT_US GET => no match; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/node_types/Codez/counts_by_sab?sab=SNOMED_US" \
+ --url "${UBKG_URL}/node-types/Codez/counts-by-sab?sab=SNOMED_US" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "2. node_types/Code/counts_by_sab?sab=SNOMEDCT_US GET => valid, single sab; should return 200" | tee -a test.out
+echo "2. node-types/Code/counts-by-sab?sab=SNOMEDCT_US GET => valid, single sab; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/node_types/Code/counts_by_sab?sab=SNOMEDCT_US" \
+ --url "${UBKG_URL}/node-types/Code/counts-by-sab?sab=SNOMEDCT_US" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "3. node_types/Code/counts_by_sab?sab=SNOMEDCT_US&sab=NCI GET => valid, multiple sab; should return 200" | tee -a test.out
+echo "3. node-types/Code/counts-by-sab?sab=SNOMEDCT_US&sab=NCI GET => valid, multiple sab; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/node_types/Code/counts_by_sab?sab=SNOMEDCT_US&sab=NCI" \
+ --url "${UBKG_URL}/node-types/Code/counts-by-sab?sab=SNOMEDCT_US&sab=NCI" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "4. node_types/Code/counts_by_sab?sab=SNOMEDCT_US%2CNCI GET => valid, list sab; should return 200" | tee -a test.out
+echo "4. node-types/Code/counts-by-sab?sab=SNOMEDCT_US%2CNCI GET => valid, list sab; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/node_types/Code/counts_by_sab?sab=SNOMEDCT_US%2CNCI" \
- --header "Accept: application/json" | cut -c1-60 | tee -a test.out
-echo | tee -a test.out
-echo | tee -a test.out
-
-#--------------------------------------------
-echo "TESTS FOR: property_types GET" | tee -a test.out
-echo "SIGNATURE: /property_types" | tee -a test.out
-echo "1. property_types GET => valid; should return 200" | tee -a test.out
-curl --request GET \
- --url "${UBKG_URL}/property_types" \
+ --url "${UBKG_URL}/node-types/Code/counts-by-sab?sab=SNOMEDCT_US%2CNCI" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: relationship_types GET" | tee -a test.out
-echo "SIGNATURE: /relationship_types" | tee -a test.out
-echo "1. relationship_types GET => valid; should return 200" | tee -a test.out
+echo "TESTS FOR: property-types GET" | tee -a test.out
+echo "SIGNATURE: /property-types" | tee -a test.out
+echo "1. property-types GET => valid; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/relationship_types" \
+ --url "${UBKG_URL}/property-types" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
+echo "TESTS FOR: relationship-types GET" | tee -a test.out
+echo "SIGNATURE: /relationship-types" | tee -a test.out
+echo "1. relationship-types GET => valid; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/relationship-types" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
@@ -846,137 +853,137 @@ echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: sabs/term_types GET" | tee -a test.out
-echo "SIGNATURE: /sabs/term_types" | tee -a test.out
+echo "TESTS FOR: sabs/term-types GET" | tee -a test.out
+echo "SIGNATURE: /sabs/term-types" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. sabs/term_types => blocked; should return custom 400" | tee -a test.out
+echo "1. sabs/term-types => blocked; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/sabs/term_types" \
+ --url "${UBKG_URL}/sabs/term-types" \
  --header "Accept: application/json"  | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: sabs/<sab>/term_types GET" | tee -a test.out
-echo "SIGNATURE: /sabs/<sab>term_types" | tee -a test.out
+echo "TESTS FOR: sabs/<sab>/term-types GET" | tee -a test.out
+echo "SIGNATURE: /sabs/<sab>term-types" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. sabs/SNOMEDCT_USA/term_types => no match; should return custom 404" | tee -a test.out
+echo "1. sabs/SNOMEDCT_USA/term-types => no match; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/sabs/SNOMEDCT_USA/term_types" \
+ --url "${UBKG_URL}/sabs/SNOMEDCT_USA/term-types" \
  --header "Accept: application/json"  | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "2. sabs/SNOMEDCT_US/term_types => valid; should return 200" | tee -a test.out
+echo "2. sabs/SNOMEDCT_US/term-types => valid; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/sabs/SNOMEDCT_US/term_types" \
+ --url "${UBKG_URL}/sabs/SNOMEDCT_US/term-types" \
  --header "Accept: application/json"  | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: semantics/semantic_types GET" | tee -a test.out
-echo "SIGNATURE: /semantics/semantic_types?skip=<number>&limit=<number>" | tee -a test.out
+echo "TESTS FOR: semantics/semantic-types GET" | tee -a test.out
+echo "SIGNATURE: /semantics/semantic-types?skip=<number>&limit=<number>" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. semantics/semantic_types?test=test => invalid parameter; should return custom 400" | tee -a test.out
+echo "1. semantics/semantic-types?test=test => invalid parameter; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantic_types?test=test" \
+ --url "${UBKG_URL}/semantics/semantic-types?test=test" \
  --header "Accept: application/json"  | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "2. semantics/semantic_types?skip=-1&limit=10 => negative skip; should return custom 400" | tee -a test.out
+echo "2. semantics/semantic-types?skip=-1&limit=10 => negative skip; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantic_types?skip=-1&limit=10" \
+ --url "${UBKG_URL}/semantics/semantic-types?skip=-1&limit=10" \
  --header "Accept: application/json"  | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "3. semantics/semantic_types?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a test.out
+echo "3. semantics/semantic-types?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantic_types?skip=1&limit=-1" \
+ --url "${UBKG_URL}/semantics/semantic-types?skip=1&limit=-1" \
  --header "Accept: application/json"  | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "4. semantics/semantic_types?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a test.out
+echo "4. semantics/semantic-types?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantic_types?skip=a&limit=10" \
+ --url "${UBKG_URL}/semantics/semantic-types?skip=a&limit=10" \
  --header "Accept: application/json"  | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "5. semantics/semantic_types?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a test.out
+echo "5. semantics/semantic-types?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantic_types?skip=1&limit=a" \
+ --url "${UBKG_URL}/semantics/semantic-types?skip=1&limit=a" \
  --header "Accept: application/json"  | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "6. semantics/semantic_types => should return 200" | tee -a test.out
+echo "6. semantics/semantic-types => should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantic_types?skip=1&limit=10" \
+ --url "${UBKG_URL}/semantics/semantic-types?skip=1&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: semantics/<semantic_types>/subtypes GET" | tee -a test.out
+echo "TESTS FOR: semantics/<semantic-types>/subtypes GET" | tee -a test.out
 echo "SIGNATURE: /semantics/<semantic_type>/subtypes?skip=<number>&limit=<number>" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. semantics/Anatomical%20Structure/semantic_types?skip=1&limit=10&test=test => invalid parameter; should return custom 400" | tee -a test.out
+echo "1. semantics/Anatomical%20Structure/semantic-types?skip=1&limit=10&test=test => invalid parameter; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic_types?skip=1&limit=10&test=test" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?skip=1&limit=10&test=test" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. semantics/Anatomical%20Structure/semantic_types?skip=-1&limit=10 => negative skip; should return custom 400" | tee -a test.out
+echo "1. semantics/Anatomical%20Structure/semantic-types?skip=-1&limit=10 => negative skip; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic_types?skip=-1&limit=10" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?skip=-1&limit=10" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "2. semantics/Anatomical%20Structure/semantic_types?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a test.out
+echo "2. semantics/Anatomical%20Structure/semantic-types?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic_types?skip=1&limit=-1" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?skip=1&limit=-1" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "3. semantics/Anatomical%20Structure/semantic_types?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a test.out
+echo "3. semantics/Anatomical%20Structure/semantic-types?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic_types?skip=-1&limit=10" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?skip=-1&limit=10" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "4. semantics/Anatomical%20Structure/semantic_types?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a test.out
+echo "4. semantics/Anatomical%20Structure/semantic-types?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic_types?skip=1&limit=-1" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?skip=1&limit=-1" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "5. semantics/Anatomical%20Structurez/semantic_types?skip=1&limit=10 => no match; should return custom 404" | tee -a test.out
+echo "5. semantics/Anatomical%20Structurez/semantic-types?skip=1&limit=10 => no match; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structurez/semantic_types?skip=1&limit=10" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structurez/semantic-types?skip=1&limit=10" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "6. semantics/Anatomical%20Structure/semantic_types?&skip=0&limit=10 => valid semantic type; should return 200" | tee -a test.out
+echo "6. semantics/Anatomical%20Structure/semantic-types?&skip=0&limit=10 => valid semantic type; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic_types?&skip=0&limit=10" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?&skip=0&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
@@ -1037,8 +1044,8 @@ curl --request GET \
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: terms/<term_id>/codes GET" | tee -a test.out
-echo "SIGNATURE: /terms/<term_id>/codes" | tee -a test.out
+echo "TESTS FOR: terms/<term-id>/codes GET" | tee -a test.out
+echo "SIGNATURE: /terms/<term-id>/codes" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 

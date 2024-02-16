@@ -6,7 +6,7 @@ from utils.http_error_string import get_404_error_string, validate_query_paramet
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 
-node_types_blueprint = Blueprint('node_types', __name__, url_prefix='/node_types')
+node_types_blueprint = Blueprint('node-types', __name__, url_prefix='/node-types')
 
 
 @node_types_blueprint.route('', methods=['GET'])
@@ -76,7 +76,7 @@ def node_types_counts_get(node_type=None):
     return jsonify(result)
 
 
-@node_types_blueprint.route('counts_by_sab', methods=['GET'])
+@node_types_blueprint.route('counts-by-sab', methods=['GET'])
 def node_types_counts_by_sab_get():
     """
     Although it is possible to obtain counts for all node types by SAB, the query response time for large
@@ -100,7 +100,7 @@ def node_types_counts_by_sab_get():
     return make_response(err, 400)
 
 
-@node_types_blueprint.route('<node_type>/counts_by_sab', methods=['GET'])
+@node_types_blueprint.route('<node_type>/counts-by-sab', methods=['GET'])
 def node_types_counts_by_sab_node_type_get(node_type):
     """
     Returns information on a set of node types, grouped by SAB

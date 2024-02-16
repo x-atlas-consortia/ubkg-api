@@ -8,7 +8,7 @@ from utils.http_error_string import get_404_error_string, validate_query_paramet
 terms_blueprint = Blueprint('terms', __name__, url_prefix='/terms')
 
 
-@terms_blueprint.route('<term_id>/codes', methods=['GET'])
+@terms_blueprint.route('<term-id>/codes', methods=['GET'])
 def terms_term_id_codes_get(term_id):
     """Returns a list of codes {TermType, Code} of the text string
 
@@ -29,7 +29,7 @@ def terms_term_id_codes_get(term_id):
     return jsonify(result)
 
 
-@terms_blueprint.route('<term_id>/concepts', methods=['GET'])
+@terms_blueprint.route('<term-id>/concepts', methods=['GET'])
 def terms_term_id_concepts_get(term_id):
     """Returns a list of concepts associated with the text string
 

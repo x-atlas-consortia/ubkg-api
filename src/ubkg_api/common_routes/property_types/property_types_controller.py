@@ -5,7 +5,7 @@ from utils.http_error_string import get_404_error_string, validate_query_paramet
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 
-property_types_blueprint = Blueprint('property_types', __name__, url_prefix='/property_types')
+property_types_blueprint = Blueprint('property-types', __name__, url_prefix='/property-types')
 
 
 @property_types_blueprint.route('', methods=['GET'])

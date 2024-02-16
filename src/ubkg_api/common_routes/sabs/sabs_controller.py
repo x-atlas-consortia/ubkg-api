@@ -133,19 +133,19 @@ def sabs_codes_details_sab_get(sab):
     return jsonify(result)
 
 
-@sabs_blueprint.route('term_types', methods=['GET'])
+@sabs_blueprint.route('term-types', methods=['GET'])
 def sabs_term_types_get():
     """
         The underlying query that returns term types cannot be run for all sabs on large UBKG instances.
         """
 
     err = f'The response to this endpoint cannot be run for all SABs because of memory limitations. ' \
-          f'Execute the /sabs/term_types/(sab) endpoint with the identifier for a SAB. Execute ' \
+          f'Execute the /sabs/term-types/(sab) endpoint with the identifier for a SAB. Execute ' \
           f'the /sabs endpoint for a list of all SABs in the UBKG.'
     return make_response(err, 400)
 
 
-@sabs_blueprint.route('<sab>/term_types', methods=['GET'])
+@sabs_blueprint.route('<sab>/term-types', methods=['GET'])
 def sabs_sab_term_types_get(sab):
 
     # Returns term types for the SAB.

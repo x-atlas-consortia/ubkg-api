@@ -5,7 +5,7 @@ from utils.http_error_string import get_404_error_string, validate_query_paramet
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 
-relationship_types_blueprint = Blueprint('relationship_types', __name__, url_prefix='/relationship_types')
+relationship_types_blueprint = Blueprint('relationship-types', __name__, url_prefix='/relationship-types')
 
 
 @relationship_types_blueprint.route('', methods=['GET'])
