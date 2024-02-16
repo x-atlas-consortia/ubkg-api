@@ -6,7 +6,7 @@ venv/
 \#*\#
 **~
 
-# config file
+# config files
 /src/ubkg_api/instance/*/*.cfg
 
 # log files in any path
