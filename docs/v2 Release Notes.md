@@ -125,27 +125,28 @@ The endpoint now allows searching by either semantic type name or Type Unique Id
 The following endpoints were introduced in Version 2 of the UBKG API. Refer to the
 SmartAPI documentation for details.
 
-| Endpoint                                    | Purpose                                                                                                                                   |
-|---------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| _/concepts/subgraph/_                       | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type                                        |
-| _/concepts/{identifier}/nodeobjects_        | Returns a set of "Concept Node objects" that "match" an identifier.  See _Concept Node objects_ below.                                    |
-| _/database/server_                          | Returns basic information on the UBKG neo4j database                                                                                      |
-| _/node_types_                               | Returns list of node types (node labels)                                                                                                  |
-| _/node_types/counts_                        | See **Workaround for long-running queries**                                                                                               |
-| _/node_types/{node_type}/counts_            | Returns counts of nodes in the database for a specified node type (label)                                                                 |
-| _/node_types/counts_by_sab_                 | See **Workaround for long-running queries**                                                                                               |  
-| _/node_types/{node_type}/counts_by_sab_     | Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB)                                        |
-| _/property_types_                           | Returns list of property types (keys)                                                                                                     |
-| _/sabs/codes/counts_                        | Returns a set of sources (SABs), including counts of the codes associated with the sources                                                |
-| _/sabs/{sab}/codes/counts/_                 | Returns the specified source (SAB), including the count of the codes associated with the source                                           |
-| _/sabs/codes/details_                       | See **Workaround for long-running queries**                                                                                               |
-| _/sabs/{sab}/codes/details_                 | Returns details on the codes associated with the specified source (SAB).                                                                  |    
-| _/sabs/term_types_                          | See **Workaround for long-running queries**                                                                                               |
-| _/sabs/{sab}/term_types_                    | Returns the list of term types (types of relationship) for relationships between the nodes that are defined by the specified source (SAB) |
-| _/relationship_types_                       | Returns list of relationship types                                                                                                        |
-| _/semantics/semantic_types_                 | Returns information on all Semantic Type nodes                                                                                            |
-| _/semantics/semantic_types/{identifier}_    | Returns information on a specified Semantic Type                                                                                          |
-| _/semantics/semantic_subtypes/{identifier}_ | Returns information on the set of Semantic Type nodes that are subtypes of the specified Semantic Type                                    |
+| Endpoint                                 | Purpose                                                                                                                                   |
+|------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| _/concepts/subgraph/_                    | Returns the set of pairs of concepts (i.e., one-hop paths) linked by a specified relationship type                                        |
+| _/concepts/{identifier}/nodeobjects_     | Returns a set of "Concept Node objects" that "match" an identifier.  See _Concept Node objects_ below.                                    |
+| _/concepts/{concept_id}/definitions_     | Returns a set of definitions for a concept                                                                                                |
+| _/database/server_                       | Returns basic information on the UBKG neo4j database                                                                                      |
+| _/node-types_                            | Returns list of node types (node labels)                                                                                                  |
+| _/node-types/counts_                     | See **Workaround for long-running queries**                                                                                               |
+| _/node-types/{node_type}/counts_         | Returns counts of nodes in the database for a specified node type (label)                                                                 |
+| _/node-types/counts-by-sab_              | See **Workaround for long-running queries**                                                                                               |  
+| _/node-types/{node_type}/counts-by-sab_  | Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB)                                        |
+| _/property-types_                        | Returns list of property types (keys)                                                                                                     |
+| _/sabs/codes/counts_                     | Returns a set of sources (SABs), including counts of the codes associated with the sources                                                |
+| _/sabs/{sab}/codes/counts/_              | Returns the specified source (SAB), including the count of the codes associated with the source                                           |
+| _/sabs/codes/details_                    | See **Workaround for long-running queries**                                                                                               |
+| _/sabs/{sab}/codes/details_              | Returns details on the codes associated with the specified source (SAB).                                                                  |    
+| _/sabs/term-types_                       | See **Workaround for long-running queries**                                                                                               |
+| _/sabs/{sab}/term-types_                 | Returns the list of term types (types of relationship) for relationships between the nodes that are defined by the specified source (SAB) |
+| _/relationship-types_                    | Returns list of relationship types                                                                                                        |
+| _/semantics/semantic-types_              | Returns information on all Semantic Type nodes                                                                                            |
+| _/semantics/{identifier}/semantic-types_ | Returns information on a specified Semantic Type                                                                                          |
+| _/semantics/{identifier}/subtypes_       | Returns information on the set of Semantic Type nodes that are subtypes of the specified Semantic Type                                    |
 
 ##### Workaround for long-running queries
 When executed against a large UBKG instance, the execution time of this endpoint will exceed either the server host timeout or server memory. 
