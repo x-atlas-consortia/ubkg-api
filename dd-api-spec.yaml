@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Data Distillery API
   description: The Data Distillery API provides REST endpoints that return results from queries against an instance of [Data Distillery](https://github.com/TaylorResearchLab/CFDE_DataDistillery), which is a deployment of the [Unified Biomedical Knowledge Graph (UBKG)](https://ubkg.docs.xconsortia.org/). To prevent exceeding service timeouts or payload limits, some endpoints are throttled in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB.
-  version: "1.0"
+  version: "2.0"
   contact:
     name: GitHub repository
     url: https://github.com/TaylorResearchLab/CFDE_DataDistillery
