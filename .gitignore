@@ -6,8 +6,10 @@ venv/
 \#*\#
 **~
 
-# config file
-/src/ubkg_api/instance/*/*.cfg
+# Ignore config file
+src/ubkg_api/instance/app.cfg
+src/ubkg_api/instance/*
+!src/ubkg_api/instance/app.cfg.example
 
 # Ignore the generated BUILD file
 BUILD
