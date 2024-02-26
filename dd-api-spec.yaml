@@ -104,8 +104,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: string
-                  example: CHV 0000052645
+                  $ref: '#/components/schemas/ConceptCodes'
         '400':
           description: invalid parameter name
         '404':
@@ -885,8 +884,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: string
-                  example: C0794811
+                  $ref: '#/components/schemas/TermConcept'
         '404':
           description: No Concepts with terms matching the specified string.
         '5XX':
@@ -1520,3 +1518,23 @@ components:
             type: string
             description: a source (SAB)
             example: SNOMEDCT_US
+    ConceptCodes: #Schema name
+      type: object
+      description: The set of Code node that link to a Concept node
+      properties:
+        codes:
+          type: array
+          items:
+            type: string
+            description: a CodeID, in format _SAB_:_CODE_
+            example: "CHV:0000052645"
+    TermConcept: #Schema name
+      type: object
+      description: An array of Concepts with preferred terms that exactly match the specified string
+      properties:
+        concepts:
+          type: array
+          items:
+            type: string
+            description: a Concept Unique Identifier (CUI)
+            example: C0794811

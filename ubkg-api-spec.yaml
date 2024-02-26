@@ -1,16 +1,14 @@
 openapi: 3.0.3
 info:
-  title: UBKG API
-  description: The UBKG API provides REST endpoints that return results from queries against an instance of the [Unified Biomedical Knowledge Graph (UBKG)](https://ubkg.docs.xconsortia.org/). To prevent exceeding service timeouts or payload limits, some endpoints are throttled in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB.
-  version: "2.0"
+  title: Data Distillery API
+  description: The Data Distillery API provides REST endpoints that return results from queries against an instance of [Data Distillery](https://github.com/TaylorResearchLab/CFDE_DataDistillery), which is a deployment of the [Unified Biomedical Knowledge Graph (UBKG)](https://ubkg.docs.xconsortia.org/). To prevent exceeding service timeouts or payload limits, some endpoints are throttled in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB.
+  version: "2.0.0"
   contact:
     name: GitHub repository
-    url: https://github.com/x-atlas-consortia/ubkg-api
+    url: https://github.com/TaylorResearchLab/CFDE_DataDistillery
 servers:
-  - url: https://ontology.api.hubmapconsortium.org/
+  - url: https://datadistillery.api.sennetconsortium.org/
     description: Production server
-  - url: https://ontology-api.dev.hubmapconsortium.org/
-    description: Development server
 paths:
   /codes/{code_id}/codes:
     get:
@@ -34,7 +32,7 @@ paths:
             items:
               type: string
               example: NCI,MDR
-            default: []
+            default: ""
       responses:
         '200':
           description: An array of objects corresponding to Code nodes that share links to the Concept associated with the specified Code, subject to constraints specified in parameters.
@@ -48,7 +46,7 @@ paths:
           description: invalid parameter name
         '404':
           description: no Codes for the specified parameters (_code_id_ and _sab_)
-        '5XX':
+        '500':
           description: Unknown error
   /codes/{code_id}/concepts:
     get:
@@ -73,14 +71,14 @@ paths:
                   $ref: '#/components/schemas/ConceptDetail'
         '404':
           description: no Concept nodes for the specified Code
-        '5XX':
+        '500':
           description: Unknown error
-  /concepts/{concept_id}/codes:
+  /concepts/{id}/codes:
     get:
-      operationId: concepts_concept_id_codes_get
+      operationId: concepts_id_codes_get
       summary: Returns information on the set of Code nodes that link to the specified Concept, subject to constraints specified in parameters. [A Concept node can have CODE relationships with (links to) multiple Code nodes. For example, the Concept with identifier C0006142 links to a set of Code nodes that include SNOMEDCT_US:254837009, NCI:C9335 and MSH:D001943.]
       parameters:
-        - name: concept_id
+        - name: id
           in: path
           required: true
           description: The identifier for the Concept (also known as the Concept Unique Identifier, or CUI)
@@ -97,7 +95,7 @@ paths:
             items:
               type: string
               example: MEDLINEPLUS,MSH,MEDCIN
-            default: []
+            default: ""
       responses:
         '200':
           description: An array of code_ids in format _SAB_:_CODE for the Codes that link to the specified Concept, subject to constraints specified in parameters.
@@ -106,20 +104,19 @@ paths:
               schema:
                 type: array
                 items:
-                  type: string
-                  example: CHV 0000052645
+                  $ref: '#/components/schemas/ConceptCodes'
         '400':
           description: invalid parameter name
         '404':
           description: no Codes for the specified parameters (_concept_id_ and _sab_)
-        '5XX':
+        '500':
           description: Unknown error
-  /concepts/{concept_id}/concepts:
+  /concepts/{id}/concepts:
     get:
-      operationId: concepts_concept_id_concepts_get
+      operationId: concepts_id_concepts_get
       summary: Returns the set of Concepts that have direct relationships with the specified Concept.
       parameters:
-        - name: concept_id
+        - name: id
           in: path
           required: true
           description: The concept identifier (also known as Concept Unique Identifier, or CUI)
@@ -137,14 +134,14 @@ paths:
                   $ref: '#/components/schemas/SabRelationshipConceptTerm'
         '404':
           description: no Concepts that have relationships with the specified Concept
-        '5XX':
+        '500':
           description: Unknown error
-  /concepts/{concept_id}/definitions:
+  /concepts/{id}/definitions:
     get:
-      operationId: concepts_concept_id_definitions_get
+      operationId: concepts_id_definitions_get
       summary: Returns the set of Definitions linked to a Concept. [A Definition is usually defined for a Code by a source (SAB), not a Concept; however, in the UBKG, the Definition is associated with the Code's linked Concept. Thus, a Concept may have multiple Definitions.]
       parameters:
-        - name: concept_id
+        - name: id
           description: Identifier (also known as a Concept Unique Identifier) for a Concept.
           in: path
           required: true
@@ -162,14 +159,14 @@ paths:
                   $ref: '#/components/schemas/SabDefinition'
         '404':
           description: No Definitions associated with the Concept _query_concept_id_.
-        '5XX':
+        '500':
           description: Unknown error
-  /concepts/{identifier}/nodeobjects:
+  /concepts/{id}/nodeobjects:
     get:
-      operationId: concepts_identifier_nodes_get
+      operationId: concepts_id_nodes_get
       summary: Returns a set of "Concept Node objects" that "match" an identifier. [A Concept node in the UBKG is the origin of a subgraph that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A "Concept Node object" represents this subgraph as a set of Concept properties--i.e., all of the Concept's linked Codes, terms, definitions, and semantic types. A "match" is an exact match between an identifier and a text-based property in a Concept Node object. Because an identifier may match properties in more than one Concept Node object, the endpoint can return multiple Concept Node objects.]
       parameters:
-        - name: identifier
+        - name: id
           in: path
           required: true
           description: The string to match against properties related to Concepts. Related properties include the preferred term for the Concept; the CUI for the Concept; the CodeID for a Code linked to the Concept; and terms for a Code linked to a Concept. Special characters in search should be URL-encoded (%20 = space; %3A = colon, %2C = comma).
@@ -185,14 +182,14 @@ paths:
                 $ref: '#/components/schemas/ConceptNodes'
         '404':
           description: No Concepts that match the identifier
-        '5XX':
+        '500':
           description: Unknown error
-  /concepts/{concept_id}/paths/expand:
+  /concepts/{id}/paths/expand:
     get:
-      operationId: concepts_concept_id_paths_expand_get
+      operationId: concepts_id_paths_expand_get
       summary: Returns a set of paths that originate from the specified Concept, subject to constraints specified in parameters.
       parameters:
-        - name: concept_id
+        - name: id
           in: path
           required: true
           description: The identifier (also known as Concept Unique Identifier, or CUI) for the Concept from which paths originate.
@@ -252,14 +249,14 @@ paths:
           description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; mindepth > maxdepth
         '404':
           description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
-        '5XX':
+        '500':
           description: Unknown error
-  /concepts/{concept_id}/paths/trees:
+  /concepts/{id}/paths/trees:
     get:
       operationId: concepts_trees_get
       summary: Return information on the Concepts in the spanning tree that originates from a specified Concept, subject to constraints on relationship type, relationship source, and range of path depths. A spanning tree is the set of paths originating from node that traverse all of the other nodes of a graph.
       parameters:
-        - name: concept_id
+        - name: id
           in: path
           required: true
           description: The concept identifier (also known as Concept Unique Identifier, or CUI) of the origin of the spanning tree.
@@ -322,7 +319,7 @@ paths:
           description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; mindepth > maxdepth
         '404':
           description: No Concepts in a spanning tree originating from specified Concept subject to constraints from parameters
-        '5XX':
+        '500':
           description: Unknown error
   /concepts/paths/subgraph:
     get:
@@ -368,14 +365,14 @@ paths:
           description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; incompatible version of neo4j (this endpoint requires at least 5.11.0)
         '404':
           description: No subgraph for specified relationship types. Includes responses from queries with execution times that exceed the maximum.
-        '5XX':
+        '500':
           description: Unknown error
-  /concepts/{origin_concept_id}/paths/shortestpath/{terminus_concept_id}:
+  /concepts/{id}/paths/shortestpath/{terminus_concept_id}:
     get:
       operationId: concepts_shortestpath_get
       summary: Return the shortest path between two Concepts, using Dykstra's algorithm with default weights, subject to constraints on relationship types (rel) and relationship sources (sab).
       parameters:
-        - name: origin_concept_id
+        - name: id
           in: path
           required: true
           description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the origin of the shortestpath calculation.
@@ -414,7 +411,7 @@ paths:
           description: invalid parameter name; missing required parameter name
         '404':
           description: No shortest path between _origin_concept_id_ and _terminus_concept_id_ with relationship types in _rel_ filtered by sources in _sab_.
-        '5XX':
+        '500':
           description: Unknown error
   /database/server:
     get:
@@ -440,7 +437,7 @@ paths:
                 $ref: '#/components/schemas/NodeTypes'
         '404':
           description: No nodes types
-        '5XX':
+        '500':
           description: Unknown error
 
   /node-types/counts:
@@ -450,7 +447,7 @@ paths:
       responses:
         '400':
           description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node-types/(node-type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node-types endpoint.
-        '5XX':
+        '500':
           description: Unknown error
   /node-types/{node_type}/counts:
     get:
@@ -473,7 +470,7 @@ paths:
                 $ref: '#/components/schemas/NodeTypeCount'
         '404':
           description: No nodes with label
-        '5XX':
+        '500':
           description: Unknown error
   /node-types/counts-by-sab:
     get:
@@ -490,7 +487,7 @@ paths:
       responses:
         '400':
           description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node-types/counts-by-sab/(node-type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node-types endpoint.
-        '5XX':
+        '500':
           description: Unknown error
   /node-types/{node_type}/counts-by-sab:
     get:
@@ -522,7 +519,7 @@ paths:
           description: invalid parameter
         '404':
           description: No nodes with label
-        '5XX':
+        '500':
           description: Unknown error
   /property-types:
     get:
@@ -535,7 +532,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PropertyTypes'
-        '5XX':
+        '500':
           description: Unknown error
   /relationship-types:
     get:
@@ -548,7 +545,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RelationshipTypes'
-        '5XX':
+        '500':
           description: Unknown error
   /sabs:
     get:
@@ -563,7 +560,7 @@ paths:
                 $ref: '#/components/schemas/Sabs'
         '404':
           description: No Sources
-        '5XX':
+        '500':
           description: Unknown error
   /sabs/codes/counts:
     get:
@@ -595,7 +592,7 @@ paths:
           description: invalid parameter name; non-numeric parameter value; negative parameter value
         '404':
           description: No Codes for the specified parameters
-        '5XX':
+        '500':
           description: Unknown error
   /sabs/{sab}/codes/counts:
     get:
@@ -634,7 +631,7 @@ paths:
           description: invalid parameter name; non-numeric parameter value; negative parameter value
         '404':
           description: No Codes for the specified parameters
-        '5XX':
+        '500':
           description: Unknown error
   /sabs/codes/details:
     get:
@@ -643,7 +640,7 @@ paths:
       responses:
         '400':
           description: The response to this endpoint cannot be run for all SABs because of memory limitations. Execute the /sabs/(sab)/codes/details endpoint with the identifier for a single SAB. Execute the /sabs endpoint for a list of all SABs in the UBKG.
-        '5XX':
+        '500':
           description: Unknown error
   /sabs/{sab}/codes/details:
     get:
@@ -682,7 +679,7 @@ paths:
           description: invalid parameter name; non-numeric parameter value; negative parameter value
         '404':
           description: No Codes for the specified parameters
-        '5XX':
+        '500':
           description: Unknown error
   /sabs/term-types:
     get:
@@ -691,7 +688,7 @@ paths:
       responses:
         '400':
           description: The response to this endpoint cannot be run for all SABs because of memory limitations. Execute the /sabs/(sab)/term-types endpoint with the identifier for a single SAB. Execute the /sabs endpoint for a list of all SABs in the UBKG.
-        '5XX':
+        '500':
           description: Unknown error
   /sabs/{sab}/term-types:
     get:
@@ -730,7 +727,7 @@ paths:
           description: invalid parameter name; non-numeric parameter value; negative parameter value
         '404':
           description: No term types for the specified parameters
-        '5XX':
+        '500':
           description: Unknown error
   /semantics/semantic-types:
     get:
@@ -762,7 +759,7 @@ paths:
           description: invalid parameter name; non-numeric parameter value; negative value
         '404':
           description: No subtypes of the specified Semantic Type.
-        '5XX':
+        '500':
           description: Unknown error
   /semantics/semantic-types/{identifier}:
     get:
@@ -801,7 +798,7 @@ paths:
           description: invalid parameter name; non-numeric parameter value; negative value
         '404':
           description: No subtypes of the specified Semantic Type.
-        '5XX':
+        '500':
           description: Unknown error
   /semantics/semantic-types/{identifier}/subtypes:
     get:
@@ -840,7 +837,7 @@ paths:
           description: invalid parameter name; non-numeric parameter value; negative value
         '404':
           description: No subtypes of the specified Semantic Type.
-        '5XX':
+        '500':
           description: Unknown error
   /terms/{term_id}/codes:
     get:
@@ -865,7 +862,7 @@ paths:
                   $ref: '#/components/schemas/TermtypeCode'
         '404':
           description: No Codes with terms matching the specified string.
-        '5XX':
+        '500':
           description: Unknown error
   /terms/{term_id}/concepts:
     get:
@@ -881,17 +878,16 @@ paths:
             example: Breast cancer
       responses:
         '200':
-          description: An array of Concepts with preferred terms that exactly match the specified string
+          description: An array of Concept Unique Identifiers that exactly match the specified string
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: string
-                  example: C0794811
+                  $ref: '#/components/schemas/TermConcept'
         '404':
           description: No Concepts with terms matching the specified string.
-        '5XX':
+        '500':
           description: Unknown error
 components:
   schemas:
@@ -1522,4 +1518,23 @@ components:
             type: string
             description: a source (SAB)
             example: SNOMEDCT_US
-
+    ConceptCodes: #Schema name
+      type: object
+      description: The set of Code node that link to a Concept node
+      properties:
+        codes:
+          type: array
+          items:
+            type: string
+            description: a CodeID, in format _SAB_:_CODE_
+            example: "CHV:0000052645"
+    TermConcept: #Schema name
+      type: object
+      description: An array of Concepts with preferred terms that exactly match the specified string
+      properties:
+        concepts:
+          type: array
+          items:
+            type: string
+            description: a Concept Unique Identifier (CUI)
+            example: C0794811
