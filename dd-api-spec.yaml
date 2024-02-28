@@ -1,14 +1,19 @@
 openapi: 3.0.3
 info:
   title: Data Distillery API
-  description: The Data Distillery API provides REST endpoints that return results from queries against an instance of [Data Distillery](https://github.com/TaylorResearchLab/CFDE_DataDistillery), which is a deployment of the [Unified Biomedical Knowledge Graph (UBKG)](https://ubkg.docs.xconsortia.org/). To prevent exceeding service timeouts or payload limits, some endpoints are throttled in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB.
+  description: The Data Distillery API provides REST endpoints that return results from queries against an instance of [Data Distillery](https://github.com/TaylorResearchLab/CFDE_DataDistillery), which is a deployment of the [Unified Biomedical Knowledge Graph (UBKG)](https://ubkg.docs.xconsortia.org/). To prevent exceeding service timeouts or payload limits, some endpoints are throttled in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB. The Data Distillery API requires an API Key.
   version: "2.0"
   contact:
     name: GitHub repository
     url: https://github.com/TaylorResearchLab/CFDE_DataDistillery
+externalDocs:
+  description: UBKG documentation
+  url: https://ubkg.docs.xconsortia.org/
 servers:
   - url: https://datadistillery.api.sennetconsortium.org/
     description: Production server
+security:
+  - api_key: []
 paths:
   /codes/{code_id}/codes:
     get:
@@ -890,6 +895,11 @@ paths:
         '5XX':
           description: Unknown error
 components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
   schemas:
     CodesCodesObj: # Schema name
       description: Code nodes that link to the same Concept node to which a specified Code links.
