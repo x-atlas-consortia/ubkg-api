@@ -934,54 +934,54 @@ echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: semantics/<semantic-types>/subtypes GET" | tee -a test.out
-echo "SIGNATURE: /semantics/<semantic_type>/subtypes?skip=<number>&limit=<number>" | tee -a test.out
+echo "TESTS FOR: semantics/<semantic-types> GET" | tee -a test.out
+echo "SIGNATURE: /semantics/<semantic_type>?skip=<number>&limit=<number>" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. semantics/Anatomical%20Structure/semantic-types?skip=1&limit=10&test=test => invalid parameter; should return custom 400" | tee -a test.out
+echo "1. semantics/semantic-types/Anatomical%20Structure?skip=1&limit=10&test=test => invalid parameter; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?skip=1&limit=10&test=test" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=1&limit=10&test=test" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. semantics/Anatomical%20Structure/semantic-types?skip=-1&limit=10 => negative skip; should return custom 400" | tee -a test.out
+echo "1. semantics/semantic-types/Anatomical%20Structure?skip=-1&limit=10 => negative skip; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?skip=-1&limit=10" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=-1&limit=10" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "2. semantics/Anatomical%20Structure/semantic-types?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a test.out
+echo "2. semantics/semantic-types/Anatomical%20Structure?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?skip=1&limit=-1" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=1&limit=-1" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "3. semantics/Anatomical%20Structure/semantic-types?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a test.out
+echo "3. semantics/semantic-types/Anatomical%20Structure?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?skip=-1&limit=10" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=-1&limit=10" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "4. semantics/Anatomical%20Structure/semantic-types?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a test.out
+echo "4. semantics/semantic-types/Anatomical%20Structure?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?skip=1&limit=-1" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=1&limit=-1" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "5. semantics/Anatomical%20Structurez/semantic-types?skip=1&limit=10 => no match; should return custom 404" | tee -a test.out
+echo "5. semantics/semantic-types/Anatomical%20Structurez?skip=1&limit=10 => no match; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structurez/semantic-types?skip=1&limit=10" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structurez?skip=1&limit=10" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "6. semantics/Anatomical%20Structure/semantic-types?&skip=0&limit=10 => valid semantic type; should return 200" | tee -a test.out
+echo "6. semantics/semantic-types/Anatomical%20Structure?&skip=0&limit=10 => valid semantic type; should return 200" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?&skip=0&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
@@ -989,57 +989,57 @@ echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: semantics/<semantic_type>/subtypes GET" | tee -a test.out
-echo "SIGNATURE: /semantics/<semantic_type>/subtypes?skip=<number>&limit=<number>" | tee -a test.out
+echo "TESTS FOR: semantics/semantic-types/<semantic_type>/subtypes GET" | tee -a test.out
+echo "SIGNATURE: /semantics/semantic-types/<semantic_type>/subtypes?skip=<number>&limit=<number>" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. semantics/Anatomical%20Structure/subtypes?test=test => invalid parameter; should return custom 400" | tee -a test.out
+echo "1. semantics/semantic-types/Anatomical%20Structure/subtypes?test=test => invalid parameter; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?test=test" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure/subtypes?test=test" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "2. semantics/Anatomical%20Structure/subtypes?skip=-1&limit=10 => negative skip; should return custom 400" | tee -a test.out
+echo "2. semantics/semantic-types/Anatomical%20Structure/subtypes?skip=-1&limit=10 => negative skip; should return custom 400" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=-1&limit=10" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "3. semantics/Anatomical%20Structure/subtypes?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a test.out
+echo "3. semantics/semantic-types/Anatomical%20Structure/subtypes?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=1&limit=-1" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure/subtypes?skip=1&limit=-1" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "4. semantics/Anatomical%20Structure/subtypes?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a test.out
+echo "4. semantics/semantic-types/Anatomical%20Structure/subtypes?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=a&limit=10" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure/subtypes?skip=a&limit=10" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "5. semantics/Anatomical%20Structure/subtypes?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a test.out
+echo "5. semantics/semantic-types/Anatomical%20Structure/subtypes?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=1&limit=a" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure/subtypes?skip=1&limit=a" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "6. semantics/Anatomical%20Structurez/subtypes?skip=1&limit=10 => no match; should return custom 404" | tee -a test.out
+echo "6. semantics/semantic-types/Anatomical%20Structurez/subtypes?skip=1&limit=10 => no match; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structurez/subtypes?skip=1&limit=10" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structurez/subtypes?skip=1&limit=10" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 echo | tee -a test.out
-echo "7. semantics/Anatomical%20Structure/subtypes?skip=1&limit=10 => valid parameters; should return 200" | tee -a test.out
+echo "7. semantics/semantic-types/Anatomical%20Structure/subtypes?skip=1&limit=10 => valid parameters; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=1&limit=10" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure/subtypes?skip=1&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 
@@ -1067,9 +1067,6 @@ echo | tee -a test.out
 echo "TESTS FOR: terms/<concept_id>/concepts GET" | tee -a test.out
 echo "SIGNATURE: /terms/<concept_id>/concepts"
 echo "1. terms/concepts/Breast%20cancerz GET => no match; should return custom 404" | tee -a test.out
-echo | tee -a test.out
-echo | tee -a test.out
-
 curl --request GET \
  --url "${UBKG_URL}/terms/Breast%20cancerz/concepts" \
  --header "Accept: application/json" | tee -a test.out
