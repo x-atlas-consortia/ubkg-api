@@ -23,3 +23,4 @@ BUILD
 **/dist
 /tests/*/*.json
 /tests/*/*.out
+/tests/*/*.key
