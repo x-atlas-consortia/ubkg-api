@@ -15,6 +15,7 @@ from common_routes.codes.codes_controller import codes_blueprint
 from common_routes.concepts.concepts_controller import concepts_blueprint
 from common_routes.terms.terms_controller import terms_blueprint
 from common_routes.semantics.semantics_controller import semantics_blueprint
+from common_routes.status.status_controller import status_blueprint
 from common_routes.database.database_controller import database_blueprint
 from common_routes.node_types.node_types_controller import node_types_blueprint
 from common_routes.property_types.property_types_controller import property_types_blueprint
@@ -46,6 +47,7 @@ class UbkgAPI:
         self.app.register_blueprint(codes_blueprint)
         self.app.register_blueprint(concepts_blueprint)
         self.app.register_blueprint(semantics_blueprint)
+        self.app.register_blueprint(status_blueprint)
         # self.app.register_blueprint(tui_blueprint)
         self.app.register_blueprint(terms_blueprint)
         self.app.register_blueprint(database_blueprint)
