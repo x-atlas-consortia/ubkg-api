@@ -513,8 +513,8 @@ echo | tee -a test.out
 
 echo "9. concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=1&maxdepth=3&skip=1&limit=-10 => negative limit: should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=3&skip=-1&limit=10" \
- --header "Accept: application/json"
+ --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=3&skip=1&limit=-10" \
+ --header "Accept: application/json" \
  --header "X-API-KEY:$apikey" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
@@ -547,7 +547,7 @@ echo "13. concepts/C2720507/paths/trees?sab=SNOMEDCT_US&sab=UBERON&rel=isa&rel=p
 curl --request GET \
  --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&sab=UBERON&rel=isa&rel=part_of&mindepth=1&maxdepth=3&skip=1&limit=10" \
 --header "Accept: application/json" \
---header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+--header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -555,7 +555,7 @@ echo "15. concepts/C2720507/paths/trees?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_
 curl --request GET \
  --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&sab=UBERON&rel=isa&rel=part_of&maxdepth=3&skip=1&limit=10" \
 --header "Accept: application/json" \
---header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+--header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -563,7 +563,7 @@ echo "15. concepts/C2720507/paths/trees?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_
 curl --request GET \
  --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&sab=UBERON&rel=isa&rel=part_of&mindepth=1&maxdepth=3&skip=1&limit=10" \
 --header "Accept: application/json" \
---header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+--header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -602,7 +602,7 @@ echo "4. concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US&rel=isa =
 curl --request GET \
  --url "${UBKG_URL}/concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US&rel=isa" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -610,7 +610,7 @@ echo "5. concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US&sab=UBERO
 curl --request GET \
  --url "${UBKG_URL}/concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US&sab=UBERON&rel=isa&rel=part_of" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -618,7 +618,7 @@ echo "6. concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US%2CUBERON&
 curl --request GET \
  --url "${UBKG_URL}/concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -632,7 +632,7 @@ echo "1. node-types GET => valid; should return 200" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/node-types" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -647,7 +647,7 @@ echo "1. node-types/counts GET => blocked; should return custom 400" | tee -a te
 curl --request GET \
  --url "${UBKG_URL}/node-types/counts" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -667,7 +667,7 @@ echo "2. node-types/Code/counts GET => valid; should return 200" | tee -a test.o
 curl --request GET \
  --url "${UBKG_URL}/node-types/Code/counts" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -682,7 +682,7 @@ echo "1. node-types/counts-by-sab GET => blocked because of likely timeout; shou
 curl --request GET \
  --url "${UBKG_URL}/node-types/counts-by-sab?test=test" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -705,7 +705,7 @@ echo "2. node-types/Code/counts-by-sab?sab=SNOMEDCT_US GET => valid, single sab;
 curl --request GET \
  --url "${UBKG_URL}/node-types/Code/counts-by-sab?sab=SNOMEDCT_US" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -713,7 +713,7 @@ echo "3. node-types/Code/counts-by-sab?sab=SNOMEDCT_US&sab=NCI GET => valid, mul
 curl --request GET \
  --url "${UBKG_URL}/node-types/Code/counts-by-sab?sab=SNOMEDCT_US&sab=NCI" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -721,7 +721,7 @@ echo "4. node-types/Code/counts-by-sab?sab=SNOMEDCT_US%2CNCI GET => valid, list 
 curl --request GET \
  --url "${UBKG_URL}/node-types/Code/counts-by-sab?sab=SNOMEDCT_US%2CNCI" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -732,7 +732,7 @@ echo "1. property-types GET => valid; should return 200" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/property-types" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -743,7 +743,7 @@ echo "1. relationship-types GET => valid; should return 200" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/relationship-types" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -757,7 +757,7 @@ echo "1. sabs => valid: should return 200" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/sabs" \
  --header "Accept: application/json" \
- --header "X-API-KEY:$apikey" | tee -a test.out | cut -c1-60 | tee -a test.out
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -1101,70 +1101,70 @@ echo | tee -a test.out
 
 echo "7. semantics/semantic-types/Anatomical%20Structure?&skip=0&limit=10 => valid semantic type; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/Anatomical%20Structure/semantic-types?&skip=0&limit=10" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?&skip=0&limit=10" \
  --header "Accept: application/json" \
  --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
-echo "TESTS FOR: semantics/subtypes/<semantic_type> GET" | tee -a test.out
-echo "SIGNATURE: /semantics/subtypes/<semantic_type>?skip=<number>&limit=<number>" | tee -a test.out
+echo "TESTS FOR: semantics/<semantic_type>/subtypes/ GET" | tee -a test.out
+echo "SIGNATURE: /semantics/<semantic_type>/subtypes?skip=<number>&limit=<number>" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "1. semantics/subtypes/Anatomical%20Structure?test=test => invalid parameter; should return custom 400" | tee -a test.out
+echo "1. semantics/Anatomical%20Structure/subtypes?test=test => invalid parameter; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/subtypes/Anatomical%20Structure?test=test" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?test=test" \
  --header "Accept: application/json" \
  --header "X-API-KEY:$apikey" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "2. semantics/subtypes/Anatomical%20Structureskip=-1&limit=10 => negative skip; should return custom 400" | tee -a test.out
+echo "2. semantics/Anatomical%20Structure/subtypes?skip=-1&limit=10 => negative skip; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/subtypes/Anatomical%20Structure?skip=-1&limit=10" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=-1&limit=10" \
  --header "Accept: application/json" \
  --header "X-API-KEY:$apikey" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "3. semantics/subtypes/Anatomical%20Structure?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a test.out
+echo "3. semantics/Anatomical%20Structure/subtypes?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/subtypes/Anatomical%20Structure?skip=1&limit=-1" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=1&limit=-1" \
  --header "Accept: application/json" \
  --header "X-API-KEY:$apikey" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "4. semantics/subtypes/Anatomical%20Structure?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a test.out
+echo "4. semantics/Anatomical%20Structure/subtypes?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/subtypes/Anatomical%20Structure?skip=a&limit=10" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=a&limit=10" \
  --header "Accept: application/json" \
  --header "X-API-KEY:$apikey" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "5. semantics/subtypes/Anatomical%20Structure?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a test.out
+echo "5. semantics/Anatomical%20Structure/subtypes?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/subtypes/Anatomical%20Structure?skip=1&limit=a" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=1&limit=a" \
  --header "Accept: application/json" \
  --header "X-API-KEY:$apikey" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "6. semantics/subtypes/Anatomical%20Structurez?skip=1&limit=10 => no match; should return custom 404" | tee -a test.out
+echo "6. semantics/Anatomical%20Structurez/subtypes?skip=1&limit=10 => no match; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/subtypes/Anatomical%20Structurez?skip=1&limit=10" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structurez/subtypes?skip=1&limit=10" \
  --header "Accept: application/json" \
  --header "X-API-KEY:$apikey" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 echo | tee -a test.out
-echo "7. semantics/subtypes/Anatomical%20Structure?skip=1&limit=10 => valid parameters; should return 200" | tee -a test.out
+echo "7. semantics/Anatomical%20Structure/subtypes?skip=1&limit=10 => valid parameters; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/subtypes/Anatomical%20Structure?skip=1&limit=10" \
+ --url "${UBKG_URL}/semantics/Anatomical%20Structure/subtypes?skip=1&limit=10" \
  --header "Accept: application/json" \
  --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out

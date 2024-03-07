@@ -15,7 +15,7 @@ def semantics_semantic_types_get():
     return semantics_semantic_type_semantic_types_get(semantic_type=None)
 
 
-@semantics_blueprint.route('<semantic_type>/semantic-types', methods=['GET'])
+@semantics_blueprint.route('semantic-types/<semantic_type>', methods=['GET'])
 def semantics_semantics_id_tyeps_get(semantic_type):
     # Return information on the specified semantic type.
     return semantics_semantic_type_semantic_types_get(semantic_type)
