@@ -74,7 +74,7 @@ def semantics_semantic_type_semantic_types_get(semantic_type):
     return jsonify(dict_result)
 
 
-@semantics_blueprint.route('<semantic_type>/subtypes', methods=['GET'])
+@semantics_blueprint.route('semantic-types/<semantic_type>/subtypes', methods=['GET'])
 def semantics_semantic_type_subtypes_get(semantic_type):
     """
     Returns a set of semantic types that are subtypes (have an IS_STY relationship with) the specified semantic type
