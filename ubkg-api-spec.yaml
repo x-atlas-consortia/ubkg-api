@@ -18,14 +18,14 @@ paths:
         - name: code_id
           in: path
           required: true
-          description: the identifier for a Code node, in format _SAB_:_code_ (or SAB%3Acode) where _SAB_ is an identifier for the source of the code.
+          description: the identifier for a Code node, in format _SAB_:_code_ where _SAB_ is an identifier for the source of the code.
           schema:
             type: string
             example: SNOMEDCT_US:254837009
         - name: sab
           in: query
           required: false
-          description: The set of sources (SABs) to which to limit the set of Codes that  link to the same Concept to which the Code with CodeID=_code_id_ links. This set can be specified either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit the set of Codes that  link to the same Concept to which the Code with CodeID=_code_id_ links. This set can be specified either a list of values delimited with commas (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: array
             uniqueItems: true
@@ -56,7 +56,7 @@ paths:
         - name: code_id
           in: path
           required: true
-          description: The identifier for the Code node, in format _SAB_:_CODE_ (or SAB%3Acode), where _SAB_ is an identifier for the source of the code. (%3A = colon)
+          description: The identifier for the Code node, in format _SAB_:_CODE_ where _SAB_ is an identifier for the source of the code.
           schema:
             type: string
             example: SNOMEDCT_US:79962008
@@ -88,7 +88,7 @@ paths:
         - name: sab
           in: query
           required: false
-          description: The set of sources (SABs) to which to limit the set of Codes that link to the specified Concept. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit the set of Codes that link to the specified Concept. Can be either a list of values delimited with commas (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: array
             uniqueItems: true
@@ -169,7 +169,7 @@ paths:
         - name: id
           in: path
           required: true
-          description: The string to match against properties related to Concepts. Related properties include the preferred term for the Concept; the CUI for the Concept; the CodeID for a Code linked to the Concept; and terms for a Code linked to a Concept. Special characters in search should be URL-encoded (%20 = space; %3A = colon, %2C = comma).
+          description: The string to match against properties related to Concepts. Related properties include the preferred term for the Concept; the CUI for the Concept; the CodeID for a Code linked to the Concept; and terms for a Code linked to a Concept.
           schema:
             type: string
             example: Cells
@@ -199,14 +199,14 @@ paths:
         - name: sab
           in: query
           required: true
-          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with commas (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: string
             example: SNOMEDCT_US
         - name: rel
           in: query
           required: true
-          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with commas (e.g., ?rel=relationship_type1,relationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
           schema:
             type: string
             example: isa
@@ -266,14 +266,14 @@ paths:
         - name: sab
           in: query
           required: true
-          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with commas (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: string
             example: SNOMEDCT_US
         - name: rel
           in: query
           required: true
-          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2).
+          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with commas (e.g., ?rel=relationship_type1,relationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2).
           schema:
             type: string
             example: isa
@@ -329,14 +329,14 @@ paths:
         - name: sab
           in: query
           required: true
-          description: The set of sources (SABs) to which to limit the relationships in the subgraph. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit the relationships in the subgraph. Can be either a list of values delimited with (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: string
             example: SNOMEDCT_US
         - name: rel
           in: query
           required: true
-          description: The set of relationship types to which to limit the relationships in the subgraph. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          description: The set of relationship types to which to limit the relationships in the subgraph. Can be either a list of values delimited with commas (e.g., ?rel=relationship_type1,relationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
           schema:
             type: string
             example: isa
@@ -389,14 +389,14 @@ paths:
         - name: sab
           in: query
           required: true
-          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3). (%2C = comma)
+          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with commas (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: string
             example: SNOMEDCT_US
         - name: rel
           in: query
           required: true
-          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with URL-encoded commas (e.g., ?rel=relationship_type11%2Crelationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2). (%2C = comma)
+          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with commas (e.g., ?rel=relationship_type1,relationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2).
           schema:
             type: string
             example: isa
@@ -504,7 +504,7 @@ paths:
         - name: sab
           in: query
           required: true
-          description: The set of sources (SABs) to which to limit counts by node type. Can be either a list of values delimited with URL-encoded commas (e.g., ?sab=SAB1%2CSAB2%2SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          description: The set of sources (SABs) to which to limit counts by node type. Can be either a list of values delimited with commas (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
           schema:
             type: string
             example: NCI
@@ -769,7 +769,7 @@ paths:
         - name: identifier
           in: path
           required: true
-          description: The identifier for a Semantic Type node. An identifier may be either a URL-encoded string corresponding to either the name of the Semantic Type (e.g., Anatomical%20Structure, with %20 representing the space character) or the Type Unique Identifier (TUI) of the Semantic Type (e.g., T017). (%20 = space; %2C = comma; %3A = colon)
+          description: The identifier for a Semantic Type node. An identifier may be either a string corresponding to either the name of the Semantic Type (e.g., "Anatomical Structure") or the Type Unique Identifier (TUI) of the Semantic Type (e.g., T017).
           schema:
             type: string
             example: T017
@@ -808,10 +808,10 @@ paths:
         - name: identifier
           in: path
           required: true
-          description: The identifier for a Semantic Type node. An identifier may be either a URL-encoded string corresponding to either the name of the Semantic Type (e.g., Anatomical%20Structure, with %20 representing the space character) or the Type Unique Identifier (TUI) of the Semantic Type (e.g., T017). (%20 = space; %2C = comma; %3A = colon)
+          description: The identifier for a Semantic Type node. An identifier may be either a string corresponding to either the name of the Semantic Type (e.g., "Anatomical Structure") or the Type Unique Identifier (TUI) of the Semantic Type (e.g., T017).
           schema:
             type: string
-            example: Anatomical%20Structure
+            example: Anatomical Structure
         - name: skip
           in: query
           required: false
