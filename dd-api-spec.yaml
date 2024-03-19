@@ -931,76 +931,193 @@ components:
           example: Malignant neoplasm of breast
     ConceptPaths: # Schema name
       type: object
-      description: Represents the set of paths originating from a Concept. Each path is an ordered set of objects representing hops away from the originating concept. Each hop represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A.
+      description: Represents a graph for a set of paths that originate from a Concept node.
       properties:
-        origin:
-          type: object
-          description: the origin of all paths
-          properties:
-            concept:
-              type: string
-              description: the identifier for the origin Concept
-              example: C2720507
-            prefterm:
-              type: string
-              description: the preferred term for the origin Concept
-              example: SNOMED CT Concept (SNOMED RT+CTV3)
-        paths:
+        nodes:
           type: array
-          description: set of paths originating from a concept.
+          description: nodes involved in the set of paths
           items:
             type: object
             properties:
-              position:
-                type: integer
-                description: The position of the path in the complete set of paths that originate from the specified Concept, ordered in terms of Depth First Search (DFS). The item property is invariant with respect to parameters such as skip or limit, but depends on parameters such as mindepth and maxdepth. For example, if skip = 5, the position of the first path will be 6.
-                example: 1
+              id:
+                type: string
+                description: Concept Unique Identifier for the Concept node
+                example: C2720507
+              name:
+                type: string
+                description: preferred term for the Concept
+                example: SNOMED CT Concept (SNOMED RT+CTV3)
+        edges:
+          type: array
+          description: edges (relationships) involved in the set of paths
+          items:
+            type: object
+            properties:
+              SAB:
+                type: string
+                description: source for the relationship
+                example: SNOMEDCT_US
+              source:
+                type: string
+                description: Concept Unique Identifier (CUI) of the originating Concept node for the relationship
+                example: C1268086
+              target:
+                type: string
+                description: Concept Unique Identifier (CUI) of the terminating Concept node for the relationship
+                example: C2720507
+              type:
+                type: string
+                description: label for the relationship
+                example: isa
+        paths:
+          type: array
+          description: array of information on the set of paths in neo4j path format
+          items:
+            type: object
+            description: information on a single path
+            properties:
+              start:
+                type: object
+                description: origin Concept node of the path
+                properties:
+                  identity: 
+                    type: integer
+                    description: neo4j numeric identifier for node
+                    example: 57732
+                  elementId:
+                    type: string
+                    description: identity, formatted as string
+                    example: "57732"
+                  labels:
+                    type: array
+                    description: labels for the node
+                    items:
+                      example: Concept
+                  properties:
+                    type: array
+                    description: properties for the node 
+                    items:
+                      type: object
+                      example: {"CUI":"C2720507"}
+              end:
+                type: object
+                description: terminal Concept node of the path
+                properties:
+                  identity: 
+                    type: integer
+                    description: neo4j numeric identifier for node
+                    example: 747324
+                  elementId:
+                    type: string
+                    description: identity, formatted as string
+                    example: "747324"
+                  labels:
+                    type: array
+                    description: labels for the node
+                    items:
+                      example: Concept
+                  properties:
+                    type: array
+                    description: properties for the node. 
+                    items:
+                      type: object
+                      example: {"CUI": "C1268086"}
               length:
-                type: integer
-                description: the length of the path--i.e., the number of items in the _path_ array.
-                example: 1
-              hops:
+                type: number
+                description: length of the path, in hops
+                example: 2.0
+              segments:
                 type: array
-                description: the set of individual hops that comprise the path. A hop represents two nodes linked by a relationship.
+                description: array of relationships in the path
                 items:
                   type: object
                   properties:
-                    hop:
-                      type: integer
-                      description: the position of the hop in the path--i.e., the distance of the hop from the originating Concept.
-                      example: 1
-                    sab:
-                      type: string
-                      description: the identifier for the source of the relationship involved in the hop.
-                      example: SNOMEDCT_US
-                    source:
+                    start:
                       type: object
-                      description: the source of the hop--i.e., the Concept node from which the relationship starts
+                      description: origin of the relationship
                       properties:
-                        concept:
+                        identity: 
+                          type: integer
+                          description: neo4j numeric identifier for the node
+                          example: 747324
+                        elementId:
                           type: string
-                          description: the identifier for the source Concept
-                          example: C0013227
-                        prefterm:
-                          type: string
-                          description: the preferred term for the source Concept
-                          example: Pharmaceutical Preparations
-                    target:
+                          description: identity formatted as string
+                          example: "747324"
+                        labels:
+                          type: array
+                          description: labels for the node
+                          items:
+                            type: object
+                            example: "Concept"
+                        properties:
+                          type: array
+                          description: properties for the node 
+                          items:
+                            type: object
+                            example: {"CUI": "C1268086"}
+                    end:
                       type: object
-                      description: the target of the hop--i.e., the Concept node in which the relationship ends
+                      description: terminus of the relationship
                       properties:
-                        concept:
+                        identity: 
+                          type: integer
+                          description: neo4j numeric identifier for the node
+                          example: 57732
+                        elementId:
                           type: string
-                          description: the identifier for the target Concept
-                          example: C2720507
-                        prefterm:
-                          type: string
-                          description: the preferred term for the target Concept
-                          example: SNOMED CT Concept (SNOMED RT+CTV3)
-                    type:
-                      type: string
-                      description: the type of relationship involved in the hop.
-                      example: isa
+                          description: identity formatted as string
+                          example: "57732"
+                        labels:
+                          type: array
+                          description: labels for the node
+                          items:
+                            type: object
+                            example: "Concept"
+                        properties:
+                          type: array
+                          description: properties for the node 
+                          items:
+                            type: object
+                            example: {"CUI":"C2720507"}
+                        relationship:
+                          type: object
+                          description: relationship between the start and end nodes
+                          properties:
+                            identity:
+                              type: integer
+                              description: neo4j numeric identifier for the relationship
+                              example: 22630008
+                            elementId:
+                              type: string
+                              description: identity, formatted as string
+                              example: "22630008"
+                            start:
+                              type: integer
+                              description: neo4j identifier for the start node of the relationship
+                              example: 747324
+                            startNodeElementID:
+                              type: string
+                              description: start, formatted as string
+                              example: "747324"
+                            end:
+                              type: integer
+                              description: neo4j identifier for the end node of the relationship
+                              example: 57732
+                            endNodeElementID:
+                              type: string
+                              description: end, formatted as string
+                              example: "57732"
+                            type:
+                              type: string
+                              description: the relationship type
+                              example: isa
+                            properties:
+                              type: array
+                              description: properties of the relationship
+                              items:
+                                type: object
+                                example: {"SAB": "SNOMEDCT_US"}
     ConceptShortestPath: # Schema name
       type: object
       description: Represents the shortest path between two Concepts. The path is an ordered set of objects representing hops away from the originating concept. Each hop represents a relationship between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A.

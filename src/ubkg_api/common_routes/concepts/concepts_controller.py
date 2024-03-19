@@ -9,11 +9,11 @@ from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_c
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size, \
-    check_neo4j_version_compatibility
+    check_neo4j_version_compatibility,check_max_mindepth
 # Functions to format query parameters for use in Cypher queries
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 # Functions common to paths routes
-from utils.path_get_endpoints import get_origin, get_terminus
+#from utils.path_get_endpoints import get_origin, get_terminus
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
 
@@ -107,38 +107,7 @@ def concepts_concept_id_definitions_get(concept_id):
 def concepts_paths_expand_get(concept_id):
 
     """
-    Returns a dictionary representing a list of paths that originate with <concept_id>, subject to constraints
-    specified in parameter arguments.
-    Each path is itself a list of dictionaries, each of which represents a hop in the path.
-    Example of output for a path of length 1:
-
-    {
-    "origin":{
-        "concept": "C2720507",
-        "prefterm": "SNOMED CT Concept (SNOMED RT+CTV3)"
-        },
-    "paths": [
-        {
-            "item": 1,
-            "length": 1,
-            "path": [
-                {
-                    "hop": 1,
-                    "sab": "SNOMEDCT_US",
-                    "source": {
-                        "concept": "C0013227",
-                        "prefterm": "Pharmaceutical Preparations"
-                    },
-                    "target": {
-                        "concept": "C2720507",
-                        "prefterm": "SNOMED CT Concept (SNOMED RT+CTV3)"
-                    },
-                    "type": "isa"
-                }
-            ]
-        }
-    ]
-}
+    Returns the set of paths that begins with the concept <concept_id>, in neo4j graph format ({nodes, paths, edges}).
 
     """
 
@@ -173,6 +142,10 @@ def concepts_paths_expand_get(concept_id):
     if err != 'ok':
         return make_response(err, 400)
 
+    # MARCH 2024 - APOC timeboxing does not work with the paths object returned by the query, so
+    # force a static maximum mindepth.
+    err = check_max_mindepth(mindepth=int(mindepth), max_mindepth=5)
+
     # Set default mininum.
     mindepth = set_default_minimum(param_value=mindepth, default=1)
     # Set default maximum.
@@ -202,11 +175,12 @@ def concepts_paths_expand_get(concept_id):
 
     result = concepts_expand_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel,
                                        mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
-    if result is None or result == []:
-        # Empty result
+
+    iserr = result is None or result == {}
+
+    if iserr:
         err = get_404_error_string(prompt_string=f"No Concepts in paths with specified parameters",
-                                   custom_request_path=f"query_concept_id='{query_concept_id}'",
-                                   timeout=neo4j_instance.timeout)
+                                   custom_request_path=f"query_concept_id='{query_concept_id}'")
         return make_response(err, 404)
 
     # Limit the size of the payload, based on the app configuration.
@@ -214,12 +188,7 @@ def concepts_paths_expand_get(concept_id):
     if err != "ok":
         return make_response(err, 400)
 
-    # Extract the origin of all paths in the list
-    origin = get_origin(result)
-
-    # Wrap origin and path list in a dictionary that will become the JSON response.
-    dict_result = {'origin': origin, 'paths': result}
-    return jsonify(dict_result)
+    return jsonify(result)
 
 # JAS February 2024 Deprecated, as the paths endpoint is a duplicate of the expand endpoint.
 # JAS January 2024 Replaced POST with GET

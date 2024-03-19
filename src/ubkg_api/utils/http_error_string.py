@@ -272,3 +272,15 @@ def check_neo4j_version_compatibility(query_version: str, instance_version: str)
         return f"This functionality requires at least version {query_version} of neo4j."
 
     return "ok"
+
+def check_max_mindepth(mindepth: int, max_mindepth: int) -> str:
+    """
+    Validates that the value of mindepth does not exceed a maximum value.
+    This is a workaround for the issue in which APOC timeboxing does not work for path-related
+    endpoints that return a paths object.
+
+    """
+    if mindepth > max_mindepth:
+        return f"The maximum value of 'mindepth' for this endpoint is {max_mindepth}. " \
+               f"Larger values of 'mindepth' result in queries that will exceed the server timeout."
+    return "ok"

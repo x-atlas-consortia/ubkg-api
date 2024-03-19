@@ -20,7 +20,7 @@ import neo4j
 
 from models.codes_codes_obj import CodesCodesObj
 from models.concept_detail import ConceptDetail
-from models.concept_path import ConceptPath
+from models.concept_graph import ConceptGraph
 from models.concept_sab_rel_depth import ConceptSabRelDepth
 from models.concept_term import ConceptTerm
 from models.path_item_concept_relationship_sab_prefterm import PathItemConceptRelationshipSabPrefterm
@@ -273,7 +273,7 @@ def concepts_concept_id_semantics_get_logic(neo4j_instance, concept_id) -> List[
 
 #  JAS February 2024: Refactored
 def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, mindepth=None,
-                              maxdepth=None, skip=None, limit=None) -> List[ConceptPath]:
+                              maxdepth=None, skip=None, limit=None) -> List[ConceptGraph]:
     """
     Obtains a subset of paths that originate from the concept with CUI=query_concept_id, subject
     to constraints specified in parameters.
@@ -288,7 +288,8 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     :param limit: maximum number of paths to return
     """
 
-    conceptpaths: [ConceptPath] = []
+    conceptgraphs: [ConceptGraph] = []
+    conceptgraph: ConceptGraph = {}
 
     # Load query string and associate parameter values to variables.
     query = loadquerystring(filename='concepts_expand.cypher')
@@ -302,82 +303,23 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     query = query.replace('$skip', str(skip))
     query = query.replace('$limit', str(limit))
 
-    # Limit query execution time to duration specified in app.cfg.
-    query = timebox_query(query, timeout=neo4j_instance.timeout)
-
-    path_position = int(skip)+1
+    print(query)
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
         for record in recds:
-            # The timebox query wraps each record in a dictionary with the record as the value of a key named 'value.'
-            val = record.get('value')
+            graph = record.get('graph')
             try:
-                # Each row from the query includes a dict that contains the actual response content.
-                path_info = val.get('paths')
-                # Add the position index for this path in the entire set--i.e., the row number from the query return,
-                # based on the value of skip.
-                path_info['position'] = path_position
-                conceptpath: ConceptPath = ConceptPath(path_info=path_info).serialize()
-                conceptpaths.append(conceptpath)
-                path_position = path_position + 1
+                conceptgraph: ConceptGraph = ConceptGraph(graph=graph).serialize()
+                conceptgraphs.append(conceptgraph)
             except KeyError:
                 pass
 
-    return conceptpaths
-
-# JAS February 2024 Deprecated, as the apoc.expandConfig call is identical to the apoc.expand.
-
-# JAS January 2024 Converted from POST to GET
-# def concepts_path_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None )
-# -> List[PathItemConceptRelationshipSabPrefterm]:
-#
-#    """
-#    :param neo4j_instance: UBKG connection
-#    :param query_concept_id: CUI of concept from which to expand paths
-#    :param sab: list of SABs by which to filter relationship types in the paths.
-#    :param rel: list of relationship types by which to filter relationship types in the paths.
-#    :param dept: maximum number of hops in the set of paths
-#    """
-#
-#    pathItemConceptRelationshipSabPrefterms: [PathItemConceptRelationshipSabPrefterm] = []
-#    query: str = \
-#        "MATCH (c:Concept {CUI: $query_concept_id})" \
-#        " CALL apoc.path.expandConfig(c, {relationshipFilter: apoc.text.join([x in [$rel] | '<'+x], ','),minLevel: size([$rel]),maxLevel: size([$rel])})" \
-#        " YIELD path" \
-#        " WHERE ALL(r IN relationships(path) WHERE r.SAB IN [$sab])" \
-#        " WITH [n IN nodes(path) | n.CUI] AS concepts, [null]+[r IN relationships(path) |Type(r)] AS relationships, [null]+[r IN relationships(path) | r.SAB] AS sabs" \
-#        " CALL{WITH concepts,relationships,sabs UNWIND RANGE(0, size(concepts)-1) AS items WITH items AS item, concepts[items] AS concept, relationships[items] AS relationship, sabs[items] AS sab RETURN COLLECT([item,concept,relationship,sab]) AS paths}" \
-#        " WITH COLLECT(paths) AS rollup" \
-#        " UNWIND RANGE(0, size(rollup)-1) AS path" \
-#        " UNWIND rollup[path] as final" \
-#        " OPTIONAL MATCH (:Concept{CUI:final[1]})-[:PREF_TERM]->(prefterm:Term)" \
-#        " RETURN path as path, final[0] AS item, final[1] AS concept, final[2] AS relationship, final[3] AS sab, prefterm.name as prefterm"
-#
-#    sabjoin = format_list_for_query(sab)
-#    query = query.replace('$sab', sabjoin)
-#    reljoin = format_list_for_query(rel)
-#    query = query.replace('$rel', reljoin)
-#
-#
-#    with neo4j_instance.driver.session() as session:
-#        recds: neo4j.Result = session.run(query,
-#                                          query_concept_id=query_concept_id
-#                                          )
-#        for record in recds:
-#            try:
-#                pathItemConceptRelationshipSabPrefterm: PathItemConceptRelationshipSabPrefterm = \
-#                    PathItemConceptRelationshipSabPrefterm(record.get('path'), record.get('item'),
-#                                                           record.get('concept'), record.get('relationship'),
-#                                                           record.get('sab'), record.get('prefterm')).serialize()
-#                pathItemConceptRelationshipSabPrefterms.append(pathItemConceptRelationshipSabPrefterm)
-#            except KeyError:
-#               pass
-#    return pathItemConceptRelationshipSabPrefterms
+    # There will be a maximum of one record.
+    return conceptgraph
 
 # JAS February 2024 - Refactored for v5.
 # apoc.algo.dijkstraWithDefaultWeight was deprecated in version 5.
 # Replaced the function with dijkstra, and accepted default weight.
-
 
 def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, terminus_concept_id=None,
                                     sab=None, rel=None) \
@@ -419,7 +361,7 @@ def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, term
 
 # JAS February 2024 Refactored to mirror concepts_expand_get_logic
 def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, mindepth=None,
-                             maxdepth=None, skip=None, limit=None) -> List[ConceptPath]:
+                             maxdepth=None, skip=None, limit=None) -> List[ConceptGraph]:
     """
     Obtains the spanning tree of paths that originate from the concept with CUI=query_concept_id, subject
     to constraints specified in parameters.
@@ -473,7 +415,7 @@ def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, re
 
 
 def concepts_subgraph_get_logic(neo4j_instance, sab=None, rel=None, skip=None, limit=None) \
-        -> List[ConceptPath]:
+        -> List[ConceptGraph]:
     """
     Obtains the set of concept pairs (one-hop paths) that involve relationships of specified types and
     defined by specified source SABs. For exammple, if sab="UBERON" and rel="part_of", then the endpoint
