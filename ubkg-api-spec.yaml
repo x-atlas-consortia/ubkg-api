@@ -1,13 +1,13 @@
 openapi: 3.0.3
 info:
-  title: Data Distillery API
-  description: The Data Distillery API provides REST endpoints that return results from queries against an instance of [Data Distillery](https://github.com/TaylorResearchLab/CFDE_DataDistillery), which is a deployment of the [Unified Biomedical Knowledge Graph (UBKG)](https://ubkg.docs.xconsortia.org/). To prevent exceeding service timeouts or payload limits, some endpoints are throttled in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB.
+  title: UBKG API
+  description: The UBKG API provides REST endpoints that return results from queries against an instance of the [Unified Biomedical Knowledge Graph (UBKG)](https://ubkg.docs.xconsortia.org/). To prevent exceeding service timeouts or payload limits, some endpoints are throttled in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB.
   version: "2.0.0"
   contact:
     name: GitHub repository
-    url: https://github.com/TaylorResearchLab/CFDE_DataDistillery
+    url: https://github.com/x-atlas-consortia/ubkg-api
 servers:
-  - url: https://datadistillery.api.sennetconsortium.org/
+  - url: https://ontology.api.hubmapconsortium.org
     description: Production server
 paths:
   /codes/{code_id}/codes:
@@ -440,15 +440,6 @@ paths:
         '500':
           description: Unknown error
 
-  /node-types/counts:
-    get:
-      summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
-      operationId: node_type_count_get
-      responses:
-        '400':
-          description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node-types/(node-type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node-types endpoint.
-        '500':
-          description: Unknown error
   /node-types/{node_type}/counts:
     get:
       summary: Returns counts of nodes in the database for a specified node type (label).
@@ -470,23 +461,6 @@ paths:
                 $ref: '#/components/schemas/NodeTypeCount'
         '404':
           description: No nodes with label
-        '500':
-          description: Unknown error
-  /node-types/counts-by-sab:
-    get:
-      summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
-      operationId: node_type_count_by_sab_get
-      parameters:
-        - name: sab
-          in: query
-          required: true
-          description: The set of sources (SABs) to which to limit counts by node type.
-          schema:
-            type: string
-            example: NCI
-      responses:
-        '400':
-          description: The response to this endpoint is likely to exceed timeout and so will not be attempted. Execute the node-types/counts-by-sab/(node-type) endpoint with the name of a node type (e.g., Codes). To obtain names of node types, execute the node-types endpoint.
         '500':
           description: Unknown error
   /node-types/{node_type}/counts-by-sab:
@@ -633,15 +607,6 @@ paths:
           description: No Codes for the specified parameters
         '500':
           description: Unknown error
-  /sabs/codes/details:
-    get:
-      operationId: sabs_codes_details_get
-      summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
-      responses:
-        '400':
-          description: The response to this endpoint cannot be run for all SABs because of memory limitations. Execute the /sabs/(sab)/codes/details endpoint with the identifier for a single SAB. Execute the /sabs endpoint for a list of all SABs in the UBKG.
-        '500':
-          description: Unknown error
   /sabs/{sab}/codes/details:
     get:
       operationId: sabs_codes_details_sab_get
@@ -679,15 +644,6 @@ paths:
           description: invalid parameter name; non-numeric parameter value; negative parameter value
         '404':
           description: No Codes for the specified parameters
-        '500':
-          description: Unknown error
-  /sabs/term-types:
-    get:
-      operationId: sabs_term_types_get
-      summary: This endpoint exists as a convenience to explain a limitation; a custom 400 message will explain the issue and suggest alternatives.
-      responses:
-        '400':
-          description: The response to this endpoint cannot be run for all SABs because of memory limitations. Execute the /sabs/(sab)/term-types endpoint with the identifier for a single SAB. Execute the /sabs endpoint for a list of all SABs in the UBKG.
         '500':
           description: Unknown error
   /sabs/{sab}/term-types:

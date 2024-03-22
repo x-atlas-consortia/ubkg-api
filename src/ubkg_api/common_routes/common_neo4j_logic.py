@@ -303,7 +303,6 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     query = query.replace('$skip', str(skip))
     query = query.replace('$limit', str(limit))
 
-    print(query)
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
         for record in recds:
