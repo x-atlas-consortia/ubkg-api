@@ -66,9 +66,14 @@ class Neo4jConnectionHelper(object):
         self._database_edition = info.get('edition')
 
         logger.info('Database information:')
-        logger.info(f'name: {self._database_name}')
-        logger.info(f'version: {self._database_version}')
-        logger.info(f'edition: {self._database_edition}')
+        logger.info(f'-- name: {self._database_name}')
+        logger.info(f'-- version: {self._database_version}')
+        logger.info(f'-- edition: {self._database_edition}')
+
+        logger.info('Constraints:')
+        logger.info(f'-- timeout: {self._timeout} seconds')
+        logger.info(f'-- payload: {self._payloadlimit} bytes')
+        logger.info(f'-- row limit: {self._rowlimit}')
 
     # https://neo4j.com/docs/api/python-driver/current/api.html
     def close(self):

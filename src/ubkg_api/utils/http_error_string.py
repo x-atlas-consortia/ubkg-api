@@ -66,7 +66,7 @@ def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=N
     """
     Formats an error string for a 404 response, accounting for optional parameters.
     :param prompt_string: - optional description of error
-    :param timeout: optional timeout for timeboxed endpoints, in milliseconds
+    :param timeout: optional timeout for timeboxed endpoints, in seconds
     :param custom_request_path: optional string to describe a value embedded in a complex request path
     --e.g., for /concept/C99999/paths/expand, custom_request_path might be "CUI='C99999'"
     :return: string
@@ -79,9 +79,8 @@ def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=N
     err = err + format_request_path(custom_err=custom_request_path) + format_request_query_string() + format_request_body()
 
     if timeout is not None:
-        timeoutsecond = int(timeout/1000)
-        errtimeout = f"{timeoutsecond} second"
-        if timeoutsecond > 1:
+        errtimeout = f"{timeout} second"
+        if timeout > 1:
             errtimeout = errtimeout + "s"
 
         err = err + f". Note that this endpoint is limited to an execution time of {errtimeout} " \
@@ -271,4 +270,16 @@ def check_neo4j_version_compatibility(query_version: str, instance_version: str)
     if int_instance_version < int_query_version:
         return f"This functionality requires at least version {query_version} of neo4j."
 
+    return "ok"
+
+def check_max_mindepth(mindepth: int, max_mindepth: int) -> str:
+    """
+    Validates that the value of mindepth does not exceed a maximum value.
+    This is a workaround for the issue in which APOC timeboxing does not work for path-related
+    endpoints that return a paths object.
+
+    """
+    if mindepth > max_mindepth:
+        return f"The maximum value of 'mindepth' for this endpoint is {max_mindepth}. " \
+               f"Larger values of 'mindepth' result in queries that will exceed the server timeout."
     return "ok"
