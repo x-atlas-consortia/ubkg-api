@@ -142,10 +142,6 @@ def concepts_paths_expand_get(concept_id):
     if err != 'ok':
         return make_response(err, 400)
 
-    # MARCH 2024 - APOC timeboxing does not work with the paths object returned by the query, so
-    # force a static maximum mindepth.
-    err = check_max_mindepth(mindepth=int(mindepth), max_mindepth=5)
-
     # Set default mininum.
     mindepth = set_default_minimum(param_value=mindepth, default=1)
     # Set default maximum.
@@ -180,7 +176,8 @@ def concepts_paths_expand_get(concept_id):
 
     if iserr:
         err = get_404_error_string(prompt_string=f"No Concepts in paths with specified parameters",
-                                   custom_request_path=f"query_concept_id='{query_concept_id}'")
+                                   custom_request_path=f"query_concept_id='{query_concept_id}'",
+                                   timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Limit the size of the payload, based on the app configuration.
@@ -189,46 +186,6 @@ def concepts_paths_expand_get(concept_id):
         return make_response(err, 400)
 
     return jsonify(result)
-
-# JAS February 2024 Deprecated, as the paths endpoint is a duplicate of the expand endpoint.
-# JAS January 2024 Replaced POST with GET
-# @concepts_blueprint.route('<concept_id>/paths', methods=['GET'])
-# def concepts_path_get(concept_id):
-#    """Return all paths of the relationship pattern specified within the selected sources
-#
-#    :rtype: Union[List[PathItemConceptRelationshipSabPrefterm], Tuple[List[PathItemConceptRelationshipSabPrefterm],
-#     int], Tuple[List[PathItemConceptRelationshipSabPrefterm], int, Dict[str, str]]
-#    """
-
-#    # Validate parameters.
-#    # Check for invalid parameter names.
-#    err = validate_query_parameter_names(parameter_name_list=['sab', 'rel'])
-#    if err != 'ok':
-#        return make_response(err, 400)
-#
-#    # Check for required parameters.
-#    err = validate_required_parameters(required_parameter_list=['sab', 'rel'])
-#    if err != 'ok':
-#        return make_response(err, 400)
-#
-#    # Get remaining parameter values from the path or query string.
-#    query_concept_id = concept_id
-#    sab = parameter_as_list(param_name='sab')
-#    rel = parameter_as_list(param_name='rel')
-#
-#    neo4j_instance = current_app.neo4jConnectionHelper.instance()
-#
-#    result = concepts_path_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel)
-#
-#    if result is None or result == []:
-#        # Empty result
-#        err = get_404_error_string(prompt_string=f"No Concepts in paths that begin with the "
-#                                                 f"Concept='query_concept_id' with relationship types "
-#                                                 f"in 'rel' filtered by sources in 'sab'")
-#        return make_response(err, 404)
-#
-#    return jsonify(result)
-
 
 # JAS February 2024 Replaced POST with GET
 @concepts_blueprint.route('<origin_concept_id>/paths/shortestpath/<terminus_concept_id>', methods=['GET'])
@@ -263,7 +220,7 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
 
     result = concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=origin_concept_id,
                                              terminus_concept_id=terminus_concept_id, sab=sab, rel=rel)
-    if result is None or result == []:
+    if result is None or result == {}:
         # Empty result
         err = get_404_error_string(prompt_string=f"No paths between Concepts",
                                    custom_request_path=f"origin_concept_id='{origin_concept_id}' and "
@@ -276,19 +233,8 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
     if err != "ok":
         return make_response(err, 400)
 
-    # Extract the origin of the shortest path.
-    origin = get_origin(result)
+    return jsonify(result)
 
-    # Extract the terminus of the shortest path.
-    terminus = get_terminus(result)
-
-    # Wrap origin and path list in a dictionary that will become the JSON response.
-    dict_result = {'origin': origin, 'terminus': terminus, 'paths': result}
-    return jsonify(dict_result)
-
-
-# JAS February 2024 Converted POST to GET.
-# Refactored to mirror the paths/expand route, which differs only in the apoc function called.
 @concepts_blueprint.route('<concept_id>/paths/trees', methods=['GET'])
 def concepts_trees_get(concept_id):
     """Return nodes in a spanning tree from a specified concept, based on
@@ -364,7 +310,7 @@ def concepts_trees_get(concept_id):
 
     result = concepts_trees_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel,
                                       mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
-    if result is None or result == []:
+    if result is None or result == {}:
         # Empty result
         err = get_404_error_string(prompt_string=f"No Concepts in spanning tree with specified parameters",
                                    custom_request_path=f"query_concept_id='{query_concept_id}'",
@@ -376,12 +322,7 @@ def concepts_trees_get(concept_id):
     if err != "ok":
         return make_response(err, 400)
 
-    # Extract the origin of all paths in the list
-    origin = get_origin(result)
-
-    # Wrap origin and path list in a dictionary that will become the JSON response.
-    dict_result = {'origin': origin, 'paths': result}
-    return jsonify(dict_result)
+    return jsonify(result)
 
 
 @concepts_blueprint.route('paths/subgraph', methods=['GET'])
@@ -435,7 +376,7 @@ def concepts_subgraph_get():
 
     result = concepts_subgraph_get_logic(neo4j_instance, sab=sab, rel=rel,
                                          skip=skip, limit=limit)
-    if result is None or result == []:
+    if result is None or result == {}:
         # Empty result
         err = get_404_error_string(prompt_string=f"No subgraphs (pairs of Concepts linked by relationships) for "
                                                  f"specified relationship types", timeout=neo4j_instance.timeout)
@@ -446,10 +387,7 @@ def concepts_subgraph_get():
     if err != "ok":
         return make_response(err, 400)
 
-    # Wrap origin and path list in a dictionary that will become the JSON response.
-    dict_result = {'paths': result}
-
-    return jsonify(dict_result)
+    return jsonify(result)
 
 
 @concepts_blueprint.route('<search>/nodeobjects', methods=['GET'])

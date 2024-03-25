@@ -66,7 +66,7 @@ def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=N
     """
     Formats an error string for a 404 response, accounting for optional parameters.
     :param prompt_string: - optional description of error
-    :param timeout: optional timeout for timeboxed endpoints, in milliseconds
+    :param timeout: optional timeout for timeboxed endpoints, in seconds
     :param custom_request_path: optional string to describe a value embedded in a complex request path
     --e.g., for /concept/C99999/paths/expand, custom_request_path might be "CUI='C99999'"
     :return: string
@@ -79,9 +79,8 @@ def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=N
     err = err + format_request_path(custom_err=custom_request_path) + format_request_query_string() + format_request_body()
 
     if timeout is not None:
-        timeoutsecond = int(timeout/1000)
-        errtimeout = f"{timeoutsecond} second"
-        if timeoutsecond > 1:
+        errtimeout = f"{timeout} second"
+        if timeout > 1:
             errtimeout = errtimeout + "s"
 
         err = err + f". Note that this endpoint is limited to an execution time of {errtimeout} " \
