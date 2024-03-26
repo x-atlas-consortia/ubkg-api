@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, current_app
-from pathlib import Path
 
 status_blueprint = Blueprint('status', __name__, url_prefix='/status')
 
@@ -16,12 +15,12 @@ json
 def get_status():
 
     try:
-        file_version_content = (Path(__file__).absolute().parent.parent.parent.parent.parent / 'VERSION').read_text().strip()
+        file_version_content = (current_app.package_base_dir / 'VERSION').read_text().strip()
     except Exception as e:
         file_version_content = str(e)
 
     try:
-        file_build_content = (Path(__file__).absolute().parent.parent.parent.parent.parent / 'BUILD').read_text().strip()
+        file_build_content = (current_app.package_base_dir / 'BUILD').read_text().strip()
     except Exception as e:
         file_build_content = str(e)
 
