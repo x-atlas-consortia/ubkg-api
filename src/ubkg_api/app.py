@@ -28,21 +28,27 @@ logger = logging.getLogger(__name__)
 
 
 class UbkgAPI:
-    def __init__(self, config):
+    def __init__(self, config, package_base_dir):
         """
         If config is a string then it will be treated as a local file path from which to load a file, e.g.
-        ubkg_app = UbkgAPI('./app.cfg').app
+        ubkg_app = UbkgAPI('./app.cfg', package_base_dir).app
 
         If config is a Flask.config then it will be used directly, e.g.
         config =  Flask(__name__,
                 instance_path=path.join(path.abspath(path.dirname(__file__)), 'instance'),
                 instance_relative_config=True)\
             .config.from_pyfile('app.cfg')
+
+        The 'package_base_dir' is the base directory of the package (e.g., the directory in which
+        the VERSION and BUILD files are located.
         """
 
         self.app = Flask(__name__,
                          instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'),
                          instance_relative_config=True)
+
+        self.app.package_base_dir = package_base_dir
+        logger.info(f"package_base_dir: {package_base_dir}")
 
         self.app.register_blueprint(codes_blueprint)
         self.app.register_blueprint(concepts_blueprint)
@@ -101,7 +107,7 @@ class UbkgAPI:
 
 if __name__ == "__main__":
     try:
-        ubkg_app = UbkgAPI('./app.cfg').app
+        ubkg_app = UbkgAPI('./app.cfg', Path(__file__).absolute().parent.parent.parent).app
         ubkg_app.run(host='0.0.0.0', port="5002")
     except Exception as e:
         print("Error during starting debug server.")
