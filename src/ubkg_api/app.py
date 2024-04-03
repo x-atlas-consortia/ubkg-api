@@ -31,7 +31,7 @@ class UbkgAPI:
     def __init__(self, config, package_base_dir):
         """
         If config is a string then it will be treated as a local file path from which to load a file, e.g.
-        ubkg_app = UbkgAPI('./app.cfg', package_bease_dir).app
+        ubkg_app = UbkgAPI('./app.cfg', package_base_dir).app
 
         If config is a Flask.config then it will be used directly, e.g.
         config =  Flask(__name__,
