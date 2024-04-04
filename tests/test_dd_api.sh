@@ -207,7 +207,7 @@ echo | tee -a test.out
 #--------------------------------------------
 echo "TESTS FOR: concepts/paths/subgraph" | tee -a test.out
 echo "SIGNATURE: /concepts/paths/subgraph?sab=<sab>&rel=<relationship type>&skip=<number>&limit=<number>" | tee -a test.out
-echo "Parameters sab and rel can be %2C-delimited list or indidividual values."  | tee -a test.out
+echo "Parameters sab and rel can be %2C-delimited list or individual values."  | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -308,7 +308,7 @@ echo | tee -a test.out
 #--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/paths/expand GET" | tee -a test.out
 echo "SIGNATURE: /concepts/<concept_id>/paths/expand?sab=<SAB>&rel=<relationship type>&mindepth=<number>&maxedepth=<number>&skip=<number>&limit=<number>" | tee -a test.out
-echo "Parameters sab and rel can be %2C-delimited list or indidividual values."  | tee -a test.out
+echo "Parameters sab and rel can be %2C-delimited list or individual values."  | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
