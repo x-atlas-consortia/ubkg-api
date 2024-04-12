@@ -10,9 +10,11 @@ class ConceptPrefterm(Model):
     def __init__(self, concept=None, prefterm=None):
         """ConceptPrefterm - a model defined in OpenAPI
 
+        Represents a concept node in the UBKG.
+
         :param concept: The concept of this ConceptPrefterm.
         :type concept: str
-        :param prefterm: The prefterm of this ConceptPrefterm.
+        :param prefterm: The prefter  of this ConceptPrefterm.
         :type prefterm: str
         """
         self.openapi_types = {
@@ -26,7 +28,7 @@ class ConceptPrefterm(Model):
         }
 
         self._concept = concept
-        self._prefterm = prefterm
+        self._prefterm  = prefterm
 
     def serialize(self):
         return {
@@ -67,22 +69,22 @@ class ConceptPrefterm(Model):
         self._concept = concept
 
     @property
-    def prefterm(self):
-        """Gets the prefterm of this ConceptPrefterm.
+    def prefterm (self):
+        """Gets the prefterm  of this ConceptPrefterm.
 
 
-        :return: The prefterm of this ConceptPrefterm.
+        :return: The prefterm  of this ConceptPrefterm.
         :rtype: str
         """
         return self._prefterm
 
-    @prefterm.setter
-    def prefterm(self, prefterm):
-        """Sets the prefterm of this ConceptPrefterm.
+    @prefterm .setter
+    def prefterm(self, prefterm ):
+        """Sets the prefter  of this ConceptPrefterm.
 
 
-        :param prefterm: The prefterm of this ConceptPrefterm.
-        :type prefterm: str
+        :param prefterm : The prefterm of this ConceptPrefterm.
+        :type prefterm : str
         """
 
-        self._prefterm = prefterm
+        self._prefterm  = prefterm

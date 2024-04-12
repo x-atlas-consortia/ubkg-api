@@ -3,7 +3,7 @@ import json
 import pytest
 import sys
 
-sys.path.append("../src")
+sys.path.append("../../src")
 from app import app
 
 
