@@ -846,11 +846,11 @@ paths:
         '5XX':
           description: Unknown error
 components:
-  # securitySchemes:
-    # api_key:
-      # type: apiKey
-      # name: X-API-KEY
-      # in: header
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: X-API-KEY
+      in: header
   schemas:
     CodesCodesObj: # Schema name
       description: Code nodes that link to the same Concept node to which a specified Code links.
