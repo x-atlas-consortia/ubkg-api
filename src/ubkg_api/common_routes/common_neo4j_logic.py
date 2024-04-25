@@ -15,6 +15,9 @@ import re
 from typing import List
 import os
 
+# Apr 2024
+from pathlib import Path
+
 import neo4j
 
 from models.codes_codes_obj import CodesCodesObj
@@ -56,9 +59,11 @@ def loadquerystring(filename: str) -> str:
     Assumes that the file is in the cypher directory.
     """
 
-    fpath = os.path.dirname(os.getcwd())
-    fpath = os.path.join(fpath, 'ubkg_api/cypher', filename)
+    #fpath = os.path.dirname(os.getcwd())
+    #fpath = os.path.join(fpath, 'ubkg_api/cypher', filename)
 
+    fpath = Path(__file__).resolve().parent
+    fpath = os.path.join(fpath,'cypher',filename)
     f = open(fpath, "r")
     query = f.read()
     f.close()
