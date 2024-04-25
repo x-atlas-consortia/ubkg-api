@@ -56,7 +56,11 @@ def loadquerystring(filename: str) -> str:
 
     :param filename: filename, without path.
 
+    APRIL 2024
     Assumes that the file is in the cypher subdirectory, which is at the same level as the script path.
+    When ubkg-api endpoints are called as passthrough from hs-ontology api, the script path is in hs-ontology-api.
+
+
     """
 
     #fpath = os.path.dirname(os.getcwd())
