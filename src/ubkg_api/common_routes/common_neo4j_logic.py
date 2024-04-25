@@ -56,15 +56,14 @@ def loadquerystring(filename: str) -> str:
 
     :param filename: filename, without path.
 
-    Assumes that the file is in the cypher directory.
+    Assumes that the file is in the cypher subdirectory, which is at the same level as the script path.
     """
 
     #fpath = os.path.dirname(os.getcwd())
     #fpath = os.path.join(fpath, 'ubkg_api/cypher', filename)
 
-    fpath = Path(__file__).resolve().parent
+    fpath = Path(__file__).resolve().parent.parent
     fpath = os.path.join(fpath,'cypher',filename)
-    print(f'UBKG: path = {fpath}')
     f = open(fpath, "r")
     query = f.read()
     f.close()
