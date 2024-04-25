@@ -311,8 +311,7 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
-    return get_graph(neo4j_instance, query=query)
-
+    return get_graph(neo4j_instance, query=querytxt)
 
 def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, terminus_concept_id=None,
                                     sab=None, rel=None) \
