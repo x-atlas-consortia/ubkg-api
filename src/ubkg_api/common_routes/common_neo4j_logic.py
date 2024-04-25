@@ -64,6 +64,7 @@ def loadquerystring(filename: str) -> str:
 
     fpath = Path(__file__).resolve().parent
     fpath = os.path.join(fpath,'cypher',filename)
+    print(f'UBKG: path = {fpath}')
     f = open(fpath, "r")
     query = f.read()
     f.close()
