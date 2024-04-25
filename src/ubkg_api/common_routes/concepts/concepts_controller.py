@@ -136,16 +136,17 @@ def concepts_paths_expand_get(concept_id):
     if err != 'ok':
         return make_response(err, 400)
 
+    # APR 2024 - Check range after setting defaults.
+    # Set default mininum.
+    mindepth = set_default_minimum(param_value=mindepth, default=1)
+    # Set default maximum.
+    maxdepth = str(int(mindepth) + 2)
+
     # Validate that mindepth is not greater than maxdepth.
     err = validate_parameter_range_order(min_name='mindepth', min_value=mindepth, max_name='maxdepth',
                                          max_value=maxdepth)
     if err != 'ok':
         return make_response(err, 400)
-
-    # Set default mininum.
-    mindepth = set_default_minimum(param_value=mindepth, default=1)
-    # Set default maximum.
-    maxdepth = str(int(mindepth) + 2)
 
     # Check that the non-default skip is non-negative.
     skip = request.args.get('skip')
