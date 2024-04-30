@@ -15,6 +15,9 @@ import re
 from typing import List
 import os
 
+# Apr 2024
+from pathlib import Path
+
 import neo4j
 
 from models.codes_codes_obj import CodesCodesObj
@@ -53,12 +56,18 @@ def loadquerystring(filename: str) -> str:
 
     :param filename: filename, without path.
 
-    Assumes that the file is in the cypher directory.
+    APRIL 2024
+    Assumes that the file is in the cypher subdirectory, which is at the same level as the script path.
+    When ubkg-api endpoints are called as passthrough from hs-ontology api, the script path is in hs-ontology-api.
+
+
     """
 
-    fpath = os.path.dirname(os.getcwd())
-    fpath = os.path.join(fpath, 'ubkg_api/cypher', filename)
+    #fpath = os.path.dirname(os.getcwd())
+    #fpath = os.path.join(fpath, 'ubkg_api/cypher', filename)
 
+    fpath = Path(__file__).resolve().parent.parent
+    fpath = os.path.join(fpath,'cypher',filename)
     f = open(fpath, "r")
     query = f.read()
     f.close()
@@ -311,8 +320,7 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
-    return get_graph(neo4j_instance, query=query)
-
+    return get_graph(neo4j_instance, query=querytxt)
 
 def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, terminus_concept_id=None,
                                     sab=None, rel=None) \
