@@ -88,9 +88,9 @@ class UbkgAPI:
                         Neo4jConnectionHelper.create(self.SERVER,
                                                      self.USERNAME,
                                                      self.PASSWORD,
-                                                     15000,
+                                                     28,
                                                      1000,
-                                                     1048576)
+                                                     9437184)
                     logger.info("Initialized Neo4jManager successfully for: {self.SERVER}")
         except Exception as e:
             logger.exception('Failed to initialize the Neo4jManager')
