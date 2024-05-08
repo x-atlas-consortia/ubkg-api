@@ -320,7 +320,8 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
-    return get_graph(neo4j_instance, query=querytxt)
+    # MAY 2024 - bug fix - changed argument from querytxt to query
+    return get_graph(neo4j_instance, query=query)
 
 def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, terminus_concept_id=None,
                                     sab=None, rel=None) \
@@ -516,24 +517,24 @@ def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[Termtype
     Returns information on Codes with terms that exactly match the specified term_id string.
     """
 
-    query: str = \
+    querytxt: str = \
         'WITH [$term_id] AS query' \
         ' MATCH (a:Term)<-[b]-(c:Code)' \
         ' WHERE a.name IN query' \
         ' RETURN DISTINCT a.name AS Term, Type(b) AS TermType, c.CodeID AS Code' \
         ' ORDER BY Term, TermType, Code'
 
-    # JAS February 2024
-    # To prevent timeout errors, limit the query execution time to a value specified in the app.cfg.
-    query = query.replace('$term_id', f'"{term_id}"')
-    query = timebox_query(query=query, timeout=neo4j_instance.timeout)
+    # JAS February 2024/May 2024
+    # To prevent timeout errors, limit the query execution time to a value specified in the app.cfg
+    querytxt = querytxt.replace('$term_id', f'"{term_id}"')
+
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
         for record in recds:
-            # The timeboxed query returns query results as values of a dict instead of as a dict.
-            val = record.get('value')
             try:
-                termtypecode: TermtypeCode = TermtypeCode(val.get('TermType'), val.get('Code')).serialize()
+                termtypecode: TermtypeCode = TermtypeCode(record.get('TermType'), record.get('Code')).serialize()
                 termtypecodes.append(termtypecode)
             except KeyError:
                 pass
@@ -542,7 +543,7 @@ def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[Termtype
 
 def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     concepts: [str] = []
-    query: str = \
+    querytxt: str = \
         'WITH [$term_id] AS query' \
         ' MATCH (a:Term)<-[b]-(c:Code)<-[:CODE]-(d:Concept)' \
         ' WHERE a.name IN query AND b.CUI = d.CUI' \
@@ -550,18 +551,18 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
         ' RETURN DISTINCT a.name AS Term, d.CUI AS Concept' \
         ' ORDER BY Concept ASC'
 
-    # JAS February 2024
+    # JAS February 2024/May 2024
     # To prevent timeout errors, limit the query execution time to a value specified in the app.cfg.
-    query = query.replace('$term_id', f'"{term_id}"')
-    query = timebox_query(query, timeout=neo4j_instance.timeout)
+    querytxt = querytxt.replace('$term_id', f'"{term_id}"')
+
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
         for record in recds:
-            # The timeboxed query returns query results as values of a dict instead of as a dict.
-            val = record.get('value')
             try:
-                concept: str = val.get('Concept')
-                concepts.append(concept)
+                concepts.append(record)
             except KeyError:
                 pass
 
@@ -612,23 +613,23 @@ def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[Conce
     Obtains information on the set of Concept subgraphs with identifiers that match the search parameter string.
 
     """
+    # MAY 2024 - Replaced timeboxing method.
+
     conceptnodes: [ConceptNode] = []
-    query = loadquerystring(filename='concepts_nodes.cypher')
+    querytxt = loadquerystring(filename='concepts_nodes.cypher')
 
     # Format the search parameter for the Cypher query.
     list_identifier = [search]
     list_identifier_join = format_list_for_query(listquery=list_identifier, doublequote=True)
-    query = query.replace('$search', list_identifier_join)
+    querytxt = querytxt.replace('$search', list_identifier_join)
 
-    # Timebox the query.
-    query = timebox_query(query, timeout=neo4j_instance.timeout)
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
         for record in recds:
-            # The timeboxed query returns query results as values of a dict instead of as a dict.
-            val = record.get('value')
-            concept = val.get('nodeobject')
+            concept = record.get('nodeobject')
             # Remove null placeholder dictionaries from nested list objects.
             concept['semantic_types'] = remove_null_placeholder_objects(concept.get('semantic_types'))
             concept['definitions'] = remove_null_placeholder_objects(concept.get('definitions'))
@@ -711,32 +712,35 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
     :param sab: optional list of sabs
 
     """
+
+    # MAY 2024 - Replaced timeboxing method.
+
     nodetypes: [NodeType] = []
     # Load and parameterize base query.
-    query = loadquerystring('node_types_by_sab.cypher')
+    querytxt = loadquerystring('node_types_by_sab.cypher')
 
     if node_type is None:
         node_type = ''
     else:
         node_type = [node_type]
     typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
-    query = query.replace('$node_type', typesjoin)
+    querytxt = querytxt.replace('$node_type', typesjoin)
+
     if sab is None:
         sab = ''
     else:
         sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    query = query.replace('$sab', sabjoin)
+    querytxt = querytxt.replace('$sab', sabjoin)
 
-    # Limit query execution time to duration specified in app.cfg.
-    query = timebox_query(query, timeout=neo4j_instance.timeout)
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
         total_count = 0
         for record in recds:
             # Each row from the query includes a dict that contains the actual response content.
-            val = record.get('value')
-            output = val.get('output')
+            output = record.get('output')
             node_types = output.get('node_types')
             for node_type in node_types:
                 count_by_label = node_type.get('count')
@@ -761,26 +765,27 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
     """
     nodetypes: [NodeType] = []
     # Load and parameterize base query.
-    query = loadquerystring('node_types.cypher')
+    querytxt = loadquerystring('node_types.cypher')
 
     if node_type is None:
         node_type = ''
     else:
         node_type = [node_type]
     typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
-    query = query.replace('$node_type', typesjoin)
+    querytxt = querytxt.replace('$node_type', typesjoin)
 
-    # Limit query execution time to duration specified in app.cfg.
-    query = timebox_query(query, timeout=neo4j_instance.timeout)
+    # MAY 2024 replaced timebox method.
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
         total_count = 0
         for record in recds:
             # Each row from the query includes a dict that contains the actual response content.
-            val = record.get('value')
-            output = val.get('output')
+            output = record.get('output')
             node_types = output.get('node_types')
+            print(node_types)
             for node_type in node_types:
                 count_by_label = node_type.get('count')
                 total_count = total_count + count_by_label
@@ -966,17 +971,19 @@ def sab_code_detail_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict
     codes: [dict] = []
 
     # Load and parameterize query.
-    query = loadquerystring('sabs_codes_details.cypher')
+    querytxt = loadquerystring('sabs_codes_details.cypher')
     if sab is None:
         sabjoin = ''
     else:
         sabjoin = format_list_for_query(listquery=[sab], doublequote=True)
-    query = query.replace('$sab', sabjoin)
+    querytxt = querytxt.replace('$sab', sabjoin)
 
-    query = query.replace('$skip', str(skip))
-    query = query.replace('$limit', str(limit))
+    querytxt = querytxt.replace('$skip', str(skip))
+    querytxt = querytxt.replace('$limit', str(limit))
 
-    query = timebox_query(query=query, timeout=neo4j_instance.timeout)
+    # MAY 2024 Replacing timebox method.
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
@@ -984,8 +991,7 @@ def sab_code_detail_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict
         position = int(skip) + 1
         res_codes = {}
         for record in recds:
-            val = record.get('value')
-            output = val.get('output')
+            output = record.get('output')
             try:
                 res_codes = output.get('codes')
                 for c in res_codes:
