@@ -845,6 +845,38 @@ paths:
           description: No Concepts with terms matching the specified string.
         '5XX':
           description: Unknown error
+/sources:
+    get:
+      operationId: sources_get
+      summary: Returns a list of Concept nodes with preferred terms that exactly match the specified string.
+      parameters:
+        - name: sab
+          in: query
+          required: true
+          description: A source (SAB) to which to limit the response.
+          schema:
+            type: string
+            example: UBERON
+        - name: context
+          in: query
+          required: true
+          description: A UBKG context to which to limit the response. Possible values are base_context, data_distillery_context, hubmap_sennet_context
+          schema:
+            type: string
+            example: base_context
+      responses:
+        '200':
+          description: An array of Concepts with preferred terms that exactly match the specified string
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Source'
+        '400':
+          description: Invalid parameter name; Invalid parameter value
+        '404':
+          description: No sources.
+        '5XX':
+          description: Unknown error
 components:
   # securitySchemes:
     # api_key:
@@ -1472,3 +1504,75 @@ components:
             type: string
             description: a Concept Unique Identifier (CUI)
             example: C0794811
+    Source: #Schema name
+      type: object
+      description: An array of information on the sources that can be imported into a UBKG context.
+      properties:
+        sources:
+          type: array
+          items:
+            type: object
+            description: array of source objects
+            properties:
+              citations:
+                type: array
+                description: References to the source recommended by the source's steward
+                items:
+                  type: object
+                  description: citation reference
+                  properties:
+                    PMID:
+                      description: PubMedID, if applicable
+                      example: 37953324
+                    url:
+                      description: full URL to the citation
+                      example: "https://pubmed.ncbi.nlm.nih.gov/37953324"
+              contexts:
+                type: array
+                description: UBKG contexts that contain the source
+                items:
+                  type: string
+                  example: base_context
+              description:
+                description: longform description of the source
+                example: "An ontology for describing the classification of human diseases organized by etiology."
+              download_date:
+                description: Date when the source was obtained, in format YYYY_MM_DD
+                example: "2024_02_24"
+              home_urls:
+                type: array
+                description: URLs to steward web sites
+                items:
+                  type: string
+                  example: "https://obofoundry.org/ontology/doid.html"
+              licenses:
+                type: array
+                description: applicable licenses or terms of use of the source specified by stewards
+                items:
+                  type: object
+                  description: license
+                  properties:
+                    type:
+                      description: the type of license
+                      example: Creative Commons license (creativecommons.org)
+                    subtype:
+                      description: the subtype of license
+                      example: CCO
+                    version:
+                      description: the versoin of the license
+                      example: version 4
+              name:
+                description: name of the source
+                example: Human Disease Ontology
+              sab:
+                description: acronym for Source ABbreviation
+                example: DOID
+              source_etl:
+                description: the parameter provided to the UBKG generation framework ETL script. For sources that are from OWL files, source_etl is the URL to the OWL; for other sources, source_etl is a command for one of the python scripts that the generation framework uses to import the source.
+                example: "http://purl.obolibrary.org/obo/doid.owl"
+              source_type:
+                description: The type of source file. Possible values are owl, api, ftp, ubkg_edge_node, umls, and simpleknowledge.
+                example: owl
+              source_version:
+                description: A reference to the version of the source. If the source is an OWL file, the usual version is the date extracted from the VersionIRI of the file; if from a website, the file date. Dates are in format YYYY_MM_DD.
+                example: "2024_04_22"
