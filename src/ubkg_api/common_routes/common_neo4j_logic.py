@@ -1039,3 +1039,47 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
     # The query returns a single record.
 
     return termtype
+
+def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
+    """
+    Obtains information on sources, or nodes in the UBKGSOURCE ontology.
+
+    The return from the query is simple, and there is no need for a model class.
+
+    :param neo4j_instance: neo4j connection
+    :param sab: source (SAB)
+    :param context: UBKG context
+
+    """
+    sources: [dict] = []
+
+    # Load and parameterize query.
+    querytxt = loadquerystring('sources.cypher')
+    # Filter by code SAB.
+    if len(sab) == 0:
+        querytxt = querytxt.replace('$sabfilter', '')
+    else:
+        querytxt = querytxt.replace('$sabfilter', f" AND t.name IN {sab}")
+
+    # Filter by ubkg context.
+    if len(context) == 0:
+        querytxt = querytxt.replace('$contextfilter', '')
+    else:
+        querytxt = querytxt.replace('$contextfilter', f" AND t.name IN {context}")
+
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+        for record in recds:
+
+            source = record.get('response')
+            try:
+                sources.append(source)
+
+            except KeyError:
+                pass
+
+    # The query has a single record.
+    return sources
