@@ -1082,4 +1082,4 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
                 pass
 
     # The query has a single record.
-    return sources
+    return source

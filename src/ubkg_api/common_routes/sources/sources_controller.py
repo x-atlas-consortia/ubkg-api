@@ -29,7 +29,7 @@ def sources_get():
 
     if not iserr:
         # Check for no results.
-        sources = result[0].get('sources')
+        sources = result.get('sources')
         iserr = len(sources) == 0
 
     if iserr:
