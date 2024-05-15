@@ -1,2 +1,0 @@
-# Add to the package distribution query strings in the Cypher path.
-graft src/cypher
