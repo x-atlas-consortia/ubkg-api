@@ -1212,3 +1212,46 @@ curl --request GET \
  --header "Accept: application/json" \
  --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
+
+#------------------------------------------
+echo "TESTS FOR: /sources GET" | tee -a test.out
+echo | tee -a test.out
+echo "1. sources GET => should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/sources" \
+ --header "Accept: application/json" \
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "2. /sources?test=x GET => invalid parameter; should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/sources?test=x" \
+ --header "Accept: application/json" \
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "3. /sources?sab=X GET => invalid SAB; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/sources?sab=x" \
+ --header "Accept: application/json" \
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "4. /sources?sab=HPOMP GET => valid SAB; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/sources?sab=HPOMP" \
+ --header "Accept: application/json" \
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "5. /sources?context=base_context GET => valid context; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/sources?context=base_context" \
+ --header "Accept: application/json" \
+ --header "X-API-KEY:$apikey" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
