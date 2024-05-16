@@ -52,7 +52,7 @@ case "$env" in
 
 esac
 
-UBKG_URL=$UBKG_URL_LOCAL
+# UBKG_URL=$UBKG_URL_LOCAL
 echo "Using UBKG at: ${UBKG_URL}" | tee test.out
 echo "Only the first 60 characters of output from HTTP 200 returns displayed."
 
