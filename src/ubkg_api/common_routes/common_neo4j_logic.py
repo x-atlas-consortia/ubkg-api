@@ -1068,8 +1068,6 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
     else:
         querytxt = querytxt.replace('$contextfilter', f" AND tContext.name IN {context}")
 
-    print(querytxt)
-
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
