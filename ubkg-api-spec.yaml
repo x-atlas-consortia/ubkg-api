@@ -845,7 +845,7 @@ paths:
           description: No Concepts with terms matching the specified string.
         '5XX':
           description: Unknown error
-/sources:
+  /sources:
     get:
       operationId: sources_get
       summary: Returns a list of Concept nodes with preferred terms that exactly match the specified string.
@@ -859,11 +859,14 @@ paths:
             example: UBERON
         - name: context
           in: query
-          required: true
-          description: A UBKG context to which to limit the response. Possible values are base_context, data_distillery_context, hubmap_sennet_context
+          required: false
+          description: A UBKG context to which to limit the response. Possible values are base_context, data_distillery_context, hubmap_sennet_context. The sources from base_context are included with any other context.
           schema:
             type: string
-            example: base_context
+            enum:
+              - base_context
+              - hubmap_sennet_context
+              - data_distillery_context
       responses:
         '200':
           description: An array of Concepts with preferred terms that exactly match the specified string
@@ -1534,9 +1537,11 @@ components:
                   type: string
                   example: base_context
               description:
+                type: string
                 description: longform description of the source
                 example: "An ontology for describing the classification of human diseases organized by etiology."
               download_date:
+                type: string
                 description: Date when the source was obtained, in format YYYY_MM_DD
                 example: "2024_02_24"
               home_urls:
@@ -1559,20 +1564,25 @@ components:
                       description: the subtype of license
                       example: CCO
                     version:
-                      description: the versoin of the license
+                      description: the version of the license
                       example: version 4
               name:
+                type: string
                 description: name of the source
                 example: Human Disease Ontology
               sab:
+                type: string
                 description: acronym for Source ABbreviation
                 example: DOID
               source_etl:
+                type: string
                 description: the parameter provided to the UBKG generation framework ETL script. For sources that are from OWL files, source_etl is the URL to the OWL; for other sources, source_etl is a command for one of the python scripts that the generation framework uses to import the source.
                 example: "http://purl.obolibrary.org/obo/doid.owl"
               source_type:
+                type: string
                 description: The type of source file. Possible values are owl, api, ftp, ubkg_edge_node, umls, and simpleknowledge.
                 example: owl
               source_version:
+                type: string
                 description: A reference to the version of the source. If the source is an OWL file, the usual version is the date extracted from the VersionIRI of the file; if from a website, the file date. Dates are in format YYYY_MM_DD.
                 example: "2024_04_22"
