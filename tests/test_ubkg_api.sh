@@ -1103,17 +1103,24 @@ curl --request GET \
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "4. /sources?sab=HPOMP GET => valid SAB; should return 200" | tee -a test.out
+echo "4. /sources?context=x GET => invalid context; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/sources?sab=HPOMP" \
+ --url "${UBKG_URL}/sources?context=x" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
-echo "5. /sources?context=base_context GET => valid context; should return 200" | tee -a test.out
+echo "5. /sources?sab=HPOMP GET => valid SAB; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/sources?sab=HPOMP" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "6. /sources?context=base_context GET => valid context; should return 200" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/sources?context=base_context" \
- --header "Accept: application/json" | tee -a test.out
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
