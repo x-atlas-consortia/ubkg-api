@@ -1062,10 +1062,11 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
         querytxt = querytxt.replace('$sabfilter', f" AND t.name IN {sab}")
 
     # Filter by ubkg context.
+    # JAS 24 May 2024 bug fix - replace t.name with tContext.name
     if len(context) == 0:
         querytxt = querytxt.replace('$contextfilter', '')
     else:
-        querytxt = querytxt.replace('$contextfilter', f" AND t.name IN {context}")
+        querytxt = querytxt.replace('$contextfilter', f" AND tContext.name IN {context}")
 
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
