@@ -1,6 +1,6 @@
 # coding: utf-8
 
-# Simple Python script that demonstrates how to use the API key stored in a file named api.key
+# Simple Python script that demonstrates how to use the API key stored in a file named umls.key
 # in the application directory to execute an endpoint.
 
 import requests
@@ -8,13 +8,13 @@ import os
 
 # Read the API key.
 fpath = os.path.dirname(os.getcwd())
-fpath = os.path.join(fpath, 'tests', 'api.key')
+fpath = os.path.join(fpath, 'tests', 'umls.key')
 f = open(fpath, 'r')
 apikey = f.read()
 f.close()
 
 # Add the API key to authorization for the URL.
-headers = {'X-API-KEY': f'{apikey}'}
+headers = {'Authorization': f'UMLS-Key {apikey}'}
 
 # Execute the endpoint.
 
