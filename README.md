@@ -54,6 +54,12 @@ If you are working with a local Docker distribution based on from [ubkg-neo4j](h
    - USERNAME=neo4j
    - PASSWORD= the value of _neo4j_password_ from the common **container.cfg** file.
 
+## Using API keys
+Some deployments based on the UBKG API may require that calls to endpoints include an API key in the header.
+Because this involves integration with authorization architecture (e.g., API gateways and authorization specific to a 
+network resource), the configuration of API keys is beyond the scope of the UBKG API. 
+
+
 ### Starting your neo4j instance
 If you are using a local instance of the UBKG, the instance should be running. 
 In particular, if you installed a local Docker instance of UBKG, be sure that Docker Desktop is running. 
