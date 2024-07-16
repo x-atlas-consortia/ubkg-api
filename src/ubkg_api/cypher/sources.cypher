@@ -49,6 +49,15 @@ CALL
 	AND r.CUI = p.CUI
 	RETURN COLLECT(t.name) AS home_urls
 }
+// source dictionary url
+CALL
+{
+	WITH CUISource
+	MATCH (pSource:Concept)-[:has_source_dictionary_url]->(p:Concept)-[:CODE]->(c:Code)-[r:PT]->(t:Term)
+	WHERE pSource.CUI=CUISource
+	AND r.CUI = p.CUI
+	RETURN t.name AS source_dictionary_url
+}
 // citations as both PMID and URL
 CALL
 {
@@ -152,9 +161,9 @@ CALL
 	RETURN t.name AS context
 }
 
-WITH CUISource,sab,source_name,source_description, home_urls, citations,
+WITH CUISource,sab,source_name,source_description, source_dictionary_url,home_urls, citations,
 CASE WHEN source_etl_command IS NULL THEN source_etl_owl ELSE source_etl_command END as source_etl,
 source_version, source_type,source_download_date, COLLECT(DISTINCT CASE WHEN license_type is NULL THEN NULL ELSE {type: CASE WHEN license_definition IS NULL THEN license_type ELSE license_definition END,subtype:license_subtype,version:license_version} END) AS licenses, COLLECT(DISTINCT context) AS contexts
-WITH {sab:sab,name:source_name,description:source_description,home_urls:home_urls,citations:citations,source_etl:source_etl,source_version:source_version, source_type:source_type, download_date:source_download_date,licenses:licenses,contexts:contexts} AS source
+WITH {sab:sab,name:source_name,description:source_description,home_urls:home_urls,source_dictionary_url:source_dictionary_url,citations:citations,source_etl:source_etl,source_version:source_version, source_type:source_type, download_date:source_download_date,licenses:licenses,contexts:contexts} AS source
 WITH COLLECT(source) AS sources
 RETURN {sources:sources} AS response
