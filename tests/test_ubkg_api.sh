@@ -1085,7 +1085,7 @@ echo | tee -a test.out
 echo "1. sources GET => should return 200" | tee -a test.out
 curl --request GET \
  --url "${UBKG_URL}/sources" \
- --header "Accept: application/json" | tee -a test.out
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 

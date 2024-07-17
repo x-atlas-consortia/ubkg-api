@@ -1548,6 +1548,10 @@ components:
                 items:
                   type: string
                   example: "https://obofoundry.org/ontology/doid.html"
+              source_dictionary_url:
+                type: string
+                description: URL to the section of the CFDE Data Distillery Data Dictionary for the source
+                example: https://github.com/nih-cfde/data-distillery/blob/main/DataDistilleryDataDictionary.md#the-library-of-integrated-network-based-cellular-signatures-lincs-dcc
               licenses:
                 type: array
                 description: applicable licenses or terms of use of the source specified by stewards
