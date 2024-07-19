@@ -6,6 +6,9 @@ info:
   contact:
     name: GitHub repository
     url: https://github.com/x-atlas-consortia/ubkg-api
+externalDocs:
+  description: UBKG documentation
+  url: https://ubkg.docs.xconsortia.org/api
 servers:
   - url: https://ontology.api.hubmapconsortium.org
     description: Production server
@@ -164,7 +167,7 @@ paths:
   /concepts/{concept_id}/nodeobjects:
     get:
       operationId: concepts_identifier_nodes_get
-      summary: Returns a set of "Concept Node objects" that "match" an identifier. [A Concept node in the UBKG is the origin of a subgraph that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A "Concept Node object" represents this subgraph as a set of Concept properties--i.e., all of the Concept's linked Codes, terms, definitions, and semantic types. A "match" is an exact match between an identifier and a text-based property in a Concept Node object. Because an identifier may match properties in more than one Concept Node object, the endpoint can return multiple Concept Node objects.]
+      summary: Returns a set of "Concept Node objects" (also known as concept subgraphs) that "match" an identifier. [Each Concept node in the UBKG is the origin of a "concept subgraph" that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A "Concept Node object" represents this subgraph as a set of Concept properties--i.e., all of the Concept's linked Codes, terms, definitions, and semantic types. A "match" is an exact match between an identifier and a text-based property in a Concept Node object. Because an identifier may match properties in more than one Concept Node object, the endpoint can return multiple Concept Node objects.]
       parameters:
         - name: concept_id
           in: path
@@ -1545,6 +1548,10 @@ components:
                 items:
                   type: string
                   example: "https://obofoundry.org/ontology/doid.html"
+              source_dictionary_url:
+                type: string
+                description: URL to the section of the CFDE Data Distillery Data Dictionary for the source
+                example: https://github.com/nih-cfde/data-distillery/blob/main/DataDistilleryDataDictionary.md#the-library-of-integrated-network-based-cellular-signatures-lincs-dcc
               licenses:
                 type: array
                 description: applicable licenses or terms of use of the source specified by stewards
