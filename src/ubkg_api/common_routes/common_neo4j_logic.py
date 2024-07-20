@@ -1082,5 +1082,49 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
             except KeyError:
                 pass
 
-    # The query has a single record.
     return source
+
+def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -> dict:
+    """
+    Obtains information on terms that link to a code.
+
+    The return from the query is simple, and there is no need for a model class.
+
+    :param neo4j_instance: neo4j connection
+    :param code_id: a UBKG Code in format SAB:CodeId
+    :param term_type: an optional list of acronyms for a code type
+
+    """
+    terms: [dict] = []
+
+    # Load and parameterize query.
+    querytxt = loadquerystring('code_code_id_terms.cypher')
+
+    # Filter by code_id.
+    querytxt = querytxt.replace('$code_id', f"'{code_id}'")
+
+    # Filter by code SAB.
+    if len(term_type) == 0:
+        querytxt = querytxt.replace('$termtype_filter', '')
+    else:
+        querytxt = querytxt.replace('$termtype_filter', f" AND TYPE(r) IN {term_type}")
+
+    print(querytxt)
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+        for record in recds:
+            term = record.get('response')
+            try:
+                terms.append(term)
+
+            except KeyError:
+                pass
+
+    # The query has either zero records or one record
+    if len(terms) == 1:
+        return term
+    else:
+        return terms
