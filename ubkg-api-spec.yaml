@@ -76,6 +76,38 @@ paths:
           description: no Concept nodes for the specified Code
         '5XX':
           description: Unknown error
+  /codes/{code_id}/terms:
+    get:
+      operationId: codes_code_id_terms_get
+      summary: Returns the set of Term nodes that link to the specified Code node, subject to constraints specified in parameters.
+      parameters:
+        - name: code_id
+          in: path
+          required: true
+          description: The CodeID for a Code node, in format SAB:CODE.
+          schema:
+            type: string
+            example: SNOMEDCT_US:254837009
+        - name: term_type
+          in: query
+          required: false
+          description: optional term type for the term. Can be either a list of values delimited with commas (e.g., ?term_type=PT,SY,FN) or with individual key-value pairs (e.g., ?term_type=PT&term_type=SY&term_type=FN)
+          schema:
+            type: string
+            example: PT
+      responses:
+        '200':
+          description: An array of Term nodes that have relationships with the specified Code node
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CodeTerms'
+        '404':
+          description: no Term nodes for the specified Code
+        '5XX':
+          description: Unknown error
   /concepts/{concept_id}/codes:
     get:
       operationId: concepts_concept_id_codes_get
@@ -901,6 +933,29 @@ components:
           description: an identifier for the source of the code. Corresponds to the Source Abbreviaion (SAB) of a Code in the UMLS.
           type: string
           example: CCF
+    CodeTerms: # Schema name
+      description: Term nodes that link to the specified Code.
+      type: object
+      properties:
+        code:
+          description: the Code to which Terms link
+          type: string
+          example: SNOMEDCT_US:254837009
+        terms:
+          description: terms linked to the code, subject to parameters
+          type: array
+          items:
+            type: object
+            properties:
+              term:
+                type: string
+                description: term string
+                example: Malignant tumor of breast
+              term_type:
+                type: string
+                description: term type for the term - an acronym of usually two or three letters
+                example: PT
+
     ConceptDetail:    # Schema name
       type: object
       description: Information on a Concept node.

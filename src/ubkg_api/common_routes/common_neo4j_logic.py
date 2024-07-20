@@ -1109,7 +1109,6 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
     else:
         querytxt = querytxt.replace('$termtype_filter', f" AND TYPE(r) IN {term_type}")
 
-    print(querytxt)
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
