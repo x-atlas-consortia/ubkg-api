@@ -481,7 +481,7 @@ def concepts_paths_subraphs_sequential_expand_get(concept_id, relsequence=None):
             err = f'Invalid parameter value: {rs}. Format relationships as <SAB>:<relationship_type>'
             return make_response(err, 400)
 
-        relsabs.append(rs.split(':')[0])
+        relsabs.append(rs.split(':')[0].upper())
         reltypes.append(rs.split(':')[1])
 
 
