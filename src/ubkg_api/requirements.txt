@@ -1,6 +1,6 @@
 Flask==3.0.3
-# Flask 3.0.3 depends on Werkzeug>=3.0.0
-Werkzeug==3.0.0
+# Flask depends on Werkzeug...
+Werkzeug==3.0.3
 
 python_dateutil >= 2.6.0
 setuptools >= 21.0.0
