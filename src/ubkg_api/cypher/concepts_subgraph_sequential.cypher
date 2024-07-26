@@ -25,7 +25,7 @@ CALL{
     MATCH (cStart:Concept)-[rStart]->(c1:Concept)
     WHERE TYPE(rStart) = reltypes[0]
     AND rStart.SAB = relsabs[0]
-    AND CASE WHEN initCUI IS NULL THEN cStart.CUI=initCUI ELSE 1=1 END
+    AND CASE WHEN initCUI <> "None" THEN cStart.CUI=initCUI ELSE 1=1 END
     RETURN DISTINCT cStart.CUI AS startCUI
     ORDER BY cStart.CUI
 }
