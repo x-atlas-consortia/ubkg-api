@@ -324,6 +324,21 @@ echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
+# The /concepts/paths/subgraphs/sequential endpoint uses the same code as the
+# /concepts/<identifier>/paths/subgraphs/sequential endpoint.
+#--------------------------------------------
+echo "TESTS FOR: concepts/<identifier>/paths/subgraphs/sequential GET" | tee -a test.out
+echo "SIGNATURE: /conepts/<identifier>/paths/subgraphs/sequential?relsequence=<SAB1:rel1,SAB2:rel2&skip=<skip>&limit=<limit>" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+echo "1. concepts/paths/subgraphs/sequential?relsequence=NCI%3Ais_marked_by_gene_product&relsequence=NCI%3Agene_product_encoded_by_gene&skip=0&limit=5 => valid, with individual; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/paths/subgraphs/sequential?relsequence=NCI:is_marked_by_gene_product&relsequence=NCI:gene_product_encoded_by_gene&skip=0&limit=5" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
 echo "TESTS FOR: concepts/<identifier>/nodeobjects GET" | tee -a test.out
 echo "SIGNATURE: /conepts/<identifier>/nodeobjects" | tee -a test.out
 echo | tee -a test.out
