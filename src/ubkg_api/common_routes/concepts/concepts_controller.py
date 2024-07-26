@@ -424,14 +424,25 @@ def concepts_concept_identifier_nodes_get(search):
     dict_result = {'nodeobjects': result}
     return jsonify(dict_result)
 
+@concepts_blueprint.route('/paths/subgraphs/sequential', methods=['GET'])
+def concepts_paths_subgraphs_sequential_get_endpoint():
+    return concepts_paths_subraphs_sequential_get(concept_id=None)
+
 @concepts_blueprint.route('<concept_id>/paths/subgraphs/sequential', methods=['GET'])
-def concepts_paths_subraphs_sequential_expand_get(concept_id, relsequence=None):
+def concepts_paths_subgraphs_name_sequential_get_endpoint(concept_id):
+    return concepts_paths_subraphs_sequential_get(concept_id=concept_id)
+
+def concepts_paths_subraphs_sequential_get(concept_id=None):
 
     """
     Returns the set of paths that begins with the concept <concept_id> and has relationships in a specified
-    sequence. Response is in neo4j graph format ({nodes, paths, edges}).
+    sequence.
 
-    :param relsequence: an ordered list that specifies a sequence of relationships in a path.
+    If no concept_id is specified, then return all paths that begin with the first specified relationship.
+
+    Response is in neo4j graph format ({nodes, paths, edges}).
+
+    The relsequence request parameter is an ordered list that specifies a sequence of relationships in a path.
     The format of each element in relsequence is <SAB>:<relationship type>.
     For example, ['UBERON:isa','PATO:has_part'] specifies the set of paths that start from the concept with CUI
     <concept_id> with relationships that match the pattern

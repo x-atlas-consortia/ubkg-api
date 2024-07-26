@@ -1163,6 +1163,7 @@ def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltyp
     querytxt = querytxt.replace('$skip', str(skip))
     querytxt = querytxt.replace('$limit', str(limit))
 
+    print(querytxt)
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 

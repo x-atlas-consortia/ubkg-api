@@ -5,21 +5,34 @@
 // 1st level - "isa" relationship from UBERON
 // 2nd level - "has_part" relationship from PATO
 
-// Two independent filters are required:
-// 1. sequential relationship types (e.g., ["isa","has_part"])
-// 2. sequential SAB properties (e.g. ["UBERON","PATO"])
-
-
-// Selection parameters supplied by the calling function.
-// 1. Code corresponding to the starting concept of the expansion.
-//WITH 'PR:P11087 CUI' AS startCUI,
-WITH $startCUI AS startCUI,
+// SELECTION PARAMETERS
+// Supplied by the calling function.
+// 1. CUI corresponding to the starting concept of the expansion.
+// If no CUI was supplied, query for all CUIs that have the first relationship.
+WITH $startCUI AS initCUI,
 // 2. Sequence of relationship types
 //['isa','only_in_taxon','has_part'] as reltypes,
 [$reltypes] AS reltypes,
 // 3. Sequence of relationship SABs
 //['CL','MP','EFO'] as relsabs,
 [$relsabs] AS relsabs
+
+// SELECTION OF STARTING CUIS
+// Obtain either the CUI provided by the parameter OR the CUIs for all concepts that have the first relationship
+// of the sequence.
+CALL{
+    WITH initCUI,reltypes, relsabs
+    MATCH (cStart:Concept)-[rStart]->(c1:Concept)
+    WHERE TYPE(rStart) = reltypes[0]
+    AND rStart.SAB = relsabs[0]
+    AND CASE WHEN initCUI IS NULL THEN cStart.CUI=initCUI ELSE 1=1 END
+    RETURN DISTINCT cStart.CUI AS startCUI
+}
+
+// FILTERING
+// Two independent filters are required:
+// 1. sequential relationship types (e.g., ["isa","has_part"])
+// 2. sequential SAB properties (e.g. ["UBERON","PATO"])
 
 // FIRST FILTER: sequence of relationship types.
 // Expand from the starting concept, obtaining only those paths that exactly match the specified sequence of relationship types.
