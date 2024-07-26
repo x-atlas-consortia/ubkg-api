@@ -404,6 +404,45 @@ paths:
           description: No subgraph for specified relationship types.
         '5XX':
           description: Unknown error
+  /concepts/paths/subgraphs/sequential:
+    get:
+      operationId: concepts_paths_subgraphs_sequential_get
+      summary: Returns a set of paths with a specified sequence of relationships, subject to constraints specified in parameters.
+      parameters:
+        - name: relsequence
+          in: query
+          required: true
+          description: A sequential set of relationships that specifies the pattern of relationships in the paths in the subgraph. Each element in the set should be in format SAB:relationship type. SAB corresponds to the source in which the relationship was asserted--e.g., "NCI:is_marked_by_gene_product" corresponds to the "is_marked_by_gene_product" relationship asserted in NCI. The set can be specified with a list of values delimited with commas (e.g., ?relsequence=SAB1:relationshiptype1,SAB2:relationshiptype2) or with individual key-value pairs (e.g., ?relsequence=SAB1:relationship_type1&relsequence=SAB2:relationshiptype2).
+          schema:
+            type: string
+            example: NCI:is_marked_by_gene_product,NCI:3Agene_product_encoded_by_gene
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Return the graph of all Concepts in paths with specified sequential relationships, subject to constraints. The schema of the response corresponds to the Table result frame of the endpoint query in the neo4j browser.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptPaths'
+        '400':
+          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; mindepth > maxdepth
+        '404':
+          description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
+        '5XX':
+          description: Unknown error
   /concepts/{concept_id}/paths/subgraphs/sequential:
     get:
       operationId: concepts_concept_id_paths_subgraphs_sequential_get

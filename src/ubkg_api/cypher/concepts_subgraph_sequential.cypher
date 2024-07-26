@@ -27,6 +27,7 @@ CALL{
     AND rStart.SAB = relsabs[0]
     AND CASE WHEN initCUI IS NULL THEN cStart.CUI=initCUI ELSE 1=1 END
     RETURN DISTINCT cStart.CUI AS startCUI
+    ORDER BY cStart.CUI
 }
 
 // FILTERING
@@ -62,7 +63,7 @@ RETURN COLLECT(path_check_rels.SAB) AS path_rel_sabs
 WITH path,path_rel_sabs
 WHERE path_rel_sabs=relsabs
 WITH path
-SKIP 0 LIMIT 1
+SKIP $skip LIMIT $limit
 //For the filtered set of paths,
 
 // 1. Obtain an "edges" object with information on all relationships in all paths.
