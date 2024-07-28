@@ -1111,7 +1111,6 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
 
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
     with neo4j_instance.driver.session() as session:
         recds: neo4j.Result = session.run(query)
         for record in recds:

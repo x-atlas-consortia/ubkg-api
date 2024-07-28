@@ -132,6 +132,33 @@ echo | tee -a test.out
 echo | tee -a test.out
 
 #--------------------------------------------
+echo "TESTS FOR: codes/<code_id>/terms" | tee -a test.out
+echo "SIGNATURE: /codes/<code_id>/terms" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "1. codes/SNOMEDCT_US%3A254837009X/terms => no match; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3A254837009X/terms" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "2. codes/SNOMEDCT_US%3A254837009/terms?term_typex=PT => invalid parameter; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3A254837009/terms?term_typex=PT" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "3. codes/SNOMEDCT_US%3A254837009/terms?term_type=PT => valid; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3A254837009/terms?term_type=PT" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/codes GET" | tee -a test.out
 echo "SIGNATURE: /concepts/<concept_id>/codes"| tee -a test.out
 echo | tee -a test.out
