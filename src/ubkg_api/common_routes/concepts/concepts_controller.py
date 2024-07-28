@@ -424,11 +424,11 @@ def concepts_concept_identifier_nodes_get(search):
     dict_result = {'nodeobjects': result}
     return jsonify(dict_result)
 
-@concepts_blueprint.route('/paths/subgraphs/sequential', methods=['GET'])
+@concepts_blueprint.route('/paths/subgraph/sequential', methods=['GET'])
 def concepts_paths_subgraphs_sequential_get_endpoint():
     return concepts_paths_subraphs_sequential_get(concept_id=None)
 
-@concepts_blueprint.route('<concept_id>/paths/subgraphs/sequential', methods=['GET'])
+@concepts_blueprint.route('<concept_id>/paths/subgraph/sequential', methods=['GET'])
 def concepts_paths_subgraphs_name_sequential_get_endpoint(concept_id):
     return concepts_paths_subraphs_sequential_get(concept_id=concept_id)
 

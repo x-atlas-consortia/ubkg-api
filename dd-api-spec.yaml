@@ -404,9 +404,9 @@ paths:
           description: No subgraph for specified relationship types.
         '5XX':
           description: Unknown error
-  /concepts/paths/subgraphs/sequential:
+  /concepts/paths/subgraph/sequential:
     get:
-      operationId: concepts_paths_subgraphs_sequential_get
+      operationId: concepts_paths_subgraph_sequential_get
       summary: Returns a set of paths with a specified sequence of relationships, subject to constraints specified in parameters.
       parameters:
         - name: relsequence
@@ -443,9 +443,9 @@ paths:
           description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
         '5XX':
           description: Unknown error
-  /concepts/{concept_id}/paths/subgraphs/sequential:
+  /concepts/{concept_id}/paths/subgraph/sequential:
     get:
-      operationId: concepts_concept_id_paths_subgraphs_sequential_get
+      operationId: concepts_concept_id_paths_subgraph_sequential_get
       summary: Returns a set of paths that originate from the specified Concept with a specified sequence of relationships, subject to constraints specified in parameters.
       parameters:
         - name: concept_id
