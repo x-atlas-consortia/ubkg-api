@@ -58,6 +58,7 @@ case "$env" in
 esac
 
 # UBKG_URL=$UBKG_URL_LOCAL
+echo "DATA DISTILLERY API" | tee test.out
 echo "Using UBKG at: ${UBKG_URL}" | tee test.out
 echo "Only the first 60 characters of output from HTTP 200 returns displayed."
 
@@ -127,6 +128,33 @@ curl --request GET \
  --url "${UBKG_URL}/codes/SNOMEDCT_US%3A254837009/concepts" \
  --header "Accept: application/json"  \
  --header "Authorization: UMLS-Key $umlskey" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
+echo "TESTS FOR: codes/<code_id>/terms" | tee -a test.out
+echo "SIGNATURE: /codes/<code_id>/terms" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "1. codes/SNOMEDCT_US%3A254837009X/terms => no match; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3A254837009X/terms" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "2. codes/SNOMEDCT_US%3A254837009/terms?term_typex=PT => invalid parameter; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3A254837009/terms?term_typex=PT" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "3. codes/SNOMEDCT_US%3A254837009/terms?term_type=PT => valid; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3A254837009/terms?term_type=PT" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
@@ -279,6 +307,99 @@ echo "9. concepts/paths/subgraph?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of&skip
 curl --request GET \
  --url "${UBKG_URL}/concepts/paths/subgraph?sab=SNOMEDCT_US&rel=isa&skip=0&limit=10" \
  --header "Accept: application/json" \
+ --header "Authorization: UMLS-Key $umlskey" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
+echo "TESTS FOR: concepts/<identifier>/paths/subgraph/sequential GET" | tee -a test.out
+echo "SIGNATURE: /conepts/<identifier>/paths/subgraph/sequential?relsequence=<SAB1:rel1,SAB2:rel2&skip=<skip>&limit=<limit>" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "1. concepts/C0006142/paths/subgraph/sequential?test=x => invalid parameter; should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?test=x" \
+ --header "Accept: application/json" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "2. concepts/C0006142/paths/subgraph/sequential?relsequence=x&skip=0&limit=5 => invalid relsequence format; should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=x&skip=0&limit=5" \
+ --header "Accept: application/json" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "3. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=X&limit=5 => skip non-numeric; should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=X&limit=5" \
+ --header "Accept: application/json" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "4. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=-1&limit=5 => skip negative; should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=X&limit=5" \
+ --header "Accept: application/json" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "5. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=0&limit=x => limit non-numeric; should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=0&limit=x" \
+ --header "Accept: application/json" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "6. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=0&limit=-1 => limit negative; should return custom 400" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=0&limit=-1" \
+ --header "Accept: application/json" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "7. concepts/C0006142X/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product,NCI%3Agene_product_encoded_by_gene&skip=0&limit=5 => invalid CUI; should return custom 404" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0006142X/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product,NCI%3Agene_product_encoded_by_gene&skip=0&limit=5" \
+ --header "Accept: application/json" \
+ --header "Authorization: UMLS-Key $umlskey" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "8. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product,NCI%3Agene_product_encoded_by_gene&skip=0&limit=5 => valid, with list; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product,NCI%3Agene_product_encoded_by_gene&skip=0&limit=5" \
+ --header "Accept: application/json" \
+ --header "Authorization: UMLS-Key $umlskey" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "9. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&relsequence=NCI%3Agene_product_encoded_by_gene&skip=0&limit=5 => valid, with individual; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&relsequence=NCI%3Agene_product_encoded_by_gene&skip=0&limit=5" \
+ --header "Authorization: UMLS-Key $umlskey" | cut -c1-60 | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+#--------------------------------------------
+# The /concepts/paths/subgraph/sequential endpoint uses the same code as the
+# /concepts/<identifier>/paths/subgraph/sequential endpoint.
+
+echo "TEST FOR: concepts/paths/subgraph/sequential GET" | tee -a test.out
+echo "SIGNATURE: /conepts/paths/subgraph/sequential?relsequence=<SAB1:rel1,SAB2:rel2&skip=<skip>&limit=<limit>" | tee -a test.out
+echo | tee -a test.out
+echo | tee -a test.out
+
+echo "concepts/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&relsequence=NCI%3Agene_product_encoded_by_gene&skip=0&limit=5 => valid, with individual; should return 200" | tee -a test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&relsequence=NCI%3Agene_product_encoded_by_gene&skip=0&limit=5" \
  --header "Authorization: UMLS-Key $umlskey" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out

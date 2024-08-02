@@ -78,6 +78,38 @@ paths:
           description: no Concept nodes for the specified Code
         '5XX':
           description: Unknown error
+  /codes/{code_id}/terms:
+    get:
+      operationId: codes_code_id_terms_get
+      summary: Returns the set of Term nodes that link to the specified Code node, subject to constraints specified in parameters.
+      parameters:
+        - name: code_id
+          in: path
+          required: true
+          description: The CodeID for a Code node, in format SAB:CODE.
+          schema:
+            type: string
+            example: SNOMEDCT_US:254837009
+        - name: term_type
+          in: query
+          required: false
+          description: optional term type for the term. Can be either a list of values delimited with commas (e.g., ?term_type=PT,SY,FN) or with individual key-value pairs (e.g., ?term_type=PT&term_type=SY&term_type=FN)
+          schema:
+            type: string
+            example: PT
+      responses:
+        '200':
+          description: An array of Term nodes that have relationships with the specified Code node
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CodeTerms'
+        '404':
+          description: no Term nodes for the specified Code
+        '5XX':
+          description: Unknown error
   /concepts/{concept_id}/codes:
     get:
       operationId: concepts_concept_id_codes_get
@@ -370,6 +402,91 @@ paths:
           description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; incompatible version of neo4j (this endpoint requires at least 5.11.0)
         '404':
           description: No subgraph for specified relationship types.
+        '5XX':
+          description: Unknown error
+  /concepts/paths/subgraph/sequential:
+    get:
+      operationId: concepts_paths_subgraph_sequential_get
+      summary: Returns a set of paths with a specified sequence of relationships, subject to constraints specified in parameters.
+      parameters:
+        - name: relsequence
+          in: query
+          required: true
+          description: A sequential set of relationships that specifies the pattern of relationships in the paths in the subgraph. Each element in the set should be in format SAB:relationship type. SAB corresponds to the source in which the relationship was asserted--e.g., "NCI:is_marked_by_gene_product" corresponds to the "is_marked_by_gene_product" relationship asserted in NCI. The set can be specified with a list of values delimited with commas (e.g., ?relsequence=SAB1:relationshiptype1,SAB2:relationshiptype2) or with individual key-value pairs (e.g., ?relsequence=SAB1:relationship_type1&relsequence=SAB2:relationshiptype2).
+          schema:
+            type: string
+            example: NCI:is_marked_by_gene_product,NCI:3Agene_product_encoded_by_gene
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Return the graph of all Concepts in paths with specified sequential relationships, subject to constraints. The schema of the response corresponds to the Table result frame of the endpoint query in the neo4j browser.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptPaths'
+        '400':
+          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; mindepth > maxdepth
+        '404':
+          description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
+        '5XX':
+          description: Unknown error
+  /concepts/{concept_id}/paths/subgraph/sequential:
+    get:
+      operationId: concepts_concept_id_paths_subgraph_sequential_get
+      summary: Returns a set of paths that originate from the specified Concept with a specified sequence of relationships, subject to constraints specified in parameters.
+      parameters:
+        - name: concept_id
+          in: path
+          required: true
+          description: The identifier (also known as Concept Unique Identifier, or CUI) for the Concept from which paths originate.
+          schema:
+            type: string
+            example: C0006142
+        - name: relsequence
+          in: query
+          required: true
+          description: A sequential set of relationships that specifies the pattern of relationships in the paths in the subgraph. Each element in the set should be in format SAB:relationship type. SAB corresponds to the source in which the relationship was asserted--e.g., "NCI:is_marked_by_gene_product" corresponds to the "is_marked_by_gene_product" relationship asserted in NCI. The set can be specified with a list of values delimited with commas (e.g., ?relsequence=SAB1:relationshiptype1,SAB2:relationshiptype2) or with individual key-value pairs (e.g., ?relsequence=SAB1:relationship_type1&relsequence=SAB2:relationshiptype2).
+          schema:
+            type: string
+            example: NCI:is_marked_by_gene_product,NCI:3Agene_product_encoded_by_gene
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Return the graph of all Concepts in paths that originate with the specified Concept node with specified sequential relationships, subject to constraints. The schema of the response corresponds to the Table result frame of the endpoint query in the neo4j browser.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptPaths'
+        '400':
+          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; mindepth > maxdepth
+        '404':
+          description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
         '5XX':
           description: Unknown error
   /concepts/{origin_concept_id}/paths/shortestpath/{terminus_concept_id}:
@@ -909,6 +1026,28 @@ components:
           description: an identifier for the source of the code. Corresponds to the Source Abbreviaion (SAB) of a Code in the UMLS.
           type: string
           example: CCF
+    CodeTerms: # Schema name
+      description: Term nodes that link to the specified Code.
+      type: object
+      properties:
+        code:
+          description: the Code to which Terms link
+          type: string
+          example: SNOMEDCT_US:254837009
+        terms:
+          description: terms linked to the code, subject to parameters
+          type: array
+          items:
+            type: object
+            properties:
+              term:
+                type: string
+                description: term string
+                example: Malignant tumor of breast
+              term_type:
+                type: string
+                description: term type for the term - an acronym of usually two or three letters
+                example: PT
     ConceptDetail:    # Schema name
       type: object
       description: Information on a Concept node.

@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, current_app, request, make_response
 from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
     concepts_concept_id_definitions_get_logic, concepts_expand_get_logic,\
     concepts_shortestpath_get_logic, concepts_trees_get_logic, concepts_subgraph_get_logic, \
-    concepts_identfier_node_get_logic
+    concepts_identfier_node_get_logic, concepts_subgraph_sequential_get_logic
 # Functions to validate query parameters
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
@@ -423,3 +423,93 @@ def concepts_concept_identifier_nodes_get(search):
 
     dict_result = {'nodeobjects': result}
     return jsonify(dict_result)
+
+@concepts_blueprint.route('/paths/subgraph/sequential', methods=['GET'])
+def concepts_paths_subgraphs_sequential_get_endpoint():
+    return concepts_paths_subraphs_sequential_get(concept_id=None)
+
+@concepts_blueprint.route('<concept_id>/paths/subgraph/sequential', methods=['GET'])
+def concepts_paths_subgraphs_name_sequential_get_endpoint(concept_id):
+    return concepts_paths_subraphs_sequential_get(concept_id=concept_id)
+
+def concepts_paths_subraphs_sequential_get(concept_id=None):
+
+    """
+    Returns the set of paths that begins with the concept <concept_id> and has relationships in a specified
+    sequence.
+
+    If no concept_id is specified, then return all paths that begin with the first specified relationship.
+
+    Response is in neo4j graph format ({nodes, paths, edges}).
+
+    The relsequence request parameter is an ordered list that specifies a sequence of relationships in a path.
+    The format of each element in relsequence is <SAB>:<relationship type>.
+    For example, ['UBERON:isa','PATO:has_part'] specifies the set of paths that start from the concept with CUI
+    <concept_id> with relationships that match the pattern
+
+    (concept_id: Concept)-[r1:isa]-(c1:Concept)-[r2:has_part]->(c2:Concept)
+
+    in which r1.SAB = 'UBERON' and r2.SAB = 'PATO'
+
+    """
+
+    neo4j_instance = current_app.neo4jConnectionHelper.instance()
+
+    # Validate parameters.
+    # Check for invalid parameter names.
+    err = validate_query_parameter_names(parameter_name_list=['relsequence', 'skip', 'limit'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Check for required parameters.
+    err = validate_required_parameters(required_parameter_list=['relsequence'])
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Check that the non-default skip is non-negative.
+    skip = request.args.get('skip')
+    err = validate_parameter_is_nonnegative(param_name='skip', param_value=skip)
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Set default mininum.
+    skip = set_default_minimum(param_value=skip, default=0)
+
+    # Check that non-default limit is non-negative.
+    limit = request.args.get('limit')
+    err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
+    if err != 'ok':
+        return make_response(err, 400)
+    # Set default row limit, based on the app configuration.
+    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
+
+    # Get remaining parameter values from the path or query string.
+    relsequence = parameter_as_list(param_name='relsequence')
+    reltypes = []
+    relsabs = []
+    for rs in relsequence:
+        if not ':' in rs:
+            err = f'Invalid parameter value: {rs}. Format relationships as <SAB>:<relationship_type>'
+            return make_response(err, 400)
+
+        relsabs.append(rs.split(':')[0].upper())
+        reltypes.append(rs.split(':')[1])
+
+
+    result = concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=concept_id, reltypes=reltypes, relsabs=relsabs,
+                                       skip=skip, limit=limit)
+
+    iserr = result is None or result == {}
+
+    if iserr:
+        err = get_404_error_string(prompt_string=f"No Concepts in paths with specified parameters",
+                                   custom_request_path=f"startCUI='{concept_id}'",
+                                   timeout=neo4j_instance.timeout)
+        return make_response(err, 404)
+
+    # Limit the size of the payload, based on the app configuration.
+    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
+    if err != "ok":
+        return make_response(err, 400)
+
+    return jsonify(result)
