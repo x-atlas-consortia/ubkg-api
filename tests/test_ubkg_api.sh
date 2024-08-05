@@ -304,28 +304,28 @@ echo | tee -a test.out
 
 echo "3. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=X&limit=5 => skip non-numeric; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequentialrelsequence=NCI:is_marked_by_gene_product&skip=X&limit=5" \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=X&limit=5" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 echo "4. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=-1&limit=5 => skip negative; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequentialrelsequence=NCI%3Ais_marked_by_gene_product&skip=X&limit=5" \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=X&limit=5" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 echo "5. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=0&limit=x => limit non-numeric; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequentialrelsequence=NCI:is_marked_by_gene_product&skip=0&limit=x" \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=0&limit=x" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 echo "6. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=0&limit=-1 => limit negative; should return custom 400" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequentialrelsequence=NCI:is_marked_by_gene_product&skip=0&limit=-1" \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=0&limit=-1" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
