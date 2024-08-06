@@ -1082,5 +1082,88 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
             except KeyError:
                 pass
 
-    # The query has a single record.
     return source
+
+def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -> dict:
+    """
+    Obtains information on terms that link to a code.
+
+    The return from the query is simple, and there is no need for a model class.
+
+    :param neo4j_instance: neo4j connection
+    :param code_id: a UBKG Code in format SAB:CodeId
+    :param term_type: an optional list of acronyms for a code type
+
+    """
+    terms: [dict] = []
+
+    # Load and parameterize query.
+    querytxt = loadquerystring('code_code_id_terms.cypher')
+
+    # Filter by code_id.
+    querytxt = querytxt.replace('$code_id', f"'{code_id}'")
+
+    # Filter by code SAB.
+    if len(term_type) == 0:
+        querytxt = querytxt.replace('$termtype_filter', '')
+    else:
+        querytxt = querytxt.replace('$termtype_filter', f" AND TYPE(r) IN {term_type}")
+
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+    with neo4j_instance.driver.session() as session:
+        recds: neo4j.Result = session.run(query)
+        for record in recds:
+            term = record.get('response')
+            try:
+                terms.append(term)
+
+            except KeyError:
+                pass
+
+    # The query has either zero records or one record
+    if len(terms) == 1:
+        return term
+    else:
+        return terms
+
+def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltypes=None, relsabs=None, skip=None,
+                                           limit=None) -> List[ConceptGraph]:
+
+    """
+    Obtains a subset of paths that originate from the concept with CUI=startCUI, in a sequence of relationships
+    specified by reltypes and relsab, limited by skip and limit parameters.
+
+    :param neo4j_instance: UBKG connection
+    :param startCUI: CUI of concept from which to expand paths
+    :param reltypes: sequential list of relationship types
+    :param relsabs: sequential list of relationship SABs
+    :param skip: paths to skip
+    :param limit: maximum number of paths to return
+
+    For example, reltypes=["isa","part_of"] and relsabs=["UBERON","PATO"] results in a query for paths that match
+    the pattern
+
+    (startCUI: Concept)-[r1:isa]-(c1:Concept)-[r2:has_part]->(c2:Concept)
+    where r1.SAB = "UBERON" and r2.SAB="PATO"
+    """
+
+    conceptgraphs: [ConceptGraph] = []
+    conceptgraph: ConceptGraph = {}
+
+    # Load query string and associate parameter values to variables.
+    querytxt = loadquerystring(filename='concepts_subgraph_sequential.cypher')
+    querytxt = querytxt.replace('$startCUI', f'"{startCUI}"')
+
+    sabjoin = format_list_for_query(listquery=reltypes, doublequote=True)
+    querytxt = querytxt.replace('$reltypes', sabjoin)
+    reljoin = format_list_for_query(listquery=relsabs, doublequote=True)
+    querytxt = querytxt.replace('$relsabs', reljoin)
+    querytxt = querytxt.replace('$skip', str(skip))
+    querytxt = querytxt.replace('$limit', str(limit))
+
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
+    # MAY 2024 - bug fix - changed argument from querytxt to query
+    return get_graph(neo4j_instance, query=query)
