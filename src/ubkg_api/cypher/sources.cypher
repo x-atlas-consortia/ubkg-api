@@ -16,7 +16,7 @@ CALL
 CALL
 {
 	WITH CUISource
-	 MATCH (pSource:Concept)-[:has_sab]->(p:Concept)-[:CODE]->(c:Code)-[r:PT]->(t:Term)
+	MATCH (pSource:Concept)-[:has_sab]->(p:Concept)-[:CODE]->(c:Code)-[r:PT]->(t:Term)
 	WHERE pSource.CUI=CUISource
 	$sabfilter
 	AND r.CUI = p.CUI
@@ -44,7 +44,7 @@ CALL
 CALL
 {
 	WITH CUISource
-	MATCH (pSource:Concept)-[:has_home_url]->(p:Concept)-[:CODE]->(c:Code)-[r:PT]->(t:Term)
+	OPTIONAL MATCH (pSource:Concept)-[:has_home_url]->(p:Concept)-[:CODE]->(c:Code)-[r:PT]->(t:Term)
 	WHERE pSource.CUI=CUISource
 	AND r.CUI = p.CUI
 	RETURN COLLECT(t.name) AS home_urls
@@ -53,7 +53,7 @@ CALL
 CALL
 {
 	WITH CUISource
-	MATCH (pSource:Concept)-[:has_source_dictionary_url]->(p:Concept)-[:CODE]->(c:Code)-[r:PT]->(t:Term)
+	OPTIONAL MATCH (pSource:Concept)-[:has_source_dictionary_url]->(p:Concept)-[:CODE]->(c:Code)-[r:PT]->(t:Term)
 	WHERE pSource.CUI=CUISource
 	AND r.CUI = p.CUI
 	RETURN t.name AS source_dictionary_url
@@ -62,7 +62,7 @@ CALL
 CALL
 {
 	WITH CUISource
-	MATCH (pSource:Concept)-[:has_citation]->(p:Concept)-[:CODE]->(c:Code)-[r:PT]->(t:Term)
+	OPTIONAL MATCH (pSource:Concept)-[:has_citation]->(p:Concept)-[:CODE]->(c:Code)-[r:PT]->(t:Term)
 	WHERE pSource.CUI=CUISource
 	AND r.CUI = p.CUI
 	RETURN COLLECT(DISTINCT {PMID:split(t.name,':')[1], url:'https://pubmed.ncbi.nlm.nih.gov/'+split(t.name,':')[1]}) AS citations
