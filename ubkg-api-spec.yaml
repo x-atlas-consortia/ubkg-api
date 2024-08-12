@@ -459,7 +459,7 @@ paths:
           description: A sequential set of relationships that specifies the pattern of relationships in the paths in the subgraph. Each element in the set should be in format SAB:relationship type. SAB corresponds to the source in which the relationship was asserted--e.g., "NCI:is_marked_by_gene_product" corresponds to the "is_marked_by_gene_product" relationship asserted in NCI. The set can be specified with a list of values delimited with commas (e.g., ?relsequence=SAB1:relationshiptype1,SAB2:relationshiptype2) or with individual key-value pairs (e.g., ?relsequence=SAB1:relationship_type1&relsequence=SAB2:relationshiptype2).
           schema:
             type: string
-            example: NCI:is_marked_by_gene_product,NCI:3Agene_product_encoded_by_gene
+            example: NCI:is_marked_by_gene_product,NCI:gene_product_encoded_by_gene
         - name: skip
           in: query
           required: false
