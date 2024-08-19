@@ -1,3 +1,7 @@
+# August 2024
+# The validate_application_context logic is specific to the HuBMAP/SenNet UBKG context. The functionality has been
+# moved to the code base in the hs-ontology-api repository.
+
 from flask import request, abort, jsonify
 
 
