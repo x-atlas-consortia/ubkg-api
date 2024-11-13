@@ -1007,7 +1007,7 @@ components:
     umls_key:
       type: apiKey
       description: API key for a UMLS licensee account, prefixed with "UMLS-Key "--e.g., "UMLS-Key <my-umls-key>"
-      name: Authorization
+      name: UMLS-Key
       in: header
   schemas:
     CodesCodesObj: # Schema name
