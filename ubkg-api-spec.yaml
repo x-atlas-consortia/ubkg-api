@@ -972,7 +972,7 @@ paths:
       parameters:
         - name: sab
           in: query
-          required: true
+          required: false
           description: A source (SAB) to which to limit the response.
           schema:
             type: string
