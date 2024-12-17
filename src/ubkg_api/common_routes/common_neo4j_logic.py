@@ -174,15 +174,23 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
 def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[ConceptDetail]:
     conceptdetails: List[ConceptDetail] = []
 
-    query: str = \
-        'WITH [$code_id] AS query' \
-        ' MATCH (a:Code)<-[:CODE]-(b:Concept)' \
-        ' WHERE a.CodeID IN query' \
-        ' OPTIONAL MATCH (b)-[:PREF_TERM]->(c:Term)' \
-        ' RETURN DISTINCT a.CodeID AS Code, b.CUI AS Concept, c.name as Prefterm' \
-        ' ORDER BY Code ASC, Concept'
+    # Dec 2024 - replace in-line Cypher with loaded file.
+    # Load Cypher query from file.
+    query: str = loadquerystring(filename='codes_code_id_concepts.cypher')
+
+    # Filter by code_id.
+    query = query.replace('$code_id', f"'{code_id}'")
+
+    #query: str = \
+        #'WITH [$code_id] AS query' \
+        #' MATCH (a:Code)<-[:CODE]-(b:Concept)' \
+        #' WHERE a.CodeID IN query' \
+        #' OPTIONAL MATCH (b)-[:PREF_TERM]->(c:Term)' \
+        #' RETURN DISTINCT a.CodeID AS Code, b.CUI AS Concept, c.name as Prefterm' \
+        #' ORDER BY Code ASC, Concept'
+
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query, code_id=code_id)
+        recds: neo4j.Result = session.run(query)
         for record in recds:
             try:
                 conceptdetail: ConceptDetail = ConceptDetail(record.get('Concept'),
