@@ -23,6 +23,8 @@ from common_routes.relationship_types.relationship_types_controller import relat
 from common_routes.sabs.sabs_controller import sabs_blueprint
 from common_routes.sources.sources_controller import sources_blueprint
 
+from utils.http_error_string import wrap_message
+
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
@@ -102,6 +104,15 @@ class UbkgAPI:
         def index():
             return "Hello! This is UBKG-API service :)"
 
+        @self.app.errorhandler(404)
+        # Custom 404 error handler.
+        def servererror(error):
+            return wrap_message(key='message', msg=error.description)
+
+        @self.app.errorhandler(500)
+        # Custom 500 error handler.
+        def servererror(error):
+            return wrap_message(key='error', msg=error.description)
 
 ####################################################################################################
 ## For local development/testing
