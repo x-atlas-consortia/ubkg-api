@@ -3,6 +3,12 @@
 
 from flask import request
 
+def wrap_message(key:str, msg:str) ->dict:
+    """
+    Wraps a return message string in JSON format.
+    """
+
+    return {key: msg}
 
 def format_request_path(custom_err=None):
     """
@@ -83,10 +89,10 @@ def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=N
         if timeout > 1:
             errtimeout = errtimeout + "s"
 
-        err = err + f". Note that this endpoint is limited to an execution time of {errtimeout} " \
+        err = err + f". Note that this endpoint is limited to an execution time of {errtimeout}" \
                     f" to prevent timeout errors."
 
-    return err
+    return wrap_message(key="message", msg=err)
 
 
 def get_number_agreement(list_items=None):
@@ -127,8 +133,9 @@ def validate_query_parameter_names(parameter_name_list=None) -> str:
         if req not in parameter_name_list:
             namelist = list_as_single_quoted_string(list_elements=parameter_name_list)
             prompt = get_number_agreement(list_items=parameter_name_list)
-            return f"Invalid query parameter: '{req}'. The possible parameter name{prompt}: {namelist}. " \
+            err =  f"Invalid query parameter: '{req}'. The possible parameter name{prompt}: {namelist}. " \
                    f"Refer to the SmartAPI documentation for this endpoint for more information."
+            return wrap_message(key="message", msg=err)
 
     return "ok"
 
@@ -150,8 +157,9 @@ def validate_required_parameters(required_parameter_list=None) -> str:
         if param not in request.args:
             namelist = list_as_single_quoted_string(list_elements=required_parameter_list)
             prompt = get_number_agreement(list_items=required_parameter_list)
-            return f"Missing query parameter: '{param}'. The required parameter{prompt}: {namelist}. " \
+            err = f"Missing query parameter: '{param}'. The required parameter{prompt}: {namelist}. " \
                    f"Refer to the SmartAPI documentation for this endpoint for more information."
+            return wrap_message(key="message", msg=err)
 
     return "ok"
 
@@ -176,8 +184,9 @@ def validate_parameter_value_in_enum(param_name=None, param_value=None, enum_lis
     if param_value not in enum_list:
         namelist = list_as_single_quoted_string(list_elements=enum_list)
         prompt = get_number_agreement(enum_list)
-        return f"Invalid value for parameter: '{param_name}'. The possible parameter value{prompt}: {namelist}. " \
+        err = f"Invalid value for parameter: '{param_name}'. The possible parameter value{prompt}: {namelist}. " \
                f"Refer to the SmartAPI documentation for this endpoint for more information."
+        return wrap_message(key="message", msg=err)
 
     return "ok"
 
@@ -193,7 +202,8 @@ def validate_parameter_is_numeric(param_name=None, param_value: str = '') -> str
     """
 
     if not param_value.lstrip('-').isnumeric():
-        return f"Invalid value ({param_value}) for parameter '{param_name}'.  The parameter must be numeric."
+        err = f"Invalid value ({param_value}) for parameter '{param_name}'.  The parameter must be numeric."
+        return wrap_message(key="message", msg=err)
 
     return "ok"
 
@@ -215,8 +225,8 @@ def validate_parameter_is_nonnegative(param_name=None, param_value: str = '') ->
         return err
 
     if int(param_value) < 0:
-        return f"Invalid value ({param_value}) for parameter '{param_name}'. The parameter cannot be negative."
-
+        err = f"Invalid value ({param_value}) for parameter '{param_name}'. The parameter cannot be negative."
+        return wrap_message(key="message", msg=err)
     return "ok"
 
 
@@ -233,7 +243,8 @@ def validate_parameter_range_order(min_name: str, min_value: str, max_name: str,
        """
 
     if int(min_value) > int(max_value):
-        return f"Invalid parameter values: '{min_name}' ({min_value}) greater than '{max_name}' ({max_value}). "
+        err = f"Invalid parameter values: '{min_name}' ({min_value}) greater than '{max_name}' ({max_value}). "
+        return wrap_message(key="message", msg=err)
 
     return "ok"
 
@@ -247,9 +258,10 @@ def check_payload_size(payload: str, max_payload_size: int) -> str:
 
     payload_size = len(str(payload))
     if payload_size > max_payload_size:
-        return f"The size of the response to the endpoint with the specified parameters " \
+        err = f"The size of the response to the endpoint with the specified parameters " \
                f"({int(payload_size)/1024} MB) exceeds the payload limit" \
                f" of {int(max_payload_size)/1024} MB."
+        return wrap_message(key="message", msg=err)
 
     return "ok"
 
@@ -269,7 +281,8 @@ def check_neo4j_version_compatibility(query_version: str, instance_version: str)
     int_query_version = int(query_version.replace('.', ''))
 
     if int_instance_version < int_query_version:
-        return f"This functionality requires at least version {query_version} of neo4j."
+        err = f"This functionality requires at least version {query_version} of neo4j."
+        return wrap_message(key="message", msg=err)
 
     return "ok"
 
@@ -281,6 +294,8 @@ def check_max_mindepth(mindepth: int, max_mindepth: int) -> str:
 
     """
     if mindepth > max_mindepth:
-        return f"The maximum value of 'mindepth' for this endpoint is {max_mindepth}. " \
+        err = f"The maximum value of 'mindepth' for this endpoint is {max_mindepth}. " \
                f"Larger values of 'mindepth' result in queries that will exceed the server timeout."
+        return wrap_message(key="message", msg=err)
+
     return "ok"
