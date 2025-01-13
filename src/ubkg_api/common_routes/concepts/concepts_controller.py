@@ -9,7 +9,7 @@ from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_c
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size, \
-    check_neo4j_version_compatibility,check_max_mindepth
+    check_neo4j_version_compatibility,check_max_mindepth,wrap_message
 # Functions to format query parameters for use in Cypher queries
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 # Functions common to paths routes
@@ -489,8 +489,8 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
     relsabs = []
     for rs in relsequence:
         if not ':' in rs:
-            err = f'Invalid parameter value: {rs}. Format relationships as <SAB>:<relationship_type>'
-            return make_response(err, 400)
+            err = f'Invalid parameter value for \'relsequence\': {rs}. Format relationships as <SAB>:<relationship_type>'
+            return make_response(wrap_message(key="message", msg=err), 400)
 
         relsabs.append(rs.split(':')[0].upper())
         reltypes.append(rs.split(':')[1])

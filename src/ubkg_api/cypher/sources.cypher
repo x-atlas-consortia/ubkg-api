@@ -62,11 +62,13 @@ CALL
 CALL
 {
 	WITH CUISource
-	OPTIONAL MATCH (pSource:Concept)-[:has_citation]->(p:Concept)-[:CODE]->(c:Code)-[r:PT]->(t:Term)
+	MATCH (pSource:Concept)-[:has_citation]->(p:Concept)-[:CODE]->(c:Code)-[r:PT]->(t:Term)
 	WHERE pSource.CUI=CUISource
 	AND r.CUI = p.CUI
-	RETURN COLLECT(DISTINCT {PMID:split(t.name,':')[1], url:'https://pubmed.ncbi.nlm.nih.gov/'+split(t.name,':')[1]}) AS citations
+	RETURN COLLECT({pmid:CASE WHEN split(t.name,':')[0]='PMID' THEN split(t.name,':')[1] END,
+	url:CASE WHEN split(t.name,':')[0]<>'PMID' THEN t.name ELSE 'https://pubmed.ncbi.nlm.nih.gov/'+split(t.name,':')[1] END}) AS citations
 }
+
 // ETL command
 CALL
 {

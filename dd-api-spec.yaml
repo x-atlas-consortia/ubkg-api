@@ -925,7 +925,7 @@ paths:
         - name: term_id
           in: path
           required: true
-          description: The string to match. Subject to timeout.
+          description: The string to match. Subject to timeout. Should be URL-encoded for spaces (%20).
           schema:
             type: string
             example: Breast cancer
@@ -950,7 +950,7 @@ paths:
         - name: term_id
           in: path
           required: true
-          description: The string to match
+          description: The string to match. Should be URL-encoded for spaces (%20).
           schema:
             type: string
             example: Breast cancer
@@ -974,7 +974,7 @@ paths:
       parameters:
         - name: sab
           in: query
-          required: true
+          required: false
           description: A source (SAB) to which to limit the response.
           schema:
             type: string
