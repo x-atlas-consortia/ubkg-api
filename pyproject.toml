@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ubkg_api"
-version = "2.1.9"
+version = "2.1.10"
 authors = [
   { name="HuBMAP Consortium", email="api-developers@hubmapconsortium.org" },
 ]
