@@ -42,8 +42,15 @@ def concepts_concept_id_codes_get(concept_id):
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string='No Codes with link to the specified Concept',
-                                   custom_request_path=f'concept_id = {concept_id}')
+                                   custom_request_path=f'concept_id = {concept_id}',
+                                   timeout=neo4j_instance.timeout)
         return make_response(err, 404)
+
+    # Feb 2025
+    # Limit the size of the payload, based on the app configuration.
+    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
+    if err != "ok":
+        return make_response(err, 413)
 
     return jsonify(result)
 
@@ -64,8 +71,15 @@ def concepts_concept_id_concepts_get(concept_id):
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string='No Concepts with relationships to the specified Concept',
-                                   custom_request_path=f'concept_id = {concept_id}')
+                                   custom_request_path=f'concept_id = {concept_id}',
+                                   timeout=neo4j_instance.timeout)
         return make_response(err, 404)
+
+    # Feb 2025
+    # Limit the size of the payload, based on the app configuration.
+    #err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
+    #if err != "ok":
+       # return make_response(err, 413)
 
     return jsonify(result)
 
@@ -83,24 +97,17 @@ def concepts_concept_id_definitions_get(concept_id):
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string='No Definitions for specified Concept',
-                                   custom_request_path=f"concept_id='{concept_id}'")
+                                   custom_request_path=f"concept_id='{concept_id}'",
+                                   timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
+    # Feb 2025
+    # Limit the size of the payload, based on the app configuration.
+    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
+    if err != "ok":
+        return make_response(err, 413)
+
     return jsonify(result)
-
-# JAS January 2024 deprecating semantics endpoints.
-# @concepts_blueprint.route('<concept_id>/semantics', methods=['GET'])
-# def concepts_concept_id_semantics_get(concept_id):
-#    """Returns a list of semantic_types {Sty, Tui, Stn} of the concept
-#
-#    :param concept_id: The concept identifier
-#    :type concept_id: str
-#
-#    :rtype: Union[List[StyTuiStn], Tuple[List[StyTuiStn], int], Tuple[List[StyTuiStn], int, Dict[str, str]]
-#    """
-#    neo4j_instance = current_app.neo4jConnectionHelper.instance()
-#    return jsonify(concepts_concept_id_semantics_get_logic(neo4j_instance, concept_id))
-
 
 # JAS January 2024 Converted from POST to GET.
 @concepts_blueprint.route('<concept_id>/paths/expand', methods=['GET'])
@@ -186,7 +193,7 @@ def concepts_paths_expand_get(concept_id):
     # Limit the size of the payload, based on the app configuration.
     err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
     if err != "ok":
-        return make_response(err, 400)
+        return make_response(err, 413)
 
     return jsonify(result)
 
@@ -234,7 +241,7 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
     # Limit the size of the payload, based on the app configuration.
     err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
     if err != "ok":
-        return make_response(err, 400)
+        return make_response(err, 413)
 
     return jsonify(result)
 
@@ -323,7 +330,7 @@ def concepts_trees_get(concept_id):
     # Limit the size of the payload, based on the app configuration.
     err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
     if err != "ok":
-        return make_response(err, 400)
+        return make_response(err, 413)
 
     return jsonify(result)
 
@@ -388,7 +395,7 @@ def concepts_subgraph_get():
     # Limit the size of the payload, based on the app configuration.
     err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
     if err != "ok":
-        return make_response(err, 400)
+        return make_response(err, 413)
 
     return jsonify(result)
 
@@ -420,6 +427,12 @@ def concepts_concept_identifier_nodes_get(search):
     err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
     if err != "ok":
         return make_response(err, 400)
+
+    # Feb 2025
+    # Limit the size of the payload, based on the app configuration.
+    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
+    if err != "ok":
+        return make_response(err, 413)
 
     dict_result = {'nodeobjects': result}
     return jsonify(dict_result)
@@ -510,6 +523,6 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
     # Limit the size of the payload, based on the app configuration.
     err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
     if err != "ok":
-        return make_response(err, 400)
+        return make_response(err, 413)
 
     return jsonify(result)

@@ -89,8 +89,8 @@ def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=N
         if timeout > 1:
             errtimeout = errtimeout + "s"
 
-        err = err + f". Note that this endpoint is limited to an execution time of {errtimeout}" \
-                    f" to prevent timeout errors."
+        err = err + f". This endpoint is limited to an execution time of {errtimeout}" \
+                    f" to prevent gateway timeout errors."
 
     return wrap_message(key="message", msg=err)
 
@@ -259,8 +259,8 @@ def check_payload_size(payload: str, max_payload_size: int) -> str:
     payload_size = len(str(payload))
     if payload_size > max_payload_size:
         err = f"The size of the response to the endpoint with the specified parameters " \
-               f"({int(payload_size)/1024} MB) exceeds the payload limit" \
-               f" of {int(max_payload_size)/1024} MB."
+               f"({int(payload_size/1024**2)} MB) exceeds the payload limit" \
+               f" of {int(max_payload_size/1024**2)} MB."
         return wrap_message(key="message", msg=err)
 
     return "ok"
