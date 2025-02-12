@@ -12,8 +12,9 @@ from utils.http_error_string import get_404_error_string, validate_query_paramet
     check_neo4j_version_compatibility,check_max_mindepth,wrap_message
 # Functions to format query parameters for use in Cypher queries
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
-# Functions common to paths routes
-#from utils.path_get_endpoints import get_origin, get_terminus
+
+# S3 redirect functions
+from utils.s3_redirect import redirect_if_large
 
 concepts_blueprint = Blueprint('concepts', __name__, url_prefix='/concepts')
 
@@ -46,13 +47,8 @@ def concepts_concept_id_codes_get(concept_id):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
-    # Limit the size of the payload, based on the app configuration.
-    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    if err != "ok":
-        return make_response(err, 413)
-
-    return jsonify(result)
+    # February 2025
+    return redirect_if_large(resp=result)
 
 
 @concepts_blueprint.route('<concept_id>/concepts', methods=['GET'])
@@ -76,13 +72,7 @@ def concepts_concept_id_concepts_get(concept_id):
         return make_response(err, 404)
 
     # Feb 2025
-    # Limit the size of the payload, based on the app configuration.
-    #err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    #if err != "ok":
-       # return make_response(err, 413)
-
-    return jsonify(result)
-
+    return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('<concept_id>/definitions', methods=['GET'])
 def concepts_concept_id_definitions_get(concept_id):
@@ -102,12 +92,7 @@ def concepts_concept_id_definitions_get(concept_id):
         return make_response(err, 404)
 
     # Feb 2025
-    # Limit the size of the payload, based on the app configuration.
-    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    if err != "ok":
-        return make_response(err, 413)
-
-    return jsonify(result)
+    return redirect_if_large(resp=result)
 
 # JAS January 2024 Converted from POST to GET.
 @concepts_blueprint.route('<concept_id>/paths/expand', methods=['GET'])
@@ -190,12 +175,8 @@ def concepts_paths_expand_get(concept_id):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Limit the size of the payload, based on the app configuration.
-    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    if err != "ok":
-        return make_response(err, 413)
-
-    return jsonify(result)
+    # Feb 2025
+    return redirect_if_large(resp=result)
 
 # JAS February 2024 Replaced POST with GET
 @concepts_blueprint.route('<origin_concept_id>/paths/shortestpath/<terminus_concept_id>', methods=['GET'])
@@ -238,12 +219,8 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Limit the size of the payload, based on the app configuration.
-    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    if err != "ok":
-        return make_response(err, 413)
-
-    return jsonify(result)
+    # Feb 2025
+    return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('<concept_id>/paths/trees', methods=['GET'])
 def concepts_trees_get(concept_id):
@@ -327,13 +304,8 @@ def concepts_trees_get(concept_id):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Limit the size of the payload, based on the app configuration.
-    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    if err != "ok":
-        return make_response(err, 413)
-
-    return jsonify(result)
-
+    # Feb 2025
+    return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('paths/subgraph', methods=['GET'])
 def concepts_subgraph_get():
@@ -392,13 +364,8 @@ def concepts_subgraph_get():
                                                  f"specified relationship types", timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Limit the size of the payload, based on the app configuration.
-    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    if err != "ok":
-        return make_response(err, 413)
-
-    return jsonify(result)
-
+    # Feb 2025
+    return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('<search>/nodeobjects', methods=['GET'])
 def concepts_concept_identifier_nodes_get(search):
@@ -429,13 +396,7 @@ def concepts_concept_identifier_nodes_get(search):
         return make_response(err, 400)
 
     # Feb 2025
-    # Limit the size of the payload, based on the app configuration.
-    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    if err != "ok":
-        return make_response(err, 413)
-
-    dict_result = {'nodeobjects': result}
-    return jsonify(dict_result)
+    return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('/paths/subgraph/sequential', methods=['GET'])
 def concepts_paths_subgraphs_sequential_get_endpoint():
@@ -520,9 +481,5 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Limit the size of the payload, based on the app configuration.
-    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    if err != "ok":
-        return make_response(err, 413)
-
-    return jsonify(result)
+    # Feb 2025
+    return redirect_if_large(resp=result)

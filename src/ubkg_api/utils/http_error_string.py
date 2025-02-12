@@ -1,7 +1,7 @@
 # coding: utf-8
 # Common functions used for format HTTP error messages (404, 400) for endpoints.
 
-from flask import request
+from flask import request, jsonify
 
 def wrap_message(key:str, msg:str) ->dict:
     """
@@ -257,7 +257,8 @@ def check_payload_size(payload: str, max_payload_size: int) -> str:
     """
 
     payload_size = len(str(payload))
-    if payload_size > max_payload_size:
+    print('max_payload_size', max_payload_size)
+    if payload_size > max_payload_size and max_payload_size > 0:
         err = f"The size of the response to the endpoint with the specified parameters " \
                f"({int(payload_size/1024**2)} MB) exceeds the payload limit" \
                f" of {int(max_payload_size/1024**2)} MB."

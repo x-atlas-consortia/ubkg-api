@@ -6,3 +6,6 @@ python_dateutil >= 2.6.0
 setuptools >= 21.0.0
 neo4j == 5.15.0
 pytest==7.3.1
+
+# for S3 worker
+boto==1.36.17

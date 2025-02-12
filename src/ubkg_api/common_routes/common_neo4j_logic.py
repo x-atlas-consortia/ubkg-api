@@ -647,7 +647,8 @@ def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[Conce
             except KeyError:
                 pass
 
-    return conceptnodes
+    return {'nodeobjects': conceptnodes}
+    #return conceptnodes
 
 
 def database_info_server_get_logic(neo4j_instance) -> dict:

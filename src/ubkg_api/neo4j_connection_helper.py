@@ -73,7 +73,7 @@ class Neo4jConnectionHelper(object):
         logger.info('Constraints:')
         logger.info(f'-- timeout: {self._timeout} seconds')
         logger.info(f'-- payload: {self._payloadlimit} bytes')
-        logger.info(f'-- row limit: {self._rowlimit}')
+        #logger.info(f'-- row limit: {self._rowlimit}')
 
     # https://neo4j.com/docs/api/python-driver/current/api.html
     def close(self):
