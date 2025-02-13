@@ -157,7 +157,7 @@ paths:
           description: The concept identifier (also known as Concept Unique Identifier, or CUI)
           schema:
             type: string
-            example: C0006142
+            example: C4722518
       responses:
         '200':
           description: An array of information on Concepts that have relationships with the specified Concept
