@@ -11,6 +11,9 @@ sys.path.append(str(path_root))
 # Local modules
 from neo4j_connection_helper import Neo4jConnectionHelper
 
+# February 2025
+from utils.S3_worker import S3Worker
+
 from common_routes.codes.codes_controller import codes_blueprint
 from common_routes.concepts.concepts_controller import concepts_blueprint
 from common_routes.terms.terms_controller import terms_blueprint
@@ -31,6 +34,34 @@ logger = logging.getLogger(__name__)
 
 
 class UbkgAPI:
+
+    def _gets3worker(self) -> S3Worker:
+        """
+        February 2025
+        Builds a S3Worker for redirection of responses that would exceed a gateway.
+        This assumes that a S3 bucket has been configured for redirection.
+
+        """
+        if 'AWS_S3_BUCKET_NAME' in self.app.config:
+            logger.info(f"Initializing S3 redirection to {self.app.config['AWS_S3_BUCKET_NAME']}")
+            try:
+                s3w = S3Worker(ACCESS_KEY_ID=self.app.config['AWS_ACCESS_KEY_ID']
+                                     , SECRET_ACCESS_KEY=self.app.config['AWS_SECRET_ACCESS_KEY']
+                                     , S3_BUCKET_NAME=self.app.config['AWS_S3_BUCKET_NAME']
+                                     , S3_OBJECT_URL_EXPIRATION_IN_SECS=self.app.config['AWS_OBJECT_URL_EXPIRATION_IN_SECS']
+                                     , LARGE_RESPONSE_THRESHOLD=self.app.config['LARGE_RESPONSE_THRESHOLD']
+                                     , SERVICE_S3_OBJ_PREFIX=self.app.config['AWS_S3_OBJECT_PREFIX'])
+                logger.info('S3Worker initialized with properties:')
+                logger.info(f"--AWS S3 bucket: {self.app.config['AWS_S3_BUCKET_NAME']}")
+                logger.info(f"--S3 object expiration: {self.app.config['AWS_OBJECT_URL_EXPIRATION_IN_SECS']}")
+                logger.info(f"--S3 large response threshold: {self.app.config['LARGE_RESPONSE_THRESHOLD']}")
+                logger.info(f"--S3 object prefix: {self.app.config['AWS_S3_OBJECT_PREFIX']}")
+                return s3w
+            except Exception as s3exception:
+                logger.critical(s3exception, exc_info=True)
+        else:
+            logger.info('S3 redirection configuration not found. S3 redirection not enabled.')
+
     def __init__(self, config, package_base_dir):
         """
         If config is a string then it will be treated as a local file path from which to load a file, e.g.
@@ -96,9 +127,13 @@ class UbkgAPI:
                                                      1000,
                                                      9437184)
                     logger.info("Initialized Neo4jManager successfully for: {self.SERVER}")
+
         except Exception as e:
             logger.exception('Failed to initialize the Neo4jManager')
             raise e
+
+        # February 2025 - Obtain a S3 worker for redirection of large payloads, if configured
+        self.app.s3worker = self._gets3worker()
 
         @self.app.route('/', methods=['GET'])
         def index():
