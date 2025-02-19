@@ -43,6 +43,7 @@ class UbkgAPI:
 
         """
         if 'AWS_S3_BUCKET_NAME' in self.app.config:
+            logger.info('S3 redirection enabled in configuration')
             logger.info(f"Initializing S3 redirection to {self.app.config['AWS_S3_BUCKET_NAME']}")
             try:
                 s3w = S3Worker(ACCESS_KEY_ID=self.app.config['AWS_ACCESS_KEY_ID']
@@ -53,8 +54,8 @@ class UbkgAPI:
                                      , SERVICE_S3_OBJ_PREFIX=self.app.config['AWS_S3_OBJECT_PREFIX'])
                 logger.info('S3Worker initialized with properties:')
                 logger.info(f"--AWS S3 bucket: {self.app.config['AWS_S3_BUCKET_NAME']}")
-                logger.info(f"--S3 object expiration: {self.app.config['AWS_OBJECT_URL_EXPIRATION_IN_SECS']}")
-                logger.info(f"--S3 large response threshold: {self.app.config['LARGE_RESPONSE_THRESHOLD']}")
+                logger.info(f"--S3 object expiration: {self.app.config['AWS_OBJECT_URL_EXPIRATION_IN_SECS']} s")
+                logger.info(f"--S3 large response threshold: {self.app.config['LARGE_RESPONSE_THRESHOLD']} bytes")
                 logger.info(f"--S3 object prefix: {self.app.config['AWS_S3_OBJECT_PREFIX']}")
                 return s3w
             except Exception as s3exception:
@@ -112,7 +113,7 @@ class UbkgAPI:
                                                      self.app.config['USERNAME'],
                                                      self.app.config['PASSWORD'],
                                                      self.app.config['TIMEOUT'],
-                                                     self.app.config['PAYLOADLIMIT'])
+                                                     self.app.config['LARGE_RESPONSE_THRESHOLD'])
                 else:
                     logger.info('Using provided Flask config.')
                     # Set self based on passed in config parameters
@@ -123,7 +124,6 @@ class UbkgAPI:
                                                      self.USERNAME,
                                                      self.PASSWORD,
                                                      28,
-                                                     1000,
                                                      9437184)
                     logger.info("Initialized Neo4jManager successfully for: {self.SERVER}")
 

@@ -73,7 +73,9 @@ class Neo4jConnectionHelper(object):
 
         logger.info('Constraints:')
         logger.info(f'-- timeout: {self._timeout} seconds')
-        logger.info(f'-- payload: {self._payloadlimit} bytes')
+        logger.info(f'-- payload limit (large response threshold): {self._payloadlimit} bytes')
+        if self._payloadlimit == 0:
+            logger.info('-- (Response size will not be checked.)')
 
     # https://neo4j.com/docs/api/python-driver/current/api.html
     def close(self):
