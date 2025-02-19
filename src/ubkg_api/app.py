@@ -112,7 +112,6 @@ class UbkgAPI:
                                                      self.app.config['USERNAME'],
                                                      self.app.config['PASSWORD'],
                                                      self.app.config['TIMEOUT'],
-                                                     self.app.config['ROWLIMIT'],
                                                      self.app.config['PAYLOADLIMIT'])
                 else:
                     logger.info('Using provided Flask config.')
