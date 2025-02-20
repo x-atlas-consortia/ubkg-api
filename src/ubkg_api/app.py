@@ -98,6 +98,9 @@ class UbkgAPI:
         self.app.register_blueprint(sabs_blueprint)
         self.app.register_blueprint(sources_blueprint)
 
+        # February 2025 - Obtain a S3 worker for redirection of large payloads, if configured
+        self.app.s3worker = self._gets3worker()
+
         self.app.neo4jConnectionHelper = None
 
         try:
@@ -131,8 +134,6 @@ class UbkgAPI:
             logger.exception('Failed to initialize the Neo4jManager')
             raise e
 
-        # February 2025 - Obtain a S3 worker for redirection of large payloads, if configured
-        self.app.s3worker = self._gets3worker()
 
         @self.app.route('/', methods=['GET'])
         def index():
