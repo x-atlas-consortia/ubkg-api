@@ -149,10 +149,9 @@ class UbkgAPI:
         def servererror(error):
             return wrap_message(key='error', msg=error.description)
 
-
         @self.app.s3worker()
         # Pointer to the app's S3Worker object
-        def s3worker():
+        def s3worker(self):
             return self.s3worker
 
 ####################################################################################################
