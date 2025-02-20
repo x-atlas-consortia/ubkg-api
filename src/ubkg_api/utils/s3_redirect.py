@@ -38,6 +38,7 @@ def redirect_if_large(resp:str) -> flask.Response:
     # of a S3Worker object on the Flask app.
     try:
         # A threshold of 0 indicates that S3 redirection is disabled.
+        print('DEBUG ', current_app.s3worker)
         if current_app.s3worker.large_response_threshold > 0:
             if len(respstr) > current_app.s3worker.large_response_threshold:
                 return getstashurl(resp=respstr)

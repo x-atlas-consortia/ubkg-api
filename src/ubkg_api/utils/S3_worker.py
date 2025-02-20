@@ -13,7 +13,7 @@ logger = logging.getLogger()
 
 class S3Worker:
 
-    #create an instance of the S3Worker, requred initialization paramerters are:
+    #create an instance of the S3Worker, required initialization parameters are:
     # ACCESS_KEY_ID- the id of an AWS access id/key pair with access to write to a public S3 bucket
     # SECRET_ACCESS_KEY- the secret/key side of the AWS access id/key pair with access to write to a public S3 bucket
     # S3_BUCKET_NAME- the name of the AWS S3 bucket where the results/obect will be stashed
