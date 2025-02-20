@@ -42,7 +42,6 @@ class UbkgAPI:
         This assumes that a S3 bucket has been configured for redirection.
 
         """
-        print(self.app.config)
         if 'AWS_S3_BUCKET_NAME' in self.app.config:
             logger.info('S3 redirection enabled in configuration')
             logger.info(f"Initializing S3 redirection to {self.app.config['AWS_S3_BUCKET_NAME']}")
