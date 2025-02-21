@@ -36,6 +36,8 @@ def getconfigval(configkey:str) -> str:
 
     :param configkey: the key to search
     """
+    print(dir(current_app))
+
     configval = ''
     if hasattr(current_app, configkey):
         print('CHILD API')
