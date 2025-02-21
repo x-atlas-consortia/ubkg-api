@@ -36,7 +36,7 @@ def getconfigval(configkey:str) -> str:
 
     :param configkey: the key to search
     """
-    print(dir(current_app))
+    print(current_app.config)
 
     configval = ''
     if hasattr(current_app, configkey):
