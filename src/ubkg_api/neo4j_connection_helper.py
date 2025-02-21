@@ -1,10 +1,20 @@
-# JAS February 2025 - removed rowlimit
+"""
+Neo4jConnectionHelper class
 
-# JAS February 2024 - Added:
-# 1. configurable values for:
-#    a. timeout to  allow for timeboxed queries
-#    b. rowlimit to limit size of payloads
-# 2. neo4j database properties (e.g., version)
+This class works around Python limitations in passing data between processes to
+set up a connection to a neo4j instance as a class property of a ubkg-api instance.
+
+This addresses the use case in which the ubkg-api is imported as a library by a
+child api. A single neo4j connection instance is kept active in the ubkg-api, so that
+the child api does not need to manage the neo4 connection.
+
+At least that's what I think all of this does.
+
+Instead of accessing the class as a "normal" attribute of the ubkg-api, the
+instance() and create() methods maintain a pointer to the single static property. A global
+variable named "instance" is also involved.
+
+"""
 
 import logging
 import neo4j
