@@ -83,6 +83,7 @@ class UbkgAPI:
                                                      self.app.config['PASSWORD'],
                                                      self.app.config['TIMEOUT'],
                                                      self.app.config['LARGE_RESPONSE_THRESHOLD'])
+                    print('DEBUG: threshold after resetting config', self.app.config['LARGE_RESPONSE_THRESHOLD'])
                 else:
                     logger.info('Using provided Flask config.')
                     # Set self based on passed in config parameters
@@ -94,7 +95,7 @@ class UbkgAPI:
                                                      self.PASSWORD,
                                                      28,
                                                      9437184)
-                    logger.info("Initialized Neo4jManager successfully for: {self.SERVER}")
+                    logger.info(f'Initialized Neo4jManager successfully for: {self.SERVER}')
 
         except Exception as e:
             logger.exception('Failed to initialize the Neo4jManager')
