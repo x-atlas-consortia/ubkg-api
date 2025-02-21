@@ -38,8 +38,12 @@ def getconfigval(configkey:str) -> str:
     """
     configval = ''
     if hasattr(current_app, configkey):
+        print('CHILD API')
+        # loaded in child api
         configval = current_app.configkey
     else:
+        # local
+        print('LOCAL')
         if configkey in current_app.config:
             configval = current_app.config[configkey]
 
