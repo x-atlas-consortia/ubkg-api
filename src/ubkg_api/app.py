@@ -47,6 +47,8 @@ class UbkgAPI:
         the VERSION and BUILD files are located.
         """
 
+        print('IN UBKG-API: config')
+        print(config)
         self.app = Flask(__name__,
                          instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'),
                          instance_relative_config=True)
@@ -101,7 +103,6 @@ class UbkgAPI:
             raise e
 
         # Feb 2025 Log S3 configuration
-        print(self.app.config)
         if 'AWS_S3_BUCKET_NAME' in self.app.config:
             logger.info('S3 redirection specified in configuration:')
             logger.info(f"--S3 bucket: {self.app.config['AWS_S3_BUCKET_NAME']}")
