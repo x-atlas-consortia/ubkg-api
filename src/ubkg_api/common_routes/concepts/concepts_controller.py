@@ -396,6 +396,7 @@ def concepts_concept_identifier_nodes_get(search):
         return make_response(err, 400)
 
     # Feb 2025
+    print('DEBUG: concepts_controller:',current_app.config)
     return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('/paths/subgraph/sequential', methods=['GET'])
