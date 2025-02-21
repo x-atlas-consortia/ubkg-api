@@ -83,7 +83,6 @@ class UbkgAPI:
                                                      self.app.config['PASSWORD'],
                                                      self.app.config['TIMEOUT'],
                                                      self.app.config['LARGE_RESPONSE_THRESHOLD'])
-                    print('DEBUG: threshold after resetting config', self.app.config['LARGE_RESPONSE_THRESHOLD'])
                 else:
                     logger.info('Using provided Flask config.')
                     # Set self based on passed in config parameters
@@ -93,18 +92,18 @@ class UbkgAPI:
                         Neo4jConnectionHelper.create(self.SERVER,
                                                      self.USERNAME,
                                                      self.PASSWORD,
-                                                     28,
-                                                     9437184)
+                                                     self.TIMEOUT,
+                                                     self.LARGE_RESPONSE_THRESHOLD)
                     logger.info(f'Initialized Neo4jManager successfully for: {self.SERVER}')
+
+                # Optional Log S3 configuration
+                if 'AWS_S3_BUCKET_NAME' in self.app.config:
+                    logger.info('S3 redirection specified in configuration:')
+                    logger.info(f"--S3 bucket: {config['AWS_S3_BUCKET_NAME']}")
 
         except Exception as e:
             logger.exception('Failed to initialize the Neo4jManager')
             raise e
-
-        # Feb 2025 Log S3 configuration
-        if 'AWS_S3_BUCKET_NAME' in config:
-            logger.info('S3 redirection specified in configuration:')
-            logger.info(f"--S3 bucket: {config['AWS_S3_BUCKET_NAME']}")
 
         @self.app.route('/', methods=['GET'])
         def index():

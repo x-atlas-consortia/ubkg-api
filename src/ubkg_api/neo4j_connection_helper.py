@@ -120,7 +120,6 @@ class Neo4jConnectionHelper(object):
 
         self._timeout = timeout
 
-
     @property
     def payloadlimit(self):
         """Gets the payloadlimit of this Neo4jConnectionHelper
