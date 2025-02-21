@@ -1,17 +1,20 @@
-# Interface to S3Worker object for redirection of large responses
+# Wrapper for S3Worker object used for S3 redirection of large responses
 
 import flask
 from flask import jsonify, make_response, current_app
 from .http_error_string import check_payload_size
+from .S3_worker import S3Worker
 
-def getstashurl(resp:str)-> flask.Response:
+
+def getstashurl(resp:str, s3w:S3Worker)-> flask.Response:
     """
     Stashes content to the S3 bucket configured in the S3Worker object of the Flask app.
     :param resp: a string assumed to be the response from an API endpoint.
+    :param s3w: S3Worker object
     """
 
     try:
-        s3_url = current_app.s3worker.stash_response_body_if_big(str(resp))
+        s3_url = s3w.stash_response_body_if_big(str(resp))
 
         if s3_url is not None:
             return make_response(s3_url, 303)
@@ -23,9 +26,11 @@ def redirect_if_large(resp:str) -> flask.Response:
     """
     Checks the size of a string, assumed to be the response from an API endpoint.
 
-    If the string exceeds the size limit configured in the S3Worker, the function:
-    1. directs the S3Worker to stash the string in a file in a specified S3 bucket
-    2. returns the URL pointing to the stored string
+    If the string exceeds the size limit configured in the app.cfg, the function returns:
+    1. If S3 redirection is specified in the app.cfg,
+       a. directs the S3Worker to stash the string in a file in a specified S3 bucket
+       b. returns a URL that points to the stored string
+    2. If S3 redirection is not specified, returns a custom HTTP 413 response.
 
     If the string does not exceed the size limit, the function returns the string as JSON.
 
@@ -34,28 +39,32 @@ def redirect_if_large(resp:str) -> flask.Response:
     """
 
     respstr = str(resp)
-    # Check whether S3 redirection has been enabled, as evidenced by the existence
-    # of a S3Worker object on the Flask app.
-    try:
-        # A threshold of 0 indicates that S3 redirection is disabled.
-        print('DEBUG ', current_app.s3worker)
-        if current_app.s3worker.large_response_threshold > 0:
-            if len(respstr) > current_app.s3worker.large_response_threshold:
-                return getstashurl(resp=respstr)
 
-    except AttributeError:
-        # S3 redirection has not been enabled. Use default payload size checking.
-        # Return a 413 (payload too large) error if the response size exceeds the configured payload limit, which should be
-        # smaller than the API gateway payload limit. The payload limit is a property of the Flask app's
-        # neo4jConnectionHelper object.
-        err = check_payload_size(payload=respstr, max_payload_size=current_app.neo4jConnectionHelper.instance().payloadlimit)
-        if err != "ok":
-            return make_response(err, 413)
+    if 'LARGE_RESPONSE_THRESHOLD' in current_app.config:
+
+        threshold = current_app.config['LARGE_RESPONSE_THRESHOLD']
+
+        if threshold > 0:
+
+            if 'AWS_S3_BUCKET_NAME' in current_app.config:
+
+                s3w = S3Worker(ACCESS_KEY_ID=current_app.config['AWS_ACCESS_KEY_ID']
+                   , SECRET_ACCESS_KEY=current_app.config['AWS_SECRET_ACCESS_KEY']
+                   , S3_BUCKET_NAME=current_app.config['AWS_S3_BUCKET_NAME']
+                   , S3_OBJECT_URL_EXPIRATION_IN_SECS=current_app.config['AWS_OBJECT_URL_EXPIRATION_IN_SECS']
+                   , LARGE_RESPONSE_THRESHOLD=current_app.config['LARGE_RESPONSE_THRESHOLD']
+                   , SERVICE_S3_OBJ_PREFIX=current_app.config['AWS_S3_OBJECT_PREFIX'])
+
+                if len(respstr) > threshold:
+                    return getstashurl(resp=respstr,s3w=s3w)
+
+            else:
+
+                # S3 redirection has not been enabled. Use default payload size checking.
+                # Return a 413 (payload too large) error if the response size exceeds the threshold.
+                err = check_payload_size(payload=respstr, max_payload_size=threshold)
+                if err != "ok":
+                    return make_response(err, 413)
 
     # Normal return
     return jsonify(resp)
-
-
-
-
-

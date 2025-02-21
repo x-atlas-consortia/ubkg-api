@@ -257,12 +257,11 @@ def check_payload_size(payload: str, max_payload_size: int) -> str:
     """
 
     payload_size = len(str(payload))
-    print('max_payload_size', max_payload_size)
     if max_payload_size > 0:
         if payload_size > max_payload_size:
             err = (f'The size of the response to the endpoint with the specified parameters ({payload_size} bytes) '
                    f'exceeds the payload limit of {max_payload_size} bytes.')
-        return wrap_message(key="message", msg=err)
+            return wrap_message(key="message", msg=err)
 
     return "ok"
 
