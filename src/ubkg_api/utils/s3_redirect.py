@@ -34,7 +34,7 @@ def redirect_if_large(resp:str) -> flask.Response:
     1. If S3 redirection is specified in the app.cfg,
        a. directs the S3Worker to stash the string in a file in a specified S3 bucket
        b. returns a URL that points to the stored string
-    2. If S3 redirection is not specified, returns a custom HTTP 413 response.
+    2. If S3 redirection is not specified, returns a custom HTTP 403 response.
 
     :param resp: a string assumed to be the response from an API endpoint.
 
@@ -64,10 +64,10 @@ def redirect_if_large(resp:str) -> flask.Response:
         else:
 
             # S3 redirection has not been enabled. Use default payload size checking.
-            # Return a 413 (payload too large) error if the response size exceeds the threshold.
+            # Return a 403 (not authorized) error if the response size exceeds the threshold.
             err = check_payload_size(payload=respstr, max_payload_size=threshold)
             if err != "ok":
-                return make_response(err, 413)
+                return make_response(err, 403)
 
     # Normal return
     return jsonify(resp)
