@@ -19,9 +19,8 @@ TIMEOUT=28000
 LARGE_RESPONSE_THRESHOLD = 9*(2**20) + 900*(2**10) #9.9Mb
 
 # OPTIONAL AWS credentials for S3 redirection. If there are no "AWS_*" keys, the
-# API will return the default HTTP 413 exception.
+# API will return the default HTTP 403 exception.
 # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
-# This is new IAM user hubmap-api-s3-prod created on 10/3/2024
 AWS_ACCESS_KEY_ID = 'AWS_ACCESS_KEY_ID'
 AWS_SECRET_ACCESS_KEY = 'AWS_SECRET_ACCESS_KEY'
 AWS_S3_BUCKET_NAME = 'AWS_S3_BUCKET_NAME'

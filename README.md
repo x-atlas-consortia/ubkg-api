@@ -275,7 +275,7 @@ When deployed behind a server gateway, such as AWS API Gateway, the gateway may 
 on the size of response payload. For example, AWS API Gateway has a response payload limit of 10 MB.
 
 The ubkg-api (loaded as a library by the hs-ontology-api) can return a custom
-HTTP 413 error (Payload too Large) when the response exceeds a specified threshold.
+HTTP 403 error (Not allowed--in this case for too large a response) when the response exceeds a specified threshold.
 The hs-ontology-api can override the default threshold in its app.cfg file:
 ```commandline
 LARGE_RESPONSE_THRESHOLD = 9*(2**20) + 900*(2**10) #9.9Mb
@@ -296,7 +296,7 @@ the **app.cfg** file of hs-ontology-api.
 # following ways:
 # 1. If the threshold is 0, then the response will be passed without any additional processing.
 # 2. If the threshold is nonzero and S3 redirection is not enabled, the API will return
-#    a custom HTTP 413 response.
+#    a custom HTTP 403 response.
 # 3. If the threshold is nonzero and S3 redirection is enabled, the API will stash the
 #    response in a file in an S3 bucket and return a pre-signed URL pointing to the
 #    stashed file.
@@ -305,9 +305,8 @@ the **app.cfg** file of hs-ontology-api.
 LARGE_RESPONSE_THRESHOLD = 9*(2**20) + 900*(2**10) #9.9Mb
 
 # OPTIONAL AWS credentials for S3 redirection. If there are no "AWS_*" keys, the
-# API will return the default HTTP 413 exception.
+# API will return the default HTTP 403 exception.
 # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
-# This is new IAM user hubmap-api-s3-prod created on 10/3/2024
 AWS_ACCESS_KEY_ID = 'AWS_ACCESS_KEY_ID'
 AWS_SECRET_ACCESS_KEY = 'AWS_SECRET_ACCESS_KEY'
 AWS_S3_BUCKET_NAME = 'AWS_S3_BUCKET_NAME'
