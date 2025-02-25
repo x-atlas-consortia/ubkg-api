@@ -59,7 +59,7 @@ def redirect_if_large(resp:str) -> flask.Response:
                                , S3_OBJECT_URL_EXPIRATION_IN_SECS=current_app.config['AWS_OBJECT_URL_EXPIRATION_IN_SECS']
                                , LARGE_RESPONSE_THRESHOLD=current_app.config['LARGE_RESPONSE_THRESHOLD']
                                , SERVICE_S3_OBJ_PREFIX=current_app.config['AWS_S3_OBJECT_PREFIX'])
-                return getstashurl(resp=respstr,s3w=s3w)
+                return getstashurl(resp=respstr.replace("'", '"'),s3w=s3w)
 
         else:
 
