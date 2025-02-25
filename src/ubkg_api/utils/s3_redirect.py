@@ -4,6 +4,7 @@ import flask
 from flask import jsonify, make_response, current_app
 from .http_error_string import check_payload_size
 from .S3_worker import S3Worker
+import json
 
 
 def getstashurl(resp:str, s3w:S3Worker)-> flask.Response:
@@ -14,7 +15,7 @@ def getstashurl(resp:str, s3w:S3Worker)-> flask.Response:
     """
 
     try:
-        s3_url = s3w.stash_response_body_if_big(json.dumps(resp_json).encode('utf-8'))
+        s3_url = s3w.stash_response_body_if_big(json.dumps(resp).encode('utf-8'))
 
         if s3_url is not None:
             return make_response(s3_url, 303)
