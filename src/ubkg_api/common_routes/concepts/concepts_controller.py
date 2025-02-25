@@ -390,11 +390,6 @@ def concepts_concept_identifier_nodes_get(search):
                                    custom_request_path=f"identifier='{search}'", timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Limit the size of the payload, based on the app configuration.
-    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    if err != "ok":
-        return make_response(err, 400)
-
     # Feb 2025
     return redirect_if_large(resp=result)
 
