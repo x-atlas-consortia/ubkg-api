@@ -65,7 +65,7 @@ def redirect_if_large(resp:str) -> flask.Response:
 
             # S3 redirection has not been enabled. Use default payload size checking.
             # Return a 403 (not authorized) error if the response size exceeds the threshold.
-            err = check_payload_size(payload=respstr, max_payload_size=threshold)
+            err = check_payload_size(payload=jsonify(respstr), max_payload_size=threshold)
             if err != "ok":
                 return make_response(err, 403)
 
