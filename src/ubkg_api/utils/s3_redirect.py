@@ -59,13 +59,13 @@ def redirect_if_large(resp:str) -> flask.Response:
                                , S3_OBJECT_URL_EXPIRATION_IN_SECS=current_app.config['AWS_OBJECT_URL_EXPIRATION_IN_SECS']
                                , LARGE_RESPONSE_THRESHOLD=current_app.config['LARGE_RESPONSE_THRESHOLD']
                                , SERVICE_S3_OBJ_PREFIX=current_app.config['AWS_S3_OBJECT_PREFIX'])
-                return getstashurl(resp=respstr,s3w=s3w)
+                return getstashurl(resp=jsonify(respstr),s3w=s3w)
 
         else:
 
             # S3 redirection has not been enabled. Use default payload size checking.
             # Return a 403 (not authorized) error if the response size exceeds the threshold.
-            err = check_payload_size(payload=jsonify(respstr), max_payload_size=threshold)
+            err = check_payload_size(payload=respstr, max_payload_size=threshold)
             if err != "ok":
                 return make_response(err, 403)
 
