@@ -1,8 +1,20 @@
-# JAS February 2024 - Added:
-# 1. configurable values for:
-#    a. timeout to  allow for timeboxed queries
-#    b. rowlimit to limit size of payloads
-# 2. neo4j database properties (e.g., version)
+"""
+Neo4jConnectionHelper class
+
+This class works around Python limitations in passing data between processes to
+set up a connection to a neo4j instance as a class property of a ubkg-api instance.
+
+This addresses the use case in which the ubkg-api is imported as a library by a
+child api. A single neo4j connection instance is kept active in the ubkg-api, so that
+the child api does not need to manage the neo4 connection.
+
+At least that's what I think all of this does.
+
+Instead of accessing the class as a "normal" attribute of the ubkg-api, the
+instance() and create() methods maintain a pointer to the single static property. A global
+variable named "instance" is also involved.
+
+"""
 
 import logging
 import neo4j
@@ -17,13 +29,13 @@ instance = None
 
 class Neo4jConnectionHelper(object):
     @staticmethod
-    def create(server, username, password, timeout, rowlimit, payloadlimit):
+    def create(server, username, password, timeout, payloadlimit):
         if instance is not None:
             raise Exception(
                 "An instance of Neo4jConnectionHelper exists already. "
                 "Use the Neo4jConnectionHelper.instance() method to retrieve it.")
 
-        return Neo4jConnectionHelper(server, username, password, timeout, rowlimit, payloadlimit)
+        return Neo4jConnectionHelper(server, username, password, timeout, payloadlimit)
 
     @staticmethod
     def instance():
@@ -49,14 +61,13 @@ class Neo4jConnectionHelper(object):
             for record in result:
                 return record.get('info')
 
-    def __init__(self, server, username, password, timeout, rowlimit, payloadlimit):
+    def __init__(self, server, username, password, timeout, payloadlimit):
 
         global instance
         self.driver = neo4j.GraphDatabase.driver(server, auth=(username, password))
         if instance is None:
             instance = self
         self._timeout = timeout
-        self._rowlimit = rowlimit
         self._payloadlimit = payloadlimit
         info = self._get_version()
         # The default database name should always be neo4j. The SHOW databases command is administrative, and cannot
@@ -72,8 +83,9 @@ class Neo4jConnectionHelper(object):
 
         logger.info('Constraints:')
         logger.info(f'-- timeout: {self._timeout} seconds')
-        logger.info(f'-- payload: {self._payloadlimit} bytes')
-        logger.info(f'-- row limit: {self._rowlimit}')
+        logger.info(f'-- payload limit (large response threshold): {self._payloadlimit} bytes')
+        if self._payloadlimit == 0:
+            logger.info('-- (Response size will not be checked.)')
 
     # https://neo4j.com/docs/api/python-driver/current/api.html
     def close(self):
@@ -119,25 +131,6 @@ class Neo4jConnectionHelper(object):
         self._timeout = timeout
 
     @property
-    def rowlimit(self):
-        """Gets the rowlimit of this Neo4jConnectionHelper
-
-        :return: The rowlimit of this Neo4jConnectionHelper.
-        :rtype: int
-        """
-        return self._rowlimit
-
-    @rowlimit.setter
-    def rowlimit(self, rowlimit):
-        """Sets the rowlimit of this Neo4jConnectionHelper.
-
-        :param rowlimit: The rowlimit of this Neo4jConnectionHelper.
-        :type rowlimit: int
-        """
-
-        self._rowlimit = rowlimit
-
-    @property
     def payloadlimit(self):
         """Gets the payloadlimit of this Neo4jConnectionHelper
 
@@ -150,7 +143,7 @@ class Neo4jConnectionHelper(object):
     def payloadlimit(self, payloadlimit):
         """Sets the payloadlimit of this Neo4jConnectionHelper.
 
-        :param payloadlimit: The rowlimit of this Neo4jConnectionHelper.
+        :param payloadlimit: The payloadlimit of this Neo4jConnectionHelper.
         :type payloadlimit: int
         """
 

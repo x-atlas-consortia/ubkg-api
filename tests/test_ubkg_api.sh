@@ -180,14 +180,14 @@ echo | tee -a test.out
 
 echo "1. concepts/C0678222Z/concepts => no match; should return custom 404" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C0678222Z/concepts" \
+ --url "${UBKG_URL}/concepts/C4722518Z/concepts" \
  --header "Accept: application/json" | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out
 
 echo "2. concepts/C0678222/concepts => valid concept; should return 200" | tee -a test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C0678222/concepts" \
+ --url "${UBKG_URL}/concepts/C4722518/concepts" \
  --header "Accept: application/json" | cut -c1-60 | tee -a test.out
 echo | tee -a test.out
 echo | tee -a test.out

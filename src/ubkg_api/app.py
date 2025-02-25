@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class UbkgAPI:
+
     def __init__(self, config, package_base_dir):
         """
         If config is a string then it will be treated as a local file path from which to load a file, e.g.
@@ -68,21 +69,26 @@ class UbkgAPI:
 
         self.app.neo4jConnectionHelper = None
 
+        s3bucketname =''
         try:
             if Neo4jConnectionHelper.is_initialized():
                 self.app.neo4jConnectionHelper = Neo4jConnectionHelper.instance()
                 logger.info("Neo4jManager has already been initialized")
             else:
+
                 if isinstance(config, str):
                     logger.info(f'Config provided from file: {config}')
+
                     self.app.config.from_pyfile(config)
                     self.app.neo4jConnectionHelper = \
                         Neo4jConnectionHelper.create(self.app.config['SERVER'],
                                                      self.app.config['USERNAME'],
                                                      self.app.config['PASSWORD'],
                                                      self.app.config['TIMEOUT'],
-                                                     self.app.config['ROWLIMIT'],
-                                                     self.app.config['PAYLOADLIMIT'])
+                                                     self.app.config['LARGE_RESPONSE_THRESHOLD'])
+
+                    if 'AWS_S3_BUCKET_NAME' in self.app.config:
+                        s3bucketname = self.app.config['AWS_S3_BUCKET_NAME']
                 else:
                     logger.info('Using provided Flask config.')
                     # Set self based on passed in config parameters
@@ -92,10 +98,16 @@ class UbkgAPI:
                         Neo4jConnectionHelper.create(self.SERVER,
                                                      self.USERNAME,
                                                      self.PASSWORD,
-                                                     28,
-                                                     1000,
-                                                     9437184)
-                    logger.info("Initialized Neo4jManager successfully for: {self.SERVER}")
+                                                     self.TIMEOUT,
+                                                     self.LARGE_RESPONSE_THRESHOLD)
+                    logger.info(f'Initialized Neo4jManager successfully for: {self.SERVER}')
+
+                    if 'AWS_S3_BUCKET_NAME' in config:
+                        s3bucketname = config['AWS_S3_BUCKET_NAME']
+
+                if s3bucketname != '':
+                    logger.info(f'Optional S3 redirection to bucket named {s3bucketname}')
+
         except Exception as e:
             logger.exception('Failed to initialize the Neo4jManager')
             raise e

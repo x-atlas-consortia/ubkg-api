@@ -1,7 +1,7 @@
 # coding: utf-8
 # Common functions used for format HTTP error messages (404, 400) for endpoints.
 
-from flask import request
+from flask import request, jsonify
 
 def wrap_message(key:str, msg:str) ->dict:
     """
@@ -89,8 +89,8 @@ def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=N
         if timeout > 1:
             errtimeout = errtimeout + "s"
 
-        err = err + f". Note that this endpoint is limited to an execution time of {errtimeout}" \
-                    f" to prevent timeout errors."
+        err = err + f". This endpoint is limited to an execution time of {errtimeout}" \
+                    f" to prevent gateway timeout errors."
 
     return wrap_message(key="message", msg=err)
 
@@ -257,11 +257,11 @@ def check_payload_size(payload: str, max_payload_size: int) -> str:
     """
 
     payload_size = len(str(payload))
-    if payload_size > max_payload_size:
-        err = f"The size of the response to the endpoint with the specified parameters " \
-               f"({int(payload_size)/1024} MB) exceeds the payload limit" \
-               f" of {int(max_payload_size)/1024} MB."
-        return wrap_message(key="message", msg=err)
+    if max_payload_size > 0:
+        if payload_size > max_payload_size:
+            err = (f'The size of the response to the endpoint with the specified parameters ({payload_size} bytes) '
+                   f'exceeds the payload limit of {max_payload_size} bytes.')
+            return wrap_message(key="message", msg=err)
 
     return "ok"
 

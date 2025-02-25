@@ -232,9 +232,9 @@ self.app.register_blueprint(codes_blueprint)
 ```
 
 # Updating SmartAPI documentation
-To add the specification for a new endpoint to the SmartAPI documentation for hs-ontology-api, update the file **hs-ontology-api-spec.yaml**.
+To add the specification for a new endpoint to the SmartAPI documentation for hs-ontology-api, update the file **ubkg-api-spec.yaml**.
 
-hs-ontology-api-spec.yaml conforms to [Swagger OpenAPI](https://swagger.io/specification/) format.
+ubkg-api-spec.yaml conforms to [Swagger OpenAPI](https://swagger.io/specification/) format.
 
 You will need to specify:
 1. Paths that correspond to your endpoint routes.
@@ -252,3 +252,64 @@ python3 -m twine upload dist/*
 
 ## Requirements
 Python 3.9 or newer
+
+# Optional Timeout Feature
+
+When deployed behind a server gateway, such as AWS API Gateway, the gateway may impose constraints
+on timeout. For example, AWS API Gateway has a timeout of 29 seconds.
+
+The ubkg-api (loaded as a library by the hs-ontology-api) can handle timeouts before they result in errors in a gateway. 
+The ubkg-api can return detailed explanations for timeout issues, instead of relying on the 
+sometimes ambiguous messages from the gateway (e.g., a HTTP 500).
+
+To enable custom management of timeout, specify values in the **app.cfg** file, as shown below.
+
+```commandline
+# Maximum duration for the execution of timeboxed queries to prevent service timeout, in seconds
+# The AWS API gateway timeout is 29 seconds.
+TIMEOUT=28
+```
+
+# Managing large payloads
+When deployed behind a server gateway, such as AWS API Gateway, the gateway may impose constraints
+on the size of response payload. For example, AWS API Gateway has a response payload limit of 10 MB.
+
+The ubkg-api (loaded as a library by the hs-ontology-api) can return a custom
+HTTP 403 error (Not allowed--in this case for too large a response) when the response exceeds a specified threshold.
+The hs-ontology-api can override the default threshold in its app.cfg file:
+```commandline
+LARGE_RESPONSE_THRESHOLD = 9*(2**20) + 900*(2**10) #9.9Mb
+```
+
+# Optional S3 redirection for large payloads
+The ubkg-api can redirect large responses to a file 
+in a AWS S3 bucket. Endpoints enabled for S3 redirection will return a 
+URL that points to the file in the S3 bucket. The URL is "pre-signed": consumers can simply
+"get" the URL to download the file locally.
+
+By default, the ubkg-api does not redirect large responses. To enable S3 redirection, specify values in 
+the **app.cfg** file of hs-ontology-api.
+
+```commandline
+# Large response threshold, as determined by the length of the response (payload).
+# Responses with payload sizes that exceed the threshold will be handled in one of the
+# following ways:
+# 1. If the threshold is 0, then the response will be passed without any additional processing.
+# 2. If the threshold is nonzero and S3 redirection is not enabled, the API will return
+#    a custom HTTP 403 response.
+# 3. If the threshold is nonzero and S3 redirection is enabled, the API will stash the
+#    response in a file in an S3 bucket and return a pre-signed URL pointing to the
+#    stashed file.
+# Setting the threshold to 9.9MB avoids triggering a HTTP 500 from an AWS API Gateway's hard
+# 10 MB payload limit
+LARGE_RESPONSE_THRESHOLD = 9*(2**20) + 900*(2**10) #9.9Mb
+
+# OPTIONAL AWS credentials for S3 redirection. If there are no "AWS_*" keys, the
+# API will return the default HTTP 403 exception.
+# https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
+AWS_ACCESS_KEY_ID = 'AWS_ACCESS_KEY_ID'
+AWS_SECRET_ACCESS_KEY = 'AWS_SECRET_ACCESS_KEY'
+AWS_S3_BUCKET_NAME = 'AWS_S3_BUCKET_NAME'
+AWS_S3_OBJECT_PREFIX = 'AWS_S3_OBJECT_PREFIX'
+AWS_OBJECT_URL_EXPIRATION_IN_SECS = 60*60 # 1 hour
+```
