@@ -15,7 +15,8 @@ def getstashurl(resp:str, s3w:S3Worker)-> flask.Response:
     """
 
     try:
-        s3_url = s3w.stash_response_body_if_big(json.dumps(json.loads(resp)).encode('utf-8'))
+        respjson = json.loads(resp)
+        s3_url = s3w.stash_response_body_if_big(json.dumps(respjson).encode('utf-8'))
 
         if s3_url is not None:
             return make_response(s3_url, 303)
