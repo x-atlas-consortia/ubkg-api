@@ -51,7 +51,7 @@ def redirect_if_large(resp) -> flask.Response:
 
         if 'AWS_S3_BUCKET_NAME' in current_app.config:
 
-            if len(str(resp) > threshold:
+            if len(str(resp)) > threshold:
                 s3w = S3Worker(ACCESS_KEY_ID=current_app.config['AWS_ACCESS_KEY_ID']
                                , SECRET_ACCESS_KEY=current_app.config['AWS_SECRET_ACCESS_KEY']
                                , S3_BUCKET_NAME=current_app.config['AWS_S3_BUCKET_NAME']
