@@ -54,8 +54,8 @@ def semantics_semantic_type_semantic_types_get(semantic_type):
     err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
     if err != 'ok':
         return make_response(err, 400)
-    # Set default row limit, based on the app configuration.
-    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
+    # Set default row limit.
+    limit = set_default_maximum(param_value=limit, default=1000)
 
     # Get remaining parameter values from the path or query string.
 
@@ -109,8 +109,8 @@ def semantics_semantic_type_subtypes_get(semantic_type):
     err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
     if err != 'ok':
         return make_response(err, 400)
-    # Set default row limit, based on the app configuration.
-    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
+    # Set default row limit.
+    limit = set_default_maximum(param_value=limit, default=1000)
 
     # Get remaining parameter values from the path or query string.
 

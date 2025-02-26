@@ -156,8 +156,8 @@ def concepts_paths_expand_get(concept_id):
     err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
     if err != 'ok':
         return make_response(err, 400)
-    # Set default row limit, based on the app configuration.
-    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
+    # Set default row limit.
+    limit = set_default_maximum(param_value=limit, default=1000)
 
     # Get remaining parameter values from the path or query string.
     query_concept_id = concept_id
@@ -287,8 +287,8 @@ def concepts_trees_get(concept_id):
     err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
     if err != 'ok':
         return make_response(err, 400)
-    # Set default row limit, based on the app configuration.
-    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
+    # Set default row limit.
+    limit = set_default_maximum(param_value=limit, default=1000)
 
     # Get remaining parameter values from the path or query string.
     query_concept_id = concept_id
@@ -349,8 +349,8 @@ def concepts_subgraph_get():
     err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
     if err != 'ok':
         return make_response(err, 400)
-    # Set default row limit, based on the app configuration.
-    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
+    # Set default row limit.
+    limit = set_default_maximum(param_value=limit, default=1000)
 
     # Get remaining parameter values from the path or query string.
     sab = parameter_as_list(param_name='sab')
@@ -389,11 +389,6 @@ def concepts_concept_identifier_nodes_get(search):
         err = get_404_error_string(prompt_string=f"No Concepts with properties that match the identifier",
                                    custom_request_path=f"identifier='{search}'", timeout=neo4j_instance.timeout)
         return make_response(err, 404)
-
-    # Limit the size of the payload, based on the app configuration.
-    err = check_payload_size(payload=result, max_payload_size=neo4j_instance.payloadlimit)
-    if err != "ok":
-        return make_response(err, 400)
 
     # Feb 2025
     return redirect_if_large(resp=result)
@@ -455,7 +450,7 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
     if err != 'ok':
         return make_response(err, 400)
     # Set default row limit, based on the app configuration.
-    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
+    limit = set_default_maximum(param_value=limit, default=1000)
 
     # Get remaining parameter values from the path or query string.
     relsequence = parameter_as_list(param_name='relsequence')

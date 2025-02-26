@@ -50,8 +50,8 @@ def sabs_codes_counts_get(sab=None):
     err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
     if err != 'ok':
         return make_response(err, 400)
-    # Set default row limit, based on the app configuration.
-    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
+    # Set default row limit.
+    limit = set_default_maximum(param_value=limit, default=1000)
 
     result = sab_code_count_get(neo4j_instance, sab=sab, skip=skip, limit=limit)
     iserr = result is None or result == []
@@ -110,8 +110,8 @@ def sabs_codes_details_sab_get(sab):
     err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
     if err != 'ok':
         return make_response(err, 400)
-    # Set default row limit, based on the app configuration.
-    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
+    # Set default row limit.
+    limit = set_default_maximum(param_value=limit, default=1000)
 
     result = sab_code_detail_get(neo4j_instance, sab=sab, skip=skip, limit=limit)
     iserr = False
@@ -172,8 +172,8 @@ def sabs_sab_term_types_get(sab):
     err = validate_parameter_is_nonnegative(param_name='limit', param_value=limit)
     if err != 'ok':
         return make_response(err, 400)
-    # Set default row limit, based on the app configuration.
-    limit = set_default_maximum(param_value=limit, default=neo4j_instance.rowlimit)
+    # Set default row limit.
+    limit = set_default_maximum(param_value=limit, default=1000)
 
     result = sab_term_type_get_logic(neo4j_instance, sab=sab, skip=skip, limit=limit)
 
