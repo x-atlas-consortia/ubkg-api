@@ -12,6 +12,16 @@ externalDocs:
 servers:
   - url: https://ontology.api.hubmapconsortium.org
     description: Production server
+tags:
+  - name: codes
+  - name: concepts
+  - name: concepts/paths
+  - name: concepts/paths/subgraph
+  - name: general
+  - name: node-types
+  - name: sabs
+  - name: semantic-types
+  - name: terms
 paths:
   /codes/{code_id}/codes:
     get:
@@ -51,6 +61,8 @@ paths:
           description: no Codes for the specified parameters (_code_id_ and _sab_)
         '5XX':
           description: Unknown error
+      tags:
+        - codes
   /codes/{code_id}/concepts:
     get:
       operationId: codes_code_id_concepts_get
@@ -76,6 +88,8 @@ paths:
           description: no Concept nodes for the specified Code
         '5XX':
           description: Unknown error
+      tags:
+        - codes
   /codes/{code_id}/terms:
     get:
       operationId: codes_code_id_terms_get
@@ -108,6 +122,8 @@ paths:
           description: no Term nodes for the specified Code
         '5XX':
           description: Unknown error
+      tags:
+        - codes
   /concepts/{concept_id}/codes:
     get:
       operationId: concepts_concept_id_codes_get
@@ -146,6 +162,8 @@ paths:
           description: no Codes for the specified parameters (_concept_id_ and _sab_)
         '5XX':
           description: Unknown error
+      tags:
+        - concepts
   /concepts/{concept_id}/concepts:
     get:
       operationId: concepts_concept_id_concepts_get
@@ -171,6 +189,8 @@ paths:
           description: no Concepts that have relationships with the specified Concept
         '5XX':
           description: Unknown error
+      tags:
+        - concepts
   /concepts/{concept_id}/definitions:
     get:
       operationId: concepts_concept_id_definitions_get
@@ -196,6 +216,8 @@ paths:
           description: No Definitions associated with the Concept _query_concept_id_.
         '5XX':
           description: Unknown error
+      tags:
+        - concepts
   /concepts/{concept_id}/nodeobjects:
     get:
       operationId: concepts_identifier_nodes_get
@@ -219,6 +241,8 @@ paths:
           description: No Concepts that match the identifier
         '5XX':
           description: Unknown error
+      tags:
+        - concepts
   /concepts/{concept_id}/paths/expand:
     get:
       operationId: concepts_concept_id_paths_expand_get
@@ -286,6 +310,8 @@ paths:
           description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
         '5XX':
           description: Unknown error
+      tags:
+        - concepts/paths
   /concepts/{concept_id}/paths/trees:
     get:
       operationId: concepts_trees_get
@@ -356,6 +382,8 @@ paths:
           description: No Concepts in a spanning tree originating from specified Concept subject to constraints from parameters. Includes responses from queries with execution times that exceed the maximum.
         '5XX':
           description: Unknown error
+      tags:
+        - concepts/paths
   /concepts/paths/subgraph:
     get:
       operationId: concepts_subgraph_get
@@ -402,6 +430,8 @@ paths:
           description: No subgraph for specified relationship types.
         '5XX':
           description: Unknown error
+      tags:
+        - concepts/paths/subgraph
   /concepts/paths/subgraph/sequential:
     get:
       operationId: concepts_paths_subgraph_sequential_get
@@ -441,6 +471,8 @@ paths:
           description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
         '5XX':
           description: Unknown error
+      tags:
+        - concepts/paths/subgraph
   /concepts/{concept_id}/paths/subgraph/sequential:
     get:
       operationId: concepts_concept_id_paths_subgraph_sequential_get
@@ -487,6 +519,8 @@ paths:
           description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
         '5XX':
           description: Unknown error
+      tags:
+        - concepts/paths/subgraph
   /concepts/{origin_concept_id}/paths/shortestpath/{terminus_concept_id}:
     get:
       operationId: concepts_shortestpath_get
@@ -533,6 +567,8 @@ paths:
           description: No shortest path between _origin_concept_id_ and _terminus_concept_id_ with relationship types in _rel_ filtered by sources in _sab_. This includes shortest path queries that exceed the timeout.
         '5XX':
           description: Unknown error
+      tags:
+        - concepts/paths
   /database/server:
     get:
       summary: Returns basic information on the UBKG neo4j database.
@@ -544,6 +580,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DatabaseInfo'
+      tags:
+        - general
   /node-types:
     get:
       summary: Returns list of node types (node labels)--e.g., Code, Concept, etc.
@@ -559,7 +597,8 @@ paths:
           description: No nodes types
         '5XX':
           description: Unknown error
-
+      tags:
+        - node-types
   /node-types/{node_type}/counts:
     get:
       summary: Returns counts of nodes in the database for a specified node type (label).
@@ -583,6 +622,8 @@ paths:
           description: No nodes with label
         '5XX':
           description: Unknown error
+      tags:
+        - node-types
   /node-types/{node_type}/counts-by-sab:
     get:
       summary: Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB), subject to constraints specified in parameters.
@@ -615,6 +656,8 @@ paths:
           description: No nodes with label
         '5XX':
           description: Unknown error
+      tags:
+        - node-types
   /property-types:
     get:
       operationId: property_types_get
@@ -628,6 +671,8 @@ paths:
                 $ref: '#/components/schemas/PropertyTypes'
         '5XX':
           description: Unknown error
+      tags:
+        - general
   /relationship-types:
     get:
       operationId: relationship_types_get
@@ -641,6 +686,8 @@ paths:
                 $ref: '#/components/schemas/RelationshipTypes'
         '5XX':
           description: Unknown error
+      tags:
+        - general
   /sabs:
     get:
       operationId: sabs_get
@@ -656,6 +703,8 @@ paths:
           description: No Sources
         '5XX':
           description: Unknown error
+      tags:
+        - sabs
   /sabs/codes/counts:
     get:
       operationId: sabs_codes_counts_get
@@ -688,6 +737,8 @@ paths:
           description: No Codes for the specified parameters
         '5XX':
           description: Unknown error
+      tags:
+        - sabs
   /sabs/{sab}/codes/counts:
     get:
       operationId: sabs_codes_counts_sab_get
@@ -727,6 +778,8 @@ paths:
           description: No Codes for the specified parameters
         '5XX':
           description: Unknown error
+      tags:
+        - sabs
   /sabs/{sab}/codes/details:
     get:
       operationId: sabs_codes_details_sab_get
@@ -766,6 +819,8 @@ paths:
           description: No Codes for the specified parameters
         '5XX':
           description: Unknown error
+      tags:
+        - sabs
   /sabs/{sab}/term-types:
     get:
       operationId: sabs_term_types_sab_get
@@ -805,6 +860,8 @@ paths:
           description: No term types for the specified parameters
         '5XX':
           description: Unknown error
+      tags:
+        - sabs
   /semantics/semantic-types:
     get:
       operationId: semantics_semantic_types_get
@@ -837,6 +894,8 @@ paths:
           description: No subtypes of the specified Semantic Type.
         '5XX':
           description: Unknown error
+      tags:
+        - semantic-types
   /semantics/semantic-types/{identifier}:
     get:
       operationId: semantics_semantic_types_identifier_get
@@ -876,6 +935,8 @@ paths:
           description: No subtypes of the specified Semantic Type.
         '5XX':
           description: Unknown error
+      tags:
+        - semantic-types
   /semantics/semantic-types/{identifier}/subtypes:
     get:
       operationId: semantics_identifier_semantic_subtypes_get
@@ -915,6 +976,8 @@ paths:
           description: No subtypes of the specified Semantic Type.
         '5XX':
           description: Unknown error
+      tags:
+        - semantic-types
   /terms/{term_id}/codes:
     get:
       operationId: terms_term_id_codes_get
@@ -940,6 +1003,8 @@ paths:
           description: No Codes with terms matching the specified string.
         '5XX':
           description: Unknown error
+      tags:
+        - terms
   /terms/{term_id}/concepts:
     get:
       operationId: terms_term_id_concepts_get
@@ -965,10 +1030,12 @@ paths:
           description: No Concepts with terms matching the specified string.
         '5XX':
           description: Unknown error
+      tags:
+        - terms
   /sources:
     get:
       operationId: sources_get
-      summary: Returns a list of Concept nodes with preferred terms that exactly match the specified string.
+      summary: Returns information on a set of sources (SABs) used to build an instance of the UBKG.
       parameters:
         - name: sab
           in: query
@@ -989,7 +1056,7 @@ paths:
               - data_distillery_context
       responses:
         '200':
-          description: An array of Concepts with preferred terms that exactly match the specified string
+          description: An array of objects for the specified set of sources
           content:
             application/json:
               schema:
@@ -1000,6 +1067,8 @@ paths:
           description: No sources.
         '5XX':
           description: Unknown error
+      tags:
+        - general
 components:
   schemas:
     CodesCodesObj: # Schema name
