@@ -55,10 +55,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CodesCodesObj'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: no Codes for the specified parameters (_code_id_ and _sab_)
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -84,8 +88,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ConceptDetail'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: no Concept nodes for the specified Code
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -118,8 +128,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CodeTerms'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: no Term nodes for the specified Code
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -156,10 +172,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ConceptCodes'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: no Codes for the specified parameters (_concept_id_ and _sab_)
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -185,8 +205,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SabRelationshipConceptTerm'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: no Concepts that have relationships with the specified Concept
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -212,8 +238,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SabDefinition'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No Definitions associated with the Concept _query_concept_id_.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -237,8 +269,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConceptNodes'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No Concepts that match the identifier
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -304,10 +342,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConceptPaths'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; mindepth > maxdepth
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -376,10 +418,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConceptPaths'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; mindepth > maxdepth
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No Concepts in a spanning tree originating from specified Concept subject to constraints from parameters. Includes responses from queries with execution times that exceed the maximum.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -424,10 +470,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConceptPaths'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; incompatible version of neo4j (this endpoint requires at least 5.11.0)
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No subgraph for specified relationship types.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -465,10 +515,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConceptPaths'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; mindepth > maxdepth
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -513,10 +567,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConceptPaths'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; missing required parameter name; non-numeric parameter value; negative value; mindepth > maxdepth
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No Concepts with paths originating from the specified concept and set of parameters. Includes responses from queries with execution times that exceed the maximum.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -561,10 +619,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConceptPaths'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; missing required parameter name
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No shortest path between _origin_concept_id_ and _terminus_concept_id_ with relationship types in _rel_ filtered by sources in _sab_. This includes shortest path queries that exceed the timeout.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -593,11 +655,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NodeTypes'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No nodes types
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
-      tags:
+      tags: 
         - node-types
   /node-types/{node_type}/counts:
     get:
@@ -618,8 +686,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NodeTypeCount'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No nodes with label
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -650,10 +724,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NodeTypeSabCount'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No nodes with label
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -669,6 +747,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PropertyTypes'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -684,6 +770,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RelationshipTypes'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -699,8 +793,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Sabs'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No Sources
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -731,10 +831,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SabCodeCounts'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; non-numeric parameter value; negative parameter value
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No Codes for the specified parameters
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -772,10 +876,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SabCodeDetails'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; non-numeric parameter value; negative parameter value
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No Codes for the specified parameters
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -813,10 +921,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SabCodeDetails'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; non-numeric parameter value; negative parameter value
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No Codes for the specified parameters
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -854,10 +966,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SabTermTypes'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; non-numeric parameter value; negative parameter value
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No term types for the specified parameters
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -888,10 +1004,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SemanticTypes'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; non-numeric parameter value; negative value
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No subtypes of the specified Semantic Type.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -929,10 +1049,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SemanticTypes'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; non-numeric parameter value; negative value
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No subtypes of the specified Semantic Type.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -970,10 +1094,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SemanticSubTypes'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: invalid parameter name; non-numeric parameter value; negative value
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No subtypes of the specified Semantic Type.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -999,8 +1127,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TermtypeCode'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No Codes with terms matching the specified string.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -1026,8 +1160,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TermConcept'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No Concepts with terms matching the specified string.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
@@ -1061,10 +1201,14 @@ paths:
             application/json:
               schema:
                   $ref: '#/components/schemas/Source'
+        '303': 
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
         '400':
-          description: Invalid parameter name; Invalid parameter value
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
         '404':
-          description: No sources.
+          description: No response for the specified parameters. This includes cases in which the query runtime exceeded a timeout configured in the server.
         '5XX':
           description: Unknown error
       tags:
