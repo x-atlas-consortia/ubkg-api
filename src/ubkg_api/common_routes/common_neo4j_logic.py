@@ -1,4 +1,10 @@
 """
+
+March 2025
+Refactored so that all endpoint queries check for timeout, using the
+timeout parameter of a neo4j.Query object.
+
+----------
 January 2024
 Refactored:
 1. to work with neo4j version 5 Cypher
@@ -148,26 +154,37 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     # Fixed issue with SAB filtering.
 
     # Load Cypher query from file.
-    query: str = loadquerystring(filename='codes_code_id_codes.cypher')
+    querytxt: str = loadquerystring(filename='codes_code_id_codes.cypher')
 
     # Filter by code_id.
-    query = query.replace('$code_id', f"'{code_id}'")
+    querytxt = querytxt.replace('$code_id', f"'{code_id}'")
 
     # Filter by code SAB.
     if len(sab) == 0:
-        query = query.replace('$sabfilter', '')
+        querytxt = querytxt.replace('$sabfilter', '')
     else:
-        query = query.replace('$sabfilter', f" AND c.SAB IN {sab}")
+        querytxt = querytxt.replace('$sabfilter', f" AND c.SAB IN {sab}")
 
-    with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query, code_id=code_id, SAB=sab)
-        for record in recds:
-            try:
-                codescodesobj: CodesCodesObj = \
-                    CodesCodesObj(record.get('Concept'), record.get('Code2'), record.get('Sab2')).serialize()
-                codescodesobjs.append(codescodesobj)
-            except KeyError:
-                pass
+    # March 2025
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
+    with (neo4j_instance.driver.session() as session):
+        try:
+            recds: neo4j.Result = session.run(query)
+            for record in recds:
+                try:
+                    codescodesobj: CodesCodesObj =CodesCodesObj(record.get('Concept'),
+                                                                record.get('Code2'),
+                                                                record.get('Sab2')).serialize()
+                    codescodesobjs.append(codescodesobj)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
+
     return codescodesobjs
 
 
@@ -176,54 +193,67 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[Conce
 
     # Dec 2024 - replace in-line Cypher with loaded file.
     # Load Cypher query from file.
-    query: str = loadquerystring(filename='codes_code_id_concepts.cypher')
+    querytxt: str = loadquerystring(filename='codes_code_id_concepts.cypher')
 
     # Filter by code_id.
-    query = query.replace('$code_id', f"'{code_id}'")
+    querytxt = querytxt.replace('$code_id', f"'{code_id}'")
 
-    #query: str = \
-        #'WITH [$code_id] AS query' \
-        #' MATCH (a:Code)<-[:CODE]-(b:Concept)' \
-        #' WHERE a.CodeID IN query' \
-        #' OPTIONAL MATCH (b)-[:PREF_TERM]->(c:Term)' \
-        #' RETURN DISTINCT a.CodeID AS Code, b.CUI AS Concept, c.name as Prefterm' \
-        #' ORDER BY Code ASC, Concept'
+    # March 2025
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        for record in recds:
-            try:
-                conceptdetail: ConceptDetail = ConceptDetail(record.get('Concept'),
-                                                             record.get('Prefterm')).serialize()
-                conceptdetails.append(conceptdetail)
-            except KeyError:
-                pass
-    return conceptdetails
+        try:
+            recds: neo4j.Result = session.run(query)
+            for record in recds:
+                try:
+                    conceptdetail: ConceptDetail = ConceptDetail(record.get('Concept'),
+                                                                 record.get('Prefterm')).serialize()
+                    conceptdetails.append(conceptdetail)
+                except KeyError:
+                    pass
 
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
+
+    return conceptdetails
 
 # https://neo4j.com/docs/api/python-driver/current/api.html#explicit-transactions
 def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: List[str]) -> List[str]:
     codes: List[str] = []
-    query: str = \
+    querytxt: str = \
         'WITH [$concept_id] AS query' \
         ' MATCH (a:Concept)-[:CODE]->(b:Code)' \
         ' WHERE a.CUI IN query AND (b.SAB IN $SAB OR $SAB = [])' \
         ' RETURN DISTINCT a.CUI AS Concept, b.CodeID AS Code, b.SAB AS Sab' \
         ' ORDER BY Concept, Code ASC'
+
+    # March 2025
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query, concept_id=concept_id, SAB=sab)
-        for record in recds:
-            try:
-                code = record.get('Code')
-                codes.append(code)
-            except KeyError:
-                pass
+        try:
+            recds: neo4j.Result = session.run(query, concept_id=concept_id, SAB=sab)
+            for record in recds:
+                try:
+                    code = record.get('Code')
+                    codes.append(code)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
+
     return codes
 
 
 def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> List[SabRelationshipConceptTerm]:
     sabrelationshipconceptprefterms: [SabRelationshipConceptPrefterm] = []
-    query: str = \
+    querytxt: str = \
         'WITH [$concept_id] AS query' \
         ' MATCH (b:Concept)<-[c]-(d:Concept)' \
         ' WHERE b.CUI IN query' \
@@ -232,36 +262,58 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
         ' RETURN DISTINCT a.name AS Prefterm1, b.CUI AS Concept1, c.SAB AS SAB, type(c) AS Relationship,' \
         '  d.CUI AS Concept2, e.name AS Prefterm2' \
         ' ORDER BY Concept1, Relationship, Concept2 ASC, Prefterm1, Prefterm2'
-    with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query, concept_id=concept_id)
-        for record in recds:
-            try:
-                sabrelationshipconceptprefterm: SabRelationshipConceptPrefterm = \
-                    SabRelationshipConceptPrefterm(record.get('SAB'), record.get('Relationship'),
-                                                   record.get('Concept2'), record.get('Prefterm2')).serialize()
-                sabrelationshipconceptprefterms.append(sabrelationshipconceptprefterm)
-            except KeyError:
-                pass
-    return sabrelationshipconceptprefterms
 
+    # March 2025
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        try:
+            recds: neo4j.Result = session.run(query, concept_id=concept_id)
+            for record in recds:
+                try:
+                    sabrelationshipconceptprefterm: SabRelationshipConceptPrefterm = \
+                        SabRelationshipConceptPrefterm(record.get('SAB'),
+                                                       record.get('Relationship'),
+                                                       record.get('Concept2'),
+                                                       record.get('Prefterm2')).serialize()
+                    sabrelationshipconceptprefterms.append(sabrelationshipconceptprefterm)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
+
+    return sabrelationshipconceptprefterms
 
 def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -> List[SabDefinition]:
     sabdefinitions: [SabDefinition] = []
-    query: str = \
+    querytxt: str = \
         'WITH [$concept_id] AS query' \
         ' MATCH (a:Concept)-[:DEF]->(b:Definition)' \
         ' WHERE a.CUI in query' \
         ' RETURN DISTINCT a.CUI AS Concept, b.SAB AS SAB, b.DEF AS Definition' \
         ' ORDER BY Concept, SAB'
+
+    # March 2025
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query, concept_id=concept_id)
-        for record in recds:
-            try:
-                sabdefinition: SabDefinition = SabDefinition(record.get('SAB'),
-                                                             record.get('Definition')).serialize()
-                sabdefinitions.append(sabdefinition)
-            except KeyError:
-                pass
+        try:
+            recds: neo4j.Result = session.run(query, concept_id=concept_id)
+            for record in recds:
+                try:
+                    sabdefinition: SabDefinition = SabDefinition(record.get('SAB'),
+                                                                 record.get('Definition')).serialize()
+                    sabdefinitions.append(sabdefinition)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
+
     return sabdefinitions
 
 def get_graph(neo4j_instance, query: neo4j.Query) -> ConceptGraph:
@@ -289,7 +341,7 @@ def get_graph(neo4j_instance, query: neo4j.Query) -> ConceptGraph:
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return {}
+                return None
 
     # There will be a maximum of one record.
     return conceptgraph
@@ -433,7 +485,7 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
     """
     semantictypes: [SemanticType] = []
     # Load and parameterize base query.
-    query = loadquerystring('semantics_semantic_types.cypher')
+    querytxt = loadquerystring('semantics_semantic_types.cypher')
 
     # The query can handle a list of multiple type identifiers (with proper formatting using format_list_for_query) or
     # no values; however, the routes in the controller limit the type identifier to a single path variable.
@@ -444,24 +496,33 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
         semtypes = [semtype]
 
     types = format_list_for_query(listquery=semtypes, doublequote=True)
-    query = query.replace('$types', types)
+    querytxt = querytxt.replace('$types', types)
 
-    query = query.replace('$skip', str(skip))
-    query = query.replace('$limit', str(limit))
+    querytxt = querytxt.replace('$skip', str(skip))
+    querytxt = querytxt.replace('$limit', str(limit))
+
+    # March 2025
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        # Identify the absolute position of the semantic type in the return.
-        position = int(skip) + 1
-        for record in recds:
-            # Each row from the query includes a dict that contains the actual response content.
-            semantic_type = record.get('semantic_type')
-            try:
-                semantictype: SemanticType = SemanticType(semantic_type, position).serialize()
-                semantictypes.append(semantictype)
-                position = position + 1
-            except KeyError:
-                pass
+        try:
+            recds: neo4j.Result = session.run(query)
+            # Identify the absolute position of the semantic type in the return.
+            position = int(skip) + 1
+            for record in recds:
+                # Each row from the query includes a dict that contains the actual response content.
+                semantic_type = record.get('semantic_type')
+                try:
+                    semantictype: SemanticType = SemanticType(semantic_type, position).serialize()
+                    semantictypes.append(semantictype)
+                    position = position + 1
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
 
     return semantictypes
 
@@ -484,7 +545,7 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
     """
     semantictypes: [SemanticType] = []
     # Load and parameterize base query.
-    query = loadquerystring('semantics_semantic_subtypes.cypher')
+    querytxt = loadquerystring('semantics_semantic_subtypes.cypher')
 
     # The query can handle a list of multiple type identifiers (with proper formatting using format_list_for_query) or
     # no values; however, the routes in the controller limit the type identifier to a single path variable.
@@ -495,24 +556,33 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
         semtypes = [semtype]
 
     types = format_list_for_query(listquery=semtypes, doublequote=True)
-    query = query.replace('$types', types)
+    querytxt = querytxt.replace('$types', types)
 
-    query = query.replace('$skip', str(skip))
-    query = query.replace('$limit', str(limit))
+    querytxt = querytxt.replace('$skip', str(skip))
+    querytxt = querytxt.replace('$limit', str(limit))
+
+    # March 2025
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        # Identify the absolute position of the semantic type in the return.
-        position = int(skip) + 1
-        for record in recds:
-            # Each row from the query includes a dict that contains the actual response content.
-            semantic_type = record.get('semantic_subtype')
-            try:
-                semantictype: SemanticType = SemanticType(semantic_type, position).serialize()
-                semantictypes.append(semantictype)
-                position = position + 1
-            except KeyError:
-                pass
+        try:
+            recds: neo4j.Result = session.run(query)
+            # Identify the absolute position of the semantic type in the return.
+            position = int(skip) + 1
+            for record in recds:
+                # Each row from the query includes a dict that contains the actual response content.
+                semantic_type = record.get('semantic_subtype')
+                try:
+                    semantictype: SemanticType = SemanticType(semantic_type, position).serialize()
+                    semantictypes.append(semantictype)
+                    position = position + 1
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
 
     return semantictypes
 
@@ -538,16 +608,23 @@ def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[Termtype
 
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-    with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        for record in recds:
-            try:
-                termtypecode: TermtypeCode = TermtypeCode(record.get('TermType'), record.get('Code')).serialize()
-                termtypecodes.append(termtypecode)
-            except KeyError:
-                pass
-    return termtypecodes
 
+    with neo4j_instance.driver.session() as session:
+        try:
+            recds: neo4j.Result = session.run(query)
+            for record in recds:
+                try:
+                    termtypecode: TermtypeCode = TermtypeCode(record.get('TermType'),
+                                                              record.get('Code')).serialize()
+                    termtypecodes.append(termtypecode)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
+
+    return termtypecodes
 
 def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     concepts: [str] = []
@@ -567,12 +644,17 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        for record in recds:
-            try:
-                concepts.append(record)
-            except KeyError:
-                pass
+        try:
+            recds: neo4j.Result = session.run(query)
+            for record in recds:
+                try:
+                    concepts.append(record)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
 
     return concepts
 
@@ -635,17 +717,22 @@ def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[Conce
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        for record in recds:
-            concept = record.get('nodeobject')
-            # Remove null placeholder dictionaries from nested list objects.
-            concept['semantic_types'] = remove_null_placeholder_objects(concept.get('semantic_types'))
-            concept['definitions'] = remove_null_placeholder_objects(concept.get('definitions'))
-            try:
-                conceptnode: ConceptNode = ConceptNode(concept).serialize()
-                conceptnodes.append(conceptnode)
-            except KeyError:
-                pass
+        try:
+            recds: neo4j.Result = session.run(query)
+            for record in recds:
+                concept = record.get('nodeobject')
+                # Remove null placeholder dictionaries from nested list objects.
+                concept['semantic_types'] = remove_null_placeholder_objects(concept.get('semantic_types'))
+                concept['definitions'] = remove_null_placeholder_objects(concept.get('definitions'))
+                try:
+                    conceptnode: ConceptNode = ConceptNode(concept).serialize()
+                    conceptnodes.append(conceptnode)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
 
     return {'nodeobjects': conceptnodes}
     #return conceptnodes
@@ -745,20 +832,25 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        total_count = 0
-        for record in recds:
-            # Each row from the query includes a dict that contains the actual response content.
-            output = record.get('output')
-            node_types = output.get('node_types')
-            for node_type in node_types:
-                count_by_label = node_type.get('count')
-                total_count = total_count + count_by_label
-            try:
-                nodetype: NodeType = NodeType(node_type).serialize()
-                nodetypes.append(nodetype)
-            except KeyError:
-                pass
+        try:
+            recds: neo4j.Result = session.run(query)
+            total_count = 0
+            for record in recds:
+                # Each row from the query includes a dict that contains the actual response content.
+                output = record.get('output')
+                node_types = output.get('node_types')
+                for node_type in node_types:
+                    count_by_label = node_type.get('count')
+                    total_count = total_count + count_by_label
+                try:
+                    nodetype: NodeType = NodeType(node_type).serialize()
+                    nodetypes.append(nodetype)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
 
     dictret = {'total_count': total_count, 'node_types': nodetypes}
     return dictret
@@ -788,21 +880,25 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        total_count = 0
-        for record in recds:
-            # Each row from the query includes a dict that contains the actual response content.
-            output = record.get('output')
-            node_types = output.get('node_types')
-            print(node_types)
-            for node_type in node_types:
-                count_by_label = node_type.get('count')
-                total_count = total_count + count_by_label
-                try:
-                    nodetype: NodeType = NodeType(node_type).serialize()
-                    nodetypes.append(nodetype)
-                except KeyError:
-                    pass
+        try:
+            recds: neo4j.Result = session.run(query)
+            total_count = 0
+            for record in recds:
+                # Each row from the query includes a dict that contains the actual response content.
+                output = record.get('output')
+                node_types = output.get('node_types')
+                for node_type in node_types:
+                    count_by_label = node_type.get('count')
+                    total_count = total_count + count_by_label
+                    try:
+                        nodetype: NodeType = NodeType(node_type).serialize()
+                        nodetypes.append(nodetype)
+                    except KeyError:
+                        pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
 
     dictret = {'total_count': total_count, 'node_types': nodetypes}
     return dictret
@@ -819,21 +915,30 @@ def node_types_get_logic(neo4j_instance) -> dict:
     """
     nodetypes: [dict] = []
 
-    query = 'CALL db.labels() YIELD label RETURN apoc.coll.sort(COLLECT(label)) AS node_types'
+    querytxt = 'CALL db.labels() YIELD label RETURN apoc.coll.sort(COLLECT(label)) AS node_types'
+
+    # Mar 2025
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
+        try:
+            recds: neo4j.Result = session.run(query)
 
-        for record in recds:
-            try:
-                nodetype = record.get('node_types')
-                nodetypes.append(nodetype)
-            except KeyError:
-                pass
+            for record in recds:
+                try:
+                    nodetype = record.get('node_types')
+                    nodetypes.append(nodetype)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
+
     # The query returns a single record.
     dictret = {'node_types': nodetype}
     return dictret
-
 
 def property_types_get_logic(neo4j_instance) -> dict:
     """
@@ -846,17 +951,27 @@ def property_types_get_logic(neo4j_instance) -> dict:
     """
     propertytypes: [dict] = []
 
-    query = 'CALL db.propertyKeys() YIELD propertyKey RETURN apoc.coll.sort(COLLECT(propertyKey)) AS properties'
+    querytxt = 'CALL db.propertyKeys() YIELD propertyKey RETURN apoc.coll.sort(COLLECT(propertyKey)) AS properties'
+
+    # Mar 2025
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
+        try:
+            recds: neo4j.Result = session.run(query)
 
-        for record in recds:
-            try:
-                propertytype = record.get('properties')
-                propertytypes.append(propertytype)
-            except KeyError:
-                pass
+            for record in recds:
+                try:
+                    propertytype = record.get('properties')
+                    propertytypes.append(propertytype)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
+
     # The query returns a single record.
     dictret = {'property_types': propertytype}
     return dictret
@@ -873,17 +988,26 @@ def relationship_types_get_logic(neo4j_instance) -> dict:
     """
     reltypes: [dict] = []
 
-    query = 'CALL db.relationshipTypes() YIELD relationshipType ' \
+    querytxt = 'CALL db.relationshipTypes() YIELD relationshipType ' \
             'RETURN apoc.coll.sort(COLLECT(relationshipType)) AS relationship_types'
 
+    # Mar 2025
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        for record in recds:
-            try:
-                reltype = record.get('relationship_types')
-                reltypes.append(reltype)
-            except KeyError:
-                pass
+        try:
+            recds: neo4j.Result = session.run(query)
+            for record in recds:
+                try:
+                    reltype = record.get('relationship_types')
+                    reltypes.append(reltype)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
 
     # The query has a single record.
     dictret = {'relationship_types': reltype}
@@ -903,17 +1027,27 @@ def sabs_get_logic(neo4j_instance) -> dict:
 
     # The commented version of the query results in a OOME.
     # query = 'MATCH (n:Code) RETURN apoc.coll.sort(COLLECT(n.SAB)) AS sab'
-    query = 'CALL {match (n:Code) return distinct n.SAB AS sab ORDER BY sab} WITH COLLECT(sab) AS sabs RETURN sabs'
+    querytxt = 'CALL {match (n:Code) return distinct n.SAB AS sab ORDER BY sab} WITH COLLECT(sab) AS sabs RETURN sabs'
+
+    # Mar 2025
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
+        try:
+            recds: neo4j.Result = session.run(query)
 
-        for record in recds:
-            try:
-                sab = record.get('sabs')
-                sabs.append(sab)
-            except KeyError:
-                pass
+            for record in recds:
+                try:
+                    sab = record.get('sabs')
+                    sabs.append(sab)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
+
     # The query returns a single record.
     dictret = {'sabs': sab}
     return dictret
@@ -934,31 +1068,39 @@ def sab_code_count_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
     sabs: [dict] = []
 
     # Load and parameterize query.
-    query = loadquerystring('sabs_codes_counts.cypher')
+    querytxt = loadquerystring('sabs_codes_counts.cypher')
     if sab is None:
         sabjoin = ''
     else:
         sabjoin = format_list_for_query(listquery=[sab], doublequote=True)
-    query = query.replace('$sab', sabjoin)
+    querytxt = querytxt.replace('$sab', sabjoin)
 
-    query = query.replace('$skip', str(skip))
-    query = query.replace('$limit', str(limit))
+    querytxt = querytxt.replace('$skip', str(skip))
+    querytxt = querytxt.replace('$limit', str(limit))
 
+    # Mar 2025
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
+        try:
+            recds: neo4j.Result = session.run(query)
 
-        # Track the position of the sabs in the list, based on the value of skip.
-        position = int(skip) + 1
-        for record in recds:
-            try:
-                sab = record.get('sabs')
-                for s in sab:
-                    s['position'] = position
-                    position = position + 1
-                sabs.append(sab)
+            # Track the position of the sabs in the list, based on the value of skip.
+            position = int(skip) + 1
+            for record in recds:
+                try:
+                    sab = record.get('sabs')
+                    for s in sab:
+                        s['position'] = position
+                        position = position + 1
+                    sabs.append(sab)
 
-            except KeyError:
-                pass
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
 
     # The query has a single record.
     dictret = {'sabs': sab}
@@ -995,26 +1137,30 @@ def sab_code_detail_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        # Track the position of the codes in the list, based on the value of skip.
-        position = int(skip) + 1
-        res_codes = {}
-        for record in recds:
-            output = record.get('output')
-            try:
-                res_codes = output.get('codes')
-                for c in res_codes:
-                    c['position'] = position
-                    position = position + 1
-                codes.append(res_codes)
+        try:
+            recds: neo4j.Result = session.run(query)
+            # Track the position of the codes in the list, based on the value of skip.
+            position = int(skip) + 1
+            res_codes = {}
+            for record in recds:
+                output = record.get('output')
+                try:
+                    res_codes = output.get('codes')
+                    for c in res_codes:
+                        c['position'] = position
+                        position = position + 1
+                    codes.append(res_codes)
 
-            except KeyError:
-                pass
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
 
     # The query has a single record.
     dictret = {'codes': res_codes}
     return dictret
-
 
 def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
     """
@@ -1030,21 +1176,31 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
     """
     termtypes: [dict] = []
 
-    query = loadquerystring(filename='sabs_term_types.cypher')
+    querytxt = loadquerystring(filename='sabs_term_types.cypher')
     sabjoin = format_list_for_query(listquery=[sab], doublequote=True)
-    query = query.replace('$sab', sabjoin)
-    query = query.replace('$skip', str(skip))
-    query = query.replace('$limit', str(limit))
+    querytxt = querytxt.replace('$sab', sabjoin)
+    querytxt = querytxt.replace('$skip', str(skip))
+    querytxt = querytxt.replace('$limit', str(limit))
+
+    # MAY 2024 Replacing timebox method.
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
+        try:
+            recds: neo4j.Result = session.run(query)
 
-        for record in recds:
-            try:
-                termtype = record.get('sabs')
-                termtypes.append(termtype)
-            except KeyError:
-                pass
+            for record in recds:
+                try:
+                    termtype = record.get('sabs')
+                    termtypes.append(termtype)
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
+
     # The query returns a single record.
 
     return termtype
@@ -1081,15 +1237,20 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        for record in recds:
+        try:
+            recds: neo4j.Result = session.run(query)
+            for record in recds:
 
-            source = record.get('response')
-            try:
-                sources.append(source)
+                source = record.get('response')
+                try:
+                    sources.append(source)
 
-            except KeyError:
-                pass
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
 
     return source
 
@@ -1121,14 +1282,19 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query)
-        for record in recds:
-            term = record.get('response')
-            try:
-                terms.append(term)
+        try:
+            recds: neo4j.Result = session.run(query)
+            for record in recds:
+                term = record.get('response')
+                try:
+                    terms.append(term)
 
-            except KeyError:
-                pass
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                return None
 
     # The query has either zero records or one record
     if len(terms) == 1:
