@@ -18,7 +18,7 @@ def property_type_get():
 
     result = property_types_get_logic(neo4j_instance)
     if result is None or result == []:
-        err = get_404_error_string(prompt_string="No property keys")
+        err = get_404_error_string(prompt_string="No property keys", timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Mar 2025

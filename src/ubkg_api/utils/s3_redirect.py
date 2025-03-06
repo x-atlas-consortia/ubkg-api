@@ -70,4 +70,9 @@ def redirect_if_large(resp) -> flask.Response:
                 return make_response(err, 403)
 
     # Normal return
-    return jsonify(resp)
+    if isinstance(resp, dict):
+        # The response is already in JSON format.
+        return resp
+    else:
+        # The response is a list.
+        return jsonify(resp)

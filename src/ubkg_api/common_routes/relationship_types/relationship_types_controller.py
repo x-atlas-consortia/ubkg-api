@@ -15,7 +15,7 @@ def relationship_type_get():
 
     result = relationship_types_get_logic(neo4j_instance)
     if result is None or result == []:
-        err = get_404_error_string(prompt_string="No relationship types")
+        err = get_404_error_string(prompt_string="No relationship types", timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Mar 2025

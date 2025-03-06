@@ -3,11 +3,11 @@
 
 from flask import request, jsonify
 
-def wrap_message(key:str, msg:str, note: str) ->dict:
+def wrap_message(key:str, msg:str, note=None) ->dict:
     """
     Wraps a return message string in JSON format.
     """
-    if note == '':
+    if note is None:
         return {key: msg}
     else:
         return {key: msg, "note":note}
@@ -86,6 +86,7 @@ def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=N
 
     err = err + format_request_path(custom_err=custom_request_path) + format_request_query_string() + format_request_body()
 
+    note = None
     if timeout is not None:
         errtimeout = f"{timeout} second"
         if timeout > 1:

@@ -388,7 +388,8 @@ def concepts_concept_identifier_nodes_get(search):
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No nodeobjects for concepts with identifier",
-                                   custom_request_path=f"identifier='{search}'", timeout=neo4j_instance.timeout)
+                                   custom_request_path=f"identifier='{search}'",
+                                   timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Feb 2025

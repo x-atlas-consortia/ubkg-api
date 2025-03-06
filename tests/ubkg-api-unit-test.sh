@@ -613,7 +613,7 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "15. concepts/C2720507/paths/trees?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of&maxdepth=3&skip=1&limit=10 => valid, list sab, rel, no mindepth: should return 200" | tee -a ubkg_unit_test.out
+echo "14. concepts/C2720507/paths/trees?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of&maxdepth=3&skip=1&limit=10 => valid, list sab, rel, no mindepth: should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&sab=UBERON&rel=isa&rel=part_of&maxdepth=3&skip=1&limit=10" \
 --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
@@ -720,7 +720,6 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
-
 
 #--------------------------------------------
 echo "TESTS FOR: node-types/counts-by-sab GET" | tee -a ubkg_unit_test.out
@@ -844,7 +843,7 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "4. sabs/codes/counts?skip=5&limit=10 => valid: should return 200" | tee -a ubkg_unit_test.out
+echo "6. sabs/codes/counts?skip=5&limit=10 => valid: should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/sabs/codes/counts?skip=5&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
@@ -892,14 +891,14 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "4. sabs/SNOMEDCT_USA/codes/counts?skip=0&limit=10 => no match: should return custom 404" | tee -a ubkg_unit_test.out
+echo "6. sabs/SNOMEDCT_USA/codes/counts?skip=0&limit=10 => no match: should return custom 404" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/sabs/SNOMEDCT_USA/codes/counts?skip=0&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "5. sabs/SNOMEDCT_US/codes/counts?skip=0&limit=10 => valid: should return 200" | tee -a ubkg_unit_test.out
+echo "7. sabs/SNOMEDCT_US/codes/counts?skip=0&limit=10 => valid: should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/sabs/SNOMEDCT_US/codes/counts?skip=0&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
@@ -960,14 +959,14 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "5. sabs/SNOMEDCT_USA/codes/details => no match: should return custom 404" | tee -a ubkg_unit_test.out
+echo "6. sabs/SNOMEDCT_USA/codes/details => no match: should return custom 404" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/sabs/SNOMEDCT_USA/codes/details" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "3. sabs/SNOMEDCT_US/codes/details?skip=0&limit=10 => valid: should return 200" | tee -a ubkg_unit_test.out
+echo "7. sabs/SNOMEDCT_US/codes/details?skip=0&limit=10 => valid: should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/sabs/SNOMEDCT_US/codes/details?skip=0&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
@@ -1068,42 +1067,42 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "1. semantics/semantic-types/Anatomical%20Structure?skip=-1&limit=10 => negative skip; should return custom 400" | tee -a ubkg_unit_test.out
+echo "2. semantics/semantic-types/Anatomical%20Structure?skip=-1&limit=10 => negative skip; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=-1&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "2. semantics/semantic-types/Anatomical%20Structure?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a ubkg_unit_test.out
+echo "3. semantics/semantic-types/Anatomical%20Structure?skip=1&limit=-1 => negative limit; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=1&limit=-1" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "3. semantics/semantic-types/Anatomical%20Structure?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a ubkg_unit_test.out
+echo "4. semantics/semantic-types/Anatomical%20Structure?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=-1&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "4. semantics/semantic-types/Anatomical%20Structure?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a ubkg_unit_test.out
+echo "5. semantics/semantic-types/Anatomical%20Structure?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=1&limit=-1" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "5. semantics/semantic-types/Anatomical%20Structurez?skip=1&limit=10 => no match; should return custom 404" | tee -a ubkg_unit_test.out
+echo "6. semantics/semantic-types/Anatomical%20Structurez?skip=1&limit=10 => no match; should return custom 404" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structurez?skip=1&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "6. semantics/semantic-types/Anatomical%20Structure?&skip=0&limit=10 => valid semantic type; should return 200" | tee -a ubkg_unit_test.out
+echo "7. semantics/semantic-types/Anatomical%20Structure?&skip=0&limit=10 => valid semantic type; should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?&skip=0&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out

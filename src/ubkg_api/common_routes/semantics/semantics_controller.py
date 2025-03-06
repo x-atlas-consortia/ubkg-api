@@ -68,7 +68,8 @@ def semantics_semantic_type_semantic_types_get(semantic_type):
         # Empty result
         errtype = "No Semantic Types match the specified identifier"
         err = get_404_error_string(prompt_string=f"{errtype}",
-                                   custom_request_path=f"'{semantic_type}'")
+                                   custom_request_path=f"'{semantic_type}'",
+                                   timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Wrap origin and path list in a dictionary that will become the JSON response.
@@ -133,7 +134,8 @@ def semantics_semantic_type_subtypes_get(semantic_type):
         errtype = "No subtypes of a Semantic Type matching the specified identifier"
 
         err = get_404_error_string(prompt_string=f"{errtype}",
-                                   custom_request_path=f"'{semantic_type}'")
+                                   custom_request_path=f"'{semantic_type}'",
+                                   timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Wrap origin and path list in a dictionary that will become the JSON response.

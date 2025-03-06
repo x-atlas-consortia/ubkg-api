@@ -35,7 +35,7 @@ def sabs_codes_counts_sab_get(sab):
 
 
 def sabs_codes_counts_get(sab=None):
-    # Returns relationship types
+    # Returns counts of codes for SABs
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
     # Validate parameters.
@@ -73,7 +73,8 @@ def sabs_codes_counts_get(sab=None):
 
     if iserr:
         err = get_404_error_string(prompt_string="No sources",
-                                   custom_request_path=f"sab='{sab}'")
+                                   custom_request_path=f"sab='{sab}'",
+                                   timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Mar 2025
@@ -136,7 +137,8 @@ def sabs_codes_details_sab_get(sab):
 
     if iserr:
         err = get_404_error_string(prompt_string="No codes",
-                                   custom_request_path=f"sab='{sab}'", timeout=neo4j_instance.timeout)
+                                   custom_request_path=f"sab='{sab}'",
+                                   timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Mar 2025
@@ -197,7 +199,9 @@ def sabs_sab_term_types_get(sab):
         iserr = len(termtypes) == 0
 
     if iserr:
-        err = get_404_error_string(prompt_string="No term types", custom_request_path=f"sab='{sab}'")
+        err = get_404_error_string(prompt_string="No term types",
+                                   custom_request_path=f"sab='{sab}'",
+                                   timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Mar 2025
