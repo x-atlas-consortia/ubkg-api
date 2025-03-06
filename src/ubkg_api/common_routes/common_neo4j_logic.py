@@ -725,9 +725,9 @@ def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[Conce
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 return None
 
-    return {'nodeobjects': conceptnodes}
-    #return conceptnodes
-
+    if conceptnodes != []:
+        return {'nodeobjects': conceptnodes}
+    return conceptnodes
 
 def database_info_server_get_logic(neo4j_instance) -> dict:
     # Obtains neo4j database server information

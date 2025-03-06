@@ -3,12 +3,14 @@
 
 from flask import request, jsonify
 
-def wrap_message(key:str, msg:str) ->dict:
+def wrap_message(key:str, msg:str, note: str) ->dict:
     """
     Wraps a return message string in JSON format.
     """
-
-    return {key: msg}
+    if note == '':
+        return {key: msg}
+    else:
+        return {key: msg, "note":note}
 
 def format_request_path(custom_err=None):
     """
@@ -89,10 +91,10 @@ def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=N
         if timeout > 1:
             errtimeout = errtimeout + "s"
 
-        err = err + f". This endpoint is limited to an execution time of {errtimeout}" \
+        note = f"NOTE: This may be because of a timeout issue. This endpoint is limited to an execution time of {errtimeout}" \
                     f" to prevent gateway timeout errors."
 
-    return wrap_message(key="message", msg=err)
+    return wrap_message(key="message", msg=err, note=note)
 
 
 def get_number_agreement(list_items=None):

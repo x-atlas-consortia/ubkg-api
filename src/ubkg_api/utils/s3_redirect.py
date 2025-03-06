@@ -16,9 +16,10 @@ def getstashurl(resp, s3w:S3Worker)-> flask.Response:
 
     try:
         s3_url = s3w.stash_response_body_if_big(json.dumps(resp).encode('utf-8'))
-
+        msg = {"message":"The response has been written to a file available at the URL.",
+               "url": s3_url}
         if s3_url is not None:
-            return make_response(s3_url, 303)
+            return make_response(msg, 303)
     except:
         err = 'Unexpected error storing large results in S3'
         return make_response(err, 500)

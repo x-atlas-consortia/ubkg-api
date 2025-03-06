@@ -170,7 +170,7 @@ def concepts_paths_expand_get(concept_id):
     iserr = result is None or result == {}
 
     if iserr:
-        err = get_404_error_string(prompt_string=f"No Concepts in paths with specified parameters",
+        err = get_404_error_string(prompt_string=f"No expanded paths found for specified parameters",
                                    custom_request_path=f"query_concept_id='{query_concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
@@ -213,7 +213,7 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
                                              terminus_concept_id=terminus_concept_id, sab=sab, rel=rel)
     if result is None or result == {}:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No paths between Concepts",
+        err = get_404_error_string(prompt_string=f"No paths found between Concepts",
                                    custom_request_path=f"origin_concept_id='{origin_concept_id}' and "
                                                        f"terminus_concept_id='{terminus_concept_id}'",
                                    timeout=neo4j_instance.timeout)
@@ -299,7 +299,7 @@ def concepts_trees_get(concept_id):
                                       mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
     if result is None or result == {}:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concepts in spanning tree with specified parameters",
+        err = get_404_error_string(prompt_string=f"No spanning tree found for specified parameters",
                                    custom_request_path=f"query_concept_id='{query_concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
@@ -360,8 +360,9 @@ def concepts_subgraph_get():
                                          skip=skip, limit=limit)
     if result is None or result == {}:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No subgraphs (pairs of Concepts linked by relationships) for "
-                                                 f"specified relationship types", timeout=neo4j_instance.timeout)
+        err = get_404_error_string(prompt_string=f"No subgraphs (pairs of Concepts linked by relationships) found for "
+                                                 f"specified relationship types",
+                                   timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
     # Feb 2025
@@ -386,7 +387,7 @@ def concepts_concept_identifier_nodes_get(search):
     result = concepts_identfier_node_get_logic(neo4j_instance, search=search)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string=f"No Concepts with properties that match the identifier",
+        err = get_404_error_string(prompt_string=f"No nodeobjects for concepts with identifier",
                                    custom_request_path=f"identifier='{search}'", timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
@@ -470,9 +471,15 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
 
     iserr = result is None or result == {}
 
+    if concept_id == None:
+        custom_request_path = f'any concept'
+    else:
+        custom_request_path = f"concept with identifier '{concept_id}'"
+    custom_request_path = custom_request_path + f" with sequential relationships '{relsequence}'"
+
     if iserr:
-        err = get_404_error_string(prompt_string=f"No Concepts in paths with specified parameters",
-                                   custom_request_path=f"startCUI='{concept_id}'",
+        err = get_404_error_string(prompt_string=f"No sequential paths found starting",
+                                   custom_request_path=custom_request_path,
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
