@@ -1,12 +1,14 @@
-from flask import Blueprint, jsonify, current_app, make_response, request
+from flask import Blueprint, current_app, make_response, request
 from ..common_neo4j_logic import sources_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 
-sources_blueprint = Blueprint('sources', __name__, url_prefix='/sources')
+# S3 redirect functions
+from utils.s3_redirect import redirect_if_large
 
+sources_blueprint = Blueprint('sources', __name__, url_prefix='/sources')
 
 @sources_blueprint.route('', methods=['GET'])
 def sources_get():
@@ -46,4 +48,5 @@ def sources_get():
         err = get_404_error_string(prompt_string="No sources")
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Mar 2025
+    return redirect_if_large(resp=result)

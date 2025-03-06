@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, current_app, make_response, request
+from flask import Blueprint, current_app, make_response, request
 from ..common_neo4j_logic import semantics_semantic_id_semantic_types_get_logic, \
     semantics_semantic_id_subtypes_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
@@ -6,20 +6,23 @@ from utils.http_error_string import get_404_error_string, validate_query_paramet
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 
+# S3 redirect functions
+from utils.s3_redirect import redirect_if_large
 semantics_blueprint = Blueprint('semantics', __name__, url_prefix='/semantics')
-
 
 @semantics_blueprint.route('semantic-types', methods=['GET'])
 def semantics_semantic_types_get():
     # Return information on all semantic types.
-    return semantics_semantic_type_semantic_types_get(semantic_type=None)
-
+    result = semantics_semantic_type_semantic_types_get(semantic_type=None)
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 @semantics_blueprint.route('semantic-types/<semantic_type>', methods=['GET'])
 def semantics_semantics_id_tyeps_get(semantic_type):
     # Return information on the specified semantic type.
-    return semantics_semantic_type_semantic_types_get(semantic_type)
-
+    result=semantics_semantic_type_semantic_types_get(semantic_type)
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 def semantics_semantic_type_semantic_types_get(semantic_type):
     """
@@ -71,8 +74,8 @@ def semantics_semantic_type_semantic_types_get(semantic_type):
     # Wrap origin and path list in a dictionary that will become the JSON response.
     dict_result = {'semantic_types': result}
 
-    return jsonify(dict_result)
-
+    # Mar 2025
+    return redirect_if_large(resp=dict_result)
 
 @semantics_blueprint.route('semantic-types/<semantic_type>/subtypes', methods=['GET'])
 def semantics_semantic_type_subtypes_get(semantic_type):
@@ -137,4 +140,5 @@ def semantics_semantic_type_subtypes_get(semantic_type):
 
     dict_result = {'semantic_sub_types': result}
 
-    return jsonify(dict_result)
+    # Mar 2025
+    return redirect_if_large(resp=dict_result)

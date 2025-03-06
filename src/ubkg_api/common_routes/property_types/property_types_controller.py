@@ -5,6 +5,9 @@ from utils.http_error_string import get_404_error_string, validate_query_paramet
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 
+# S3 redirect functions
+from utils.s3_redirect import redirect_if_large
+
 property_types_blueprint = Blueprint('property-types', __name__, url_prefix='/property-types')
 
 
@@ -18,4 +21,5 @@ def property_type_get():
         err = get_404_error_string(prompt_string="No property keys")
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Mar 2025
+    return redirect_if_large(resp=result)

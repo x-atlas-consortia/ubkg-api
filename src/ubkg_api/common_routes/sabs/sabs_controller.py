@@ -5,6 +5,8 @@ from utils.http_error_string import get_404_error_string, validate_query_paramet
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
+# S3 redirect functions
+from utils.s3_redirect import redirect_if_large
 
 sabs_blueprint = Blueprint('sabs', __name__, url_prefix='/sabs')
 
@@ -13,17 +15,23 @@ def sabs_get():
     # Return list of SABS.
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
-    return sabs_get_logic(neo4j_instance)
+    result = sabs_get_logic(neo4j_instance)
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 @sabs_blueprint.route('/codes/counts', methods=['GET'])
 def sabs_codes_counts_get():
     # Return SABs and counts of codes for all SABs.
-    return sabs_codes_counts_get()
+    result = sabs_codes_counts_get()
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 @sabs_blueprint.route('<sab>/codes/counts', methods=['GET'])
 def sabs_codes_counts_sab_get(sab):
     # Return SAB and count of codes for specified SAB.
-    return sabs_codes_counts_get(sab)
+    result = sabs_codes_counts_get(sab)
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 
 def sabs_codes_counts_get(sab=None):
@@ -68,7 +76,8 @@ def sabs_codes_counts_get(sab=None):
                                    custom_request_path=f"sab='{sab}'")
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 
 @sabs_blueprint.route('/codes/details', methods=['GET'])
@@ -130,7 +139,8 @@ def sabs_codes_details_sab_get(sab):
                                    custom_request_path=f"sab='{sab}'", timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 
 @sabs_blueprint.route('term-types', methods=['GET'])
@@ -190,4 +200,5 @@ def sabs_sab_term_types_get(sab):
         err = get_404_error_string(prompt_string="No term types", custom_request_path=f"sab='{sab}'")
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Mar 2025
+    return redirect_if_large(resp=result)

@@ -29,19 +29,12 @@ import neo4j
 from models.codes_codes_obj import CodesCodesObj
 from models.concept_detail import ConceptDetail
 from models.concept_graph import ConceptGraph
-from models.concept_sab_rel_depth import ConceptSabRelDepth
-from models.concept_term import ConceptTerm
 from models.path_item_concept_relationship_sab_prefterm import PathItemConceptRelationshipSabPrefterm
-# from models.qqst import QQST
 from models.semantictype import SemanticType
 from models.sab_definition import SabDefinition
 from models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
 from models.sab_relationship_concept_term import SabRelationshipConceptTerm
-# JAS January 2024 Deprecqting semantic and tui models
-# from models.semantic_stn import SemanticStn
-# from models.sty_tui_stn import StyTuiStn
 from models.termtype_code import TermtypeCode
-from models.concept_prefterm import ConceptPrefterm
 from models.concept_node import ConceptNode
 from models.node_type import NodeType
 
@@ -362,8 +355,6 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     :param limit: maximum number of paths to return
     """
 
-    conceptgraphs: [ConceptGraph] = []
-    conceptgraph: ConceptGraph = {}
 
     # Load query string and associate parameter values to variables.
     querytxt = loadquerystring(filename='concepts_expand.cypher')
@@ -1322,9 +1313,6 @@ def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltyp
     (startCUI: Concept)-[r1:isa]-(c1:Concept)-[r2:has_part]->(c2:Concept)
     where r1.SAB = "UBERON" and r2.SAB="PATO"
     """
-
-    conceptgraphs: [ConceptGraph] = []
-    conceptgraph: ConceptGraph = {}
 
     # Load query string and associate parameter values to variables.
     querytxt = loadquerystring(filename='concepts_subgraph_sequential.cypher')
