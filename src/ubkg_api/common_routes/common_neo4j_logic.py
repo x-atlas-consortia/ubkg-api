@@ -20,6 +20,8 @@ import logging
 import re
 from typing import List
 import os
+# Mar 2025 for handling configurable timeouts
+from werkzeug.exceptions import RequestTimeout
 
 # Apr 2024
 from pathlib import Path
@@ -73,16 +75,17 @@ def loadquerystring(filename: str) -> str:
     return query
 
 
-def timebox_query(query: str, timeout: int = 10000) -> str:
+#def timebox_query(query: str, timeout: int = 10000) -> str:
+    # Mar 2025 deprecated
 
-    """
-    Limits the execution of a query to a specified timeout.
-    :param query: query string to timebox
-    :param timeout: timeout in ms. This can, for example, be set in the app.cfg file.
-    """
+   # """
+    #Limits the execution of a query to a specified timeout.
+    #:param query: query string to timebox
+    #:param timeout: timeout in ms. This can, for example, be set in the app.cfg file.
+    #"""
 
     # Use simple string concatenation instead of an f-string to wrap the source query in a timebox call.
-    return "CALL apoc.cypher.runTimeboxed('" + query + "',{}," + str(timeout) + ")"
+    #return "CALL apoc.cypher.runTimeboxed('" + query + "',{}," + str(timeout) + ")"
 
 
 def format_list_for_query(listquery: list[str], doublequote: bool = False) -> str:
@@ -174,9 +177,9 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     return codescodesobjs
 
@@ -206,10 +209,11 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[Conce
                 except KeyError:
                     pass
 
+
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     return conceptdetails
 
@@ -237,9 +241,9 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     return codes
 
@@ -274,9 +278,9 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     return sabrelationshipconceptprefterms
 
@@ -303,9 +307,9 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     return sabdefinitions
 
@@ -332,9 +336,9 @@ def get_graph(neo4j_instance, query: neo4j.Query) -> ConceptGraph:
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     # There will be a maximum of one record.
     return conceptgraph
@@ -511,9 +515,9 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     return semantictypes
 
@@ -571,9 +575,9 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     return semantictypes
 
@@ -611,9 +615,9 @@ def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[Termtype
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     return termtypecodes
 
@@ -643,9 +647,9 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     return concepts
 
@@ -721,9 +725,9 @@ def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[Conce
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     if conceptnodes != []:
         return {'nodeobjects': conceptnodes}
@@ -839,9 +843,9 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     dictret = {'total_count': total_count, 'node_types': nodetypes}
     return dictret
@@ -887,9 +891,9 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
                     except KeyError:
                         pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     dictret = {'total_count': total_count, 'node_types': nodetypes}
     return dictret
@@ -923,9 +927,9 @@ def node_types_get_logic(neo4j_instance) -> dict:
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     # The query returns a single record.
     dictret = {'node_types': nodetype}
@@ -959,9 +963,9 @@ def property_types_get_logic(neo4j_instance) -> dict:
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     # The query returns a single record.
     dictret = {'property_types': propertytype}
@@ -996,9 +1000,9 @@ def relationship_types_get_logic(neo4j_instance) -> dict:
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     # The query has a single record.
     dictret = {'relationship_types': reltype}
@@ -1035,9 +1039,9 @@ def sabs_get_logic(neo4j_instance) -> dict:
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     # The query returns a single record.
     dictret = {'sabs': sab}
@@ -1089,9 +1093,9 @@ def sab_code_count_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     # The query has a single record.
     dictret = {'sabs': sab}
@@ -1145,9 +1149,9 @@ def sab_code_detail_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     # The query has a single record.
     dictret = {'codes': res_codes}
@@ -1188,9 +1192,9 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     # The query returns a single record.
 
@@ -1239,9 +1243,9 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     return source
 
@@ -1283,9 +1287,9 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
                 except KeyError:
                     pass
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, return an empty value, to trigger the custom 404 message.
+            # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                return None
+                raise RequestTimeout
 
     # The query has either zero records or one record
     if len(terms) == 1:

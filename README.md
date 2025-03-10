@@ -282,10 +282,8 @@ To enable custom management of timeout, specify values in the **app.cfg** file, 
 TIMEOUT=28
 ```
 
-Note that the ubkg-api does not raise a specific timeout error (such as a HTTP 408) when a query
-exceeds the configured timeout; instead, it returns nothing, which the
-API treats as a HTTP 404. The custom message for the 404 explains that the
-response may be empty because of a timeout.
+The ubkg-api returns a custom HTTP 408 response when a query
+exceeds the configured timeout.
 
 # Managing large payloads
 When deployed behind a server gateway, such as AWS API Gateway, the gateway may impose constraints
@@ -305,7 +303,9 @@ in a AWS S3 bucket. Endpoints enabled for S3 redirection will return a
 URL that points to the file in the S3 bucket. The URL is "pre-signed": consumers can simply
 "get" the URL to download the file locally.
 
-By default, the ubkg-api returns a HTTP 403. To enable S3 redirection, specify values in 
+If S3 redirection is not configured, the ubkg-api will return a simple HTTP 403 response. 
+
+To enable S3 redirection, specify values in 
 the appropriate **app.cfg** file--usually the app.cfg of the child API that imports the ubkg-api.
 
 ```commandline

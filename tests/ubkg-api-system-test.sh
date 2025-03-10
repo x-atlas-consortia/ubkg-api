@@ -95,7 +95,7 @@ curl --request GET \
 echo | tee -a ubkg_system_test.out
 echo | tee -a ubkg_system_test.out
 
-echo "/concepts/C0678222/concepts" | tee -a ubkg_system_test.out
+echo "/concepts/C0010346/concepts" | tee -a ubkg_system_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C4722518/concepts" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_system_test.out

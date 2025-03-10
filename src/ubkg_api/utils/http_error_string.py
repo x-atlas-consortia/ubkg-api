@@ -87,13 +87,13 @@ def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=N
     err = err + format_request_path(custom_err=custom_request_path) + format_request_query_string() + format_request_body()
 
     note = None
-    if timeout is not None:
-        errtimeout = f"{timeout} second"
-        if timeout > 1:
-            errtimeout = errtimeout + "s"
+    #if timeout is not None:
+        #errtimeout = f"{timeout} second"
+        #if timeout > 1:
+            #errtimeout = errtimeout + "s"
 
-        note = f"NOTE: This may be because of a timeout issue. This endpoint is limited to an execution time of {errtimeout}" \
-                    f" to prevent gateway timeout errors."
+        #note = f"NOTE: This may be because of a timeout issue. This endpoint is limited to an execution time of {errtimeout}" \
+                    #f" to prevent gateway timeout errors."
 
     return wrap_message(key="message", msg=err, note=note)
 

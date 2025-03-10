@@ -126,6 +126,18 @@ class UbkgAPI:
         def servererror(error):
             return wrap_message(key='error', msg=error.description)
 
+        @self.app.errorhandler(408)
+        # Custom 408 (server timeout) error handler.
+        def servererror(error):
+            timeout = int(self.app.config['TIMEOUT'])
+            if timeout is not None:
+                timeoutunit = f'{timeout} second'
+            if timeout > 1:
+                timeoutunit = timeoutunit + "s"
+            msg = f"The query runtime exceeded the specified timeout of {timeoutunit}."
+            return wrap_message(key='message', msg=msg)
+
+
 ####################################################################################################
 ## For local development/testing
 ####################################################################################################
