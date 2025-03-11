@@ -5,6 +5,7 @@ from flask import jsonify, make_response, current_app
 from .http_error_string import check_payload_size
 from .S3_worker import S3Worker
 import json
+import traceback
 
 
 def getstashurl(resp, s3w:S3Worker)-> flask.Response:
@@ -20,8 +21,9 @@ def getstashurl(resp, s3w:S3Worker)-> flask.Response:
                "url": s3_url}
         if s3_url is not None:
             return make_response(msg, 303)
-    except:
-        err = 'Unexpected error storing large results in S3'
+    except Exception as e:
+        traceback.print_exc()
+        err = 'Unexpected error storing large results in S3.'
         return make_response(err, 500)
 
 def redirect_if_large(resp) -> flask.Response:
@@ -42,6 +44,7 @@ def redirect_if_large(resp) -> flask.Response:
 
     """
 
+    print('redirect_if_large')
     threshold = 0
     if 'LARGE_RESPONSE_THRESHOLD' in current_app.config:
         threshold = current_app.config['LARGE_RESPONSE_THRESHOLD']

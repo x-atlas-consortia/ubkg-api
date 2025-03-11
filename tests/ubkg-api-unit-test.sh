@@ -140,7 +140,7 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "2. codes/SNOMEDCT_US%3A254837009/terms?term_typex=PT => invalid parameter; should return custom 404" | tee -a ubkg_unit_test.out
+echo "2. codes/SNOMEDCT_US%3A254837009/terms?term_typex=PT => invalid parameter; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/codes/SNOMEDCT_US%3A254837009/terms?term_typex=PT" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
@@ -225,7 +225,7 @@ echo | tee -a ubkg_unit_test.out
 #--------------------------------------------
 echo "TESTS FOR: concepts/paths/subgraph" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/paths/subgraph?sab=<sab>&rel=<relationship type>&skip=<number>&limit=<number>" | tee -a ubkg_unit_test.out
-echo "Parameters sab and rel can be %2C-delimited list or indidividual values."  | tee -a ubkg_unit_test.out
+echo "Parameters sab and rel can be %2C-delimited list or individual values."  | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
@@ -294,7 +294,7 @@ echo | tee -a ubkg_unit_test.out
 
 #--------------------------------------------
 echo "TESTS FOR: concepts/<identifier>/paths/subgraph/sequential GET" | tee -a ubkg_unit_test.out
-echo "SIGNATURE: /conepts/<identifier>/paths/subgraph/sequential?relsequence=<SAB1:rel1,SAB2:rel2&skip=<skip>&limit=<limit>" | tee -a ubkg_unit_test.out
+echo "SIGNATURE: /concepts/<identifier>/paths/subgraph/sequential?relsequence=<SAB1:rel1,SAB2:rel2&skip=<skip>&limit=<limit>" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
@@ -366,7 +366,7 @@ echo | tee -a ubkg_unit_test.out
 # /concepts/<identifier>/paths/subgraph/sequential endpoint.
 #--------------------------------------------
 echo "TESTS FOR: concepts/<identifier>/paths/subgraph/sequential GET" | tee -a ubkg_unit_test.out
-echo "SIGNATURE: /conepts/<identifier>/paths/subgraph/sequential?relsequence=<SAB1:rel1,SAB2:rel2&skip=<skip>&limit=<limit>" | tee -a ubkg_unit_test.out
+echo "SIGNATURE: /concepts/<identifier>/paths/subgraph/sequential?relsequence=<SAB1:rel1,SAB2:rel2&skip=<skip>&limit=<limit>" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo "1. concepts/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&relsequence=NCI%3Agene_product_encoded_by_gene&skip=0&limit=5 => valid, with individual; should return 200" | tee -a ubkg_unit_test.out
@@ -399,7 +399,7 @@ echo | tee -a ubkg_unit_test.out
 #--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/paths/expand GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/<concept_id>/paths/expand?sab=<SAB>&rel=<relationship type>&mindepth=<number>&maxedepth=<number>&skip=<number>&limit=<number>" | tee -a ubkg_unit_test.out
-echo "Parameters sab and rel can be %2C-delimited list or indidividual values."  | tee -a ubkg_unit_test.out
+echo "Parameters sab and rel can be %2C-delimited list or individual values."  | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
@@ -518,7 +518,7 @@ echo | tee -a ubkg_unit_test.out
 #--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/paths/trees GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/<concept_id>/paths/trees?sab=<SAB>&rel=<relationship type>&mindepth=<number>&maxdepth=<number>&skip=<number>&limit=<number>"
-echo "Parameters sab and rel can be %2C-delimited list or indidividual values."  | tee -a ubkg_unit_test.out
+echo "Parameters sab and rel can be %2C-delimited list or individual values."  | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
@@ -630,7 +630,7 @@ echo | tee -a ubkg_unit_test.out
 #--------------------------------------------
 echo "TESTS FOR: concepts/<origin_concept_id>/paths/shortestpath/<terminus_concept_id> GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/<origin_concept_id>/paths/shortestpath/<terminus_concept_id>?sab=<SAB>&rel=<relationship types" | tee -a ubkg_unit_test.out
-echo "Parameters sab and rel can be %2C-delimited list or indidividual values."  | tee -a ubkg_unit_test.out
+echo "Parameters sab and rel can be %2C-delimited list or individual values."  | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
@@ -737,7 +737,7 @@ echo | tee -a ubkg_unit_test.out
 #--------------------------------------------
 echo "TESTS FOR: node-types/<node-type>/counts-by-sab GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /node-types/<node-type>/counts?sab=<SAB>" | tee -a ubkg_unit_test.out
-echo "Parameters sab and rel can be %2C-delimited list or indidividual values."  | tee -a ubkg_unit_test.out
+echo "Parameters sab and rel can be %2C-delimited list or individual values."  | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 

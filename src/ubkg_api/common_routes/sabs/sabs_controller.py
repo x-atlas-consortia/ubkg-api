@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, current_app, make_response, request
-from ..common_neo4j_logic import sab_code_count_get, sab_code_detail_get, sab_term_type_get_logic,\
+from ..common_neo4j_logic import sabs_codes_counts_query_get, sab_code_detail_query_get, sab_term_type_get_logic,\
     sabs_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
@@ -22,19 +22,21 @@ def sabs_get():
 @sabs_blueprint.route('/codes/counts', methods=['GET'])
 def sabs_codes_counts_get():
     # Return SABs and counts of codes for all SABs.
-    result = sabs_codes_counts_get()
+    # Call the common route function for sabs/codes/counts endpoints.
+    result = sabs_codes_counts_route_get()
     # Mar 2025
     return redirect_if_large(resp=result)
 
 @sabs_blueprint.route('<sab>/codes/counts', methods=['GET'])
 def sabs_codes_counts_sab_get(sab):
     # Return SAB and count of codes for specified SAB.
-    result = sabs_codes_counts_get(sab)
+    # Call the common route function for sabs/codes/counts endpoints.
+    result = sabs_codes_counts_route_get(sab)
     # Mar 2025
     return redirect_if_large(resp=result)
 
 
-def sabs_codes_counts_get(sab=None):
+def sabs_codes_counts_route_get(sab=None):
     # Returns counts of codes for SABs
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
@@ -61,7 +63,8 @@ def sabs_codes_counts_get(sab=None):
     # Set default row limit.
     limit = set_default_maximum(param_value=limit, default=1000)
 
-    result = sab_code_count_get(neo4j_instance, sab=sab, skip=skip, limit=limit)
+    # Call the query function.
+    result = sabs_codes_counts_query_get(neo4j_instance, sab=sab, skip=skip, limit=limit)
     iserr = result is None or result == []
     if not iserr:
         # Check for empty sab data, which may happen in response either to invalid SAB or a skip > number of records.
@@ -77,8 +80,7 @@ def sabs_codes_counts_get(sab=None):
                                    timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Mar 2025
-    return redirect_if_large(resp=result)
+    return result
 
 
 @sabs_blueprint.route('/codes/details', methods=['GET'])
@@ -123,7 +125,7 @@ def sabs_codes_details_sab_get(sab):
     # Set default row limit.
     limit = set_default_maximum(param_value=limit, default=1000)
 
-    result = sab_code_detail_get(neo4j_instance, sab=sab, skip=skip, limit=limit)
+    result = sab_code_detail_query_get(neo4j_instance, sab=sab, skip=skip, limit=limit)
     iserr = False
     if result is None or result == []:
         iserr = True

@@ -1048,7 +1048,7 @@ def sabs_get_logic(neo4j_instance) -> dict:
     return dictret
 
 
-def sab_code_count_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
+def sabs_codes_counts_query_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
     """
     Obtains information on SABs, including counts of codes associated with them.
 
@@ -1102,7 +1102,7 @@ def sab_code_count_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
     return dictret
 
 
-def sab_code_detail_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
+def sab_code_detail_query_get(neo4j_instance, sab=None, skip=None, limit=None) -> dict:
     """
     Obtains information on the codes for a specified SAB, including counts.
 
