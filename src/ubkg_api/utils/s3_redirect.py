@@ -44,7 +44,6 @@ def redirect_if_large(resp) -> flask.Response:
 
     """
 
-    print('redirect_if_large')
     threshold = 0
     if 'LARGE_RESPONSE_THRESHOLD' in current_app.config:
         threshold = current_app.config['LARGE_RESPONSE_THRESHOLD']
