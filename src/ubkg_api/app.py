@@ -126,8 +126,8 @@ class UbkgAPI:
         def servererror(error):
             return wrap_message(key='error', msg=error.description)
 
-        @self.app.errorhandler(408)
-        # Custom 408 (server timeout) error handler.
+        @self.app.errorhandler(504)
+        # Custom 504 (server timeout) error handler.
         def servererror(error):
             timeout = int(self.app.config['TIMEOUT'])
             if timeout is not None:
