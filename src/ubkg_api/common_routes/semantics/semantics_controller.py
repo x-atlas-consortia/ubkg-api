@@ -13,16 +13,12 @@ semantics_blueprint = Blueprint('semantics', __name__, url_prefix='/semantics')
 @semantics_blueprint.route('semantic-types', methods=['GET'])
 def semantics_semantic_types_get():
     # Return information on all semantic types.
-    result = semantics_semantic_type_semantic_types_get(semantic_type=None)
-    # Mar 2025
-    return redirect_if_large(resp=result)
+    return semantics_semantic_type_semantic_types_get(semantic_type=None)
 
 @semantics_blueprint.route('semantic-types/<semantic_type>', methods=['GET'])
 def semantics_semantics_id_types_get(semantic_type):
     # Return information on the specified semantic type.
-    result = semantics_semantic_type_semantic_types_get(semantic_type)
-    # Mar 2025
-    return redirect_if_large(resp=result)
+    return semantics_semantic_type_semantic_types_get(semantic_type)
 
 def semantics_semantic_type_semantic_types_get(semantic_type):
     """
@@ -74,7 +70,8 @@ def semantics_semantic_type_semantic_types_get(semantic_type):
 
     # Wrap origin and path list in a dictionary that will become the JSON response.
     dict_result = {'semantic_types': result}
-    return dict_result
+    # Mar 2025
+    return redirect_if_large(resp=dict_result)
 
 @semantics_blueprint.route('semantic-types/<semantic_type>/subtypes', methods=['GET'])
 def semantics_semantic_type_subtypes_get(semantic_type):
