@@ -22,18 +22,12 @@ def sabs_get():
 @sabs_blueprint.route('/codes/counts', methods=['GET'])
 def sabs_codes_counts_get():
     # Return SABs and counts of codes for all SABs.
-    # Call the common route function for sabs/codes/counts endpoints.
-    result = sabs_codes_counts_route_get()
-    # Mar 2025
-    return redirect_if_large(resp=result)
+    return sabs_codes_counts_route_get()
 
 @sabs_blueprint.route('<sab>/codes/counts', methods=['GET'])
 def sabs_codes_counts_sab_get(sab):
     # Return SAB and count of codes for specified SAB.
-    # Call the common route function for sabs/codes/counts endpoints.
-    result = sabs_codes_counts_route_get(sab)
-    # Mar 2025
-    return redirect_if_large(resp=result)
+    return sabs_codes_counts_route_get(sab)
 
 
 def sabs_codes_counts_route_get(sab=None):
@@ -78,9 +72,11 @@ def sabs_codes_counts_route_get(sab=None):
         err = get_404_error_string(prompt_string="No sources",
                                    custom_request_path=f"sab='{sab}'",
                                    timeout = neo4j_instance.timeout)
+        print('returning make_response with 404')
         return make_response(err, 404)
 
-    return result
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 
 @sabs_blueprint.route('/codes/details', methods=['GET'])

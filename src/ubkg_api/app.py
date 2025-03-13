@@ -119,12 +119,12 @@ class UbkgAPI:
         @self.app.errorhandler(404)
         # Custom 404 error handler.
         def servererror(error):
-            return wrap_message(key='message', msg=error.description)
+            return wrap_message(key='message', msg=error.description), 404
 
         @self.app.errorhandler(500)
         # Custom 500 error handler.
         def servererror(error):
-            return wrap_message(key='error', msg=error.description)
+            return wrap_message(key='error', msg=error.description), 500
 
         @self.app.errorhandler(504)
         # Custom 504 (server timeout) error handler.
@@ -135,7 +135,7 @@ class UbkgAPI:
             if timeout > 1:
                 timeoutunit = timeoutunit + "s"
             msg = f"The query runtime exceeded the specified timeout of {timeoutunit}."
-            return wrap_message(key='message', msg=msg)
+            return wrap_message(key='message', msg=msg), 504
 
 
 ####################################################################################################

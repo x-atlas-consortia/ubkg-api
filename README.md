@@ -274,15 +274,48 @@ The ubkg-api (either running standalone or imported into a child API) can handle
 The ubkg-api can return detailed explanations for timeout issues, instead of relying on the 
 sometimes ambiguous messages from the gateway (e.g., a HTTP 500).
 
-To enable custom management of timeout, specify values in the **app.cfg** file, as shown below.
+## Code required
+### app.cfg
+An instance of hs-ontology-api can override the default timeout in its app.cfg file.
+To enable custom management of timeout and payload size, specify values in the **app.cfg** file, as shown below.
 
 ```commandline
+
 # Maximum duration for the execution of timeboxed queries to prevent service timeout, in seconds
 # The AWS API gateway timeout is 29 seconds.
 TIMEOUT=28
 ```
+If the ubkg-api is imported as a PyPI package into a child API (the default configuration), the
+timeout should be specified in the app.cfg of the child API. The configuration of the child API
+takes precedence over that of the ubkg-api.
 
-The ubkg-api returns a custom HTTP 408 response when a query
+### Endpoint function code
+To validate timeout, use a try/exception block in the 
+code in the **neo4j_logic.py** in the *utils* folder.
+ 
+Example:
+```commandline
+from werkzeug.exceptions import GatewayTimeout
+...
+    #Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        try:
+            recds: neo4j.Result = session.run(query)
+
+            for record in recds:
+                # process records
+
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, raise a HTTP 408.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                raise GatewayTimeout
+
+    return <your records>
+```
+
+The ubkg-api returns a custom HTTP 504 response when a query
 exceeds the configured timeout.
 
 # Managing large payloads
@@ -305,9 +338,9 @@ URL that points to the file in the S3 bucket. The URL is "pre-signed": consumers
 
 If S3 redirection is not configured, the ubkg-api will return a simple HTTP 403 response. 
 
-To enable S3 redirection, specify values in 
-the appropriate **app.cfg** file--usually the app.cfg of the child API that imports the ubkg-api.
-
+## Coding required
+### app.cfg
+To enable S3 redirection, specify values in the **app.cfg** file.
 ```commandline
 # Large response threshold, as determined by the length of the response (payload).
 # Responses with payload sizes that exceed the threshold will be handled in one of the
@@ -330,4 +363,21 @@ AWS_SECRET_ACCESS_KEY = 'AWS_SECRET_ACCESS_KEY'
 AWS_S3_BUCKET_NAME = 'AWS_S3_BUCKET_NAME'
 AWS_S3_OBJECT_PREFIX = 'AWS_S3_OBJECT_PREFIX'
 AWS_OBJECT_URL_EXPIRATION_IN_SECS = 60*60 # 1 hour
+```
+Note that if the ubkg-api is being imported as a PyPI package (the default configuration),
+the S3 configuration should be specified in the app.cfg of the child api.
+Configuration in the child API takes precedence over that of the ubkg-api.
+
+### route logic
+Add the following import to the controller:
+```commandline
+# S3 redirect functions
+from utils.s3_redirect import redirect_if_large
+```
+
+Send the result of the query to payload validation:
+```commandline
+    result = <call to function in neo4j_logic.py>
+    # Redirect to S3 if payload is large.
+    return redirect_if_large(resp=result)
 ```
