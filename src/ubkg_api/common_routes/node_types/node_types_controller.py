@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, current_app, make_response, request
+from flask import Blueprint, current_app, make_response
 from ..common_neo4j_logic import node_types_node_type_counts_by_sab_get_logic, \
     node_types_node_type_counts_get_logic, node_types_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
@@ -6,14 +6,19 @@ from utils.http_error_string import get_404_error_string, validate_query_paramet
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 
+# S3 redirect functions
+from utils.s3_redirect import redirect_if_large
 node_types_blueprint = Blueprint('node-types', __name__, url_prefix='/node-types')
-
 
 @node_types_blueprint.route('', methods=['GET'])
 def node_type_get():
     # Return list of node types.
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
-    return node_types_get_logic(neo4j_instance)
+
+    result=node_types_get_logic(neo4j_instance)
+
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 @node_types_blueprint.route('counts', methods=['GET'])
 def node_type_counts_get():
@@ -73,7 +78,8 @@ def node_types_counts_get(node_type=None):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 
 @node_types_blueprint.route('counts-by-sab', methods=['GET'])
@@ -147,4 +153,5 @@ def node_types_counts_by_sab_node_type_get(node_type):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Mar 2025
+    return redirect_if_large(resp=result)

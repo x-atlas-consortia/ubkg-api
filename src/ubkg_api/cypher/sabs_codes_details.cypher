@@ -17,12 +17,23 @@ WITH sab_match,code_count
 CALL
 {
     WITH sab_match
-    OPTIONAL MATCH (n:Code)-[r]-(t:Term) WHERE n.SAB=sab_match
-    RETURN DISTINCT n.CodeID AS code, {term_type:TYPE(r),term:t.name} as term ORDER BY n.CodeID
+    OPTIONAL MATCH (n:Code)
+    WHERE n.SAB=sab_match
+    RETURN DISTINCT n.CodeID AS code ORDER BY n.CodeID
+}
+// Get optional term details.
+// March 2024 handles SABS like BIOMARKER with no terms for codes.
+WITH sab_match,code_count,code
+CALL
+{
+    WITH code
+    OPTIONAL MATCH (p:Concept)-[:CODE]->(n:Code{CodeID:code})-[r]->(t:Term)
+    WHERE r.CUI=p.CUI
+    RETURN COLLECT(DISTINCT CASE WHEN t.name IS NULL THEN {} ELSE {term_type:TYPE(r),term:t.name} END) AS terms //ORDER BY n.CodeId
 }
 //Build output
-WITH sab_match, code_count, code, COLLECT(term) as terms
-SKIP $skip LIMIT $limit
+WITH sab_match, code_count, code, terms
+SKIP 0 LIMIT 1000
 WITH sab_match, code_count,COLLECT({code:code,terms:terms}) AS codes
 WITH {sab:sab_match, total_count:code_count,codes:codes} as sab
 RETURN sab as output

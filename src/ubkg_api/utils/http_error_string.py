@@ -7,7 +7,6 @@ def wrap_message(key:str, msg:str) ->dict:
     """
     Wraps a return message string in JSON format.
     """
-
     return {key: msg}
 
 def format_request_path(custom_err=None):
@@ -83,14 +82,6 @@ def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=N
         err = prompt_string
 
     err = err + format_request_path(custom_err=custom_request_path) + format_request_query_string() + format_request_body()
-
-    if timeout is not None:
-        errtimeout = f"{timeout} second"
-        if timeout > 1:
-            errtimeout = errtimeout + "s"
-
-        err = err + f". This endpoint is limited to an execution time of {errtimeout}" \
-                    f" to prevent gateway timeout errors."
 
     return wrap_message(key="message", msg=err)
 
