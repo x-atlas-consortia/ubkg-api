@@ -59,6 +59,9 @@ Some deployments based on the UBKG API may require that calls to endpoints inclu
 Because this involves integration with authorization architecture (e.g., API gateways and authorization specific to a 
 network resource), the configuration of API keys is beyond the scope of the UBKG API. 
 
+The [Data Distillery API](https://smart-api.info/ui/1ab18b7ba0b2539a361c8df3686f47f0) is an example of an API that queries
+a UBKG instance, but requires an API key.
+
 
 ### Starting your neo4j instance
 If you are using a local instance of the UBKG, the instance should be running. 
@@ -120,6 +123,14 @@ Various methods of testing endpoint URLs are possible, including:
 4. Executing directly in the browser. This method is suitable for GET endpoints.
 
 # Adding new endpoints
+
+## Development note
+The ubkg-api currently uses two architectures:
+1. "legacy" endpoints use a MVC (Model-View-Controller) architecture in which the "native" results from Cypher queries are translated by means of a class hierarchy. 
+2. Newer endpoints use a simpler architecture, in which Cypher queries of streamed JSON are essentially passed through to response with little additional processing.
+
+The following instructions are primarily for the legacy architecture.
+
 Each endpoint in ubkg-api involves:
 - One or more functions in the **_functional script_** (**neo4j_logic.py**). The usual use case is a parameterized function that prepares a Cypher query against the target neo4j instance.
 - a **_controller_** script in the __routes__ path that registers a BluePrint route in Flask and links a route to a function in the functional script.
@@ -128,6 +139,7 @@ Each endpoint in ubkg-api involves:
 ## Tasks:
 ### Create a model script
 The model script is a class that defines the response for the endpoint.
+#### NOTE: This is the legacy architecture.
 #### File path
 Create the script in the __models__ path.
 #### Class method
@@ -258,17 +270,53 @@ Python 3.9 or newer
 When deployed behind a server gateway, such as AWS API Gateway, the gateway may impose constraints
 on timeout. For example, AWS API Gateway has a timeout of 29 seconds.
 
-The ubkg-api (loaded as a library by the hs-ontology-api) can handle timeouts before they result in errors in a gateway. 
+The ubkg-api (either running standalone or imported into a child API) can handle timeouts before they result in errors in a gateway. 
 The ubkg-api can return detailed explanations for timeout issues, instead of relying on the 
 sometimes ambiguous messages from the gateway (e.g., a HTTP 500).
 
-To enable custom management of timeout, specify values in the **app.cfg** file, as shown below.
+## Code required
+### app.cfg
+An instance of hs-ontology-api can override the default timeout in its app.cfg file.
+To enable custom management of timeout and payload size, specify values in the **app.cfg** file, as shown below.
 
 ```commandline
+
 # Maximum duration for the execution of timeboxed queries to prevent service timeout, in seconds
 # The AWS API gateway timeout is 29 seconds.
 TIMEOUT=28
 ```
+If the ubkg-api is imported as a PyPI package into a child API (the default configuration), the
+timeout should be specified in the app.cfg of the child API. The configuration of the child API
+takes precedence over that of the ubkg-api.
+
+### Endpoint function code
+To validate timeout, use a try/exception block in the 
+code in the **neo4j_logic.py** in the *utils* folder.
+ 
+Example:
+```commandline
+from werkzeug.exceptions import GatewayTimeout
+...
+    #Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        try:
+            recds: neo4j.Result = session.run(query)
+
+            for record in recds:
+                # process records
+
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, raise a HTTP 408.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                raise GatewayTimeout
+
+    return <your records>
+```
+
+The ubkg-api returns a custom HTTP 504 response when a query
+exceeds the configured timeout.
 
 # Managing large payloads
 When deployed behind a server gateway, such as AWS API Gateway, the gateway may impose constraints
@@ -282,14 +330,17 @@ LARGE_RESPONSE_THRESHOLD = 9*(2**20) + 900*(2**10) #9.9Mb
 ```
 
 # Optional S3 redirection for large payloads
-The ubkg-api can redirect large responses to a file 
+Instead of simply returning a 403 error when the response payload is too large,
+the ubkg-api can redirect large responses to a file 
 in a AWS S3 bucket. Endpoints enabled for S3 redirection will return a 
 URL that points to the file in the S3 bucket. The URL is "pre-signed": consumers can simply
 "get" the URL to download the file locally.
 
-By default, the ubkg-api does not redirect large responses. To enable S3 redirection, specify values in 
-the **app.cfg** file of hs-ontology-api.
+If S3 redirection is not configured, the ubkg-api will return a simple HTTP 403 response. 
 
+## Coding required
+### app.cfg
+To enable S3 redirection, specify values in the **app.cfg** file.
 ```commandline
 # Large response threshold, as determined by the length of the response (payload).
 # Responses with payload sizes that exceed the threshold will be handled in one of the
@@ -312,4 +363,21 @@ AWS_SECRET_ACCESS_KEY = 'AWS_SECRET_ACCESS_KEY'
 AWS_S3_BUCKET_NAME = 'AWS_S3_BUCKET_NAME'
 AWS_S3_OBJECT_PREFIX = 'AWS_S3_OBJECT_PREFIX'
 AWS_OBJECT_URL_EXPIRATION_IN_SECS = 60*60 # 1 hour
+```
+Note that if the ubkg-api is being imported as a PyPI package (the default configuration),
+the S3 configuration should be specified in the app.cfg of the child api.
+Configuration in the child API takes precedence over that of the ubkg-api.
+
+### route logic
+Add the following import to the controller:
+```commandline
+# S3 redirect functions
+from utils.s3_redirect import redirect_if_large
+```
+
+Send the result of the query to payload validation:
+```commandline
+    result = <call to function in neo4j_logic.py>
+    # Redirect to S3 if payload is large.
+    return redirect_if_large(resp=result)
 ```

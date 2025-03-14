@@ -1,10 +1,12 @@
 from flask import Blueprint, jsonify, current_app, make_response, request
-from ..common_neo4j_logic import sab_code_count_get, sab_code_detail_get, sab_term_type_get_logic,\
+from ..common_neo4j_logic import sabs_codes_counts_query_get, sab_code_detail_query_get, sab_term_type_get_logic,\
     sabs_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
+# S3 redirect functions
+from utils.s3_redirect import redirect_if_large
 
 sabs_blueprint = Blueprint('sabs', __name__, url_prefix='/sabs')
 
@@ -13,21 +15,23 @@ def sabs_get():
     # Return list of SABS.
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
-    return sabs_get_logic(neo4j_instance)
+    result = sabs_get_logic(neo4j_instance)
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 @sabs_blueprint.route('/codes/counts', methods=['GET'])
 def sabs_codes_counts_get():
     # Return SABs and counts of codes for all SABs.
-    return sabs_codes_counts_get()
+    return sabs_codes_counts_route_get()
 
 @sabs_blueprint.route('<sab>/codes/counts', methods=['GET'])
 def sabs_codes_counts_sab_get(sab):
     # Return SAB and count of codes for specified SAB.
-    return sabs_codes_counts_get(sab)
+    return sabs_codes_counts_route_get(sab)
 
 
-def sabs_codes_counts_get(sab=None):
-    # Returns relationship types
+def sabs_codes_counts_route_get(sab=None):
+    # Returns counts of codes for SABs
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
     # Validate parameters.
@@ -53,7 +57,8 @@ def sabs_codes_counts_get(sab=None):
     # Set default row limit.
     limit = set_default_maximum(param_value=limit, default=1000)
 
-    result = sab_code_count_get(neo4j_instance, sab=sab, skip=skip, limit=limit)
+    # Call the query function.
+    result = sabs_codes_counts_query_get(neo4j_instance, sab=sab, skip=skip, limit=limit)
     iserr = result is None or result == []
     if not iserr:
         # Check for empty sab data, which may happen in response either to invalid SAB or a skip > number of records.
@@ -65,10 +70,13 @@ def sabs_codes_counts_get(sab=None):
 
     if iserr:
         err = get_404_error_string(prompt_string="No sources",
-                                   custom_request_path=f"sab='{sab}'")
+                                   custom_request_path=f"sab='{sab}'",
+                                   timeout = neo4j_instance.timeout)
+        print('returning make_response with 404')
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 
 @sabs_blueprint.route('/codes/details', methods=['GET'])
@@ -113,7 +121,7 @@ def sabs_codes_details_sab_get(sab):
     # Set default row limit.
     limit = set_default_maximum(param_value=limit, default=1000)
 
-    result = sab_code_detail_get(neo4j_instance, sab=sab, skip=skip, limit=limit)
+    result = sab_code_detail_query_get(neo4j_instance, sab=sab, skip=skip, limit=limit)
     iserr = False
     if result is None or result == []:
         iserr = True
@@ -127,10 +135,12 @@ def sabs_codes_details_sab_get(sab):
 
     if iserr:
         err = get_404_error_string(prompt_string="No codes",
-                                   custom_request_path=f"sab='{sab}'", timeout=neo4j_instance.timeout)
+                                   custom_request_path=f"sab='{sab}'",
+                                   timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Mar 2025
+    return redirect_if_large(resp=result)
 
 
 @sabs_blueprint.route('term-types', methods=['GET'])
@@ -187,7 +197,10 @@ def sabs_sab_term_types_get(sab):
         iserr = len(termtypes) == 0
 
     if iserr:
-        err = get_404_error_string(prompt_string="No term types", custom_request_path=f"sab='{sab}'")
+        err = get_404_error_string(prompt_string="No term types",
+                                   custom_request_path=f"sab='{sab}'",
+                                   timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
-    return jsonify(result)
+    # Mar 2025
+    return redirect_if_large(resp=result)
