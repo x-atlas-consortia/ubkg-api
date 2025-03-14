@@ -83,7 +83,6 @@ def get_404_error_string(prompt_string=None, custom_request_path=None, timeout=N
 
     err = err + format_request_path(custom_err=custom_request_path) + format_request_query_string() + format_request_body()
 
-    note = None
     return wrap_message(key="message", msg=err)
 
 
