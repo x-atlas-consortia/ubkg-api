@@ -267,16 +267,19 @@ Python 3.9 or newer
 
 # Optional Timeout Feature
 
+The ubkg-api can be deployed in various environments.
+
 When deployed behind a server gateway, such as AWS API Gateway, the gateway may impose constraints
-on timeout. For example, AWS API Gateway has a timeout of 29 seconds.
+on timeout or response payload size. For example, AWS API Gateway has a timeout of 29 seconds and
+a maximum response payload of 10 MB. 
 
-The ubkg-api (either running standalone or imported into a child API) can handle timeouts before they result in errors in a gateway. 
-The ubkg-api can return detailed explanations for timeout issues, instead of relying on the 
-sometimes ambiguous messages from the gateway (e.g., a HTTP 500).
-
+The ubkg-api can be configured to enforce its own timeout that
+occurs before an actual gateway timeout, essentially acting as a proxy for 
+the gateway. 
+The ubkg-api's HTTP 504 timeout message will return detailed 
+explanations for the timeout.
 ## Code required
 ### app.cfg
-An instance of hs-ontology-api can override the default timeout in its app.cfg file.
 To enable custom management of timeout and payload size, specify values in the **app.cfg** file, as shown below.
 
 ```commandline
@@ -318,22 +321,24 @@ from werkzeug.exceptions import GatewayTimeout
 The ubkg-api returns a custom HTTP 504 response when a query
 exceeds the configured timeout.
 
-# Managing large payloads
-When deployed behind a server gateway, such as AWS API Gateway, the gateway may impose constraints
-on the size of response payload. For example, AWS API Gateway has a response payload limit of 10 MB.
-
-The ubkg-api (loaded as a library by the hs-ontology-api) can return a custom
-HTTP 403 error (Not allowed--in this case for too large a response) when the response exceeds a specified threshold.
-The hs-ontology-api can override the default threshold in its app.cfg file:
+## Coding required
+### app.cfg
+To enable timeout validation, specify the following key in the app.cfg file:
 ```commandline
 LARGE_RESPONSE_THRESHOLD = 9*(2**20) + 900*(2**10) #9.9Mb
 ```
+# Payload size validation with optional S3 redirection
 
-# Optional S3 redirection for large payloads
-Instead of simply returning a 403 error when the response payload is too large,
-the ubkg-api can redirect large responses to a file 
-in a AWS S3 bucket. Endpoints enabled for S3 redirection will return a 
-URL that points to the file in the S3 bucket. The URL is "pre-signed": consumers can simply
+APIs in environments employing an AWS API gateway have limits on
+the size of response payloads. The current default AWS API gateway limit on payloads is 10 MB.
+
+The ubkg-api can be configured to check the size of response payloads. This feature can
+be used to prevent triggering of the actual gateway error. In addition,
+the ubkg-api's HTTP 403 error code message provides more detail than does the message from the gateway.
+
+The ubkg-api can also work around a gateway payload limit by redirect large payloads to an AWS S3 bucket. 
+The ubkg-api will return a URL that points to the file in 
+the S3 bucket. The URL is "pre-signed": consumers can simply
 "get" the URL to download the file locally.
 
 If S3 redirection is not configured, the ubkg-api will return a simple HTTP 403 response. 
