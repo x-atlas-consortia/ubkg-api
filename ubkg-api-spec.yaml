@@ -1,7 +1,8 @@
 openapi: 3.0.3
 info:
   title: UBKG API
-  description: The UBKG API provides REST endpoints that return results from queries against an instance of the [Unified Biomedical Knowledge Graph (UBKG)](https://ubkg.docs.xconsortia.org/). To prevent exceeding service timeouts or payload limits, some endpoints are throttled in both execution time and in the size of its response payload--e.g., to a maximum execution time of 29 seconds and a maximum payload of 9.9 MB.
+  description: The UBKG API provides REST endpoints that return results from queries against the base context instance of the [Unified Biomedical Knowledge Graph (UBKG)](https://ubkg.docs.xconsortia.org/). To prevent exceeding service timeouts or payload limits, some endpoints are throttled in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB. NOTE - The API requires an Authorization key in the request header in format "UMLS-Key[space][apikey]", where apikey is the API key for a UMLS licensee acount.
+
   version: "2.0.0"
   contact:
     name: GitHub repository
@@ -10,8 +11,8 @@ externalDocs:
   description: UBKG documentation
   url: https://ubkg.docs.xconsortia.org/api
 servers:
-  - url: https://ontology.api.hubmapconsortium.org
-    description: Production server
+  - url: https://ubkg.api.xconsortia.org
+    description: Base context instance
 tags:
   - name: codes
   - name: concepts
@@ -22,6 +23,8 @@ tags:
   - name: sabs
   - name: semantic-types
   - name: terms
+security:
+  - umls_key: []
 paths:
   /codes/{code_id}/codes:
     get:
@@ -1272,6 +1275,12 @@ paths:
       tags:
         - general
 components:
+  securitySchemes:
+    umls_key:
+      type: apiKey
+      description: API key for a UMLS licensee account, prefixed with "UMLS-Key "--e.g., "UMLS-Key <my-umls-key>"
+      name: Authorization
+      in: header
   schemas:
     CodesCodesObj: # Schema name
       description: Code nodes that link to the same Concept node to which a specified Code links.
