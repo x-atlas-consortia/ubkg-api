@@ -311,7 +311,7 @@ from werkzeug.exceptions import GatewayTimeout
                 # process records
 
         except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, raise a HTTP 408.
+            # If the error is from a timeout, raise a HTTP 504.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
