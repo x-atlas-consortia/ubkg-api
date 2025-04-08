@@ -1,10 +1,10 @@
 openapi: "3.0.1"
 info:
-  title: "UBKG API"
-  description: "UBKG API"
+  title: "Base UBKG API"
+  description: "Base UBKG API"
   version: "2.2.1"
 servers:
-- url: "https://ubkg.api.xconsortia.org/"
+- url: "https://ubkg.api.xconsortia.org"
 paths:
   /property-types:
     get:
@@ -20,7 +20,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PropertyTypes"
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -94,7 +94,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -143,7 +143,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Sabs"
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -188,7 +188,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ArrayOfTermtypeCode"
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -228,6 +228,8 @@ paths:
         required: true
         schema:
           type: "string"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -267,65 +269,12 @@ paths:
         required: true
         schema:
           type: "string"
-      x-amazon-apigateway-integration:
-        connectionId: "${stageVariables.VPCLINK}"
-        httpMethod: "GET"
-        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/paths/subgraph/sequential"
-        responses:
-          default:
-            statusCode: "200"
-        requestParameters:
-          integration.request.path.id: "method.request.path.id"
-        connectionType: "VPC_LINK"
-        passthroughBehavior: "when_no_match"
-        type: "http_proxy"
-    options:
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      x-amazon-apigateway-integration:
-        connectionId: "${stageVariables.VPCLINK}"
-        httpMethod: "OPTIONS"
-        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/paths/subgraph/sequential"
-        responses:
-          default:
-            statusCode: "200"
-        requestParameters:
-          integration.request.path.id: "method.request.path.id"
-        connectionType: "VPC_LINK"
-        passthroughBehavior: "when_no_match"
-        type: "http_proxy"
-  /concepts/{id}/definitions:
-    get:
-      operationId: "concepts_id_definitions_get"
-      parameters:
-      - name: "id"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "404":
-          description: "404 response"
-          content: {}
-        "500":
-          description: "500 response"
-          content: {}
-        "200":
-          description: "200 response"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ArrayOfSabDefinition"
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
-        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/definitions"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/paths/subgraph/sequential"
         responses:
           default:
             statusCode: "200"
@@ -344,7 +293,7 @@ paths:
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "OPTIONS"
-        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/definitions"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/paths/subgraph/sequential"
         responses:
           default:
             statusCode: "200"
@@ -383,7 +332,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -415,6 +364,61 @@ paths:
         connectionType: "VPC_LINK"
         passthroughBehavior: "when_no_match"
         type: "http_proxy"
+  /concepts/{id}/definitions:
+    get:
+      operationId: "concepts_id_definitions_get"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArrayOfSabDefinition"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/definitions"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/definitions"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
   /terms/{term_id}/concepts:
     get:
       operationId: "terms_term_id_concepts_get"
@@ -438,7 +442,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ArrayOfTermConcept"
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -504,7 +508,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -553,7 +557,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -606,7 +610,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -667,7 +671,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -730,7 +734,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -780,7 +784,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -829,7 +833,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ArrayOfConceptDetail"
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -873,7 +877,7 @@ paths:
           type: "string"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
-        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:557310757627:function:DataDistillery-API-Gateway-404-Lambda/invocations"
+        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:557310757627:function:Base-UBKG-API-Gateway-404/invocations"
         responses:
           default:
             statusCode: "200"
@@ -885,6 +889,8 @@ paths:
         type: "aws_proxy"
   /concepts/paths/subgraph/sequential:
     get:
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -917,7 +923,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -936,72 +942,6 @@ paths:
         responses:
           default:
             statusCode: "200"
-        connectionType: "VPC_LINK"
-        passthroughBehavior: "when_no_match"
-        type: "http_proxy"
-  /semantics/semantic-types/{identifier}:
-    get:
-      operationId: "semantics_semantic_types_identifier_get"
-      parameters:
-      - name: "skip"
-        in: "query"
-        schema:
-          type: "string"
-      - name: "identifier"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      - name: "limit"
-        in: "query"
-        schema:
-          type: "string"
-      responses:
-        "404":
-          description: "404 response"
-          content: {}
-        "200":
-          description: "200 response"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SemanticTypes"
-        "400":
-          description: "400 response"
-          content: {}
-        "500":
-          description: "500 response"
-          content: {}
-      security:
-      - Data-Distillery-UMLS-Auth: []
-      x-amazon-apigateway-integration:
-        connectionId: "${stageVariables.VPCLINK}"
-        httpMethod: "GET"
-        uri: "http://${stageVariables.VPCNLB}/semantics/semantic-types/{identifier}"
-        responses:
-          default:
-            statusCode: "200"
-        requestParameters:
-          integration.request.path.identifier: "method.request.path.identifier"
-        connectionType: "VPC_LINK"
-        passthroughBehavior: "when_no_match"
-        type: "http_proxy"
-    options:
-      parameters:
-      - name: "identifier"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      x-amazon-apigateway-integration:
-        connectionId: "${stageVariables.VPCLINK}"
-        httpMethod: "OPTIONS"
-        uri: "http://${stageVariables.VPCNLB}/semantics/semantic-types/{identifier}"
-        responses:
-          default:
-            statusCode: "200"
-        requestParameters:
-          integration.request.path.identifier: "method.request.path.identifier"
         connectionType: "VPC_LINK"
         passthroughBehavior: "when_no_match"
         type: "http_proxy"
@@ -1039,7 +979,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1063,6 +1003,72 @@ paths:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "OPTIONS"
         uri: "http://${stageVariables.VPCNLB}/semantics/semantic-types/{identifier}/subtypes"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.identifier: "method.request.path.identifier"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /semantics/semantic-types/{identifier}:
+    get:
+      operationId: "semantics_semantic_types_identifier_get"
+      parameters:
+      - name: "skip"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "identifier"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "limit"
+        in: "query"
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SemanticTypes"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/semantics/semantic-types/{identifier}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.identifier: "method.request.path.identifier"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "identifier"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/semantics/semantic-types/{identifier}"
         responses:
           default:
             statusCode: "200"
@@ -1100,7 +1106,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1152,7 +1158,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1207,7 +1213,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/NodeTypeCount"
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1253,7 +1259,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/RelationshipTypes"
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1347,7 +1353,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1403,7 +1409,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1481,7 +1487,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ConceptNodes"
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1565,7 +1571,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1608,7 +1614,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1653,7 +1659,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ArrayOfSabRelationshipConceptTerm"
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1696,7 +1702,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/DatabaseInfo"
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1712,29 +1718,6 @@ paths:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "OPTIONS"
         uri: "http://${stageVariables.VPCNLB}/database/server"
-        responses:
-          default:
-            statusCode: "200"
-        connectionType: "VPC_LINK"
-        passthroughBehavior: "when_no_match"
-        type: "http_proxy"
-  /sources:
-    get:
-      x-amazon-apigateway-integration:
-        connectionId: "${stageVariables.VPCLINK}"
-        httpMethod: "GET"
-        uri: "http://${stageVariables.VPCNLB}/sources"
-        responses:
-          default:
-            statusCode: "200"
-        connectionType: "VPC_LINK"
-        passthroughBehavior: "when_no_match"
-        type: "http_proxy"
-    options:
-      x-amazon-apigateway-integration:
-        connectionId: "${stageVariables.VPCLINK}"
-        httpMethod: "OPTIONS"
-        uri: "http://${stageVariables.VPCNLB}/sources"
         responses:
           default:
             statusCode: "200"
@@ -1758,7 +1741,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/NodeTypes"
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -1774,6 +1757,31 @@ paths:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "OPTIONS"
         uri: "http://${stageVariables.VPCNLB}/node-types"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /sources:
+    get:
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/sources"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/sources"
         responses:
           default:
             statusCode: "200"
@@ -1814,7 +1822,7 @@ paths:
           description: "500 response"
           content: {}
       security:
-      - Data-Distillery-UMLS-Auth: []
+      - Base-UBKG-API-UMLS-Auth: []
       x-amazon-apigateway-integration:
         connectionId: "${stageVariables.VPCLINK}"
         httpMethod: "GET"
@@ -2540,12 +2548,12 @@ components:
                           format: "int32"
       description: "counts by node type, grouped by SAB"
   securitySchemes:
-    Data-Distillery-UMLS-Auth:
+    Base-UBKG-API-UMLS-Auth:
       type: "apiKey"
       name: "Authorization"
       in: "header"
       x-amazon-apigateway-authtype: "custom"
       x-amazon-apigateway-authorizer:
-        authorizerUri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:557310757627:function:Data-Distillery-UBKG-API-UMLS-Authorizer/invocations"
+        authorizerUri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:557310757627:function:Base-UBKG-API-UMLS-Authorizer/invocations"
         authorizerResultTtlInSeconds: 0
         type: "token"
