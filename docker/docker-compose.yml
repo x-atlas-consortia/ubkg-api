@@ -1,0 +1,47 @@
+services:
+
+  # The ubkg-front-end service contains clients for the UBKG neo4j, including the ubkg-api and Guesdt.
+
+  ubkg-front-end:
+    hostname: ubkg-front-end
+    container_name: ubkg-front-end
+    # Map host machine port 6666 to container port 8080
+    # Only root can listen on ports below 1024, we use higher-numbered ports
+    # since nginx is running under non-root user ubkg
+    ports:
+      - "6666:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    environment:
+      # UID and GID 1001 to match the ubkg user by default.
+      # These environment variables will be passed to the Dockerfile and used to configure the non-root
+      # user under which nginx will run.
+      - HOST_GID=${HOST_GID:-1001}
+      - HOST_UID=${HOST_UID:-1001}
+    init: true
+    restart: always
+    volumes:
+      # Mount the app config to container in order to keep it outside of the image
+      - "../src/ubkg_api/instance:/usr/src/app/src/ubkg_api/instance"
+      # Mount the logging to container
+      - "../log:/usr/src/app/log"
+      # Mount conf.d on host machine to the nginx conf.d on container
+      - "./ubkg-api/nginx/conf.d:/etc/nginx/conf.d"
+    #networks:
+      #- gateway_hubmap
+    # Send docker logs to AWS CloudWatch
+    #logging:
+      #driver: awslogs
+      #options:
+        #awslogs-region: us-east-1
+        #awslogs-group: hs-ontology-api-docker-logs
+        #awslogs-stream: ${LOG_STREAM}
+
+#networks:
+  # This is the network created by gateway to enable communication between multiple docker-compose projects
+  #gateway_hubmap:
+    #external: true
