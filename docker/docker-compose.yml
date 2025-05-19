@@ -5,11 +5,14 @@ services:
   ubkg-front-end:
     hostname: ubkg-front-end
     container_name: ubkg-front-end
-    # Map host machine port 6666 to container port 8080
+    # Map host machine port 7000 to container port 8080
     # Only root can listen on ports below 1024, we use higher-numbered ports
-    # since nginx is running under non-root user ubkg
+    # since nginx is running under non-root user ubkg.
+
+    # Divergence from standard hubmapconsortium API architecture:
+    # The standard architecture maps port 6666, which the Chrome browser considers an "unsafe port".
     ports:
-      - "6666:8080"
+      - "7000:8080"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080"]
       interval: 1m30s
@@ -25,7 +28,10 @@ services:
     init: true
     restart: always
     volumes:
-      # Mount the app config to container in order to keep it outside of the image
+      # Mount the app config to container in order to keep it outside of the image.
+      # Divergence from standard hubmapconsortium API architecture:
+      # The ubkg-api is compiled as a PyPI package. The src directory has subdirectories
+      # for both the API source and the PyPA Egg.
       - "../src/ubkg_api/instance:/usr/src/app/src/ubkg_api/instance"
       # Mount the logging to container
       - "../log:/usr/src/app/log"

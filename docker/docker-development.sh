@@ -1,12 +1,25 @@
 #!/bin/bash
 
-# Script for calling Docker compose to control the ubkg-front-end services container.
-# This script differs from the docker-deployment.sh script in that it allows for building a new
-# image.
+# Script for calling Docker compose to control the ubkg-front-end services container of UBKGBox.
+# This script differs from the docker-deployment.sh script primarily in that it allows for
+# building a new image.
 
-# The UBKGBox deployment version will correspond to the version of the ubkg-api.
+# Arguments and functions:
+# 1. check
+#    Verifies the location of the app.cfg file for ubkg-api that is to be mounted externally.
+# 2. config
+#    Calls Docker compose config.
+# 3. build
+#    a. Refreshes ubkg-api source from the current branch.
+#    b. Recalculates content of BUILD file in the container from branch information.
+#    c. Recalculates content of the VERSION file in the container from the ubkg-api repository.
+#       The UBKGBox deployment version will correspond to the version of the ubkg-api.
+#    d. Builds a new image.
+# 4. start
+#    Builds a container from the current image with docker compose up.
+# 5. stop, down
+#    Executes corresponding docker compose commands on the current container.
 
-# Print a new line and the banner
 echo
 echo "==================== UBKGBox front end ===================="
 
@@ -73,9 +86,13 @@ else
     echo
 
     if [ "$1" = "check" ]; then
-        # Bash array
+        # Bash array.
+        # Divergence from standard hubmapconsortium API architecture:
+        # ubkg-api is compiled as a PyPI package. The src directory has an additional level, with
+        # subdirectories for both the actual API source and the PyPA Egg.
+        # The path to API source is different.
         config_paths=(
-            '../src/instance/app.cfg'
+            '../src/ubkg_api/instance/app.cfg'
         )
 
         for pth in "${config_paths[@]}"; do

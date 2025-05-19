@@ -8,15 +8,16 @@
 #    b. the Guesdt HTML/JavaScript application
 #    c. an nginx web server/reverse proxy
 
-# The ubkg-api is not deployed standalone. It is either compiled as a PyPI package and consumed by
-# child APIs (e.g., hs-ontology-api) or as a component of the UBKGBox suite.
+# The ubkg-api is, in general, not deployed standalone.
+# It is either compiled as a PyPI package and consumed by child APIs (e.g., hs-ontology-api) or
+# as a component of the UBKGBox suite.
 # ---------------------------
 
-# The parent image is based on RedHat Linux Universal Base Image (UBI) version 9.
-# To do: multi-platform --i.e., linux/amd64,linux/arm64
-# to account for both Intel and Apple architectures.
+# The parent image is based on RedHat Linux Universal Base Image (UBI).
+# To do: multi-platform --i.e., linux/amd64,linux/arm64 to account for both Intel and Apple architectures.
 FROM redhat/ubi9:9.4
 
+# image LABEL layer
 LABEL description="UBKGBox ubkg-front-end"
 
 # -----------------
@@ -31,7 +32,7 @@ enabled=0\n\\n\
 disable_system_repos=0\n'\
 >> /etc/yum/pluginconf.d/subscription-manager.conf
 
-# Reduce the number of layers in image by minimizing the number of separate RUN commands.
+# Reduce the number of layers in the image by minimizing the number of separate RUN commands.
 # 1 - Install GCC, Git, Python, and libraries needed for Python development.
 # 2 - Set default Python version for `python` command, `python3` already points to the newly installed Python3.9.
 # 3 - Upgrade pip, after upgrading, both pip and pip3 are the same version.

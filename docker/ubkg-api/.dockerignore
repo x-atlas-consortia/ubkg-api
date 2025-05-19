@@ -7,5 +7,8 @@
 # Ignore README
 README.md
 
-# Ignore the flask instance folder
+# Ignore the flask instance folder.
+# Divergence from standard hubmapconsortium API architecture:
+# The ubkg-api is compiled as a PyPI package. The src directory has an additional level,
+# with subdirectories for both the actual API source and the PyPA Egg.
 src/ubkg_api/instance
