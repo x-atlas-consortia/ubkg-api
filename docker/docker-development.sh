@@ -19,6 +19,11 @@
 #    Builds a container from the current image with docker compose up.
 # 5. stop, down
 #    Executes corresponding docker compose commands on the current container.
+# -- Divergence from standard hubmapconsortium API image build
+# 6. push
+#    Pushes images in both linux/amd64 and linux/arm64 to Docker Hub.
+# --
+
 
 echo
 echo "==================== UBKGBox front end ===================="
@@ -70,8 +75,8 @@ function export_version() {
 }
 
 
-if [[ "$1" != "check" && "$1" != "config" && "$1" != "build" && "$1" != "start" && "$1" != "stop" && "$1" != "down" ]]; then
-    echo "Unknown command '$1', specify one of the following: check|config|build|start|stop|down"
+if [[ "$1" != "check" && "$1" != "config" && "$1" != "build" && "$1" != "start" && "$1" != "stop" && "$1" != "down" && "$1" != "push" ]]; then
+    echo "Unknown command '$1', specify one of the following: check|config|build|push|start|stop|down"
 else
     # Always show the script dir
     get_dir_of_this_script
@@ -136,6 +141,9 @@ else
         docker compose -f docker-compose.yml -f docker-compose.development.yml -p ubkg-front-end stop
     elif [ "$1" = "down" ]; then
         docker compose -f docker-compose.yml -f docker-compose.development.yml -p ubkg-front-end down
+    elif [ "$1" = "push" ]; then
+        # buildx uses docker-compose.yml
+        docker buildx bake -f docker-compose.yml -f docker-compose.development.yml --push
     fi
 fi
 
