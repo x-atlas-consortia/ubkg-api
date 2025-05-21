@@ -36,7 +36,7 @@ function generate_build_version() {
 # Also remove newlines and leading/trailing slashes if present in that VERSION file
 function export_version() {
     export UBKG_API_VERSION=$(tr -d "\n\r" < ../VERSION | xargs)
-    echo "HS_ONTOLOGY_API_VERSION: $UBKG_API_VERSION"
+    echo "UBKG_API_VERSION: $UBKG_API_VERSION"
 }
 
 
