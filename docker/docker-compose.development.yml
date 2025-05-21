@@ -8,6 +8,7 @@ services:
       # Configure Compose for multi-architecture builds.
       # Prerequisite: creating an additional buildx builder by running
       # docker buildx create --use
+      # Build tags for both the current version and "latest".
       tags:
         - docker.io/hubmap/ubkg-front-end:${UBKG_API_VERSION:?err}
         - docker.io/hubmap/ubkg-front-end:latest
