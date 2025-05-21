@@ -15,19 +15,25 @@ The bash shell scripts contained in this directory are intended for use on Mac O
 These scripts will not work on Windows. 
 (The resulting Docker images should, however, run on Windows.)
 
+# Divergence from standard hubmapconsortium API Compose framework
+The **ubkg-front-end** Docker Compose architecture is based on the framework of Shell scripts and Compose YML files used to containerize APIs 
+deployed by the HuBMAP Consortium, with significant differences.
+1. Unlike other APIs in the consortium, the ubkg-api is deployed both as an application in **UBKGBox** and as a PyPI package to be used by other "child APIs". For this reason, the _/src_ directory of the ubkg-api repo has an additional level of subdirectory, corresponding to both the actual API source and the PyPA Egg information.
+2. Unlike other APIs in the consortium, the **ubkg-front-end** image must be available for both linux/amd64 and linux/arm64 architectures.
+
 # Build Workflow Prerequisites
 ## Docker
 [Docker must be installed](https://docs.docker.com/engine/install/) on the development machine with Docker BuildX build support.  
 By default Docker BuildX support is installed with Docker Desktop.  If you have a version of Docker installed without Desktop you can [install Docker BuildX manually](https://docs.docker.com/build/install-buildx/).
 
 ## Docker Hub
-The developer must be logged in to Docker Hub with an account that has privileges in the [hubmap consortium](https://hub.docker.com/orgs/hubmap/teams/consortium/members) organization.
+To publish **ubkg-front-end** images in the Docker Hub registry, the developer must be logged in to Docker Hub with an account that has privileges in the [hubmap consortium](https://hub.docker.com/orgs/hubmap/teams/consortium/members) organization.
 
 ## Docker Compose for multiple architectures
-The Docker Compose build architecture will push **ubkg-front-end** images to Docker Hub for both 
+The Docker Compose workflow will push **ubkg-front-end** images to Docker Hub for both 
 linux/amd64 (Intel) and linux/arm64(OSX) architectures. This requires that:
-- The development machine must run two buildx builders
-- The docker-compose.development.yml file includes platform properties.
+- the development machine runs two buildx builders.
+- the **docker-compose.development.yml** file includes keys that enable multiple architectures (**tags** and **x-bake**)
 
 Refer to [this article](architecture-builds-are-possible-with-docker-compose-kind-of-2a4e8d166c56) for an explanation of configuring Docker Compose for multiple architectures.
 
