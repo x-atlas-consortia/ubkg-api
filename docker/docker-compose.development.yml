@@ -14,7 +14,8 @@ services:
         - docker.io/hubmap/ubkg-front-end:latest
       x-bake:
         platforms:
-          - linux/amd64
+          # To do: modify Dockerfile to manage yum filesystem to accommodate multiple builds.
+          #- linux/amd64
           - linux/arm64
     # Build the image with name and tag
     # Exit with an error message containing err if unset or empty in the environment
