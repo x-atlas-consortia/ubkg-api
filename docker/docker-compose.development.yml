@@ -2,8 +2,6 @@ services:
   
   ubkg-front-end:
     build:
-      # Set the build context for the Dockerfile to allow copying of files from directories above
-      # the directory that contains the Dockerfile.
       context: ./ubkg-api
       # Configure Compose for multi-architecture builds.
       # Prerequisite: creating an additional buildx builder by running

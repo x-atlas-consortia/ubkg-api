@@ -8,13 +8,12 @@
 #    b. the Guesdt HTML/JavaScript application
 #    c. an nginx web server/reverse proxy
 
-# The ubkg-api is, in general, not deployed standalone.
+# The ubkg-api is not deployed as a standalone component.
 # It is either compiled as a PyPI package and consumed by child APIs (e.g., hs-ontology-api) or
-# as a component of the UBKGBox suite.
+# as a component of the UBKGBox Compose application.
 # ---------------------------
 
 # The parent image is based on RedHat Linux Universal Base Image (UBI).
-# To do: multi-platform --i.e., linux/amd64,linux/arm64 to account for both Intel and Apple architectures.
 FROM redhat/ubi9:9.4
 
 # image LABEL layer
@@ -64,20 +63,10 @@ RUN yum install --assumeyes  procps-ng make && \
 # ----------------
 # INSTALL NGINX AND FLASK APP DEPENDENCIES VIA YUM.
 
+COPY . .
+
 # Change to directory that contains the Dockerfile.
 WORKDIR /usr/src/app
-
-# Copy files from the build context to the image.
-# The build requires the files in the "src" directory of the GitHub repo, which is at the same level
-# as the "docker" directory that contains the Dockerfile.
-# To enable access to the directory,
-# 1. If building in Docker, build from a directory other than the directory containing the Dockerfile,
-#    with the -f flag pointing to the Dockerfile. (Good luck with that, by the way: you'll need to
-#    figure out all of the relative file paths.)
-# 2. If building in Docker Compose (the preferred method), set the context to point to the
-#    ./ubkg-api directory of the project root.
-
-COPY . .
 
 # http://nginx.org/en/linux_packages.html#RHEL-CentOS
 # Set up the yum repository to install the latest mainline version of Nginx
@@ -95,22 +84,24 @@ module_hotfixes=true\n'\
 # 2 - By default, the repository for stable nginx packages is used. Use mainline nginx packages.
 # 3 - Install nginx (using the custom yum repo specified earlier).
 # 4 - Remove the default nginx config file.
-# 5 - Overwrite the nginx.conf with ours to run nginx as non-root.
+# 5 - Overwrite the nginx.conf with ours to run nginx as non-root. Copy over conf.d.
 # 6 - Remove the nginx directory copied from host machine (nginx/conf.d gets mounted to the container).
 # 7 - Upgrade pip (the one installed in base image may be old) and install flask app dependencies (pip3 also works).
 # 8 - Install Flask app dependencies.
 # 9 - Make the start script executable.
 # 10 - Clean all yum cache.
 
-RUN yum install -y yum-utils && \
-    yum-config-manager --enable nginx-mainline && \
+# RUN yum install -y yum-utils && \
+RUN yum-config-manager --enable nginx-mainline && \
     yum install -y nginx && \
     rm /etc/nginx/conf.d/default.conf && \
-    mv nginx/nginx.conf /etc/nginx/nginx.conf && \
     rm -rf nginx && \
     pip install --upgrade pip -r src/requirements.txt && \
     chmod +x start.sh && \
     yum clean all
+
+COPY nginx/nginx.conf etc/nginx/conf
+COPY nginx/conf.d etc/nginx/conf.d
 
 # The EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime.
 # EXPOSE does not make the ports of the container accessible to the host.
