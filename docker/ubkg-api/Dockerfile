@@ -94,13 +94,12 @@ module_hotfixes=true\n'\
 RUN yum-config-manager --enable nginx-mainline && \
     yum install -y nginx && \
     rm /etc/nginx/conf.d/default.conf && \
+    mv nginx/nginx.conf /etc/nginx/nginx.conf && \
+    mv nginx/conf.d /etc/nginx &&\
     rm -rf nginx && \
-    #pip install --upgrade pip -r src/requirements.txt && \
+    pip install --upgrade pip -r src/requirements.txt && \
     chmod +x start.sh && \
     yum clean all
-
-COPY nginx/nginx.conf etc/nginx/conf
-COPY nginx/conf.d etc/nginx/conf.d
 
 # The EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime.
 # EXPOSE does not make the ports of the container accessible to the host.

@@ -4,6 +4,8 @@
 # 'daemon off;' is nginx configuration directive
 nginx -g 'daemon off;' &
 
+echo "Sleeping for 120 s"
+sleep 120
 # Start uwsgi and keep it running in foreground.
 
 # Divergence from standard hubmapconsortium API configuration:
