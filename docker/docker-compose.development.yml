@@ -2,18 +2,22 @@ services:
   
   ubkg-front-end:
     build:
+      # Set the build context for the Dockerfile. The docker-development.sh script copies
+      # source from the current GitHub branch to the build context directory
+      # for the Dockerfile to copy to the image.
       context: ./ubkg-api
+
       # Configure Compose for multi-architecture builds.
-      # Prerequisite: creating an additional buildx builder by running
-      # docker buildx create --use
-      # Build tags for both the current version and "latest".
+      # Prerequisites:
+      # 1. Create an additional buildx builder by running
+      #    docker buildx create --use
+      # 2. Build tags for both the current version and "latest".
       tags:
         - docker.io/hubmap/ubkg-front-end:${UBKG_API_VERSION:?err}
         - docker.io/hubmap/ubkg-front-end:latest
       x-bake:
         platforms:
-          # To do: modify Dockerfile to manage yum filesystem to accommodate multiple builds.
-          #- linux/amd64
+          - linux/amd64
           - linux/arm64
     # Build the image with name and tag
     # Exit with an error message containing err if unset or empty in the environment

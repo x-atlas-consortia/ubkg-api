@@ -26,6 +26,21 @@ deployed by the HuBMAP Consortium, with significant differences.
 [Docker must be installed](https://docs.docker.com/engine/install/) on the development machine with Docker BuildX build support.  
 By default Docker BuildX support is installed with Docker Desktop.  If you have a version of Docker installed without Desktop you can [install Docker BuildX manually](https://docs.docker.com/build/install-buildx/).
 
+## Docker Desktop resources
+Building the **ubkg-front-end** image and container will require more than the default amount of resources.
+Manage Docker resources in Docker Desktop from the _Settings>Resources>Advanced_ menu.
+### OOME
+Docker Out of Memory Errors (OOME) manifest as exits with [error code 137](https://medium.com/javarevisited/understanding-and-resolving-docker-exit-code-73ff617230cf). 
+
+To address OOMEs, increase the **Memory Limit** to at least 16 MB.
+
+### yum file system
+The Dockerfile installs packages and dependencies using the **yum** package manager. 
+The size of packages such as nginx may exceed the available space allocated to the container file system, resulting
+in a failure to solve in yum with messages like `At least 4MB more space needed on the filesystem.`
+
+To address yum file system size, increase the **Disk usage limit** to a value larger than the default (8 MB).
+
 ## Docker Hub
 To publish **ubkg-front-end** images in the Docker Hub registry, the developer must be logged in to Docker Hub with an account that has privileges in the [hubmap consortium](https://hub.docker.com/orgs/hubmap/teams/consortium/members) organization.
 

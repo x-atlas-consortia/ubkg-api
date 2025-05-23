@@ -10,7 +10,8 @@
 # 2. config
 #    Calls Docker compose config.
 # 3. build
-#    a. Refreshes ubkg-api source from the current branch.
+#    a. Refreshes ubkg-api source from the current branch. The src directory is copied under
+#       the docker directory, and it is this src that the Dockerfile copies to the image.
 #    b. Recalculates content of BUILD file in the container from branch information.
 #    c. Recalculates content of the VERSION file in the container from the ubkg-api repository.
 #       The UBKGBox deployment version will correspond to the version of the ubkg-api.

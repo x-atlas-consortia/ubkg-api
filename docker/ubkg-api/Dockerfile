@@ -63,10 +63,9 @@ RUN yum install --assumeyes  procps-ng make && \
 # ----------------
 # INSTALL NGINX AND FLASK APP DEPENDENCIES VIA YUM.
 
-COPY . .
-
 # Change to directory that contains the Dockerfile.
 WORKDIR /usr/src/app
+COPY . .
 
 # http://nginx.org/en/linux_packages.html#RHEL-CentOS
 # Set up the yum repository to install the latest mainline version of Nginx
@@ -96,7 +95,7 @@ RUN yum-config-manager --enable nginx-mainline && \
     yum install -y nginx && \
     rm /etc/nginx/conf.d/default.conf && \
     rm -rf nginx && \
-    pip install --upgrade pip -r src/requirements.txt && \
+    #pip install --upgrade pip -r src/requirements.txt && \
     chmod +x start.sh && \
     yum clean all
 
