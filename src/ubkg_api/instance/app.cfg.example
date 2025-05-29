@@ -1,4 +1,4 @@
-SERVER='bolt://ubkg-neo4j:7687'
+SERVER='bolt://localhost:4500'
 USERNAME='neo4j'
 PASSWORD='abcd1234'
 # Maximum duration for the execution of timeboxed queries to prevent service timeout, in seconds
