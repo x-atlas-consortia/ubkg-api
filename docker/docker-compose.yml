@@ -27,13 +27,3 @@ services:
       - HOST_UID=${HOST_UID:-1001}
     init: true
     restart: always
-    #volumes:
-      # Mount the app config to container in order to keep it outside of the image.
-      # Divergence from standard hubmapconsortium API architecture:
-      # The ubkg-api is compiled as a PyPI package. The src directory has subdirectories
-      # for both the API source and the PyPA Egg.
-      #- "../src/ubkg_api/instance:/usr/src/app/src/ubkg_api/instance"
-      # Mount the logging to container
-      #- "../log:/usr/src/app/log"
-      # Mount conf.d on host machine to the nginx conf.d on container
-      #- "./ubkg-api/nginx/conf.d:/etc/nginx/conf.d"
