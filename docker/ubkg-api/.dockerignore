@@ -7,5 +7,6 @@
 # Ignore README
 README.md
 
-# Ignore the app.cfg file.
+# Ignore the app.cfg file. The Docker Compose for UBKGBox will assume that app.cfg is in an external
+# bind mount.
 src/ubkg_api/instance/app.cfg

@@ -1,11 +1,11 @@
 # Unified Biomedical Knowledge Graph
 
-## Integrating ubkg-api into a UBKGBox deployment (ubkg-front-end)
+## Integrating the ubkg-api into a UBKGBox deployment (ubkg-front-end)
 
 **[UBKGBox](https://github.com/x-atlas-consortia/ubkg-box)** is a Docker Compose
 multi-container application featuring:
-- a **ubkg-back-end** service running an instance of a UBKG context in neo4j
-- a **ubkg-front-end** service running a number of UBKG clients, including an instance of ubkg-api.
+- a **ubkg-back-end** service hosting an instance of a UBKG context in neo4j
+- a **ubkg-front-end** service hosting a number of UBKG clients, including an instance of ubkg-api.
 
 The code in the _/docker_ directory of this repository can be used to build and push
 the **ubkg-front-end** image of **UBKGBox**.
@@ -73,3 +73,7 @@ Once at least two buildx builders are available, the build workflow will build a
    The last image and container correspond to the image with linux/arm64 architecture.
 4. `./docker-development.sh push` will push tagged images for both linux/amd64 and linux/arm64 architectures to the Docker hub repo named **hubmap/ubkg-front-end**:
 ![img.png](img.png)
+
+# Application dependency
+The ubkg-api requires a configuration file named **app.cfg**, which can be built from a copy of **app.cfg.example**.
+As a component of the **ubkg-front-end** service in **UBKGBox**, the ubkg-api assumes that a copy of the **app.cfg** file will be in an external bind mount directory named _api_instance_.
