@@ -112,7 +112,7 @@ else
 
         echo 'Checks complete, all good :)'
     elif [ "$1" = "config" ]; then
-        docker compose -f docker-compose.yml -f docker-compose.development.yml -p ubkg-front-end config
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p ubkg-api config
     elif [ "$1" = "build" ]; then
         # Delete the copied source code dir if exists
         if [ -d "ubkg-api/src" ]; then
@@ -135,13 +135,13 @@ else
         cp ../VERSION ubkg-api
         cp ../BUILD ubkg-api
 
-        docker compose -f docker-compose.yml -f docker-compose.development.yml -p ubkg-front-end build
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p ubkg-api build
     elif [ "$1" = "start" ]; then
-        docker compose -f docker-compose.yml -f docker-compose.development.yml -p ubkg-front-end up -d
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p ubkg-api up -d
     elif [ "$1" = "stop" ]; then
-        docker compose -f docker-compose.yml -f docker-compose.development.yml -p ubkg-front-end stop
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p ubkg-api stop
     elif [ "$1" = "down" ]; then
-        docker compose -f docker-compose.yml -f docker-compose.development.yml -p ubkg-front-end down
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p ubkg-api down
     elif [ "$1" = "push" ]; then
         # buildx uses docker-compose.yml
         docker buildx bake -f docker-compose.yml -f docker-compose.development.yml --push

@@ -1,7 +1,7 @@
 services:
   
-  ubkg-front-end:
+  ubkg-api:
     # Use the published image and tag from DockerHub
-    image: hubmap/ubkg-front-end:${UBKG_API_VERSION:?err}
+    image: hubmap/ubkg-api:${UBKG_API_VERSION:?err}
 
 
