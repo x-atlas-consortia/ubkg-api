@@ -96,8 +96,6 @@ RUN yum-config-manager --enable nginx-mainline && \
     rm /etc/nginx/conf.d/default.conf && \
     mv nginx/nginx.conf /etc/nginx/nginx.conf && \
     mv nginx/conf.d /etc/nginx &&\
-    cp nginx/html/home.html /usr/share/nginx/html &&\
-    mv nginx/html/images /usr/share/nginx/html/images &&\
     rm -rf nginx && \
     pip install --upgrade pip -r src/requirements.txt && \
     chmod +x start.sh && \

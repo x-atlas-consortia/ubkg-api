@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# UBKGBox front-end container entrypoint
+# ubkg-api container entrypoint
 # Configures the container to run nginx as a non-root user named ubkg.
 
 # Pass the HOST_UID and HOST_UID from environment variables specified in docker-compose
 HOST_GID=${HOST_GID}
 HOST_UID=${HOST_UID}
 
-echo "Starting ubkg-front-end container with the same host user UID: $HOST_UID and GID: $HOST_GID"
+echo "Starting ubkg-api container with the same host user UID: $HOST_UID and GID: $HOST_GID"
 
 # Create a new user with the same host UID to run processes on container, named "ubkg".
 # The username diverges from the standard hubmapconsortium user name of "hubmap".

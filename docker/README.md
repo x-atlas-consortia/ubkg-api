@@ -2,10 +2,14 @@
 
 ## Integrating the ubkg-api into a UBKGBox deployment (ubkg-front-end)
 
-**[UBKGBox](https://github.com/x-atlas-consortia/ubkg-box)** is a Docker Compose
-multi-container application featuring:
-- a **ubkg-back-end** service hosting an instance of a UBKG context in neo4j
-- a **ubkg-api** service hosting an instance of ubkg-api.
+**UBKGBox** is a - a container hosting a UBKG context running in neo4j, built from the [ubkg-neo4j](https://github.com/x-atlas-consortia/ubkg-neo4j) Docker architecture
+- containers that work with the UBKG instance, including:
+   - an instance of the UBKG API (https://github.com/x-atlas-consortia/ubkg-api), a REST API
+   - Swagger documentation for the UBKG API
+   - an instance of [Guesdt](https://github.com/x-atlas-consortia/Guesdt), a Web UI that represents the UBKG in tree view
+   - the neo4j browser
+- a front-end UI with networked links to client components, built from the [ubkg-front-end](https://github.com/x-atlas-consortia/ubkg-front-end) architecture
+- a [ubkg-auth](https://github.com/x-atlas-consortia/ubkg-auth) authentication service that authenticates UBKG consumers against the UMLS API by means of an API key
 
 The code in the _/docker_ directory of this repository can be used to build and push
 the **ubkg-api** image of **UBKGBox**.
@@ -21,7 +25,7 @@ deployed by the HuBMAP Consortium, with significant differences.
 1. Unlike other APIs in the consortium, the ubkg-api is deployed both as an application in **UBKGBox** and as a PyPI package to be used by other "child APIs". For this reason, the _/src_ directory of the ubkg-api repo has an additional level of subdirectory, corresponding to both the actual API source and the PyPA Egg information.
 2. Unlike other APIs in the consortium, the **ubkg-front-end** image must be available for both linux/amd64 and linux/arm64 architectures.
 
-# Build Workflow Prerequisites
+# Build Prerequisites
 ## Docker
 [Docker must be installed](https://docs.docker.com/engine/install/) on the development machine with Docker BuildX build support.  
 By default Docker BuildX support is installed with Docker Desktop.  If you have a version of Docker installed without Desktop you can [install Docker BuildX manually](https://docs.docker.com/build/install-buildx/).
