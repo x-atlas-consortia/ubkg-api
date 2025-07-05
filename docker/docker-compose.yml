@@ -12,7 +12,7 @@ services:
     # Divergence from standard hubmapconsortium API architecture:
     # The standard architecture maps port 6666, which the Chrome browser considers an "unsafe port".
     ports:
-      - "7000:8080"
+      - "8080:8080"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080"]
       interval: 1m30s
