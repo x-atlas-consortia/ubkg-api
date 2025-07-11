@@ -255,9 +255,9 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_system_test.out
 echo | tee -a ubkg_system_test.out
 
-echo "/sources?sab=HPOMP GET" | tee -a ubkg_system_test.out
+echo "/sources GET" | tee -a ubkg_system_test.out
 curl --request GET \
- --url "${UBKG_URL}/sources?sab=HPOMP" \
+ --url "${UBKG_URL}/sources" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_system_test.out
 echo | tee -a ubkg_system_test.out
 echo | tee -a ubkg_system_test.out
