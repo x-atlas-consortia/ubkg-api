@@ -1,0 +1,2010 @@
+openapi: 3.0.3
+info:
+  title: UBKG API
+  description: The UBKG API provides REST endpoints that return results from queries against the base context instance of the [Unified Biomedical Knowledge Graph (UBKG)](https://ubkg.docs.xconsortia.org/). To prevent exceeding service timeouts or payload limits, some endpoints are throttled in both execution time and in the size of its response payload--e.g., to a maximum execution time of 15 seconds and a maximum payload of 9 MB. NOTE - The API requires an Authorization key in the request header in format "UMLS-Key[space][apikey]", where apikey is the API key for a UMLS licensee acount.
+
+  version: "2.0.0"
+  contact:
+    name: GitHub repository
+    url: https://github.com/x-atlas-consortia/ubkg-api
+externalDocs:
+  description: UBKG documentation
+  url: https://ubkg.docs.xconsortia.org/api
+servers:
+  - url: http://ubkg-api:8080/api
+    description: Base context instance
+tags:
+  - name: codes
+  - name: concepts
+  - name: concepts/paths
+  - name: concepts/paths/subgraph
+  - name: general
+  - name: node-types
+  - name: sabs
+  - name: semantic-types
+  - name: terms
+security:
+  - umls_key: []
+paths:
+  /codes/{code_id}/codes:
+    get:
+      summary:  Returns information on Code nodes that link to the Concept nodes to which the specified code links (i.e., related codes), subject to constraints specified in parameters. [A Concept node in the UBKG can have CODE relationships with (links to) Code nodes from multiple sources (SABs). For example, the Code nodes with code_ids SNOMEDCT_US:254837009, NCI:C9335 and MSH:D001943 link to the Concept with identifier C0006142.]
+      operationId: codes_code_id_codes_get
+      parameters:
+        - name: code_id
+          in: path
+          required: true
+          description: the identifier for a Code node, in format _SAB_:_code_ where _SAB_ is an identifier for the source of the code.
+          schema:
+            type: string
+            example: SNOMEDCT_US:254837009
+        - name: sab
+          in: query
+          required: false
+          description: The set of sources (SABs) to which to limit the set of Codes that  link to the same Concept to which the Code with CodeID=_code_id_ links. This set can be specified either a list of values separated by commas (e.g., ?sab=SAB1,SAB,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+              example: NCI,MDR
+            default: []
+      responses:
+        '200':
+          description: An array of objects corresponding to Code nodes that share links to the Concept associated with the specified Code, subject to constraints specified in parameters.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CodesCodesObj'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded the specified timeout.
+        '5XX':
+          description: Unknown error
+      tags:
+        - codes
+  /codes/{code_id}/concepts:
+    get:
+      operationId: codes_code_id_concepts_get
+      summary: Returns the set of Concept nodes that link to the specified Code node. [A Code node can have CODE relationships with (links to) multiple Concept nodes. For example, the Code with identifier SNOMEDCT_US:79962008 links to a set of Concepts that includes C0014863 and C1442913.]
+      parameters:
+        - name: code_id
+          in: path
+          required: true
+          description: The identifier for the Code node, in format _SAB_:_CODE_ where _SAB_ is an identifier for the source of the code.
+          schema:
+            type: string
+            example: SNOMEDCT_US:79962008
+      responses:
+        '200':
+          description: An array of Concept nodes that have CODE relationships with the specified Code node
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConceptDetail'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - codes
+  /codes/{code_id}/terms:
+    get:
+      operationId: codes_code_id_terms_get
+      summary: Returns the set of Term nodes that link to the specified Code node, subject to constraints specified in parameters.
+      parameters:
+        - name: code_id
+          in: path
+          required: true
+          description: The CodeID for a Code node, in format SAB:CODE.
+          schema:
+            type: string
+            example: SNOMEDCT_US:254837009
+        - name: term_type
+          in: query
+          required: false
+          description: optional term type for the term. Can be either a list of values delimited with commas (e.g., ?term_type=PT,SY,FN) or with individual key-value pairs (e.g., ?term_type=PT&term_type=SY&term_type=FN)
+          schema:
+            type: string
+            example: PT
+      responses:
+        '200':
+          description: An array of Term nodes that have relationships with the specified Code node
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CodeTerms'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '408':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - codes
+  /concepts/{concept_id}/codes:
+    get:
+      operationId: concepts_concept_id_codes_get
+      summary: Returns information on the set of Code nodes that link to the specified Concept, subject to constraints specified in parameters. [A Concept node can have CODE relationships with (links to) multiple Code nodes. For example, the Concept with identifier C0006142 links to a set of Code nodes that include SNOMEDCT_US:254837009, NCI:C9335 and MSH:D001943.]
+      parameters:
+        - name: concept_id
+          in: path
+          required: true
+          description: The identifier for the Concept (also known as the Concept Unique Identifier, or CUI)
+          schema:
+            type: string
+            example: C0678222
+        - name: sab
+          in: query
+          required: false
+          description: The set of sources (SABs) to which to limit the set of Codes that link to the specified Concept. Can be either a list of values delimited with commas (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+              example: MEDLINEPLUS,MSH,MEDCIN
+            default: []
+      responses:
+        '200':
+          description: An array of code_ids in format _SAB_:_CODE for the Codes that link to the specified Concept, subject to constraints specified in parameters.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConceptCodes'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - concepts
+  /concepts/{concept_id}/concepts:
+    get:
+      operationId: concepts_concept_id_concepts_get
+      summary: Returns the set of Concepts that have direct relationships with the specified Concept.
+      parameters:
+        - name: concept_id
+          in: path
+          required: true
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI)
+          schema:
+            type: string
+            example: C4722518
+      responses:
+        '200':
+          description: An array of information on Concepts that have relationships with the specified Concept
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SabRelationshipConceptTerm'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - concepts
+  /concepts/{concept_id}/definitions:
+    get:
+      operationId: concepts_concept_id_definitions_get
+      summary: Returns the set of Definitions linked to a Concept. [A Definition is usually defined for a Code by a source (SAB), not a Concept; however, in the UBKG, the Definition is associated with the Code's linked Concept. Thus, a Concept may have multiple Definitions.]
+      parameters:
+        - name: concept_id
+          description: Identifier (also known as a Concept Unique Identifier) for a Concept.
+          in: path
+          required: true
+          schema:
+            type: string
+            example: C0006142
+      responses:
+        '200':
+          description: An array of Definitions associated with the Concept.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SabDefinition'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - concepts
+  /concepts/{concept_id}/nodeobjects:
+    get:
+      operationId: concepts_identifier_nodes_get
+      summary: Returns a set of "Concept Node objects" (also known as concept subgraphs) that "match" an identifier. [Each Concept node in the UBKG is the origin of a "concept subgraph" that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A "Concept Node object" represents this subgraph as a set of Concept properties--i.e., all of the Concept's linked Codes, terms, definitions, and semantic types. A "match" is an exact match between an identifier and a text-based property in a Concept Node object. Because an identifier may match properties in more than one Concept Node object, the endpoint can return multiple Concept Node objects.]
+      parameters:
+        - name: concept_id
+          in: path
+          required: true
+          description: The string to match against properties related to Concepts. Related properties include the preferred term for the Concept; the CUI for the Concept; the CodeID for a Code linked to the Concept; and terms for a Code linked to a Concept.
+          schema:
+            type: string
+            example: Cells
+      responses:
+        '200':
+          description: The set of Concept node objects that match the identifier.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptNodes'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - concepts
+  /concepts/{concept_id}/paths/expand:
+    get:
+      operationId: concepts_concept_id_paths_expand_get
+      summary: Returns a set of paths that originate from the specified Concept, subject to constraints specified in parameters.
+      parameters:
+        - name: concept_id
+          in: path
+          required: true
+          description: The identifier (also known as Concept Unique Identifier, or CUI) for the Concept from which paths originate.
+          schema:
+            type: string
+            example: C2720507
+        - name: sab
+          in: query
+          required: true
+          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited withcommas (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: SNOMEDCT_US
+        - name: rel
+          in: query
+          required: true
+          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with commas (e.g., ?rel=relationship_type1,relationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          schema:
+            type: string
+            example: isa
+        - name: mindepth
+          in: query
+          required: false
+          description: The minimum number of hops in the returned set of expanded paths--e.g., mindepth=2 directs the endpoint to return paths that have at least 2 hops. The minimum must be non-negative and less than the value of _maxdepth_. The default value is 1. Large values of mindepth may result in long queries that exceed the execution time limits.
+          schema:
+            type: string
+            example: 1
+        - name: maxdepth
+          in: query
+          required: false
+          description: The maximum number of hops in the returned set of expanded paths--e.g., maxdepth=4 directs the endpoint to return paths that have no more than 4 hops. The maximum must be non-negative. The default value is _mindepth_ + 2. Large values of maxdepth may result in long queries that exceed the execution time limits.
+          schema:
+            type: string
+            example: 3
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Return the graph of all Concepts in paths that originate with the specified Concept node, subject to constraints. The schema of the response corresponds to the Table result frame of the endpoint query in the neo4j browser.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptPaths'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - concepts/paths
+  /concepts/{concept_id}/paths/trees:
+    get:
+      operationId: concepts_trees_get
+      summary: Return information on the Concepts in the spanning tree that originates from a specified Concept, subject to constraints on relationship type, relationship source, and range of path depths. A spanning tree is the set of paths originating from node that traverse all of the other nodes of a graph.
+      parameters:
+        - name: concept_id
+          in: path
+          required: true
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI) of the origin of the spanning tree.
+          schema:
+            type: string
+            example: C0006142
+        - name: sab
+          in: query
+          required: true
+          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with commas (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: SNOMEDCT_US
+        - name: rel
+          in: query
+          required: true
+          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with commas (e.g., ?rel=relationship_type1,relationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2).
+          schema:
+            type: string
+            example: isa
+        - name: mindepth
+          in: query
+          required: false
+          description: The minimum number of hops in the spanning tree--e.g., mindepth=1 directs the endpoint to return paths that have at least 1 hop. The minimum must be non-negative and less than the value of _maxdepth_. The only allowed values are 0 or 1. The default value is 0.
+          schema:
+            type: integer
+            enum:
+              - 0
+              - 1
+            default: 0
+        - name: maxdepth
+          in: query
+          required: false
+          description: The maximum number of hops in spanning tree--e.g., maxdepth=4 directs the endpoint to return paths that have no more than 4 hops. The maximum must be non-negative. The default value is _mindepth_ + 2. Large values of maxdepth may result in long queries that exceed the execution time limits.
+          schema:
+            type: string
+            example: 3
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Return information the paths in the spanning tree that originates from the specified Concept, subject to constraints on relationship type, relationship source, and spanning depth.  The schema of the response corresponds to the Table result frame of the endpoint query in the neo4j browser.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptPaths'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - concepts/paths
+  /concepts/paths/subgraph:
+    get:
+      operationId: concepts_subgraph_get
+      summary: Returns a subgraph of Concept nodes that are connected by a set of specified relationship types defined by a set of specified sources. For example, the endpoint can return the subgraph consisting of nodes that are linked by UBERON's "part_of" relationship.
+      parameters:
+        - name: sab
+          in: query
+          required: true
+          description: The set of sources (SABs) to which to limit the relationships in the subgraph. Can be either a list of values delimited with commas (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: SNOMEDCT_US
+        - name: rel
+          in: query
+          required: true
+          description: The set of relationship types to which to limit the relationships in the subgraph. Can be either a list of values delimited with commas (e.g., ?rel=relationship_type1,relationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2)
+          schema:
+            type: string
+            example: isa
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Return the set of Concepts linked by the specified relationships from the specified SABs. The schema of the response corresponds to the Table result frame of the endpoint query in the neo4j browser.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptPaths'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - concepts/paths/subgraph
+  /concepts/paths/subgraph/sequential:
+    get:
+      operationId: concepts_paths_subgraph_sequential_get
+      summary: Returns a set of paths with a specified sequence of relationships, subject to constraints specified in parameters.
+      parameters:
+        - name: relsequence
+          in: query
+          required: true
+          description: A sequential set of relationships that specifies the pattern of relationships in the paths in the subgraph. Each element in the set should be in format SAB:relationship type. SAB corresponds to the source in which the relationship was asserted--e.g., "NCI:is_marked_by_gene_product" corresponds to the "is_marked_by_gene_product" relationship asserted in NCI. The set can be specified with a list of values delimited with commas (e.g., ?relsequence=SAB1:relationshiptype1,SAB2:relationshiptype2) or with individual key-value pairs (e.g., ?relsequence=SAB1:relationship_type1&relsequence=SAB2:relationshiptype2).
+          schema:
+            type: string
+            example: NCI:is_marked_by_gene_product,NCI:3Agene_product_encoded_by_gene
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Return the graph of all Concepts in paths with specified sequential relationships, subject to constraints. The schema of the response corresponds to the Table result frame of the endpoint query in the neo4j browser.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptPaths'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - concepts/paths/subgraph
+  /concepts/{concept_id}/paths/subgraph/sequential:
+    get:
+      operationId: concepts_concept_id_paths_subgraph_sequential_get
+      summary: Returns a set of paths that originate from the specified Concept with a specified sequence of relationships, subject to constraints specified in parameters.
+      parameters:
+        - name: concept_id
+          in: path
+          required: true
+          description: The identifier (also known as Concept Unique Identifier, or CUI) for the Concept from which paths originate.
+          schema:
+            type: string
+            example: C0006142
+        - name: relsequence
+          in: query
+          required: true
+          description: A sequential set of relationships that specifies the pattern of relationships in the paths in the subgraph. Each element in the set should be in format SAB:relationship type. SAB corresponds to the source in which the relationship was asserted--e.g., "NCI:is_marked_by_gene_product" corresponds to the "is_marked_by_gene_product" relationship asserted in NCI. The set can be specified with a list of values delimited with commas (e.g., ?relsequence=SAB1:relationshiptype1,SAB2:relationshiptype2) or with individual key-value pairs (e.g., ?relsequence=SAB1:relationship_type1&relsequence=SAB2:relationshiptype2).
+          schema:
+            type: string
+            example: NCI:is_marked_by_gene_product,NCI:gene_product_encoded_by_gene
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of paths to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Return the graph of all Concepts in paths that originate with the specified Concept node with specified sequential relationships, subject to constraints. The schema of the response corresponds to the Table result frame of the endpoint query in the neo4j browser.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptPaths'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - concepts/paths/subgraph
+  /concepts/{origin_concept_id}/paths/shortestpath/{terminus_concept_id}:
+    get:
+      operationId: concepts_shortestpath_get
+      summary: Return the shortest path between two Concepts, using Dykstra's algorithm with default weights, subject to constraints on relationship types (rel) and relationship sources (sab).
+      parameters:
+        - name: origin_concept_id
+          in: path
+          required: true
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the origin of the shortestpath calculation.
+          schema:
+            type: string
+            example: C2720507
+        - name: terminus_concept_id
+          in: path
+          required: true
+          description: The concept identifier (also known as Concept Unique Identifier, or CUI) for the terminus of the shortestpath calculation.
+          schema:
+            type: string
+            example: C1272753
+        - name: sab
+          in: query
+          required: true
+          description: The set of sources (SABs) to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with commas (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: SNOMEDCT_US
+        - name: rel
+          in: query
+          required: true
+          description: The set of relationship types to which to limit the relationships in the set of expanded paths. Can be either a list of values delimited with commas (e.g., ?rel=relationship_type1,relationship_type2) or individual key-value pairs (e.g., ?rel=relationship_type1&rel=relationship_type2).
+          schema:
+            type: string
+            example: isa
+      responses:
+        '200':
+          description: Returns the ordered set of Concepts involved in the shortest path, subject to constraints for relationship type and source. The schema of the response corresponds to the Table result frame of the endpoint query in the neo4j browser.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptPaths'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - concepts/paths
+  /database/server:
+    get:
+      summary: Returns basic information on the UBKG neo4j database.
+      operationId: database_info_server_get
+      responses:
+        '200':
+          description: basic information on the UBKG neo4j database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseInfo'
+      tags:
+        - general
+  /node-types:
+    get:
+      summary: Returns list of node types (node labels)--e.g., Code, Concept, etc.
+      operationId: node_type_get
+      responses:
+        '200':
+          description: List of node types
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeTypes'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - node-types
+  /node-types/{node_type}/counts:
+    get:
+      summary: Returns counts of nodes in the database for a specified node type (label).
+      operationId: node_type_id_count_get
+      parameters:
+        - name: node_type
+          in: path
+          required: true
+          description: a node type
+          schema:
+            type: string
+            example: Code
+      responses:
+        '200':
+          description: List of counts by node type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeTypeCount'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - node-types
+  /node-types/{node_type}/counts-by-sab:
+    get:
+      summary: Returns counts of nodes in the database for a specified node type (label), grouped by source (SAB), subject to constraints specified in parameters.
+      operationId: node_type_id_count_by_sab_get
+      parameters:
+        - name: node_type
+          in: path
+          required: true
+          description: a node type
+          schema:
+            type: string
+            example: Code
+        - name: sab
+          in: query
+          required: true
+          description: The set of sources (SABs) to which to limit counts by node type. Can be either a list of values delimited with commas (e.g., ?sab=SAB1,SAB2,SAB3) or with individual key-value pairs (e.g., ?sab=SAB1&sab=SAB2&SAB=SAB3).
+          schema:
+            type: string
+            example: NCI
+      responses:
+        '200':
+          description: List of counts by node type, grouped by source, subject to constraints specified in parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeTypeSabCount'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - node-types
+  /property-types:
+    get:
+      operationId: property_types_get
+      summary: Returns the set of property types (keys) for all nodes and relationships
+      responses:
+        '200':
+          description: List of property types
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyTypes'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - general
+  /relationship-types:
+    get:
+      operationId: relationship_types_get
+      summary: Returns the set of relationship types
+      responses:
+        '200':
+          description: List of relationship types
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelationshipTypes'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - general
+  /sabs:
+    get:
+      operationId: sabs_get
+      summary: Returns a list of sources (SABs) in the UBKG. [A source corresponds to a vocabulary, an ontology, or reference. The Source Abbreviation (SAB) is unique acronym that identifies the source.]
+      responses:
+        '200':
+          description: Returns information on a set of sources.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sabs'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - sabs
+  /sabs/codes/counts:
+    get:
+      operationId: sabs_codes_counts_get
+      summary: Returns a list of sources (SABs), including counts of the codes associated with the sources, subject to constraints from parameters
+      parameters:
+        - name: skip
+          in: query
+          required: false
+          description: the number of Codes to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Codes to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns information on a set of sources, subject to constraints from parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SabCodeCounts'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - sabs
+  /sabs/{sab}/codes/counts:
+    get:
+      operationId: sabs_codes_counts_sab_get
+      summary: Returns information for a specified source (SAB), including counts of the codes associated with the source, subject to constraints from parameters
+      parameters:
+        - name: sab
+          in: path
+          required: true
+          description: A source (SAB) to which to limit the response.
+          schema:
+            type: string
+            example: UBERON
+        - name: skip
+          in: query
+          required: false
+          description: the number of Codes to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Codes to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns information on a source, subject to constraints from parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SabCodeDetails'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - sabs
+  /sabs/{sab}/codes/details:
+    get:
+      operationId: sabs_codes_details_sab_get
+      summary: Returns including details for codes associated with a specified source (SAB), subject to constraints from parameters
+      parameters:
+        - name: sab
+          in: path
+          required: true
+          description: A source (SAB) to which to limit the response.
+          schema:
+            type: string
+            example: UBERON
+        - name: skip
+          in: query
+          required: false
+          description: the number of Codes to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Codes to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns information on a set of sources and their associated Codes, subject to constraints from parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SabCodeDetails'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - sabs
+  /sabs/{sab}/term-types:
+    get:
+      operationId: sabs_term_types_sab_get
+      summary: Returns the list of term types (types of relationship) for relationships between the nodes that are defined by the specified source (SAB)
+      parameters:
+        - name: sab
+          in: path
+          required: true
+          description: A source (SAB) to which to limit the response.
+          schema:
+            type: string
+            example: UBERON
+        - name: skip
+          in: query
+          required: false
+          description: the number of Codes to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Codes to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns information on a set of sources and their associated Codes, subject to constraints from parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SabTermTypes'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - sabs
+  /semantics/semantic-types:
+    get:
+      operationId: semantics_semantic_types_get
+      summary: Returns the complete set of Semantic Type nodes, subject to constraints specified in parameters.
+      parameters:
+        - name: skip
+          in: query
+          required: false
+          description: the number of Semantic Types to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Semantic Types to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns the set of Semantic Type nodes, subject to constaints specified in the parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemanticTypes'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - semantic-types
+  /semantics/semantic-types/{identifier}:
+    get:
+      operationId: semantics_semantic_types_identifier_get
+      summary: Returns the Semantic Type node that matches the identifier, subject to constraints specified in parameters.
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          description: The identifier for a Semantic Type node. An identifier may be either a string corresponding to either the name of the Semantic Type (e.g., "Anatomical Structure") or the Type Unique Identifier (TUI) of the Semantic Type (e.g., T017).
+          schema:
+            type: string
+            example: T017
+        - name: skip
+          in: query
+          required: false
+          description: the number of paths to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of Semantic Types to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns the set of Semantic Type nodes, subject to constaints specified in the parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemanticTypes'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - semantic-types
+  /semantics/semantic-types/{identifier}/subtypes:
+    get:
+      operationId: semantics_identifier_semantic_subtypes_get
+      summary: Returns the set of Semantic Type nodes that are subtypes (have ISA_STY relationship with) the specified Semantic Type, subject to constraints specified in parameters.
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          description: The identifier for a Semantic Type node. An identifier may be either a string corresponding to either the name of the Semantic Type (e.g., "Anatomical Structure") or the Type Unique Identifier (TUI) of the Semantic Type (e.g., T017).
+          schema:
+            type: string
+            example: Anatomical Structure
+        - name: skip
+          in: query
+          required: false
+          description: the number of semantic sub-types to skip in the returned set. The value must be non-negative. The default value is 0.
+          schema:
+            type: string
+            example: 0
+        - name: limit
+          in: query
+          required: false
+          description: the maximum number of semantic sub-types to return. The value must be non-negative. The default value is the maximum number of rows specified by configuration.
+          schema:
+            type: string
+            example: 10
+      responses:
+        '200':
+          description: Returns the set of Semantic Type nodes that are subtypes of the specified Semantic Type node.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemanticSubTypes'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - semantic-types
+  /terms/{term_id}/codes:
+    get:
+      operationId: terms_term_id_codes_get
+      summary: Returns a list of Code nodes with terms that exactly match the specified string. Terms can be of different types--e.g., preferred terms (PT), synonyms (SY), etc.
+      parameters:
+        - name: term_id
+          in: path
+          required: true
+          description: The string to match. Subject to timeout. Should be URL-encoded for spaces (%20).
+          schema:
+            type: string
+            example: Breast cancer
+      responses:
+        '200':
+          description: An array of Codes with terms that exactly match the specified string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TermtypeCode'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - terms
+  /terms/{term_id}/concepts:
+    get:
+      operationId: terms_term_id_concepts_get
+      summary: Returns a list of Concept nodes with preferred terms that exactly match the specified string.
+      parameters:
+        - name: term_id
+          in: path
+          required: true
+          description: The string to match. Should be URL-encoded for spaces (%20).
+          schema:
+            type: string
+            example: Breast cancer
+      responses:
+        '200':
+          description: An array of Concepts with preferred terms that exactly match the specified string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TermConcept'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - terms
+  /sources:
+    get:
+      operationId: sources_get
+      summary: Returns information on a set of sources (SABs) used to build an instance of the UBKG.
+      parameters:
+        - name: sab
+          in: query
+          required: false
+          description: A source (SAB) to which to limit the response.
+          schema:
+            type: string
+            example: UBERON
+        - name: context
+          in: query
+          required: false
+          description: A UBKG context to which to limit the response. Possible values are base_context, data_distillery_context, hubmap_sennet_context. The sources from base_context are included with any other context.
+          schema:
+            type: string
+            enum:
+              - base_context
+              - hubmap_sennet_context
+              - data_distillery_context
+      responses:
+        '200':
+          description: An array of objects for the specified set of sources
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Source'
+        '303':
+          description: The response size exceeds a limit set by the server. The response content is stored in a file in a AWS S3 bucket. The returned response includes a URL that can be used to download the stored file.
+        '400':
+          description: Invalid parameter name or value
+        '403':
+          description: The response size exceeds a limit set by the server.
+        '404':
+          description: No response for the specified parameters.
+        '504':
+          description: The query run time exceeded a timeout set by the server.
+        '5XX':
+          description: Unknown error
+      tags:
+        - general
+components:
+  securitySchemes:
+    umls_key:
+      type: apiKey
+      description: API key for a UMLS licensee account, prefixed with "UMLS-Key "--e.g., "UMLS-Key <my-umls-key>"
+      name: Authorization
+      in: header
+  schemas:
+    CodesCodesObj: # Schema name
+      description: Code nodes that link to the same Concept node to which a specified Code links.
+      type: object
+      properties:
+        concept:
+          description: The CUI (Concept Unique Identifier) for the shared Concept node.
+          type: string
+          example: C0006142
+        code:
+          description: CodeID of a Code node, in format _SAB_:_CODE_
+          type: string
+          example: CCS 2.5
+        SAB:
+          description: an identifier for the source of the code. Corresponds to the Source Abbreviaion (SAB) of a Code in the UMLS.
+          type: string
+          example: CCF
+    CodeTerms: # Schema name
+      description: Term nodes that link to the specified Code.
+      type: object
+      properties:
+        code:
+          description: the Code to which Terms link
+          type: string
+          example: SNOMEDCT_US:254837009
+        terms:
+          description: terms linked to the code, subject to parameters
+          type: array
+          items:
+            type: object
+            properties:
+              term:
+                type: string
+                description: term string
+                example: Malignant tumor of breast
+              term_type:
+                type: string
+                description: term type for the term - an acronym of usually two or three letters
+                example: PT
+
+    ConceptDetail:    # Schema name
+      type: object
+      description: Information on a Concept node.
+      properties:
+        concept:
+          type: string
+          description: Concept Unique Identifier (CUI) for the Concept node
+          example: C0006142
+        prefterm:
+          type: string
+          description: Preferred term for the Concept node.
+          example: Malignant neoplasm of breast
+    ConceptPaths: # Schema name
+      type: object
+      description: Represents a graph for a set of paths that originate from a Concept node.
+      properties:
+        nodes:
+          type: array
+          description: nodes involved in the set of paths
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Concept Unique Identifier for the Concept node
+                example: C2720507
+              name:
+                type: string
+                description: preferred term for the Concept
+                example: SNOMED CT Concept (SNOMED RT+CTV3)
+        edges:
+          type: array
+          description: edges (relationships) involved in the set of paths
+          items:
+            type: object
+            properties:
+              SAB:
+                type: string
+                description: source for the relationship
+                example: SNOMEDCT_US
+              source:
+                type: string
+                description: Concept Unique Identifier (CUI) of the originating Concept node for the relationship
+                example: C1268086
+              target:
+                type: string
+                description: Concept Unique Identifier (CUI) of the terminating Concept node for the relationship
+                example: C2720507
+              type:
+                type: string
+                description: label for the relationship
+                example: isa
+        paths:
+          type: array
+          description: array of information on the set of paths in neo4j path format
+          items:
+            type: object
+            description: information on a single path
+            properties:
+              start:
+                type: object
+                description: origin Concept node of the path
+                properties:
+                  identity:
+                    type: integer
+                    description: neo4j numeric identifier for node
+                    example: 57732
+                  elementId:
+                    type: string
+                    description: identity, formatted as string
+                    example: "57732"
+                  labels:
+                    type: array
+                    description: labels for the node
+                    items:
+                      example: Concept
+                  properties:
+                    type: array
+                    description: properties for the node
+                    items:
+                      type: object
+                      example: {"CUI":"C2720507"}
+              end:
+                type: object
+                description: terminal Concept node of the path
+                properties:
+                  identity:
+                    type: integer
+                    description: neo4j numeric identifier for node
+                    example: 747324
+                  elementId:
+                    type: string
+                    description: identity, formatted as string
+                    example: "747324"
+                  labels:
+                    type: array
+                    description: labels for the node
+                    items:
+                      example: Concept
+                  properties:
+                    type: array
+                    description: properties for the node.
+                    items:
+                      type: object
+                      example: {"CUI": "C1268086"}
+              length:
+                type: number
+                description: length of the path, in hops
+                example: 2.0
+              segments:
+                type: array
+                description: array of relationships in the path
+                items:
+                  type: object
+                  properties:
+                    start:
+                      type: object
+                      description: origin of the relationship
+                      properties:
+                        identity:
+                          type: integer
+                          description: neo4j numeric identifier for the node
+                          example: 747324
+                        elementId:
+                          type: string
+                          description: identity formatted as string
+                          example: "747324"
+                        labels:
+                          type: array
+                          description: labels for the node
+                          items:
+                            type: object
+                            example: "Concept"
+                        properties:
+                          type: array
+                          description: properties for the node
+                          items:
+                            type: object
+                            example: {"CUI": "C1268086"}
+                    end:
+                      type: object
+                      description: terminus of the relationship
+                      properties:
+                        identity:
+                          type: integer
+                          description: neo4j numeric identifier for the node
+                          example: 57732
+                        elementId:
+                          type: string
+                          description: identity formatted as string
+                          example: "57732"
+                        labels:
+                          type: array
+                          description: labels for the node
+                          items:
+                            type: object
+                            example: "Concept"
+                        properties:
+                          type: array
+                          description: properties for the node
+                          items:
+                            type: object
+                            example: {"CUI":"C2720507"}
+                        relationship:
+                          type: object
+                          description: relationship between the start and end nodes
+                          properties:
+                            identity:
+                              type: integer
+                              description: neo4j numeric identifier for the relationship
+                              example: 22630008
+                            elementId:
+                              type: string
+                              description: identity, formatted as string
+                              example: "22630008"
+                            start:
+                              type: integer
+                              description: neo4j identifier for the start node of the relationship
+                              example: 747324
+                            startNodeElementID:
+                              type: string
+                              description: start, formatted as string
+                              example: "747324"
+                            end:
+                              type: integer
+                              description: neo4j identifier for the end node of the relationship
+                              example: 57732
+                            endNodeElementID:
+                              type: string
+                              description: end, formatted as string
+                              example: "57732"
+                            type:
+                              type: string
+                              description: the relationship type
+                              example: isa
+                            properties:
+                              type: array
+                              description: properties of the relationship
+                              items:
+                                type: object
+                                example: {"SAB": "SNOMEDCT_US"}
+    SabDefinition: # Schema name
+      type: object
+      description: A Definition associated with a Concept.
+      properties:
+        sab:
+          type: string
+          description: Source of a Definition.
+          example: NCI
+        definition:
+          type: string
+          description: The definition text.
+          example: A primary or metastatic malignant neoplasm involving the breast. The vast majority of cases are carcinomas arising from the breast parenchyma or the nipple. Malignant breast neoplasms occur more frequently in females than in males.
+    SabRelationshipConceptTerm: # Schema name
+      type: object
+      description: Information on a Concept that has a relationship with another Concept
+      properties:
+        sab:
+          type: string
+          description: The source of the relationship, such as a vocabulary or ontology, that asserts the relationship between concepts. Although relationships are usually described in terms of Codes, they actually exist between the Concepts that are linked to the Codes. For example, if an ontology SAB1 shows that code A has relationship r with code B, the associated concepts for A and B will have a relationship with type=r and SAB=SAB1.
+          example: ICD10AM
+        relationship:
+          type: string
+          description: the relationship type--e.g., "isa", "property_of"
+          example: CHD
+        concept:
+          type: string
+          description: the identifier for the Concept, also known as the Concept Unique Identifier (CUI)
+          example: C0006826
+        prefterm:
+          type: string
+          description: The preferred term for the Concept. Note that the preferred term for a Concept may be different than the preferred term for a Code that links to the Concept.
+          example: Malignant Neoplasms
+    TermtypeCode: # Schema name
+      type: object
+      description: A Code with a term that matches a specified string
+      properties:
+        termtype:
+          type: string
+          description: Term type--i.e., the relationship between the Code and the Term
+          example: LA
+        code:
+          type: string
+          description: Identifier for the Code ID, in the format _SAB_:_CODE_.
+          example: LNC:LA14283-8
+    SemanticTypes: # Schema name
+      type: object
+      description: Array of Semantic Type nodes
+      properties:
+        position:
+          type: integer
+          description: absolute position of the Semantic Type in the list of all possible values in the response. Invariant relative to skip--e.g., if skip = 5, the position of the first element in the list will be 6.
+          example: 1
+        semantic_types:
+          type: array
+          items:
+            type: object
+            properties:
+              semantic_type:
+                type: object
+                description: A Semantic Type node
+                properties:
+                  def:
+                    type: string
+                    description: the definition for the Semantic Type
+                    example: An anatomical structure that exists...
+                  stn:
+                    type: string
+                    description: the Semantic Type's identifier in the Semantic Type Network
+                    example: A1.2.1
+                  sty:
+                    type: string
+                    description: the Semantic Type name
+                    example: Embryonic Structure
+                  tui:
+                    type: string
+                    description: the Type Unique Identifier (TUI) for the Semantic Type node
+                    example: T018
+    SemanticSubTypes: # Schema name
+      type: object
+      description: Array of Semantic Type nodes that are sub-types of a Semantic Type
+      properties:
+        position:
+          type: integer
+          description: absolute position of the Semantic Type in the list of all possible values in the response. Invariant relative to skip--e.g., if skip = 5, the position of the first element in the list will be 6.
+          example: 1
+        semantic_sub_types:
+          type: array
+          items:
+            type: object
+            properties:
+              semantic_type:
+                type: object
+                description: A Semantic Type node that is a sub-type of a specified Semantic Type node
+                properties:
+                  def:
+                    type: string
+                    description: the definition for the Semantic Type
+                    example: An anatomical structure that exists...
+                  stn:
+                    type: string
+                    description: the Semantic Type's identifier in the Semantic Type Network
+                    example: A1.2.1
+                  sty:
+                    type: string
+                    description: the Semantic Type name
+                    example: Embryonic Structure
+                  tui:
+                    type: string
+                    description: the Type Unique Identifier (TUI) for the Semantic Type node
+                    example: T018
+    ConceptNodes: # Schema name
+      type: object
+      description: A set of "Concept node" objects that translate and consolidate information about Concept nodes in the UBKG. Each Concept node in the UBKG is the origin of a subgraph that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. The Concept node object represents information extracted from all of the nodes in the Concept node's subgraph.
+      properties:
+        nodes:
+          type: array
+          description: Array of Concept node objects. Each Concept node object represents a Concept node as the origin of a subgraph of linked Code, Term, Definition, and Semantic Type nodes.
+          items:
+            type: object
+            properties:
+              node:
+                type: object
+                properties:
+                  cui:
+                    type: string
+                    description: the identifier for the Concept node
+                    example: C0007634
+                  pref_term:
+                    type: string
+                    description: the preferred term for the Concept node, corresponding to a Term node that links to (has PREF_TERM relationship with) the Concept node.
+                    example: Cells
+                  codes:
+                    type: array
+                    description: Array of Code objects. Each Code object represents a Code node that links to (has CODE relationship with) the Concept node and its associated Terms.
+                    items:
+                      type: object
+                      properties:
+                        codeid:
+                          type: string
+                          description: the CodeID for the Code node, in format _SAB_:_CODE_
+                          example: "CL:0000000"
+                        sab:
+                          type: string
+                          description: the identifier for the source (SAB) that defined the code
+                          example: CL
+                        terms:
+                          type: array
+                          description: Array of Term nodes that link to the Code node.
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                description: Term string
+                                example: cell
+                              tty:
+                                type: string
+                                description: term type--i.e., the type of relationship between the Term node and the Code node.
+                                example: PT_PATO
+                  definitions:
+                    type: array
+                    description: Array of Definition objects. Each Definition object represents a Definition node that links to (has DEF relationship with) the Concept node. (If a SAB assigns a definition to a code, the UBKG represents the definition as a Definition node linked to the Concept node to which the Code node links.)
+                    items:
+                      type: object
+                      properties:
+                        def:
+                          type: string
+                          description: the definition string
+                          example: A material entity of anatomical origin....
+                        sab:
+                          type: string
+                          description: the identifier for the source (SAB) that provided the definition
+                          example: CL
+                  semantic_types:
+                    type: array
+                    description: Array of Semantic Type objects. Each Semantic Type object represents a Semantic Type node that links to (has STY relationship with) the Concept node.
+                    items:
+                      type: object
+                      properties:
+                        def:
+                          type: string
+                          description: the definition of the semantic type
+                          example: The fundamental structural and functional unit of living organisms.
+                        stn:
+                          type: string
+                          description: the Semantic Type's identifier in the Semantic Type Network
+                          example: A1.2.1
+                        sty:
+                          type: string
+                          description: the Semantic Type name
+                          example: Embryonic Structure
+                        tui:
+                          type: string
+                          description: the Type Unique Identifier (TUI) for the Semantic Type node
+                          example: T018
+    DatabaseInfo: # Schema name
+      type: object
+      description: basic information on the neo4j database server instance
+      properties:
+        version:
+          type: string
+          description: neo4j version
+          example: "5.11.0"
+        edition:
+          type: string
+          description: type of neo4j instance
+          example: community
+    NodeTypeCount: # Schema name
+      type: object
+      description: counts by node type
+      properties:
+        node_types:
+          type: array
+          items:
+            type: object
+            properties:
+              total_count:
+                type: integer
+                description: Count of nodes with any of the labels in node_types. Equal to the total count of nodes in the database if no node_type was specified.
+                example: 1650946
+              node_type:
+                type: object
+                properties:
+                  label:
+                    type: string
+                    description: the label for the node type
+                    example: Code
+                  count:
+                    type: integer
+                    description: count of nodes with the label
+                    example: 16590946
+    NodeTypeSabCount: # Schema name
+      type: object
+      description: counts by node type, grouped by SAB
+      properties:
+        node_types:
+          type: array
+          items:
+            type: object
+            properties:
+              total_count:
+                type: integer
+                description: Count of nodes with any of the labels in node-types. Equal to the total count of nodes in the database if no filters were applied.
+                example: 170947
+              node_type:
+                type: object
+                properties:
+                  label:
+                    type: string
+                    description: the label for the node type
+                    example: Code
+                  count:
+                    type: integer
+                    description: count of nodes with the label
+                    example: 170947
+                  sabs:
+                    type: array
+                    description: array of sources (SABs) for nodes with the specified node types
+                    items:
+                      type: object
+                      properties:
+                        sab:
+                          type: string
+                          description: source name
+                          example: NCI
+                        count:
+                          type: integer
+                          description: count of nodes from the SAB with the specified node type
+                          example: 170947
+    PropertyTypes: #Schema name
+      type: object
+      description: list of property types (keys)
+      properties:
+        property_types:
+          description: list of property types
+          type: array
+          items:
+            type: string
+            description: a property type
+            example: CODE
+    RelationshipTypes: #Schema name
+      type: object
+      description: list of relationship types
+      properties:
+        relationship_types:
+          description: list of relationship types
+          type: array
+          items:
+            type: string
+            description: relationship type
+            example: isa
+    SabCodeCounts: #Schema name
+      type: object
+      description: A set of information on a source (SAB), including counts by codes.
+      properties:
+        sabs:
+          description: list of SABs
+          type: array
+          items:
+            type: object
+            description: a source (SAB)
+            properties:
+              sab:
+                description: source identifier
+                type: string
+                example: UBERON
+              count:
+                description: count of the codes in the SAB
+                type: string
+                example: 14314
+              position:
+                description: ordinal position of the sab in the endpoint's return, with respect to the _skip_ parameter
+                type: integer
+                example: 1
+    SabCodeDetails: #Schema name
+      type: object
+      description: A set of information on the Codes of a source (SAB)
+      properties:
+        codes:
+          description: list of Codes
+          type: array
+          items:
+            type: object
+            description: a Code in a SAB
+            properties:
+              codeid:
+                description: the CodeID of the Code, in format _SAB_:_CODE_.
+                type: string
+                example: "UBERON:0000000"
+              position:
+                description: the position of the Code in the endpoint's return, with respect to the _skip_ parameter
+                type: integer
+                example: 1
+              terms:
+                description: set of terms associated with the Code.
+                type: array
+                items:
+                  type: object
+                  description: a term for a Code
+                  properties:
+                    term:
+                      description: the term string
+                      type: string
+                      example: processual entity
+                    term_type:
+                      description: the term type for the term
+                      type: string
+                      example: PT
+    SabTermTypes: #Schema name
+      type: object
+      description: A set of term types (relationship types) for relationships that originate from the Code nodes that are defined by a source (SAB).
+      properties:
+        sab:
+          type: string
+          description: identifier for a source
+          example: SNOMEDCT_US
+        term_types:
+          type: array
+          description: array of term types
+          items:
+            type: string
+            description: the term type
+            example: PT
+    NodeTypes: #Schema name
+      type: object
+      description: The set of node types (labels) for all nodes in the UBKG
+      properties:
+        node_types:
+          type: array
+          items:
+            type: string
+            description: node type
+            example: Code
+    Sabs: #Schema name
+      type: object
+      description: The set of sources (SABs) for all Code nodes in the UBKG
+      properties:
+        sabs:
+          type: array
+          items:
+            type: string
+            description: a source (SAB)
+            example: SNOMEDCT_US
+    ConceptCodes: #Schema name
+      type: object
+      description: The set of Code node that link to a Concept node
+      properties:
+        codes:
+          type: array
+          items:
+            type: string
+            description: a CodeID, in format _SAB_:_CODE_
+            example: "CHV:0000052645"
+    TermConcept: #Schema name
+      type: object
+      description: An array of Concepts with preferred terms that exactly match the specified string
+      properties:
+        concepts:
+          type: array
+          items:
+            type: string
+            description: a Concept Unique Identifier (CUI)
+            example: C0794811
+    Source: #Schema name
+      type: object
+      description: An array of information on the sources that can be imported into a UBKG context.
+      properties:
+        sources:
+          type: array
+          items:
+            type: object
+            description: array of source objects
+            properties:
+              citations:
+                type: array
+                description: References to the source recommended by the source's steward
+                items:
+                  type: object
+                  description: citation reference
+                  properties:
+                    PMID:
+                      description: PubMedID, if applicable
+                      example: 37953324
+                    url:
+                      description: full URL to the citation
+                      example: "https://pubmed.ncbi.nlm.nih.gov/37953324"
+              contexts:
+                type: array
+                description: UBKG contexts that contain the source
+                items:
+                  type: string
+                  example: base_context
+              description:
+                type: string
+                description: longform description of the source
+                example: "An ontology for describing the classification of human diseases organized by etiology."
+              download_date:
+                type: string
+                description: Date when the source was obtained, in format YYYY_MM_DD
+                example: "2024_02_24"
+              home_urls:
+                type: array
+                description: URLs to steward web sites
+                items:
+                  type: string
+                  example: "https://obofoundry.org/ontology/doid.html"
+              source_dictionary_url:
+                type: string
+                description: URL to the section of the CFDE Data Distillery Data Dictionary for the source
+                example: https://github.com/nih-cfde/data-distillery/blob/main/DataDistilleryDataDictionary.md#the-library-of-integrated-network-based-cellular-signatures-lincs-dcc
+              licenses:
+                type: array
+                description: applicable licenses or terms of use of the source specified by stewards
+                items:
+                  type: object
+                  description: license
+                  properties:
+                    type:
+                      description: the type of license
+                      example: Creative Commons license (creativecommons.org)
+                    subtype:
+                      description: the subtype of license
+                      example: CCO
+                    version:
+                      description: the version of the license
+                      example: version 4
+              name:
+                type: string
+                description: name of the source
+                example: Human Disease Ontology
+              sab:
+                type: string
+                description: acronym for Source ABbreviation
+                example: DOID
+              source_etl:
+                type: string
+                description: the parameter provided to the UBKG generation framework ETL script. For sources that are from OWL files, source_etl is the URL to the OWL; for other sources, source_etl is a command for one of the python scripts that the generation framework uses to import the source.
+                example: "http://purl.obolibrary.org/obo/doid.owl"
+              source_type:
+                type: string
+                description: The type of source file. Possible values are owl, api, ftp, ubkg_edge_node, umls, and simpleknowledge.
+                example: owl
+              source_version:
+                type: string
+                description: A reference to the version of the source. If the source is an OWL file, the usual version is the date extracted from the VersionIRI of the file; if from a website, the file date. Dates are in format YYYY_MM_DD.
+                example: "2024_04_22"
