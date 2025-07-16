@@ -11,7 +11,7 @@ externalDocs:
   description: UBKG documentation
   url: https://ubkg.docs.xconsortia.org/api
 servers:
-  - url: http://neo4j.ubkgbox.com:8080/api
+  - url: http://localhost:7000/api&endpoint=
     description: UBKGBox instance of ubkg-api
 tags:
   - name: codes
