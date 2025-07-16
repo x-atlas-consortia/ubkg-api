@@ -12,7 +12,7 @@ externalDocs:
   url: https://ubkg.docs.xconsortia.org/api
 servers:
   - url: http://ubkg-api:8080/api
-    description: Base context instance
+    description: UBKGBox instance of ubkg-api
 tags:
   - name: codes
   - name: concepts
