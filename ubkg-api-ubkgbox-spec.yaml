@@ -11,7 +11,7 @@ externalDocs:
   description: UBKG documentation
   url: https://ubkg.docs.xconsortia.org/api
 servers:
-  - url: http://localhost:7000/api&endpoint=
+  - url: http://localhost:7000/api?endpoint=
     description: UBKGBox instance of ubkg-api
 tags:
   - name: codes
