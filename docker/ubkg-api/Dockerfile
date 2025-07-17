@@ -93,6 +93,7 @@ RUN yum-config-manager --enable nginx-mainline && \
     chmod +x start.sh && \
     yum clean all
 
+
 # The EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime.
 # EXPOSE does not make the ports of the container accessible to the host.
 # 5000: nginx http socket defined in uswgi.ini
