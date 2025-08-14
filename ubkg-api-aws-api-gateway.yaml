@@ -1,0 +1,2559 @@
+openapi: "3.0.1"
+info:
+  title: "Base UBKG API"
+  description: "Base UBKG API"
+  version: "2.2.1"
+servers:
+- url: "https://ubkg.api.xconsortia.org"
+paths:
+  /property-types:
+    get:
+      operationId: "property_types_get"
+      responses:
+        "500":
+          description: "500 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PropertyTypes"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/property-types"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/property-types"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /concepts/{id}/paths/trees:
+    get:
+      operationId: "concepts_trees_get"
+      parameters:
+      - name: "mindepth"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "limit"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "rel"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      - name: "skip"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "sab"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      - name: "maxdepth"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConceptPaths"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/paths/trees"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/paths/trees"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /sabs:
+    get:
+      operationId: "sabs_get"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sabs"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/sabs"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/sabs"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /terms/{term_id}/codes:
+    get:
+      operationId: "terms_term_id_codes_get"
+      parameters:
+      - name: "term_id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArrayOfTermtypeCode"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/terms/{term_id}/codes"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.term_id: "method.request.path.term_id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "term_id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/terms/{term_id}/codes"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.term_id: "method.request.path.term_id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /codes/{code_id}/terms:
+    get:
+      parameters:
+      - name: "code_id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/codes/{code_id}/terms"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.code_id: "method.request.path.code_id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "code_id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/codes/{code_id}/terms"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.code_id: "method.request.path.code_id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /concepts/{id}/paths/subgraph/sequential:
+    get:
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/paths/subgraph/sequential"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/paths/subgraph/sequential"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /codes/{code_id}/codes:
+    get:
+      operationId: "codes_code_id_codes_get"
+      parameters:
+      - name: "code_id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "sab"
+        in: "query"
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArrayOfCodesCodesObj"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/codes/{code_id}/codes"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.code_id: "method.request.path.code_id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "code_id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/codes/{code_id}/codes"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.code_id: "method.request.path.code_id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /concepts/{id}/definitions:
+    get:
+      operationId: "concepts_id_definitions_get"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArrayOfSabDefinition"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/definitions"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/definitions"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /terms/{term_id}/concepts:
+    get:
+      operationId: "terms_term_id_concepts_get"
+      parameters:
+      - name: "term_id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArrayOfTermConcept"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/terms/{term_id}/concepts"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.term_id: "method.request.path.term_id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "term_id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/terms/{term_id}/concepts"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.term_id: "method.request.path.term_id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /sabs/{sab}/term-types:
+    get:
+      operationId: "sabs_term_types_sab_get"
+      parameters:
+      - name: "sab"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "skip"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "limit"
+        in: "query"
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SabTermTypes"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/sabs/{sab}/term-types"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.sab: "method.request.path.sab"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "sab"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/sabs/{sab}/term-types"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.sab: "method.request.path.sab"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /node-types/counts-by-sab:
+    get:
+      operationId: "node_type_count_by_sab_get"
+      parameters:
+      - name: "sab"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/node-types/counts-by-sab"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/node-types/counts-by-sab"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /node-types/{node_type}/counts-by-sab:
+    get:
+      operationId: "node_type_id_count_by_sab_get"
+      parameters:
+      - name: "node_type"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "sab"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NodeTypeSabCount"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/node-types/{node_type}/counts-by-sab"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.node_type: "method.request.path.node_type"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "node_type"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/node-types/{node_type}/counts-by-sab"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.node_type: "method.request.path.node_type"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /semantics/semantic-types:
+    get:
+      operationId: "semantics_semantic_types_get"
+      parameters:
+      - name: "skip"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "limit"
+        in: "query"
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SemanticTypes"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/semantics/semantic-types"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/semantics/semantic-types"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /concepts/{id}/paths/shortestpath/{terminus_concept_id}:
+    get:
+      operationId: "concepts_shortestpath_get"
+      parameters:
+      - name: "rel"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      - name: "terminus_concept_id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "sab"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConceptShortestPath"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/paths/shortestpath/{terminus_concept_id}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+          integration.request.path.terminus_concept_id: "method.request.path.terminus_concept_id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "terminus_concept_id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/paths/shortestpath/{terminus_concept_id}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+          integration.request.path.terminus_concept_id: "method.request.path.terminus_concept_id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /node-types/counts:
+    get:
+      operationId: "node_type_count_get"
+      responses:
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/node-types/counts"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/node-types/counts"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /codes/{code_id}/concepts:
+    get:
+      operationId: "codes_code_id_concepts_get"
+      parameters:
+      - name: "code_id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArrayOfConceptDetail"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/codes/{code_id}/concepts"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestParameters:
+          integration.request.path.code_id: "method.request.path.code_id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "code_id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/codes/{code_id}/concepts"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.code_id: "method.request.path.code_id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /{proxy+}:
+    x-amazon-apigateway-any-method:
+      parameters:
+      - name: "proxy"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:557310757627:function:Base-UBKG-API-Gateway-404/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        cacheNamespace: "v8deoo"
+        cacheKeyParameters:
+        - "method.request.path.proxy"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+  /concepts/paths/subgraph/sequential:
+    get:
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/concepts/paths/subgraph/sequential"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/concepts/paths/subgraph/sequential"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /sabs/codes/details:
+    get:
+      operationId: "sabs_codes_details_get"
+      responses:
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/sabs/codes/details"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/sabs/codes/details"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /semantics/semantic-types/{identifier}/subtypes:
+    get:
+      operationId: "semantics_identifier_semantic_subtypes_get"
+      parameters:
+      - name: "skip"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "identifier"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "limit"
+        in: "query"
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SemanticSubTypes"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/semantics/semantic-types/{identifier}/subtypes"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.identifier: "method.request.path.identifier"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "identifier"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/semantics/semantic-types/{identifier}/subtypes"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.identifier: "method.request.path.identifier"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /semantics/semantic-types/{identifier}:
+    get:
+      operationId: "semantics_semantic_types_identifier_get"
+      parameters:
+      - name: "skip"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "identifier"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "limit"
+        in: "query"
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SemanticTypes"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/semantics/semantic-types/{identifier}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.identifier: "method.request.path.identifier"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "identifier"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/semantics/semantic-types/{identifier}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.identifier: "method.request.path.identifier"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /sabs/codes/counts:
+    get:
+      operationId: "sabs_codes_counts_get"
+      parameters:
+      - name: "skip"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "limit"
+        in: "query"
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SabCodeCounts"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/sabs/codes/counts"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/sabs/codes/counts"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /concepts/{id}/codes:
+    get:
+      operationId: "concepts_id_codes_get"
+      parameters:
+      - name: "sab"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArrayOfConceptCodes"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/codes"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/codes"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /node-types/{node_type}/counts:
+    get:
+      operationId: "node_type_id_count_get"
+      parameters:
+      - name: "node_type"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NodeTypeCount"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/node-types/{node_type}/counts"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.node_type: "method.request.path.node_type"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "node_type"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/node-types/{node_type}/counts"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.node_type: "method.request.path.node_type"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /relationship-types:
+    get:
+      operationId: "relationship_types_get"
+      responses:
+        "500":
+          description: "500 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RelationshipTypes"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/relationship-types"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/relationship-types"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /:
+    get:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    x-amazon-apigateway-any-method:
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:557310757627:function:DataDistillery-API-Gateway-404-Lambda/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+  /concepts/paths/subgraph:
+    get:
+      operationId: "concepts_subgraph_get"
+      parameters:
+      - name: "limit"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "skip"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "rel"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      - name: "sab"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConceptSubgraph"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/concepts/paths/subgraph"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/concepts/paths/subgraph"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /sabs/{sab}/codes/details:
+    get:
+      operationId: "sabs_codes_details_sab_get"
+      parameters:
+      - name: "sab"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "skip"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "limit"
+        in: "query"
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SabCodeDetails"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/sabs/{sab}/codes/details"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.sab: "method.request.path.sab"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "sab"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/sabs/{sab}/codes/details"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.sab: "method.request.path.sab"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /status:
+    get:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/status"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/status"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /concepts/{id}/nodeobjects:
+    get:
+      operationId: "concepts_id_nodes_get"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConceptNodes"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/nodeobjects"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/nodeobjects"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /concepts/{id}/paths/expand:
+    get:
+      operationId: "concepts_id_paths_expand_get"
+      parameters:
+      - name: "mindepth"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "limit"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "rel"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      - name: "skip"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "sab"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      - name: "maxdepth"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConceptPaths"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/paths/expand"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/paths/expand"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /sabs/term-types:
+    get:
+      operationId: "sabs_term_types_get"
+      responses:
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/sabs/term-types"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/sabs/term-types"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /concepts/{id}/concepts:
+    get:
+      operationId: "concepts_id_concepts_get"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArrayOfSabRelationshipConceptTerm"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/concepts"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/concepts/{id}/concepts"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.id: "method.request.path.id"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /database/server:
+    get:
+      operationId: "database_info_server_get"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseInfo"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/database/server"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/database/server"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /node-types:
+    get:
+      operationId: "node_type_get"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NodeTypes"
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/node-types"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/node-types"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /sources:
+    get:
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/sources"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/sources"
+        responses:
+          default:
+            statusCode: "200"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+  /sabs/{sab}/codes/counts:
+    get:
+      operationId: "sabs_codes_counts_sab_get"
+      parameters:
+      - name: "sab"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "skip"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "limit"
+        in: "query"
+        schema:
+          type: "string"
+      responses:
+        "404":
+          description: "404 response"
+          content: {}
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SabCodeDetails"
+        "400":
+          description: "400 response"
+          content: {}
+        "500":
+          description: "500 response"
+          content: {}
+      security:
+      - Base-UBKG-API-UMLS-Auth: []
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "GET"
+        uri: "http://${stageVariables.VPCNLB}/sabs/{sab}/codes/counts"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.sab: "method.request.path.sab"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+    options:
+      parameters:
+      - name: "sab"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      x-amazon-apigateway-integration:
+        connectionId: "${stageVariables.VPCLINK}"
+        httpMethod: "OPTIONS"
+        uri: "http://${stageVariables.VPCNLB}/sabs/{sab}/codes/counts"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.sab: "method.request.path.sab"
+        connectionType: "VPC_LINK"
+        passthroughBehavior: "when_no_match"
+        type: "http_proxy"
+components:
+  schemas:
+    ArrayOfTermtypeCode:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/TermtypeCode"
+    PropertyTypes:
+      type: "object"
+      properties:
+        property_types:
+          type: "array"
+          description: "list of property types"
+          items:
+            type: "string"
+            description: "a property type"
+      description: "list of property types (keys)"
+    SabRelationshipConceptTerm:
+      type: "object"
+      properties:
+        sab:
+          type: "string"
+          description: "The source of the relationship, such as a vocabulary or ontology,\
+            \ that asserts the relationship between concepts. Although relationships\
+            \ are usually described in terms of Codes, they actually exist between\
+            \ the Concepts that are linked to the Codes. For example, if an ontology\
+            \ SAB1 shows that code A has relationship r with code B, the associated\
+            \ concepts for A and B will have a relationship with type=r and SAB=SAB1."
+        relationship:
+          type: "string"
+          description: "the relationship type--e.g., \"isa\", \"property_of\""
+        concept:
+          type: "string"
+          description: "the identifier for the Concept, also known as the Concept\
+            \ Unique Identifier (CUI)"
+        prefterm:
+          type: "string"
+          description: "The preferred term for the Concept. Note that the preferred\
+            \ term for a Concept may be different than the preferred term for a Code\
+            \ that links to the Concept."
+      description: "Information on a Concept that has a relationship with another\
+        \ Concept"
+    ConceptPaths:
+      type: "object"
+      properties:
+        origin:
+          type: "object"
+          properties:
+            concept:
+              type: "string"
+              description: "the identifier for the origin Concept"
+            prefterm:
+              type: "string"
+              description: "the preferred term for the origin Concept"
+          description: "the origin of all paths"
+        paths:
+          type: "array"
+          description: "set of paths originating from a concept."
+          items:
+            type: "object"
+            properties:
+              position:
+                type: "integer"
+                description: "The position of the path in the complete set of paths\
+                  \ that originate from the specified Concept, ordered in terms of\
+                  \ Depth First Search (DFS). The item property is invariant with\
+                  \ respect to parameters such as skip or limit, but depends on parameters\
+                  \ such as mindepth and maxdepth. For example, if skip = 5, the position\
+                  \ of the first path will be 6."
+                format: "int32"
+              length:
+                type: "integer"
+                description: "the length of the path--i.e., the number of items in\
+                  \ the _path_ array."
+                format: "int32"
+              hops:
+                type: "array"
+                description: "the set of individual hops that comprise the path. A\
+                  \ hop represents two nodes linked by a relationship."
+                items:
+                  type: "object"
+                  properties:
+                    hop:
+                      type: "integer"
+                      description: "the position of the hop in the path--i.e., the\
+                        \ distance of the hop from the originating Concept."
+                      format: "int32"
+                    sab:
+                      type: "string"
+                      description: "the identifier for the source of the relationship\
+                        \ involved in the hop."
+                    source:
+                      type: "object"
+                      properties:
+                        concept:
+                          type: "string"
+                          description: "the identifier for the source Concept"
+                        prefterm:
+                          type: "string"
+                          description: "the preferred term for the source Concept"
+                      description: "the source of the hop--i.e., the Concept node\
+                        \ from which the relationship starts"
+                    target:
+                      type: "object"
+                      properties:
+                        concept:
+                          type: "string"
+                          description: "the identifier for the target Concept"
+                        prefterm:
+                          type: "string"
+                          description: "the preferred term for the target Concept"
+                      description: "the target of the hop--i.e., the Concept node\
+                        \ in which the relationship ends"
+                    type:
+                      type: "string"
+                      description: "the type of relationship involved in the hop."
+      description: "Represents the set of paths originating from a Concept. Each path\
+        \ is an ordered set of objects representing hops away from the originating\
+        \ concept. Each hop represents a relationship between two concepts. For example,\
+        \ the path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept\
+        \ A."
+    DatabaseInfo:
+      type: "object"
+      properties:
+        version:
+          type: "string"
+          description: "neo4j version"
+        edition:
+          type: "string"
+          description: "type of neo4j instance"
+      description: "basic information on the neo4j database server instance"
+    ArrayOfSabRelationshipConceptTerm:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/SabRelationshipConceptTerm"
+    SabCodeCounts:
+      type: "object"
+      properties:
+        sabs:
+          type: "array"
+          description: "list of SABs"
+          items:
+            type: "object"
+            properties:
+              sab:
+                type: "string"
+                description: "source identifier"
+              count:
+                type: "string"
+                description: "count of the codes in the SAB"
+              position:
+                type: "integer"
+                description: "ordinal position of the sab in the endpoint's return,\
+                  \ with respect to the _skip_ parameter"
+                format: "int32"
+            description: "a source (SAB)"
+      description: "A set of information on a source (SAB), including counts by codes."
+    ArrayOfTermConcept:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/TermConcept"
+    SabDefinition:
+      type: "object"
+      properties:
+        sab:
+          type: "string"
+          description: "Source of a Definition."
+        definition:
+          type: "string"
+          description: "The definition text."
+      description: "A Definition associated with a Concept."
+    SemanticSubTypes:
+      type: "object"
+      properties:
+        position:
+          type: "integer"
+          description: "absolute position of the Semantic Type in the list of all\
+            \ possible values in the response. Invariant relative to skip--e.g., if\
+            \ skip = 5, the position of the first element in the list will be 6."
+          format: "int32"
+        semantic_sub_types:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              semantic_type:
+                type: "object"
+                properties:
+                  def:
+                    type: "string"
+                    description: "the definition for the Semantic Type"
+                  stn:
+                    type: "string"
+                    description: "the Semantic Type's identifier in the Semantic Type\
+                      \ Network"
+                  sty:
+                    type: "string"
+                    description: "the Semantic Type name"
+                  tui:
+                    type: "string"
+                    description: "the Type Unique Identifier (TUI) for the Semantic\
+                      \ Type node"
+                description: "A Semantic Type node that is a sub-type of a specified\
+                  \ Semantic Type node"
+      description: "Array of Semantic Type nodes that are sub-types of a Semantic\
+        \ Type"
+    TermtypeCode:
+      type: "object"
+      properties:
+        termtype:
+          type: "string"
+          description: "Term type--i.e., the relationship between the Code and the\
+            \ Term"
+        code:
+          type: "string"
+          description: "Identifier for the Code ID, in the format _SAB_:_CODE_."
+      description: "A Code with a term that matches a specified string"
+    Sabs:
+      type: "object"
+      properties:
+        sabs:
+          type: "array"
+          items:
+            type: "string"
+            description: "a source (SAB)"
+      description: "The set of sources (SABs) for all Code nodes in the UBKG"
+    SemanticTypes:
+      type: "object"
+      properties:
+        position:
+          type: "integer"
+          description: "absolute position of the Semantic Type in the list of all\
+            \ possible values in the response. Invariant relative to skip--e.g., if\
+            \ skip = 5, the position of the first element in the list will be 6."
+          format: "int32"
+        semantic_types:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              semantic_type:
+                type: "object"
+                properties:
+                  def:
+                    type: "string"
+                    description: "the definition for the Semantic Type"
+                  stn:
+                    type: "string"
+                    description: "the Semantic Type's identifier in the Semantic Type\
+                      \ Network"
+                  sty:
+                    type: "string"
+                    description: "the Semantic Type name"
+                  tui:
+                    type: "string"
+                    description: "the Type Unique Identifier (TUI) for the Semantic\
+                      \ Type node"
+                description: "A Semantic Type node"
+      description: "Array of Semantic Type nodes"
+    ConceptShortestPath:
+      type: "object"
+      properties:
+        origin:
+          type: "object"
+          properties:
+            concept:
+              type: "string"
+              description: "the identifier for the origin Concept"
+            prefterm:
+              type: "string"
+              description: "the preferred term for the origin Concept"
+          description: "the origin of the shortest path"
+        terminus:
+          type: "object"
+          properties:
+            concept:
+              type: "string"
+              description: "the identifier for the terminal Concept"
+            prefterm:
+              type: "string"
+              description: "the preferred term for the terminal Concept"
+          description: "the terminal Concept in the shortest path"
+        paths:
+          type: "array"
+          description: "set of paths originating from a concept."
+          items:
+            type: "object"
+            properties:
+              position:
+                type: "integer"
+                description: "Always 1."
+                format: "int32"
+              length:
+                type: "integer"
+                description: "the length of the path--i.e., the number of items in\
+                  \ the _path_ array."
+                format: "int32"
+              hops:
+                type: "array"
+                description: "the set of individual hops that comprise the path. A\
+                  \ hop represents two nodes linked by a relationship."
+                items:
+                  type: "object"
+                  properties:
+                    hop:
+                      type: "integer"
+                      description: "the position of the hop in the path--i.e., the\
+                        \ distance of the hop from the originating Concept."
+                      format: "int32"
+                    sab:
+                      type: "string"
+                      description: "the identifier for the source of the relationship\
+                        \ involved in the hop."
+                    source:
+                      type: "object"
+                      properties:
+                        concept:
+                          type: "string"
+                          description: "the identifier for the source Concept"
+                        prefterm:
+                          type: "string"
+                          description: "the preferred term for the source Concept"
+                      description: "the source of the hop--i.e., the Concept node\
+                        \ from which the relationship starts"
+                    target:
+                      type: "object"
+                      properties:
+                        concept:
+                          type: "string"
+                          description: "the identifier for the target Concept"
+                        prefterm:
+                          type: "string"
+                          description: "the preferred term for the target Concept"
+                      description: "the target of the hop--i.e., the Concept node\
+                        \ in which the relationship ends"
+                    type:
+                      type: "string"
+                      description: "the type of relationship involved in the hop."
+      description: "Represents the shortest path between two Concepts. The path is\
+        \ an ordered set of objects representing hops away from the originating concept.\
+        \ Each hop represents a relationship between two concepts. For example, the\
+        \ path (A)-[r]->(B)-[r]->(C) has 2 hops between Concept C and Concept A."
+    ConceptDetail:
+      type: "object"
+      properties:
+        concept:
+          type: "string"
+          description: "Concept Unique Identifier (CUI) for the Concept node"
+        prefterm:
+          type: "string"
+          description: "Preferred term for the Concept node."
+      description: "Information on a Concept node."
+    CodesCodesObj:
+      type: "object"
+      properties:
+        concept:
+          type: "string"
+          description: "The CUI (Concept Unique Identifier) for the shared Concept\
+            \ node."
+        code:
+          type: "string"
+          description: "CodeID of a Code node, in format _SAB_:_CODE_"
+        SAB:
+          type: "string"
+          description: "an identifier for the source of the code. Corresponds to the\
+            \ Source Abbreviaion (SAB) of a Code in the UMLS."
+      description: "Code nodes that link to the same Concept node to which a specified\
+        \ Code links."
+    SabTermTypes:
+      type: "object"
+      properties:
+        sab:
+          type: "string"
+          description: "identifier for a source"
+        term_types:
+          type: "array"
+          description: "array of term types"
+          items:
+            type: "string"
+            description: "the term type"
+      description: "A set of term types (relationship types) for relationships that\
+        \ originate from the Code nodes that are defined by a source (SAB)."
+    RelationshipTypes:
+      type: "object"
+      properties:
+        relationship_types:
+          type: "array"
+          description: "list of relationship types"
+          items:
+            type: "string"
+            description: "relationship type"
+      description: "list of relationship types"
+    SabCodeDetails:
+      type: "object"
+      properties:
+        codes:
+          type: "array"
+          description: "list of Codes"
+          items:
+            type: "object"
+            properties:
+              codeid:
+                type: "string"
+                description: "the CodeID of the Code, in format _SAB_:_CODE_."
+              position:
+                type: "integer"
+                description: "the position of the Code in the endpoint's return, with\
+                  \ respect to the _skip_ parameter"
+                format: "int32"
+              terms:
+                type: "array"
+                description: "set of terms associated with the Code."
+                items:
+                  type: "object"
+                  properties:
+                    term:
+                      type: "string"
+                      description: "the term string"
+                    term_type:
+                      type: "string"
+                      description: "the term type for the term"
+                  description: "a term for a Code"
+            description: "a Code in a SAB"
+      description: "A set of information on the Codes of a source (SAB)"
+    ConceptNodes:
+      type: "object"
+      properties:
+        nodes:
+          type: "array"
+          description: "Array of Concept node objects. Each Concept node object represents\
+            \ a Concept node as the origin of a subgraph of linked Code, Term, Definition,\
+            \ and Semantic Type nodes."
+          items:
+            type: "object"
+            properties:
+              node:
+                type: "object"
+                properties:
+                  cui:
+                    type: "string"
+                    description: "the identifier for the Concept node"
+                  pref_term:
+                    type: "string"
+                    description: "the preferred term for the Concept node, corresponding\
+                      \ to a Term node that links to (has PREF_TERM relationship with)\
+                      \ the Concept node."
+                  codes:
+                    type: "array"
+                    description: "Array of Code objects. Each Code object represents\
+                      \ a Code node that links to (has CODE relationship with) the\
+                      \ Concept node and its associated Terms."
+                    items:
+                      type: "object"
+                      properties:
+                        codeid:
+                          type: "string"
+                          description: "the CodeID for the Code node, in format _SAB_:_CODE_"
+                        sab:
+                          type: "string"
+                          description: "the identifier for the source (SAB) that defined\
+                            \ the code"
+                        terms:
+                          type: "array"
+                          description: "Array of Term nodes that link to the Code\
+                            \ node."
+                          items:
+                            type: "object"
+                            properties:
+                              name:
+                                type: "string"
+                                description: "Term string"
+                              tty:
+                                type: "string"
+                                description: "term type--i.e., the type of relationship\
+                                  \ between the Term node and the Code node."
+                  definitions:
+                    type: "array"
+                    description: "Array of Definition objects. Each Definition object\
+                      \ represents a Definition node that links to (has DEF relationship\
+                      \ with) the Concept node. (If a SAB assigns a definition to\
+                      \ a code, the UBKG represents the definition as a Definition\
+                      \ node linked to the Concept node to which the Code node links.)"
+                    items:
+                      type: "object"
+                      properties:
+                        def:
+                          type: "string"
+                          description: "the definition string"
+                        sab:
+                          type: "string"
+                          description: "the identifier for the source (SAB) that provided\
+                            \ the definition"
+                  semantic_types:
+                    type: "array"
+                    description: "Array of Semantic Type objects. Each Semantic Type\
+                      \ object represents a Semantic Type node that links to (has\
+                      \ STY relationship with) the Concept node."
+                    items:
+                      type: "object"
+                      properties:
+                        def:
+                          type: "string"
+                          description: "the definition of the semantic type"
+                        stn:
+                          type: "string"
+                          description: "the Semantic Type's identifier in the Semantic\
+                            \ Type Network"
+                        sty:
+                          type: "string"
+                          description: "the Semantic Type name"
+                        tui:
+                          type: "string"
+                          description: "the Type Unique Identifier (TUI) for the Semantic\
+                            \ Type node"
+      description: "A set of \"Concept node\" objects that translate and consolidate\
+        \ information about Concept nodes in the UBKG. Each Concept node in the UBKG\
+        \ is the origin of a subgraph that links the Concept node to a set of Code,\
+        \ Term, Definition, and Semantic Type nodes. The Concept node object represents\
+        \ information extracted from all of the nodes in the Concept node's subgraph."
+    ConceptCodes:
+      type: "object"
+      properties:
+        codes:
+          type: "array"
+          items:
+            type: "string"
+            description: "a CodeID, in format _SAB_:_CODE_"
+      description: "The set of Code node that link to a Concept node"
+    NodeTypes:
+      type: "object"
+      properties:
+        node_types:
+          type: "array"
+          items:
+            type: "string"
+            description: "node type"
+      description: "The set of node types (labels) for all nodes in the UBKG"
+    NodeTypeCount:
+      type: "object"
+      properties:
+        node_types:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              total_count:
+                type: "integer"
+                description: "Count of nodes with any of the labels in node_types.\
+                  \ Equal to the total count of nodes in the database if no node_type\
+                  \ was specified."
+                format: "int32"
+              node_type:
+                type: "object"
+                properties:
+                  label:
+                    type: "string"
+                    description: "the label for the node type"
+                  count:
+                    type: "integer"
+                    description: "count of nodes with the label"
+                    format: "int32"
+      description: "counts by node type"
+    ArrayOfSabDefinition:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/SabDefinition"
+    TermConcept:
+      type: "object"
+      properties:
+        concepts:
+          type: "array"
+          items:
+            type: "string"
+            description: "a Concept Unique Identifier (CUI)"
+      description: "An array of Concepts with preferred terms that exactly match the\
+        \ specified string"
+    ArrayOfConceptDetail:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/ConceptDetail"
+    ArrayOfCodesCodesObj:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/CodesCodesObj"
+    ArrayOfConceptCodes:
+      type: "array"
+      items:
+        $ref: "#/components/schemas/ConceptCodes"
+    ConceptSubgraph:
+      type: "object"
+      properties:
+        paths:
+          type: "array"
+          description: "set of paths originating from a concept."
+          items:
+            type: "object"
+            properties:
+              position:
+                type: "integer"
+                description: "The position of the path in the complete subgraph. The\
+                  \ item property is invariant with respect to parameters such as\
+                  \ skip or limit. For example, if skip = 5, the position of the first\
+                  \ path in the response will be 6."
+                format: "int32"
+              length:
+                type: "integer"
+                description: "Always 1."
+                format: "int32"
+              hops:
+                type: "array"
+                description: "the set of individual hops that comprise the path. A\
+                  \ hop represents two nodes linked by a relationship."
+                items:
+                  type: "object"
+                  properties:
+                    hop:
+                      type: "integer"
+                      description: "the position of the hop in the path--i.e., the\
+                        \ distance of the hop from the originating Concept."
+                      format: "int32"
+                    sab:
+                      type: "string"
+                      description: "the identifier for the source of the relationship\
+                        \ involved in the hop."
+                    source:
+                      type: "object"
+                      properties:
+                        concept:
+                          type: "string"
+                          description: "the identifier for the source Concept"
+                        prefterm:
+                          type: "string"
+                          description: "the preferred term for the source Concept"
+                      description: "the source of the hop--i.e., the Concept node\
+                        \ from which the relationship starts"
+                    target:
+                      type: "object"
+                      properties:
+                        concept:
+                          type: "string"
+                          description: "the identifier for the target Concept"
+                        prefterm:
+                          type: "string"
+                          description: "the preferred term for the target Concept"
+                      description: "the target of the hop--i.e., the Concept node\
+                        \ in which the relationship ends"
+                    type:
+                      type: "string"
+                      description: "the type of relationship involved in the hop."
+      description: "Represents a subgraph--a set of one-hop paths involving a set\
+        \ of relationship types. The path is an ordered set of objects representing\
+        \ hops away from the originating concept. Each hop represents a relationship\
+        \ between two concepts. For example, the path (A)-[r]->(B)-[r]->(C) has 2\
+        \ hops between Concept C and Concept A."
+    NodeTypeSabCount:
+      type: "object"
+      properties:
+        node_types:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              total_count:
+                type: "integer"
+                description: "Count of nodes with any of the labels in node-types.\
+                  \ Equal to the total count of nodes in the database if no filters\
+                  \ were applied."
+                format: "int32"
+              node_type:
+                type: "object"
+                properties:
+                  label:
+                    type: "string"
+                    description: "the label for the node type"
+                  count:
+                    type: "integer"
+                    description: "count of nodes with the label"
+                    format: "int32"
+                  sabs:
+                    type: "array"
+                    description: "array of sources (SABs) for nodes with the specified\
+                      \ node types"
+                    items:
+                      type: "object"
+                      properties:
+                        sab:
+                          type: "string"
+                          description: "source name"
+                        count:
+                          type: "integer"
+                          description: "count of nodes from the SAB with the specified\
+                            \ node type"
+                          format: "int32"
+      description: "counts by node type, grouped by SAB"
+  securitySchemes:
+    Base-UBKG-API-UMLS-Auth:
+      type: "apiKey"
+      name: "Authorization"
+      in: "header"
+      x-amazon-apigateway-authtype: "custom"
+      x-amazon-apigateway-authorizer:
+        authorizerUri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:557310757627:function:Base-UBKG-API-UMLS-Authorizer/invocations"
+        authorizerResultTtlInSeconds: 0
+        type: "token"
