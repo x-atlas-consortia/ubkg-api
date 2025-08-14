@@ -1,0 +1,31 @@
+services:
+  
+  ubkg-api:
+    build:
+      # Set the build context for the Dockerfile. The docker-development.sh script copies
+      # source from the current GitHub branch to the build context directory
+      # for the Dockerfile to copy to the image.
+      context: ./ubkg-api
+
+      # Configure Compose for multi-architecture builds.
+      # Prerequisites:
+      # 1. Create an additional buildx builder by running
+      #    docker buildx create --use
+      # 2. Build tags for both the current version and "latest".
+      tags:
+        - docker.io/hubmap/ubkg-api:${UBKG_API_VERSION:?err}
+        - docker.io/hubmap/ubkg-api:latest
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+    # Build the image with name and tag
+    # Exit with an error message containing err if unset or empty in the environment
+    image: hubmap/ubkg-api:${UBKG_API_VERSION:?err}
+    volumes:  
+      # Mount the VERSION file and BUILD file 
+      - "../VERSION:/usr/src/app/VERSION" 
+      - "../BUILD:/usr/src/app/BUILD" 
+      # Mount the source code to container  
+      - "../src:/usr/src/app/src"
+
