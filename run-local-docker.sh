@@ -1,0 +1,1 @@
+docker run -it --name test-ubkg-front-end ubkg-front-end

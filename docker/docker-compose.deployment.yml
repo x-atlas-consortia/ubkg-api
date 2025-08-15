@@ -1,0 +1,7 @@
+services:
+  
+  ubkg-api:
+    # Use the published image and tag from DockerHub
+    image: hubmap/ubkg-api:${UBKG_API_VERSION:?err}
+
+

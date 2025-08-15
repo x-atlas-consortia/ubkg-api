@@ -1,4 +1,14 @@
-SERVER='bolt://ubkg-neo4j:7687'
+# SERVER, USERNAME, and PASSWORD are used to connect to a UBKG neo4j instance.
+# SERVER is a URI that is passed to the neo4j.Graphdatabase.Driver.
+# The format for SERVER depends on the application environment for the neo4j instance:
+# 1. If the neo4j instance is running locally, SERVER should be bolt://localhost:7687.
+# 2. If the neo4j instance is running in a local Docker container application, SERVER
+#    should be in format bolt://localhost:<PORT>, where PORT is the host port that was
+#    assigned to container port 7687.
+# 3. If the neo4j instance is running in a Docker container that is part of a Docker
+#    Compose multi-container application, SERVER should be format bolt://<IMAGE>:7687,
+#    where IMAGE is the Docker image name of the container that hosts the neo4j instance.
+SERVER='bolt://localhost:4500'
 USERNAME='neo4j'
 PASSWORD='abcd1234'
 # Maximum duration for the execution of timeboxed queries to prevent service timeout, in seconds
