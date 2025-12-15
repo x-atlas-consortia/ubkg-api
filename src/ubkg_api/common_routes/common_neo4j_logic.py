@@ -212,15 +212,13 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]
 
     return result
 
-# https://neo4j.com/docs/api/python-driver/current/api.html#explicit-transactions
 def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: List[str]) -> List[str]:
-    codes: List[str] = []
-    querytxt: str = \
-        'WITH [$concept_id] AS query' \
-        ' MATCH (a:Concept)-[:CODE]->(b:Code)' \
-        ' WHERE a.CUI IN query AND (b.SAB IN $SAB OR $SAB = [])' \
-        ' RETURN DISTINCT a.CUI AS Concept, b.CodeID AS Code, b.SAB AS Sab' \
-        ' ORDER BY Concept, Code ASC'
+
+    # December 2025 - refactored to use JSON response
+    result: List[str] = []
+
+    # Load Cypher query from file.
+    querytxt: str = loadquerystring(filename='concepts_concept_id_codes.cypher')
 
     # March 2025
     # Set timeout for query based on value in app.cfg.
@@ -228,20 +226,17 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query, concept_id=concept_id, SAB=sab)
+            recds: neo4j.Result = session.run(query)
+
             for record in recds:
-                try:
-                    code = record.get('Code')
-                    codes.append(code)
-                except KeyError:
-                    pass
+                result.append(record.get('codes'))
+
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    return codes
-
+    return result
 
 def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> List[SabRelationshipConceptTerm]:
     sabrelationshipconceptprefterms: [SabRelationshipConceptPrefterm] = []
@@ -1282,12 +1277,6 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
-
-    # The query has either zero records or one record
-    #if len(result) == 1:
-        #return result
-    #else:
-        #return result
 
     return result
 
