@@ -28,4 +28,3 @@ UNWIND codes as code
 WITH code
 ORDER BY code.code, code.concept, code.SAB
 RETURN COLLECT(code) AS codes
-//RETURN Concept, c.CodeID AS Code2, c.SAB AS Sab2 ORDER BY Code1, Concept ASC, Code2, Sab2
