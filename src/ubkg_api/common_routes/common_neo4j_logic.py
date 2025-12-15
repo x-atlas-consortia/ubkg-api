@@ -30,7 +30,7 @@ from pathlib import Path
 import neo4j
 
 #from models.codes_codes_obj import CodesCodesObj
-from src.ubkg_api.models.concept_detail import ConceptDetail
+#from src.ubkg_api.models.concept_detail import ConceptDetail
 from src.ubkg_api.models.concept_graph import ConceptGraph
 from src.ubkg_api.models.path_item_concept_relationship_sab_prefterm import PathItemConceptRelationshipSabPrefterm
 from src.ubkg_api.models.semantictype import SemanticType
@@ -147,8 +147,9 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     """
     result: List[dict] = []
 
-    # JAS January 2024.
-    # Fixed issue with SAB filtering.
+    # December 2025 - refactored to use streamed JSON response.
+
+    # JAS January 2024 - Fixed issue with SAB filtering.
 
     # Load Cypher query from file.
     querytxt: str = loadquerystring(filename='codes_code_id_codes.cypher')
@@ -180,8 +181,10 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     return result
 
 
-def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[ConceptDetail]:
-    conceptdetails: List[ConceptDetail] = []
+def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]:
+    result: List[dict] = []
+
+    # December 2025 - refactored to use streamed JSON response.
 
     # Dec 2024 - replace in-line Cypher with loaded file.
     # Load Cypher query from file.
@@ -197,13 +200,9 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[Conce
     with neo4j_instance.driver.session() as session:
         try:
             recds: neo4j.Result = session.run(query)
+
             for record in recds:
-                try:
-                    conceptdetail: ConceptDetail = ConceptDetail(record.get('Concept'),
-                                                                 record.get('Prefterm')).serialize()
-                    conceptdetails.append(conceptdetail)
-                except KeyError:
-                    pass
+                result.append(record.get('concepts'))
 
 
         except neo4j.exceptions.ClientError as e:
@@ -211,7 +210,7 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[Conce
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    return conceptdetails
+    return result
 
 # https://neo4j.com/docs/api/python-driver/current/api.html#explicit-transactions
 def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: List[str]) -> List[str]:
