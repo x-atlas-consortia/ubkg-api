@@ -2,8 +2,8 @@
 
 from __future__ import absolute_import
 
-from .base_model_ import Model
-from . import util
+from src.ubkg_api.models.base_model_ import Model
+from src.ubkg_api.models import util
 
 
 class CodesCodesObj(Model):

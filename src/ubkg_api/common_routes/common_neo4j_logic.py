@@ -20,6 +20,7 @@ import logging
 import re
 from typing import List
 import os
+import sys
 # Mar 2025 for handling configurable timeouts
 from werkzeug.exceptions import GatewayTimeout
 
@@ -28,17 +29,17 @@ from pathlib import Path
 
 import neo4j
 
-from models.codes_codes_obj import CodesCodesObj
-from models.concept_detail import ConceptDetail
-from models.concept_graph import ConceptGraph
-from models.path_item_concept_relationship_sab_prefterm import PathItemConceptRelationshipSabPrefterm
-from models.semantictype import SemanticType
-from models.sab_definition import SabDefinition
-from models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
-from models.sab_relationship_concept_term import SabRelationshipConceptTerm
-from models.termtype_code import TermtypeCode
-from models.concept_node import ConceptNode
-from models.node_type import NodeType
+#from models.codes_codes_obj import CodesCodesObj
+from src.ubkg_api.models.concept_detail import ConceptDetail
+from src.ubkg_api.models.concept_graph import ConceptGraph
+from src.ubkg_api.models.path_item_concept_relationship_sab_prefterm import PathItemConceptRelationshipSabPrefterm
+from src.ubkg_api.models.semantictype import SemanticType
+from src.ubkg_api.models.sab_definition import SabDefinition
+from src.ubkg_api.models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
+from src.ubkg_api.models.sab_relationship_concept_term import SabRelationshipConceptTerm
+from src.ubkg_api.models.termtype_code import TermtypeCode
+from src.ubkg_api.models.concept_node import ConceptNode
+from src.ubkg_api.models.node_type import NodeType
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -136,7 +137,7 @@ def parse_and_check_rel(rel: List[str]) -> List[List]:
     return rel_list
 
 
-def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) -> List[CodesCodesObj]:
+def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) -> List[dict]:
     """
     Returns the set of Code nodes that share Concept links with the specified Code node.
     :param neo4j_instance: neo4j connection
@@ -144,7 +145,7 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     :param sab: optional list of SABs from which to select codes that share links to the Concept node linked to the
     Code node
     """
-    codescodesobjs: List[CodesCodesObj] = []
+    result: List[dict] = []
 
     # JAS January 2024.
     # Fixed issue with SAB filtering.
@@ -168,20 +169,15 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     with (neo4j_instance.driver.session() as session):
         try:
             recds: neo4j.Result = session.run(query)
+
             for record in recds:
-                try:
-                    codescodesobj: CodesCodesObj =CodesCodesObj(record.get('Concept'),
-                                                                record.get('Code2'),
-                                                                record.get('Sab2')).serialize()
-                    codescodesobjs.append(codescodesobj)
-                except KeyError:
-                    pass
+                result.append(record.get('codes'))
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    return codescodesobjs
+    return result
 
 
 def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[ConceptDetail]:
