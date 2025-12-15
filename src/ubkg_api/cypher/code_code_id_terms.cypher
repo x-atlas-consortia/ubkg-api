@@ -6,6 +6,7 @@
 
 // The function that loads this query will replace values for code_id and termtype_filter.
 
+// December 2025 - refactored to JSON response
 CALL
 {
     WITH $code_id AS query
@@ -16,4 +17,4 @@ CALL
     RETURN DISTINCT c.CodeID AS code, type(r) as term_type, t.name as term
 }
 WITH code, COLLECT(DISTINCT {term_type: term_type, term: term}) AS terms
-RETURN {code:code,terms:terms} AS response
+RETURN COLLECT({code:code,terms:terms}) AS terms

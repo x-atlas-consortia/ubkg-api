@@ -1255,7 +1255,7 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
     :param term_type: an optional list of acronyms for a code type
 
     """
-    terms: [dict] = []
+    result: [dict] = []
 
     # Load and parameterize query.
     querytxt = loadquerystring('code_code_id_terms.cypher')
@@ -1274,23 +1274,22 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
     with neo4j_instance.driver.session() as session:
         try:
             recds: neo4j.Result = session.run(query)
-            for record in recds:
-                term = record.get('response')
-                try:
-                    terms.append(term)
 
-                except KeyError:
-                    pass
+            for record in recds:
+                result.append(record.get('terms'))
+
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
     # The query has either zero records or one record
-    if len(terms) == 1:
-        return term
-    else:
-        return terms
+    #if len(result) == 1:
+        #return result
+    #else:
+        #return result
+
+    return result
 
 def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltypes=None, relsabs=None, skip=None,
                                            limit=None) -> List[ConceptGraph]:
