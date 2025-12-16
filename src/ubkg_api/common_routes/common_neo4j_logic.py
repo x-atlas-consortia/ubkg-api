@@ -32,7 +32,6 @@ import neo4j
 from src.ubkg_api.models.concept_graph import ConceptGraph
 from src.ubkg_api.models.path_item_concept_relationship_sab_prefterm import PathItemConceptRelationshipSabPrefterm
 from src.ubkg_api.models.semantictype import SemanticType
-from src.ubkg_api.models.sab_definition import SabDefinition
 from src.ubkg_api.models.termtype_code import TermtypeCode
 from src.ubkg_api.models.concept_node import ConceptNode
 from src.ubkg_api.models.node_type import NodeType
@@ -277,34 +276,39 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
 
     return result
 
-def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -> List[SabDefinition]:
-    sabdefinitions: [SabDefinition] = []
-    querytxt: str = \
-        'WITH [$concept_id] AS query' \
-        ' MATCH (a:Concept)-[:DEF]->(b:Definition)' \
-        ' WHERE a.CUI in query' \
-        ' RETURN DISTINCT a.CUI AS Concept, b.SAB AS SAB, b.DEF AS Definition' \
-        ' ORDER BY Concept, SAB'
+def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -> List[dict]:
+
+    # December 2025 - refactored to work with JSON responses from Cypher.
+    result: [dict] = []
+
+    # Load Cypher query from file.
+    querytxt: str = loadquerystring(filename='concepts_concept_id_definitions.cypher')
+
+    querytxt = querytxt.replace('$concept_id', concept_id)
+
+    #querytxt: str = \
+        #'WITH [$concept_id] AS query' \
+        #' MATCH (a:Concept)-[:DEF]->(b:Definition)' \
+        #' WHERE a.CUI in query' \
+        #' RETURN DISTINCT a.CUI AS Concept, b.SAB AS SAB, b.DEF AS Definition' \
+        #' ORDER BY Concept, SAB'
 
     # March 2025
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query, concept_id=concept_id)
+            recds: neo4j.Result = session.run(query)
+
             for record in recds:
-                try:
-                    sabdefinition: SabDefinition = SabDefinition(record.get('SAB'),
-                                                                 record.get('Definition')).serialize()
-                    sabdefinitions.append(sabdefinition)
-                except KeyError:
-                    pass
+                result.append(record.get('definitions'))
+
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    return sabdefinitions
+    return result
 
 def get_graph(neo4j_instance, query: neo4j.Query) -> ConceptGraph:
     """
