@@ -26,7 +26,6 @@ def concepts_concept_id_codes_get(concept_id):
     :param concept_id: The concept identifier
     :type concept_id: str
 
-    :rtype: Union[List[str], Tuple[List[str], int], Tuple[List[str], int, Dict[str, str]]
     """
 
     # Validate sab parameter.
@@ -58,8 +57,6 @@ def concepts_concept_id_concepts_get(concept_id):
     :param concept_id: The concept identifier
     :type concept_id: str
 
-    :rtype: Union[List[SabRelationshipConceptTerm], Tuple[List[SabRelationshipConceptTerm], int],
-     Tuple[List[SabRelationshipConceptTerm], int, Dict[str, str]]
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 

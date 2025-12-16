@@ -29,14 +29,10 @@ from pathlib import Path
 
 import neo4j
 
-#from models.codes_codes_obj import CodesCodesObj
-#from src.ubkg_api.models.concept_detail import ConceptDetail
 from src.ubkg_api.models.concept_graph import ConceptGraph
 from src.ubkg_api.models.path_item_concept_relationship_sab_prefterm import PathItemConceptRelationshipSabPrefterm
 from src.ubkg_api.models.semantictype import SemanticType
 from src.ubkg_api.models.sab_definition import SabDefinition
-from src.ubkg_api.models.sab_relationship_concept_prefterm import SabRelationshipConceptPrefterm
-from src.ubkg_api.models.sab_relationship_concept_term import SabRelationshipConceptTerm
 from src.ubkg_api.models.termtype_code import TermtypeCode
 from src.ubkg_api.models.concept_node import ConceptNode
 from src.ubkg_api.models.node_type import NodeType
@@ -220,6 +216,10 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
     # Load Cypher query from file.
     querytxt: str = loadquerystring(filename='concepts_concept_id_codes.cypher')
 
+    querytxt = querytxt.replace('$concept_id', concept_id)
+    querytxt = querytxt.replace('$SAB', sab)
+
+
     # March 2025
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
@@ -238,17 +238,26 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
 
     return result
 
-def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> List[SabRelationshipConceptTerm]:
-    sabrelationshipconceptprefterms: [SabRelationshipConceptPrefterm] = []
-    querytxt: str = \
-        'WITH [$concept_id] AS query' \
-        ' MATCH (b:Concept)<-[c]-(d:Concept)' \
-        ' WHERE b.CUI IN query' \
-        ' OPTIONAL MATCH (b)-[:PREF_TERM]->(a:Term)' \
-        ' OPTIONAL MATCH (d)-[:PREF_TERM]->(e:Term)' \
-        ' RETURN DISTINCT a.name AS Prefterm1, b.CUI AS Concept1, c.SAB AS SAB, type(c) AS Relationship,' \
-        '  d.CUI AS Concept2, e.name AS Prefterm2' \
-        ' ORDER BY Concept1, Relationship, Concept2 ASC, Prefterm1, Prefterm2'
+def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> List[dict]:
+
+    # December 2025 - refactored to use JSON response.
+
+    result: [dict] = []
+
+    # Load Cypher query from file.
+    querytxt: str = loadquerystring(filename='concepts_concept_id_concepts.cypher')
+
+    querytxt = querytxt.replace('$concept_id', concept_id)
+
+    #querytxt: str = \
+        #'WITH [$concept_id] AS query' \
+        #' MATCH (b:Concept)<-[c]-(d:Concept)' \
+        #' WHERE b.CUI IN query' \
+        #' OPTIONAL MATCH (b)-[:PREF_TERM]->(a:Term)' \
+        #' OPTIONAL MATCH (d)-[:PREF_TERM]->(e:Term)' \
+        #' RETURN DISTINCT a.name AS Prefterm1, b.CUI AS Concept1, c.SAB AS SAB, type(c) AS Relationship,' \
+        #'  d.CUI AS Concept2, e.name AS Prefterm2' \
+        #' ORDER BY Concept1, Relationship, Concept2 ASC, Prefterm1, Prefterm2'
 
     # March 2025
     # Set timeout for query based on value in app.cfg.
@@ -256,23 +265,17 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query, concept_id=concept_id)
+            recds: neo4j.Result = session.run(query)
+
             for record in recds:
-                try:
-                    sabrelationshipconceptprefterm: SabRelationshipConceptPrefterm = \
-                        SabRelationshipConceptPrefterm(record.get('SAB'),
-                                                       record.get('Relationship'),
-                                                       record.get('Concept2'),
-                                                       record.get('Prefterm2')).serialize()
-                    sabrelationshipconceptprefterms.append(sabrelationshipconceptprefterm)
-                except KeyError:
-                    pass
+                result.append(record.get('concepts'))
+
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    return sabrelationshipconceptprefterms
+    return result
 
 def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -> List[SabDefinition]:
     sabdefinitions: [SabDefinition] = []
