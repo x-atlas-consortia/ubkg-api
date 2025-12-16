@@ -1,10 +1,11 @@
+import os
 from flask import Blueprint, jsonify, current_app, request, make_response
 
 # Cypher query functions
 from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
     concepts_concept_id_definitions_get_logic, concepts_expand_get_logic,\
     concepts_shortestpath_get_logic, concepts_trees_get_logic, concepts_subgraph_get_logic, \
-    concepts_identfier_node_get_logic, concepts_subgraph_sequential_get_logic
+    concepts_identifier_node_get_logic, concepts_subgraph_sequential_get_logic
 # Functions to validate query parameters
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
@@ -381,7 +382,7 @@ def concepts_concept_identifier_nodes_get(search):
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
-    result = concepts_identfier_node_get_logic(neo4j_instance, search=search)
+    result = concepts_identifier_node_get_logic(neo4j_instance, search=search)
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No nodeobjects for concepts with identifier",

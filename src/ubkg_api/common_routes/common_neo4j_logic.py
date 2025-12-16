@@ -31,7 +31,6 @@ import neo4j
 
 from src.ubkg_api.models.semantictype import SemanticType
 from src.ubkg_api.models.termtype_code import TermtypeCode
-from src.ubkg_api.models.concept_node import ConceptNode
 from src.ubkg_api.models.node_type import NodeType
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
@@ -631,54 +630,16 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     return concepts
 
 
-def remove_null_placeholder_objects(listdict: list[dict]) -> list[dict]:
+def concepts_identifier_node_get_logic(neo4j_instance, search: str) -> List[dict]:
     """
-    If a Concept node identified in the query behind the concepts_identfier_node_get_logic does not have semantic types
-    or definitions, the return will contain objects with null values--e.g.,
-    "semantic_types": [
-        {"def": null,
-         "sty": null,
-         "tui": null,
-         "stn": null}
-         ],
-    "definitions": [
-        {"def": null,
-        "sab": null}
-        ]
+    December 2025 - Refactored to use JSON stream from Cypher.
 
-    This function removes the null objects from the list--e.g., to "semantic_types":[],"definitions":[]
-
-    :param listdict: a list of dictionaries
-
-    """
-
-    listpop = []
-    # Loop through the list and indentify placeholder dictionaries.
-    for d in listdict:
-        allnull = True
-        for key, val in d.items():
-            if val is not None:
-                allnull = False
-        if allnull:
-            listpop.append(listdict.index(d))
-
-    # Remove the placeholder dictionaries from the list.
-    if len(listpop) > 0:
-        for ld in listpop:
-            listdict.pop(ld)
-
-    return listdict
-
-
-def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[ConceptNode]:
-    """
     Obtains information on the set of Concept subgraphs with identifiers that match the search parameter string.
 
     """
-    # MAY 2024 - Replaced timeboxing method.
 
-    conceptnodes: [ConceptNode] = []
-    querytxt = loadquerystring(filename='concepts_nodes.cypher')
+    result: [dict] = []
+    querytxt = loadquerystring(filename='concepts_nodeobjects.cypher')
 
     # Format the search parameter for the Cypher query.
     list_identifier = [search]
@@ -691,24 +652,16 @@ def concepts_identfier_node_get_logic(neo4j_instance, search: str) -> List[Conce
     with neo4j_instance.driver.session() as session:
         try:
             recds: neo4j.Result = session.run(query)
+
             for record in recds:
-                concept = record.get('nodeobject')
-                # Remove null placeholder dictionaries from nested list objects.
-                concept['semantic_types'] = remove_null_placeholder_objects(concept.get('semantic_types'))
-                concept['definitions'] = remove_null_placeholder_objects(concept.get('definitions'))
-                try:
-                    conceptnode: ConceptNode = ConceptNode(concept).serialize()
-                    conceptnodes.append(conceptnode)
-                except KeyError:
-                    pass
+                result.append(record.get('nodeobjects'))
+
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    if conceptnodes != []:
-        return {'nodeobjects': conceptnodes}
-    return conceptnodes
+    return {"nodeobjects":result}
 
 def database_info_server_get_logic(neo4j_instance) -> dict:
     # Obtains neo4j database server information

@@ -1,3 +1,5 @@
+// Deprecated December 2025
+
 // Used by the concepts/<identifier>/nodes endpoint.
 // Returns representations of translated and consolidated information ("Concept nodes")
 // for the Concepts that "match" a search term.
