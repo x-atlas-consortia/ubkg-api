@@ -246,16 +246,6 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
 
     querytxt = querytxt.replace('$concept_id', concept_id)
 
-    #querytxt: str = \
-        #'WITH [$concept_id] AS query' \
-        #' MATCH (b:Concept)<-[c]-(d:Concept)' \
-        #' WHERE b.CUI IN query' \
-        #' OPTIONAL MATCH (b)-[:PREF_TERM]->(a:Term)' \
-        #' OPTIONAL MATCH (d)-[:PREF_TERM]->(e:Term)' \
-        #' RETURN DISTINCT a.name AS Prefterm1, b.CUI AS Concept1, c.SAB AS SAB, type(c) AS Relationship,' \
-        #'  d.CUI AS Concept2, e.name AS Prefterm2' \
-        #' ORDER BY Concept1, Relationship, Concept2 ASC, Prefterm1, Prefterm2'
-
     # March 2025
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
@@ -283,13 +273,6 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
     querytxt: str = loadquerystring(filename='concepts_concept_id_definitions.cypher')
 
     querytxt = querytxt.replace('$concept_id', concept_id)
-
-    #querytxt: str = \
-        #'WITH [$concept_id] AS query' \
-        #' MATCH (a:Concept)-[:DEF]->(b:Definition)' \
-        #' WHERE a.CUI in query' \
-        #' RETURN DISTINCT a.CUI AS Concept, b.SAB AS SAB, b.DEF AS Definition' \
-        #' ORDER BY Concept, SAB'
 
     # March 2025
     # Set timeout for query based on value in app.cfg.
@@ -736,56 +719,6 @@ def database_info_server_get_logic(neo4j_instance) -> dict:
                "edition": neo4j_instance.database_edition}
 
     return dictret
-
-
-# JAS January 2024
-# Deprecating. The Cypher is incompatible with version 5.
-"""
-def terms_term_id_concepts_terms_get_logic(neo4j_instance, term_id: str) -> List[ConceptTerm]:
-    conceptTerms: [ConceptTerm] = []
-    query: str = \
-        'WITH [$term_id] AS query' \
-        ' OPTIONAL MATCH (a:Term)<-[b]-(c:Code)<-[:CODE]-(d:Concept)' \
-        ' WHERE a.name IN query AND b.CUI = d.CUI' \
-        ' OPTIONAL MATCH (a:Term)<--(d:Concept)' \
-        ' WHERE a.name IN query WITH a,collect(d.CUI) AS next' \
-        ' MATCH (f:Term)<-[:PREF_TERM]-(g:Concept)-[:CODE]->(h:Code)-[i]->(j:Term)' \
-        ' WHERE g.CUI IN next AND g.CUI = i.CUI' \
-        ' WITH a, g,COLLECT(j.name)+[f.name] AS x' \
-        ' WITH * UNWIND(x) AS Term2' \
-        ' RETURN DISTINCT a.name AS Term1, g.CUI AS Concept, Term2' \
-        ' ORDER BY Term1, Term2'
-    with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query, term_id=term_id)
-        for record in recds:
-            try:
-                conceptTerm: ConceptTerm = ConceptTerm(record.get('Concept'), record.get('Term2')).serialize()
-                conceptTerms.append(conceptTerm)
-            except KeyError:
-                pass
-    return conceptTerms
-"""
-
-# JAS January 2024
-# Deprecated tui routes
-"""
-def tui_tui_id_semantics_get_logic(neo4j_instance, tui_id: str) -> List[SemanticStn]:
-    semanticStns: [SemanticStn] = []
-    query: str = \
-        'WITH [$tui_id] AS query' \
-        ' MATCH (a:Semantic)' \
-        ' WHERE (a.TUI IN query OR query = [])' \
-        ' RETURN DISTINCT a.name AS semantic, a.TUI AS TUI, a.STN AS STN1'
-    with neo4j_instance.driver.session() as session:
-        recds: neo4j.Result = session.run(query, tui_id=tui_id)
-        for record in recds:
-            try:
-                semanticStn: SemanticStn = SemanticStn(record.get('semantic'), record.get('STN1')).serialize()
-                semanticStns.append(semanticStn)
-            except KeyError:
-                pass
-    return semanticStns
-"""
 
 
 def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None, sab=None) -> dict:
