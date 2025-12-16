@@ -2,10 +2,10 @@
 
 from __future__ import absolute_import
 
-from . import util
-from .base_model_ import Model
+from src.ubkg_api.models import util
+from src.ubkg_api.models.base_model_ import Model
 # property class
-from .concept_prefterm import ConceptPrefterm
+from src.ubkg_api.models.concept_prefterm import ConceptPrefterm
 
 class ConceptPathHop(Model):
     """

@@ -29,8 +29,6 @@ from pathlib import Path
 
 import neo4j
 
-from src.ubkg_api.models.concept_graph import ConceptGraph
-from src.ubkg_api.models.path_item_concept_relationship_sab_prefterm import PathItemConceptRelationshipSabPrefterm
 from src.ubkg_api.models.semantictype import SemanticType
 from src.ubkg_api.models.termtype_code import TermtypeCode
 from src.ubkg_api.models.concept_node import ConceptNode
@@ -310,8 +308,10 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
 
     return result
 
-def get_graph(neo4j_instance, query: neo4j.Query) -> ConceptGraph:
+def get_graph(neo4j_instance, query: neo4j.Query) -> [dict]:
     """
+    December 2025 - refactored to work directly with JSON response from query.
+
     Used by paths-related endpoints to return a graph object.
     :param query: query string with timeout
     :param neo4j_instance: UBKG connection
@@ -319,30 +319,27 @@ def get_graph(neo4j_instance, query: neo4j.Query) -> ConceptGraph:
     Assumes that the query string returns a JSON object named graph in the nodes/paths/edges format.
 
     """
-    conceptgraphs: [ConceptGraph] = []
-    conceptgraph: ConceptGraph = {}
+    result: [dict] = []
 
     with neo4j_instance.driver.session() as session:
         try:
             recds: neo4j.Result = session.run(query)
+
             for record in recds:
-                graph = record.get('graph')
-                try:
-                    conceptgraph: ConceptGraph = ConceptGraph(graph=graph).serialize()
-                    conceptgraphs.append(conceptgraph)
-                except KeyError:
-                    pass
+                result.append(record.get('graph'))
+
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
     # There will be a maximum of one record.
-    return conceptgraph
+    return result
 
 def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, mindepth=None,
-                              maxdepth=None, skip=None, limit=None) -> List[ConceptGraph]:
+                              maxdepth=None, skip=None, limit=None) -> List[dict]:
     """
+
     Obtains a subset of paths that originate from the concept with CUI=query_concept_id, subject
     to constraints specified in parameters.
 
@@ -377,7 +374,7 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
 
 def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, terminus_concept_id=None,
                                     sab=None, rel=None) \
-        -> List[PathItemConceptRelationshipSabPrefterm]:
+        -> List[dict]:
 
     # Load query string and associate parameter values to variables.
     querytxt = loadquerystring(filename='concepts_shortestpath.cypher')
@@ -396,7 +393,7 @@ def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, term
 
 # JAS February 2024 Refactored to mirror concepts_expand_get_logic
 def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, mindepth=None,
-                             maxdepth=None, skip=None, limit=None) -> List[ConceptGraph]:
+                             maxdepth=None, skip=None, limit=None) -> List[dict]:
     """
     Obtains the spanning tree of paths that originate from the concept with CUI=query_concept_id, subject
     to constraints specified in parameters.
@@ -429,7 +426,7 @@ def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, re
     return get_graph(neo4j_instance, query=query)
 
 def concepts_subgraph_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, skip=None, limit=None) \
-        -> List[ConceptGraph]:
+        -> List[dict]:
     """
     Obtains the subgraph involving relationships of specified types and
     defined by specified source SABs. For exammple, if sab="UBERON" and rel="part_of", then the endpoint
@@ -1288,7 +1285,7 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
     return result
 
 def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltypes=None, relsabs=None, skip=None,
-                                           limit=None) -> List[ConceptGraph]:
+                                           limit=None) -> List[dict]:
 
     """
     Obtains a subset of paths that originate from the concept with CUI=startCUI, in a sequence of relationships
