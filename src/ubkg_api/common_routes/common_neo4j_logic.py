@@ -726,7 +726,8 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
     """
     nodetypes: [NodeType] = []
     # Load and parameterize base query.
-    querytxt = loadquerystring('node_types.cypher')
+    # December 2025 - renamed to distinguish from node_types.cypher for node_types_get_logic.
+    querytxt = loadquerystring('node_types_counts.cypher')
 
     if node_type is None:
         node_type = ''
@@ -773,9 +774,9 @@ def node_types_get_logic(neo4j_instance) -> dict:
     :param neo4j_instance: neo4j connection
 
     """
-    nodetypes: [dict] = []
+    result: [dict] = []
 
-    querytxt = 'CALL db.labels() YIELD label RETURN apoc.coll.sort(COLLECT(label)) AS node_types'
+    querytxt = loadquerystring('node_types.cypher')
 
     # Mar 2025
     # Set timeout for query based on value in app.cfg.
@@ -784,21 +785,16 @@ def node_types_get_logic(neo4j_instance) -> dict:
     with neo4j_instance.driver.session() as session:
         try:
             recds: neo4j.Result = session.run(query)
-
             for record in recds:
-                try:
-                    nodetype = record.get('node_types')
-                    nodetypes.append(nodetype)
-                except KeyError:
-                    pass
+                result.append(record.get('node_types'))
+
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    # The query returns a single record.
-    dictret = {'node_types': nodetype}
-    return dictret
+    # The query returns a list of a list.
+    return {'node_types':result[0]}
 
 def property_types_get_logic(neo4j_instance) -> dict:
     """
