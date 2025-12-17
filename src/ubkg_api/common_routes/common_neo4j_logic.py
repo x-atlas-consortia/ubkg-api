@@ -669,9 +669,8 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
 
     """
 
-    # MAY 2024 - Replaced timeboxing method.
 
-    nodetypes: [NodeType] = []
+    nodetypes: [dict] = []
     # Load and parameterize base query.
     querytxt = loadquerystring('node_types_by_sab.cypher')
 
@@ -702,11 +701,12 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
                 for node_type in node_types:
                     count_by_label = node_type.get('count')
                     total_count = total_count + count_by_label
-                try:
-                    nodetype: NodeType = NodeType(node_type).serialize()
-                    nodetypes.append(nodetype)
-                except KeyError:
-                    pass
+                    nodetypes.append({'node_type':node_type})
+                #try:
+                    #nodetype: NodeType = NodeType(node_type).serialize()
+                    #nodetypes.append(nodetype)
+                #except KeyError:
+                    #pass
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
