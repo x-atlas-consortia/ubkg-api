@@ -438,9 +438,12 @@ def concepts_subgraph_get_logic(neo4j_instance, query_concept_id=None, sab=None,
     return get_graph(neo4j_instance, query=query)
 
 def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None, skip=None,
-                                                   limit=None) -> List[SemanticType]:
+                                                   limit=None) -> List[dict]:
     """
-    Obtains information on the set of Semantic (semantic type) nodes that match the identifier semtype
+    December 2025 - refactored to work with streamed JSON response.
+
+    Obtains information on the set of
+    1. Semantic (semantic type) nodes that match the identifier semtype
     2. the set of Semantic (semantic type) nodes that are subtypes (have ISA_STY relationships
     with) the semantic type identified with semtype
 
@@ -448,13 +451,14 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
     1. Name (e.g., "Anatomical Structure")
     2. Type Unique Identifier (e.g., "T017")
 
+    :param neo4j_instance: UBKG connection
     :param semtype: a string OR list string prepared by the controller.
     :param skip: SKIP value for the query
     :param limit: LIMIT value for the query
     :param neo4j_instance: neo4j connection
 
     """
-    semantictypes: [SemanticType] = []
+    result: [dict] = []
     # Load and parameterize base query.
     querytxt = loadquerystring('semantics_semantic_types.cypher')
 
@@ -477,25 +481,27 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        try:
-            recds: neo4j.Result = session.run(query)
-            # Identify the absolute position of the semantic type in the return.
-            position = int(skip) + 1
-            for record in recds:
-                # Each row from the query includes a dict that contains the actual response content.
-                semantic_type = record.get('semantic_type')
-                try:
-                    semantictype: SemanticType = SemanticType(semantic_type, position).serialize()
-                    semantictypes.append(semantictype)
-                    position = position + 1
-                except KeyError:
-                    pass
-        except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, raise a HTTP 408.
-            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                raise GatewayTimeout
+        with neo4j_instance.driver.session() as session:
+            try:
+                recds: neo4j.Result = session.run(query)
 
-    return semantictypes
+                # Add the relative position (skip) for each semantic type.
+                position = int(skip) + 1
+                for record in recds:
+                    types = record.get('semantic_types')
+                    for type in types:
+                        typewithpos = dict(position=position)
+                        typewithpos['semantic_type'] = semtype
+                        position = position + 1
+                        result.append(typewithpos)
+
+
+            except neo4j.exceptions.ClientError as e:
+                # If the error is from a timeout, raise a HTTP 408.
+                if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                    raise GatewayTimeout
+
+    return result
 
 
 def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=None,

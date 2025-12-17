@@ -15,4 +15,4 @@ CALL apoc.do.when(([$types] = []),
 YIELD value
 WITH value.s as s ORDER BY s.STN SKIP $skip LIMIT $limit
 WITH DISTINCT {sty:s.name,tui:s.TUI,def:s.DEF,stn:s.STN}  AS stys
-RETURN stys AS semantic_type
+RETURN COLLECT(stys) AS semantic_types
