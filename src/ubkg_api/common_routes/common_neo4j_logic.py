@@ -582,14 +582,13 @@ def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[dict]:
     return result
 
 def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
+
+    """
+    December 2025 - refactored to work with loaded Cypher.
+    """
+
     concepts: [str] = []
-    querytxt: str = \
-        'WITH [$term_id] AS query' \
-        ' MATCH (a:Term)<-[b]-(c:Code)<-[:CODE]-(d:Concept)' \
-        ' WHERE a.name IN query AND b.CUI = d.CUI' \
-        ' OPTIONAL MATCH (a:Term)<--(d:Concept) WHERE a.name IN query' \
-        ' RETURN DISTINCT a.name AS Term, d.CUI AS Concept' \
-        ' ORDER BY Concept ASC'
+    querytxt = loadquerystring('terms_term_id_concepts.cypher')
 
     # JAS February 2024/May 2024
     # To prevent timeout errors, limit the query execution time to a value specified in the app.cfg.
@@ -598,6 +597,8 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
+    # The Cypher query is not in JSON format, but is a list of lists.
+    # Maintain for downward compatibility.
     with neo4j_instance.driver.session() as session:
         try:
             recds: neo4j.Result = session.run(query)
