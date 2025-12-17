@@ -29,7 +29,6 @@ from pathlib import Path
 
 import neo4j
 
-from src.ubkg_api.models.semantictype import SemanticType
 from src.ubkg_api.models.termtype_code import TermtypeCode
 from src.ubkg_api.models.node_type import NodeType
 
@@ -505,8 +504,9 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
 
 
 def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=None,
-                                             limit=None) -> List[SemanticType]:
+                                             limit=None) -> List[dict]:
     """
+    December 2025 - refactored to work with streamed JSON response.
     Obtains information on the set of Semantic (semantic type) nodes that match the set of Semantic (semantic type)
     nodes that are subtypes (have ISA_STY relationships with) the semantic type identified with semtype
 
@@ -520,7 +520,7 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
     :param neo4j_instance: neo4j connection
 
     """
-    semantictypes: [SemanticType] = []
+    result: [dict] = []
     # Load and parameterize base query.
     querytxt = loadquerystring('semantics_semantic_subtypes.cypher')
 
@@ -545,23 +545,24 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
     with neo4j_instance.driver.session() as session:
         try:
             recds: neo4j.Result = session.run(query)
-            # Identify the absolute position of the semantic type in the return.
+
+            # Add the relative position (skip) for each semantic subtype.
             position = int(skip) + 1
             for record in recds:
-                # Each row from the query includes a dict that contains the actual response content.
-                semantic_type = record.get('semantic_subtype')
-                try:
-                    semantictype: SemanticType = SemanticType(semantic_type, position).serialize()
-                    semantictypes.append(semantictype)
+                subtypes = record.get('semantic_subtypes')
+                for subtype in subtypes:
+                    subtypewithpos = dict(position=position)
+                    subtypewithpos['semantic_type'] = subtype
                     position = position + 1
-                except KeyError:
-                    pass
+                    result.append(subtypewithpos)
+
+
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    return semantictypes
+    return result
 
 
 def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[TermtypeCode]:

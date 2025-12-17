@@ -19,4 +19,4 @@ CALL
 }
 WITH type_query, s ORDER BY s.STN SKIP $skip LIMIT $limit
 WITH COLLECT({sty:s.name,tui:s.TUI,def:s.DEF,stn:s.STN})  AS stys
-RETURN stys AS semantic_subtype
+RETURN stys AS semantic_subtypes
