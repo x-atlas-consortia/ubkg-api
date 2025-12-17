@@ -798,6 +798,7 @@ def node_types_get_logic(neo4j_instance) -> dict:
 
 def property_types_get_logic(neo4j_instance) -> dict:
     """
+    December 2025 - refactored to work with streamed response from neo4j.
     Obtains information on property types.
 
     The return from the query is simple, and there is no need for a model class.
@@ -805,32 +806,26 @@ def property_types_get_logic(neo4j_instance) -> dict:
     :param neo4j_instance: neo4j connection
 
     """
-    propertytypes: [dict] = []
+    result: [dict] = []
 
-    querytxt = 'CALL db.propertyKeys() YIELD propertyKey RETURN apoc.coll.sort(COLLECT(propertyKey)) AS properties'
+    querytxt = loadquerystring('property_types.cypher')
 
-    # Mar 2025
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        try:
-            recds: neo4j.Result = session.run(query)
+        with neo4j_instance.driver.session() as session:
+            try:
+                recds: neo4j.Result = session.run(query)
+                for record in recds:
+                    result.append(record.get('property_types'))
 
-            for record in recds:
-                try:
-                    propertytype = record.get('properties')
-                    propertytypes.append(propertytype)
-                except KeyError:
-                    pass
-        except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, raise a HTTP 408.
-            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                raise GatewayTimeout
+            except neo4j.exceptions.ClientError as e:
+                # If the error is from a timeout, raise a HTTP 408.
+                if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                    raise GatewayTimeout
 
-    # The query returns a single record.
-    dictret = {'property_types': propertytype}
-    return dictret
+        # The query returns a list of a list.
+        return {'property_types': result[0]}
 
 
 def relationship_types_get_logic(neo4j_instance) -> dict:
