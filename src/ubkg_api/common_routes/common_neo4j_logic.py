@@ -67,18 +67,6 @@ def loadquerystring(filename: str) -> str:
     return query
 
 
-#def timebox_query(query: str, timeout: int = 10000) -> str:
-    # Mar 2025 deprecated
-
-   # """
-    #Limits the execution of a query to a specified timeout.
-    #:param query: query string to timebox
-    #:param timeout: timeout in ms. This can, for example, be set in the app.cfg file.
-    #"""
-
-    # Use simple string concatenation instead of an f-string to wrap the source query in a timebox call.
-    #return "CALL apoc.cypher.runTimeboxed('" + query + "',{}," + str(timeout) + ")"
-
 
 def format_list_for_query(listquery: list[str], doublequote: bool = False) -> str:
     """
