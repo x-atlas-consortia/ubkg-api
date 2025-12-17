@@ -52,15 +52,3 @@ def terms_term_id_concepts_get(term_id):
     # Mar 2025
     return redirect_if_large(resp=result)
 
-# JAS January 2024 Deprecating
-# @terms_blueprint.route('<term_id>/concepts/terms', methods=['GET'])
-# def terms_term_id_concepts_terms_get(term_id):
-    # """Returns an expanded list of concept(s) and preferred term(s) {Concept, Term} from an exact text match
-
-    # :param term_id: The term identifier
-    # :type term_id: str
-
-    # :rtype: Union[List[ConceptTerm], Tuple[List[ConceptTerm], int], Tuple[List[ConceptTerm], int, Dict[str, str]]
-    # """
-    # neo4j_instance = current_app.neo4jConnectionHelper.instance()
-    # return jsonify(terms_term_id_concepts_terms_get_logic(neo4j_instance, term_id))
