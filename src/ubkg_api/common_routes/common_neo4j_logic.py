@@ -28,8 +28,6 @@ from pathlib import Path
 
 import neo4j
 
-from src.ubkg_api.models.node_type import NodeType
-
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
@@ -702,11 +700,6 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
                     count_by_label = node_type.get('count')
                     total_count = total_count + count_by_label
                     nodetypes.append({'node_type':node_type})
-                #try:
-                    #nodetype: NodeType = NodeType(node_type).serialize()
-                    #nodetypes.append(nodetype)
-                #except KeyError:
-                    #pass
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
@@ -718,13 +711,14 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
 
 def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dict:
     """
+    December 2025 - refactored to work with streamed response instead of NodeType model class.
     Obtains information on node types.
 
     :param node_type: an optional filter for node type (label)
     :param neo4j_instance: neo4j connection
 
     """
-    nodetypes: [NodeType] = []
+    nodetypes: [dict] = []
     # Load and parameterize base query.
     # December 2025 - renamed to distinguish from node_types.cypher for node_types_get_logic.
     querytxt = loadquerystring('node_types_counts.cypher')
@@ -751,11 +745,8 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
                 for node_type in node_types:
                     count_by_label = node_type.get('count')
                     total_count = total_count + count_by_label
-                    try:
-                        nodetype: NodeType = NodeType(node_type).serialize()
-                        nodetypes.append(nodetype)
-                    except KeyError:
-                        pass
+                    nodetypes.append({'node_type': node_type})
+
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
@@ -767,6 +758,7 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
 
 def node_types_get_logic(neo4j_instance) -> dict:
     """
+    December 2025 - refactored to work with streamed response.
     Obtains information on node types.
 
     The return from the query is simple, and there is no need for a model class.
@@ -778,8 +770,6 @@ def node_types_get_logic(neo4j_instance) -> dict:
 
     querytxt = loadquerystring('node_types.cypher')
 
-    # Mar 2025
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
