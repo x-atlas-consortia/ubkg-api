@@ -20,7 +20,6 @@ import logging
 import re
 from typing import List
 import os
-import sys
 # Mar 2025 for handling configurable timeouts
 from werkzeug.exceptions import GatewayTimeout
 
@@ -29,7 +28,6 @@ from pathlib import Path
 
 import neo4j
 
-from src.ubkg_api.models.termtype_code import TermtypeCode
 from src.ubkg_api.models.node_type import NodeType
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
@@ -553,23 +551,17 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
     return result
 
 
-def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[TermtypeCode]:
+def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[dict]:
 
-    termtypecodes: [TermtypeCode] = []
+    result: [dict] = []
 
     """
+    December 2025 - refactored to work with JSON response.
     Returns information on Codes with terms that exactly match the specified term_id string.
     """
 
-    querytxt: str = \
-        'WITH [$term_id] AS query' \
-        ' MATCH (a:Term)<-[b]-(c:Code)' \
-        ' WHERE a.name IN query' \
-        ' RETURN DISTINCT a.name AS Term, Type(b) AS TermType, c.CodeID AS Code' \
-        ' ORDER BY Term, TermType, Code'
-
-    # JAS February 2024/May 2024
-    # To prevent timeout errors, limit the query execution time to a value specified in the app.cfg
+    # Load and parameterize base query.
+    querytxt = loadquerystring('terms_term_id_codes.cypher')
     querytxt = querytxt.replace('$term_id', f'"{term_id}"')
 
     # Set timeout for query based on value in app.cfg.
@@ -578,19 +570,16 @@ def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[Termtype
     with neo4j_instance.driver.session() as session:
         try:
             recds: neo4j.Result = session.run(query)
+
             for record in recds:
-                try:
-                    termtypecode: TermtypeCode = TermtypeCode(record.get('TermType'),
-                                                              record.get('Code')).serialize()
-                    termtypecodes.append(termtypecode)
-                except KeyError:
-                    pass
+                result.append(record.get('codes'))
+
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    return termtypecodes
+    return result
 
 def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     concepts: [str] = []
