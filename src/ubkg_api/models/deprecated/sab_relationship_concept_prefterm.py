@@ -4,8 +4,8 @@ from __future__ import absolute_import
 
 from dataclasses import dataclass
 
-from . import util
-from .base_model_ import Model
+from src.ubkg_api.models.deprecated import util
+from src.ubkg_api.models.deprecated.base_model_ import Model
 
 
 @dataclass

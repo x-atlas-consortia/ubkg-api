@@ -2,7 +2,7 @@ import datetime
 
 import six
 
-from . import typing_utils
+from src.ubkg_api.models.deprecated import typing_utils
 
 
 def _deserialize(data, klass):

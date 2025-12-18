@@ -2,8 +2,8 @@
 
 from __future__ import absolute_import
 
-from src.ubkg_api.models import util
-from src.ubkg_api.models.base_model_ import Model
+from src.ubkg_api.models.deprecated import util
+from src.ubkg_api.models.deprecated.base_model_ import Model
 
 class SemanticType(Model):
 

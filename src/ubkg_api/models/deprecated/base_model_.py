@@ -3,7 +3,7 @@ import pprint
 import six
 import typing
 
-from . import util
+from src.ubkg_api.models.deprecated import util
 
 T = typing.TypeVar('T')
 

@@ -4,8 +4,8 @@ from __future__ import absolute_import
 
 from typing import List
 
-from . import util
-from .base_model_ import Model
+from src.ubkg_api.models.deprecated import util
+from src.ubkg_api.models.deprecated.base_model_ import Model
 
 
 class ConceptSabRelDepth(Model):
