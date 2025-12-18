@@ -1,4 +1,10 @@
 """
+December 2025
+Refactored:
+1. To match a consistent pattern where an endpoint function loads its Cypher
+   query from a file in the cypher path.
+2. To work with a streamed response (usually JSON) from Cypher instead of
+   translating the response into a "model" class.
 
 March 2025
 Refactored so that all endpoint queries check for timeout, using the
@@ -124,8 +130,6 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
 
     # December 2025 - refactored to use streamed JSON response.
 
-    # JAS January 2024 - Fixed issue with SAB filtering.
-
     # Load Cypher query from file.
     querytxt: str = loadquerystring(filename='codes_code_id_codes.cypher')
 
@@ -138,8 +142,6 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     else:
         querytxt = querytxt.replace('$sabfilter', f" AND c.SAB IN {sab}")
 
-    # March 2025
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with (neo4j_instance.driver.session() as session):
@@ -168,8 +170,6 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]
     # Filter by code_id.
     querytxt = querytxt.replace('$code_id', f"'{code_id}'")
 
-    # March 2025
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -198,9 +198,6 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
     querytxt = querytxt.replace('$concept_id', concept_id)
     querytxt = querytxt.replace('$SAB', sab)
 
-
-    # March 2025
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -228,8 +225,6 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
 
     querytxt = querytxt.replace('$concept_id', concept_id)
 
-    # March 2025
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -256,8 +251,6 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
 
     querytxt = querytxt.replace('$concept_id', concept_id)
 
-    # March 2025
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
         try:
@@ -334,7 +327,6 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
-    # MAY 2024 - bug fix - changed argument from querytxt to query
     return get_graph(neo4j_instance, query=query)
 
 def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, terminus_concept_id=None,
@@ -459,8 +451,6 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
     querytxt = querytxt.replace('$skip', str(skip))
     querytxt = querytxt.replace('$limit', str(limit))
 
-    # March 2025
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -522,8 +512,6 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
     querytxt = querytxt.replace('$skip', str(skip))
     querytxt = querytxt.replace('$limit', str(limit))
 
-    # March 2025
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -711,7 +699,7 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
 
 def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dict:
     """
-    December 2025 - refactored to work with streamed response instead of NodeType model class.
+    December 2025 - refactored to work with streamed response.
     Obtains information on node types.
 
     :param node_type: an optional filter for node type (label)
@@ -730,8 +718,6 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
     typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
     querytxt = querytxt.replace('$node_type', typesjoin)
 
-    # MAY 2024 replaced timebox method.
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -761,9 +747,7 @@ def node_types_get_logic(neo4j_instance) -> dict:
     December 2025 - refactored to work with streamed response.
     Obtains information on node types.
 
-    The return from the query is simple, and there is no need for a model class.
-
-    :param neo4j_instance: neo4j connection
+  :param neo4j_instance: neo4j connection
 
     """
     result: [dict] = []
@@ -790,8 +774,6 @@ def property_types_get_logic(neo4j_instance) -> dict:
     """
     December 2025 - refactored to work with streamed response from neo4j.
     Obtains information on property types.
-
-    The return from the query is simple, and there is no need for a model class.
 
     :param neo4j_instance: neo4j connection
 
@@ -821,8 +803,6 @@ def property_types_get_logic(neo4j_instance) -> dict:
 def relationship_types_get_logic(neo4j_instance) -> dict:
     """
     Obtains information on relationship types.
-
-    The return from the query is simple, and there is no need for a model class.
 
     :param neo4j_instance: neo4j connection
 
@@ -890,8 +870,6 @@ def sabs_codes_counts_query_get(neo4j_instance, sab=None, skip=None, limit=None)
     """
     Obtains information on SABs, including counts of codes associated with them.
 
-    The return from the query is simple, and there is no need for a model class.
-
     :param neo4j_instance: neo4j connection
     :param skip: SKIP value for the query
     :param limit: LIMIT value for the query
@@ -911,8 +889,6 @@ def sabs_codes_counts_query_get(neo4j_instance, sab=None, skip=None, limit=None)
     querytxt = querytxt.replace('$skip', str(skip))
     querytxt = querytxt.replace('$limit', str(limit))
 
-    # Mar 2025
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
         try:
@@ -964,8 +940,6 @@ def sab_code_detail_query_get(neo4j_instance, sab=None, skip=None, limit=None) -
     querytxt = querytxt.replace('$skip', str(skip))
     querytxt = querytxt.replace('$limit', str(limit))
 
-    # MAY 2024 Replacing timebox method.
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -998,8 +972,6 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
     """
     Obtains information on the term types of relationships between codes in a SAB.
 
-    The return from the query is simple, and there is no need for a model class.
-
     :param neo4j_instance: neo4j connection
     :param skip: number of term types to skip
     :param limit: maximum number of term types to return
@@ -1014,8 +986,6 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
     querytxt = querytxt.replace('$skip', str(skip))
     querytxt = querytxt.replace('$limit', str(limit))
 
-    # MAY 2024 Replacing timebox method.
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -1040,8 +1010,6 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
 def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
     """
     Obtains information on sources, or nodes in the UBKGSOURCE ontology.
-
-    The return from the query is simple, and there is no need for a model class.
 
     :param neo4j_instance: neo4j connection
     :param sab: source (SAB)
@@ -1090,8 +1058,6 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
     """
     Obtains information on terms that link to a code.
 
-    The return from the query is simple, and there is no need for a model class.
-
     :param neo4j_instance: neo4j connection
     :param code_id: a UBKG Code in format SAB:CodeId
     :param term_type: an optional list of acronyms for a code type
@@ -1111,7 +1077,6 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
     else:
         querytxt = querytxt.replace('$termtype_filter', f" AND TYPE(r) IN {term_type}")
 
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
         try:
@@ -1159,8 +1124,6 @@ def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltyp
     querytxt = querytxt.replace('$skip', str(skip))
     querytxt = querytxt.replace('$limit', str(limit))
 
-    # Set timeout for query based on value in app.cfg.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
-    # MAY 2024 - bug fix - changed argument from querytxt to query
     return get_graph(neo4j_instance, query=query)
