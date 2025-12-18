@@ -26,6 +26,7 @@ import logging
 import re
 from typing import List
 import os
+
 # Mar 2025 for handling configurable timeouts
 from werkzeug.exceptions import GatewayTimeout
 
@@ -57,9 +58,6 @@ def loadquerystring(filename: str) -> str:
 
 
     """
-
-    #fpath = os.path.dirname(os.getcwd())
-    #fpath = os.path.join(fpath, 'ubkg_api/cypher', filename)
 
     fpath = Path(__file__).resolve().parent.parent
     fpath = os.path.join(fpath,'cypher',filename)
@@ -126,7 +124,7 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     :param sab: optional list of SABs from which to select codes that share links to the Concept node linked to the
     Code node
     """
-    result: List[dict] = []
+    result: list[dict] = []
 
     # December 2025 - refactored to use streamed JSON response.
 
@@ -159,7 +157,7 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
 
 
 def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]:
-    result: List[dict] = []
+    result: list[dict] = []
 
     # December 2025 - refactored to use streamed JSON response.
 
@@ -190,7 +188,7 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]
 def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: List[str]) -> List[str]:
 
     # December 2025 - refactored to use JSON response
-    result: List[str] = []
+    result: list[str] = []
 
     # Load Cypher query from file.
     querytxt: str = loadquerystring(filename='concepts_concept_id_codes.cypher')
@@ -219,7 +217,7 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
 
     # December 2025 - refactored to use JSON response.
 
-    result: [dict] = []
+    result: list[dict] = []
 
     # Load Cypher query from file.
     querytxt: str = loadquerystring(filename='concepts_concept_id_concepts.cypher')
@@ -246,7 +244,7 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
 def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -> List[dict]:
 
     # December 2025 - refactored to work with JSON responses from Cypher.
-    result: [dict] = []
+    result: list[dict] = []
 
     # Load Cypher query from file.
     querytxt: str = loadquerystring(filename='concepts_concept_id_definitions.cypher')
@@ -268,7 +266,7 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
 
     return result[0]
 
-def get_graph(neo4j_instance, query: neo4j.Query) -> [dict]:
+def get_graph(neo4j_instance, query: neo4j.Query) -> List[dict]:
     """
     December 2025 - refactored to work directly with JSON response from query.
 
@@ -279,7 +277,7 @@ def get_graph(neo4j_instance, query: neo4j.Query) -> [dict]:
     Assumes that the query string returns a JSON object named graph in the nodes/paths/edges format.
 
     """
-    result: [dict] = []
+    result: list[dict] = []
 
     with neo4j_instance.driver.session() as session:
         try:
@@ -435,7 +433,7 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
     :param neo4j_instance: neo4j connection
 
     """
-    result: [dict] = []
+    result: list[dict] = []
     # Load and parameterize base query.
     querytxt = loadquerystring('semantics_semantic_types.cypher')
 
@@ -456,25 +454,23 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
-        with neo4j_instance.driver.session() as session:
-            try:
-                recds: neo4j.Result = session.run(query)
+        try:
+            recds: neo4j.Result = session.run(query)
 
-                # Add the relative position (skip) for each semantic type.
-                position = int(skip) + 1
-                for record in recds:
-                    types = record.get('semantic_types')
-                    for type in types:
-                        typewithpos = dict(position=position)
-                        typewithpos['semantic_type'] = semtype
-                        position = position + 1
-                        result.append(typewithpos)
+            # Add the relative position (skip) for each semantic type.
+            position = int(skip) + 1
+            for record in recds:
+                semtypes = record.get('semantic_types')
+                for semtype in semtypes:
+                    typewithpos = dict(position=position)
+                    typewithpos['semantic_type'] = semtype
+                    position = position + 1
+                    result.append(typewithpos)
 
-
-            except neo4j.exceptions.ClientError as e:
-                # If the error is from a timeout, raise a HTTP 408.
-                if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                    raise GatewayTimeout
+        except neo4j.exceptions.ClientError as e:
+             # If the error is from a timeout, raise a HTTP 408.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                raise GatewayTimeout
 
     return result
 
@@ -496,7 +492,7 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
     :param neo4j_instance: neo4j connection
 
     """
-    result: [dict] = []
+    result: list[dict] = []
     # Load and parameterize base query.
     querytxt = loadquerystring('semantics_semantic_subtypes.cypher')
 
@@ -541,7 +537,7 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
 
 def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[dict]:
 
-    result: [dict] = []
+    result: list[dict] = []
 
     """
     December 2025 - refactored to work with JSON response.
@@ -575,7 +571,7 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     December 2025 - refactored to work with loaded Cypher.
     """
 
-    concepts: [str] = []
+    concepts: list[str] = []
     querytxt = loadquerystring('terms_term_id_concepts.cypher')
 
     # JAS February 2024/May 2024
@@ -611,7 +607,7 @@ def concepts_identifier_node_get_logic(neo4j_instance, search: str) -> List[dict
 
     """
 
-    result: [dict] = []
+    result: list[dict] = []
     querytxt = loadquerystring(filename='concepts_nodeobjects.cypher')
 
     # Format the search parameter for the Cypher query.
@@ -658,7 +654,7 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
     """
 
 
-    nodetypes: [dict] = []
+    nodetypes: list[dict] = []
     # Load and parameterize base query.
     querytxt = loadquerystring('node_types_by_sab.cypher')
 
@@ -708,7 +704,7 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
     :param neo4j_instance: neo4j connection
 
     """
-    nodetypes: [dict] = []
+    nodetypes: list[dict] = []
     # Load and parameterize base query.
     # December 2025 - renamed to distinguish from node_types.cypher for node_types_get_logic.
     querytxt = loadquerystring('node_types_counts.cypher')
@@ -752,7 +748,7 @@ def node_types_get_logic(neo4j_instance) -> dict:
   :param neo4j_instance: neo4j connection
 
     """
-    result: [dict] = []
+    result: list[dict] = []
 
     querytxt = loadquerystring('node_types.cypher')
 
@@ -780,7 +776,7 @@ def property_types_get_logic(neo4j_instance) -> dict:
     :param neo4j_instance: neo4j connection
 
     """
-    result: [dict] = []
+    result: list[dict] = []
 
     querytxt = loadquerystring('property_types.cypher')
 
@@ -809,7 +805,7 @@ def relationship_types_get_logic(neo4j_instance) -> dict:
     :param neo4j_instance: neo4j connection
 
     """
-    result: [dict] = []
+    result: list[dict] = []
 
     querytxt = loadquerystring('relationship_types.cypher')
 
@@ -838,7 +834,7 @@ def sabs_get_logic(neo4j_instance) -> dict:
     :param neo4j_instance: neo4j connection
 
     """
-    sabs: [dict] = []
+    sabs: list[dict] = []
 
     # The commented version of the query results in a OOME.
     # query = 'MATCH (n:Code) RETURN apoc.coll.sort(COLLECT(n.SAB)) AS sab'
@@ -878,7 +874,7 @@ def sabs_codes_counts_query_get(neo4j_instance, sab=None, skip=None, limit=None)
     :param sab: identifier for a source (SAB)
 
     """
-    sabs: [dict] = []
+    sabs: list[dict] = []
 
     # Load and parameterize query.
     querytxt = loadquerystring('sabs_codes_counts.cypher')
@@ -929,7 +925,7 @@ def sab_code_detail_query_get(neo4j_instance, sab=None, skip=None, limit=None) -
     :param sab: source (SAB)
 
     """
-    codes: [dict] = []
+    codes: list[dict] = []
 
     # Load and parameterize query.
     querytxt = loadquerystring('sabs_codes_details.cypher')
@@ -980,7 +976,7 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
     :param sab: source (SAB)
 
     """
-    termtypes: [dict] = []
+    termtypes: list[dict] = []
 
     querytxt = loadquerystring(filename='sabs_term_types.cypher')
     sabjoin = format_list_for_query(listquery=[sab], doublequote=True)
@@ -1018,7 +1014,7 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
     :param context: UBKG context
 
     """
-    sources: [dict] = []
+    sources: list[dict] = []
 
     # Load and parameterize query.
     querytxt = loadquerystring('sources.cypher')
@@ -1065,7 +1061,7 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
     :param term_type: an optional list of acronyms for a code type
 
     """
-    result: [dict] = []
+    result: list[dict] = []
 
     # Load and parameterize query.
     querytxt = loadquerystring('code_code_id_terms.cypher')
