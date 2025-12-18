@@ -853,8 +853,6 @@ def sabs_get_logic(neo4j_instance) -> dict:
     """
     Obtains information on sources (SABs).
 
-    The return from the query is simple, and there is no need for a model class.
-
     :param neo4j_instance: neo4j connection
 
     """
@@ -862,7 +860,7 @@ def sabs_get_logic(neo4j_instance) -> dict:
 
     # The commented version of the query results in a OOME.
     # query = 'MATCH (n:Code) RETURN apoc.coll.sort(COLLECT(n.SAB)) AS sab'
-    querytxt = 'CALL {match (n:Code) return distinct n.SAB AS sab ORDER BY sab} WITH COLLECT(sab) AS sabs RETURN sabs'
+    querytxt = loadquerystring('sabs.cypher')
 
     # Mar 2025
     # Set timeout for query based on value in app.cfg.
@@ -946,7 +944,6 @@ def sab_code_detail_query_get(neo4j_instance, sab=None, skip=None, limit=None) -
     """
     Obtains information on the codes for a specified SAB, including counts.
 
-    The return from the query is simple, and there is no need for a model class.
 
     :param neo4j_instance: neo4j connection
     :param skip: SKIP value for the query
