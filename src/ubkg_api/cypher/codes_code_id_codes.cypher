@@ -22,7 +22,7 @@ WITH Code1, Concept
 MATCH (b:Concept)-[:CODE]->(c:Code)
 WHERE b.CUI=Concept
 $sabfilter
-RETURN COLLECT({SAB:c.SAB, code:c.CodeID, concept:Concept}) AS codes
+WITH COLLECT({SAB:c.SAB, code:c.CodeID, concept:Concept}) AS codes
 WITH codes
 UNWIND codes as code
 WITH code
