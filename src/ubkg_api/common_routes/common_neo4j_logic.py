@@ -184,7 +184,7 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    return result
+    return result[0]
 
 def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: List[str]) -> List[str]:
 

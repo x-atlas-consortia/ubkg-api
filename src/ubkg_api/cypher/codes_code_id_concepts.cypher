@@ -5,7 +5,7 @@
 WITH $code_id AS query
 MATCH (:Term)<-[d]-(a:Code)<-[:CODE]-(b:Concept)-[:PREF_TERM]->(c:Term)
 WHERE ((a.CodeID = query) AND (b.CUI = d.CUI))
-WITH COLLECT({concept:Concept,prefterm:c.name}) AS concepts
+WITH COLLECT({concept:b.CUI,prefterm:c.name}) AS concepts
 WITH concepts
 UNWIND concepts AS concept
 WITH concept
