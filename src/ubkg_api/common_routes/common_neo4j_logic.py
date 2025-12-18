@@ -198,7 +198,6 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
     querytxt = querytxt.replace('$concept_id', f"'{concept_id}'")
     sabjoin = format_list_for_query(listquery=sab, doublequote=True)
     querytxt = querytxt.replace('$SAB', sabjoin)
-    print(querytxt)
 
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
@@ -225,7 +224,7 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
     # Load Cypher query from file.
     querytxt: str = loadquerystring(filename='concepts_concept_id_concepts.cypher')
 
-    querytxt = querytxt.replace('$concept_id', concept_id)
+    querytxt = querytxt.replace('$concept_id', f"'{concept_id}'")
 
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
@@ -241,7 +240,8 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    return result
+    # The query result is a list.
+    return result[0]
 
 def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -> List[dict]:
 
@@ -251,7 +251,7 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
     # Load Cypher query from file.
     querytxt: str = loadquerystring(filename='concepts_concept_id_definitions.cypher')
 
-    querytxt = querytxt.replace('$concept_id', concept_id)
+    querytxt = querytxt.replace('$concept_id', f"'{concept_id}'")
 
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
@@ -266,7 +266,7 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    return result
+    return result[0]
 
 def get_graph(neo4j_instance, query: neo4j.Query) -> [dict]:
     """
