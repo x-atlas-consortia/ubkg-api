@@ -186,6 +186,46 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]
 
     return result[0]
 
+
+def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -> dict:
+    """
+    Obtains information on terms that link to a code.
+
+    :param neo4j_instance: neo4j connection
+    :param code_id: a UBKG Code in format SAB:CodeId
+    :param term_type: an optional list of acronyms for a code type
+
+    """
+    result: list[dict] = []
+
+    # Load and parameterize query.
+    querytxt = loadquerystring('code_code_id_terms.cypher')
+
+    # Filter by code_id.
+    querytxt = querytxt.replace('$code_id', f"'{code_id}'")
+
+    # Filter by code SAB.
+    if len(term_type) == 0:
+        querytxt = querytxt.replace('$termtype_filter', '')
+    else:
+        # case-insensitive
+        querytxt = querytxt.replace('$termtype_filter', f" AND TYPE(r) IN {[t.upper() for t in term_type]}")
+
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+    with neo4j_instance.driver.session() as session:
+        try:
+            recds: neo4j.Result = session.run(query)
+
+            for record in recds:
+                result.append(record.get('terms'))
+
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, raise a HTTP 408.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                raise GatewayTimeout
+
+    return result[0]
+
 def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: List[str]) -> List[str]:
 
     # December 2025 - refactored to use JSON response
@@ -1053,43 +1093,6 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
 
     return source
 
-def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -> dict:
-    """
-    Obtains information on terms that link to a code.
-
-    :param neo4j_instance: neo4j connection
-    :param code_id: a UBKG Code in format SAB:CodeId
-    :param term_type: an optional list of acronyms for a code type
-
-    """
-    result: list[dict] = []
-
-    # Load and parameterize query.
-    querytxt = loadquerystring('code_code_id_terms.cypher')
-
-    # Filter by code_id.
-    querytxt = querytxt.replace('$code_id', f"'{code_id}'")
-
-    # Filter by code SAB.
-    if len(term_type) == 0:
-        querytxt = querytxt.replace('$termtype_filter', '')
-    else:
-        querytxt = querytxt.replace('$termtype_filter', f" AND TYPE(r) IN {term_type}")
-
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-    with neo4j_instance.driver.session() as session:
-        try:
-            recds: neo4j.Result = session.run(query)
-
-            for record in recds:
-                result.append(record.get('terms'))
-
-        except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, raise a HTTP 408.
-            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                raise GatewayTimeout
-
-    return result
 
 def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltypes=None, relsabs=None, skip=None,
                                            limit=None) -> List[dict]:
