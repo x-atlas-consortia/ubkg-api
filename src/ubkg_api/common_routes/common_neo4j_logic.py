@@ -195,8 +195,10 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
     # Load Cypher query from file.
     querytxt: str = loadquerystring(filename='concepts_concept_id_codes.cypher')
 
-    querytxt = querytxt.replace('$concept_id', concept_id)
-    querytxt = querytxt.replace('$SAB', sab)
+    querytxt = querytxt.replace('$concept_id', f"'{concept_id}'")
+    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
+    querytxt = querytxt.replace('$SAB', sabjoin)
+    print(querytxt)
 
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
