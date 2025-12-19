@@ -16,7 +16,7 @@ def sabs_get():
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
     result = sabs_get_logic(neo4j_instance)
-    # Mar 2025
+
     return redirect_if_large(resp=result)
 
 @sabs_blueprint.route('/codes/counts', methods=['GET'])
@@ -75,7 +75,6 @@ def sabs_codes_counts_route_get(sab=None):
         print('returning make_response with 404')
         return make_response(err, 404)
 
-    # Mar 2025
     return redirect_if_large(resp=result)
 
 
@@ -139,7 +138,6 @@ def sabs_codes_details_sab_get(sab):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Mar 2025
     return redirect_if_large(resp=result)
 
 
@@ -202,5 +200,4 @@ def sabs_sab_term_types_get(sab):
                                    timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Mar 2025
     return redirect_if_large(resp=result)

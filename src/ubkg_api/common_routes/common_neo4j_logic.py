@@ -848,7 +848,6 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
         querytxt = querytxt.replace('$sabfilter', f" AND t.name IN {sab}")
 
     # Filter by ubkg context.
-    # JAS 24 May 2024 bug fix - replace t.name with tContext.name
     if len(context) == 0:
         querytxt = querytxt.replace('$contextfilter', '')
     else:
@@ -940,7 +939,7 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
     """
     nodetypes: list[dict] = []
     # Load and parameterize base query.
-    # December 2025 - renamed to distinguish from node_types.cypher for node_types_get_logic.
+
     querytxt = loadquerystring('node_types_counts.cypher')
 
     if node_type is None:

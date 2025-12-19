@@ -7,7 +7,7 @@ from utils.http_parameter import parameter_as_list
 
 codes_blueprint = Blueprint('codes', __name__, url_prefix='/codes')
 
-# February 2025
+
 # S3 redirect functions
 from utils.s3_redirect import redirect_if_large
 
@@ -37,7 +37,7 @@ def codes_code_id_codes_get(code_id):
                                    timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # February 2025
+
     return redirect_if_large(resp=result)
 
 
@@ -60,7 +60,6 @@ def codes_code_id_concepts_get(code_id):
                                    timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # February 2025
     return redirect_if_large(resp=result)
 
 @codes_blueprint.route('/<code_id>/terms', methods=['GET'])
@@ -89,5 +88,4 @@ def codes_code_id_terms_get(code_id):
                                    timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # February 2025
     return redirect_if_large(resp=result)

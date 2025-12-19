@@ -17,7 +17,6 @@ def node_type_get():
 
     result=node_types_get_logic(neo4j_instance)
 
-    # Mar 2025
     return redirect_if_large(resp=result)
 
 @node_types_blueprint.route('counts', methods=['GET'])
@@ -78,7 +77,6 @@ def node_types_counts_get(node_type=None):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Mar 2025
     return redirect_if_large(resp=result)
 
 
@@ -153,5 +151,4 @@ def node_types_counts_by_sab_node_type_get(node_type):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Mar 2025
     return redirect_if_large(resp=result)
