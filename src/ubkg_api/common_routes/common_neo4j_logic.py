@@ -30,6 +30,9 @@ import os
 # Mar 2025 for handling configurable timeouts
 from werkzeug.exceptions import GatewayTimeout
 
+from flask import jsonify
+from neo4j.graph import Path
+
 # Apr 2024
 from pathlib import Path
 
@@ -40,6 +43,9 @@ logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+#--------------------
+# UTILITY ROUTINES
+# -------------------
 
 def loadquerystring(filename: str) -> str:
     """
@@ -65,7 +71,6 @@ def loadquerystring(filename: str) -> str:
     query = f.read()
     f.close()
     return query
-
 
 
 def format_list_for_query(listquery: list[str], doublequote: bool = False) -> str:
@@ -115,6 +120,9 @@ def parse_and_check_rel(rel: List[str]) -> List[List]:
             raise Exception(f"Invalid SAB in rel optional parameter list", 400)
     return rel_list
 
+#--------------------
+# codes ENDPOINT ROUTINES
+# -------------------
 
 def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) -> List[dict]:
     """
@@ -158,11 +166,16 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
 
 
 def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]:
+    """
+    Returns information on the Concept node that links to the specified Code node.
+    :param neo4j_instance: neo4j connection
+    :param code_id: CodeID for the Code node, in format <SAB>:<CODE>
+
+    """
     result: list[dict] = []
 
     # December 2025 - refactored to use streamed JSON response.
 
-    # Dec 2024 - replace in-line Cypher with loaded file.
     # Load Cypher query from file.
     querytxt: str = loadquerystring(filename='codes_code_id_concepts.cypher')
 
@@ -226,7 +239,17 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
 
     return result[0]
 
+#--------------------
+# concepts ENDPOINT ROUTINES
+# -------------------
+
 def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: List[str]) -> List[str]:
+    """
+    Returns information on the Code nodes that link to the specified Concept node.
+    :param neo4j_instance: neo4j connection
+    :param concept_id: a Concept Unique Identifier (CUI)
+    :param sab: a list of SAB codes by which to filter codes in response
+    """
 
     # December 2025 - refactored to use JSON response
     result: list[str] = []
@@ -255,6 +278,13 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
     return result
 
 def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> List[dict]:
+    """
+    Returns information on the Concept nodes that have relationships with the
+    specificed concept.
+    :param neo4j_instance: neo4j connection
+    :param concept_id: a Concept Unique Identifier (CUI)
+
+    """
 
     # December 2025 - refactored to use JSON response.
 
@@ -283,6 +313,12 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
     return result[0]
 
 def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -> List[dict]:
+    """
+    Returns information on the Definition nodes that link to the specified Concept node.
+    :param neo4j_instance: neo4j connection
+    :param concept_id: a Concept Unique Identifier (CUI)
+
+    """
 
     # December 2025 - refactored to work with JSON responses from Cypher.
     result: list[dict] = []
@@ -306,6 +342,48 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
                 raise GatewayTimeout
 
     return result[0]
+
+
+def concepts_identifier_node_get_logic(neo4j_instance, search: str) -> List[dict]:
+    """
+    December 2025 - Refactored to use JSON stream from Cypher.
+
+    Obtains information on the set of Concept subgraphs (aka "Concept node objects")
+    with identifiers that match the search parameter string.
+
+    :param neo4j_instance: neo4j connection
+    :param search: a search string
+
+    """
+
+    result: list[dict] = []
+    querytxt = loadquerystring(filename='concepts_nodeobjects.cypher')
+
+    # Format the search parameter for the Cypher query.
+    list_identifier = [search]
+    list_identifier_join = format_list_for_query(listquery=list_identifier, doublequote=True)
+    querytxt = querytxt.replace('$search', list_identifier_join)
+
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        try:
+            recds: neo4j.Result = session.run(query)
+
+            for record in recds:
+                result.append(record.get('nodeobjects'))
+
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, raise a HTTP 408.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                raise GatewayTimeout
+
+    return {"nodeobjects":result}
+
+#--------------------
+# concepts/paths ENDPOINT UTILITIES
+# -------------------
 
 def get_graph(neo4j_instance, query: neo4j.Query) -> List[dict]:
     """
@@ -335,6 +413,9 @@ def get_graph(neo4j_instance, query: neo4j.Query) -> List[dict]:
     # There will be a maximum of one record.
     return result
 
+#--------------------
+# concepts/paths ENDPOINT ROUTINES
+# -------------------
 def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, mindepth=None,
                               maxdepth=None, skip=None, limit=None) -> List[dict]:
     """
@@ -351,7 +432,6 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     :param skip: paths to skip
     :param limit: maximum number of paths to return
     """
-
 
     # Load query string and associate parameter values to variables.
     querytxt = loadquerystring(filename='concepts_expand.cypher')
@@ -370,9 +450,14 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
 
     return get_graph(neo4j_instance, query=query)
 
+
 def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, terminus_concept_id=None,
                                     sab=None, rel=None) \
         -> List[dict]:
+    """
+    Returns the shortest path between two CUIs using Dykstra's algorithm with default weights,
+    subject to constraints specified in parameters.
+    """
 
     # Load query string and associate parameter values to variables.
     querytxt = loadquerystring(filename='concepts_shortestpath.cypher')
@@ -389,7 +474,6 @@ def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, term
     return get_graph(neo4j_instance, query=query)
 
 
-# JAS February 2024 Refactored to mirror concepts_expand_get_logic
 def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, mindepth=None,
                              maxdepth=None, skip=None, limit=None) -> List[dict]:
     """
@@ -423,6 +507,11 @@ def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, re
 
     return get_graph(neo4j_instance, query=query)
 
+
+#--------------------
+# concepts/paths ENDPOINT ROUTINES
+# -------------------
+
 def concepts_subgraph_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, skip=None, limit=None) \
         -> List[dict]:
     """
@@ -452,6 +541,48 @@ def concepts_subgraph_get_logic(neo4j_instance, query_concept_id=None, sab=None,
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     return get_graph(neo4j_instance, query=query)
+
+
+def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltypes=None, relsabs=None, skip=None,
+                                           limit=None) -> List[dict]:
+
+    """
+    Obtains a subset of paths that originate from the concept with CUI=startCUI, in a sequence of relationships
+    specified by reltypes and relsab, limited by skip and limit parameters.
+
+    :param neo4j_instance: UBKG connection
+    :param startCUI: CUI of concept from which to expand paths
+    :param reltypes: sequential list of relationship types
+    :param relsabs: sequential list of relationship SABs
+    :param skip: paths to skip
+    :param limit: maximum number of paths to return
+
+    For example, reltypes=["isa","part_of"] and relsabs=["UBERON","PATO"] results in a query for paths that match
+    the pattern
+
+    (startCUI: Concept)-[r1:isa]-(c1:Concept)-[r2:has_part]->(c2:Concept)
+    where r1.SAB = "UBERON" and r2.SAB="PATO"
+    """
+
+    # Load query string and associate parameter values to variables.
+    querytxt = loadquerystring(filename='concepts_subgraph_sequential.cypher')
+    querytxt = querytxt.replace('$startCUI', f'"{startCUI}"')
+
+    sabjoin = format_list_for_query(listquery=reltypes, doublequote=True)
+    querytxt = querytxt.replace('$reltypes', sabjoin)
+    reljoin = format_list_for_query(listquery=relsabs, doublequote=True)
+    querytxt = querytxt.replace('$relsabs', reljoin)
+    querytxt = querytxt.replace('$skip', str(skip))
+    querytxt = querytxt.replace('$limit', str(limit))
+
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
+    return get_graph(neo4j_instance, query=query)
+
+
+#--------------------
+# semantics ENDPOINT ROUTINES
+# -------------------
 
 def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None, skip=None,
                                                    limit=None) -> List[dict]:
@@ -575,6 +706,9 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
 
     return result
 
+#--------------------
+# terms ENDPOINT ROUTINES
+# -------------------
 
 def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[dict]:
 
@@ -639,39 +773,9 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
 
     return concepts
 
-
-def concepts_identifier_node_get_logic(neo4j_instance, search: str) -> List[dict]:
-    """
-    December 2025 - Refactored to use JSON stream from Cypher.
-
-    Obtains information on the set of Concept subgraphs with identifiers that match the search parameter string.
-
-    """
-
-    result: list[dict] = []
-    querytxt = loadquerystring(filename='concepts_nodeobjects.cypher')
-
-    # Format the search parameter for the Cypher query.
-    list_identifier = [search]
-    list_identifier_join = format_list_for_query(listquery=list_identifier, doublequote=True)
-    querytxt = querytxt.replace('$search', list_identifier_join)
-
-    # Set timeout for query based on value in app.cfg.
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    with neo4j_instance.driver.session() as session:
-        try:
-            recds: neo4j.Result = session.run(query)
-
-            for record in recds:
-                result.append(record.get('nodeobjects'))
-
-        except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, raise a HTTP 408.
-            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                raise GatewayTimeout
-
-    return {"nodeobjects":result}
+#--------------------
+# general ENDPOINT ROUTINES
+# -------------------
 
 def database_info_server_get_logic(neo4j_instance) -> dict:
     # Obtains neo4j database server information
@@ -683,6 +787,114 @@ def database_info_server_get_logic(neo4j_instance) -> dict:
 
     return dictret
 
+def property_types_get_logic(neo4j_instance) -> dict:
+    """
+    December 2025 - refactored to work with streamed response from neo4j.
+    Obtains information on property types.
+
+    :param neo4j_instance: neo4j connection
+
+    """
+    result: list[dict] = []
+
+    querytxt = loadquerystring('property_types.cypher')
+
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        with neo4j_instance.driver.session() as session:
+            try:
+                recds: neo4j.Result = session.run(query)
+                for record in recds:
+                    result.append(record.get('property_types'))
+
+            except neo4j.exceptions.ClientError as e:
+                # If the error is from a timeout, raise a HTTP 408.
+                if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                    raise GatewayTimeout
+
+        # The query returns a list of a list.
+        return {'property_types': result[0]}
+
+
+def relationship_types_get_logic(neo4j_instance) -> dict:
+    """
+    Obtains information on relationship types.
+
+    :param neo4j_instance: neo4j connection
+
+    """
+    result: list[dict] = []
+
+    querytxt = loadquerystring('relationship_types.cypher')
+
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        with neo4j_instance.driver.session() as session:
+            try:
+                recds: neo4j.Result = session.run(query)
+                for record in recds:
+                    result.append(record.get('relationship_types'))
+
+            except neo4j.exceptions.ClientError as e:
+                # If the error is from a timeout, raise a HTTP 408.
+                if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                    raise GatewayTimeout
+
+        # The query returns a list of a list.
+        return {'relationship_types': result[0]}
+
+def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
+    """
+    Obtains information on sources, or nodes in the UBKGSOURCE ontology.
+
+    :param neo4j_instance: neo4j connection
+    :param sab: source (SAB)
+    :param context: UBKG context
+
+    """
+    sources: list[dict] = []
+
+    # Load and parameterize query.
+    querytxt = loadquerystring('sources.cypher')
+    # Filter by code SAB.
+    if len(sab) == 0:
+        querytxt = querytxt.replace('$sabfilter', '')
+    else:
+        querytxt = querytxt.replace('$sabfilter', f" AND t.name IN {sab}")
+
+    # Filter by ubkg context.
+    # JAS 24 May 2024 bug fix - replace t.name with tContext.name
+    if len(context) == 0:
+        querytxt = querytxt.replace('$contextfilter', '')
+    else:
+        querytxt = querytxt.replace('$contextfilter', f" AND tContext.name IN {context}")
+
+    # Set timeout for query based on value in app.cfg.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
+    with neo4j_instance.driver.session() as session:
+        try:
+            recds: neo4j.Result = session.run(query)
+            for record in recds:
+
+                source = record.get('response')
+                try:
+                    sources.append(source)
+
+                except KeyError:
+                    pass
+        except neo4j.exceptions.ClientError as e:
+            # If the error is from a timeout, raise a HTTP 408.
+            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
+                raise GatewayTimeout
+
+    return source
+
+#--------------------
+# node-types ENDPOINT ROUTINES
+# -------------------
 
 def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None, sab=None) -> dict:
     """
@@ -693,7 +905,6 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
     :param sab: optional list of sabs
 
     """
-
 
     nodetypes: list[dict] = []
     # Load and parameterize base query.
@@ -809,64 +1020,9 @@ def node_types_get_logic(neo4j_instance) -> dict:
     # The query returns a list of a list.
     return {'node_types':result[0]}
 
-def property_types_get_logic(neo4j_instance) -> dict:
-    """
-    December 2025 - refactored to work with streamed response from neo4j.
-    Obtains information on property types.
-
-    :param neo4j_instance: neo4j connection
-
-    """
-    result: list[dict] = []
-
-    querytxt = loadquerystring('property_types.cypher')
-
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    with neo4j_instance.driver.session() as session:
-        with neo4j_instance.driver.session() as session:
-            try:
-                recds: neo4j.Result = session.run(query)
-                for record in recds:
-                    result.append(record.get('property_types'))
-
-            except neo4j.exceptions.ClientError as e:
-                # If the error is from a timeout, raise a HTTP 408.
-                if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                    raise GatewayTimeout
-
-        # The query returns a list of a list.
-        return {'property_types': result[0]}
-
-
-def relationship_types_get_logic(neo4j_instance) -> dict:
-    """
-    Obtains information on relationship types.
-
-    :param neo4j_instance: neo4j connection
-
-    """
-    result: list[dict] = []
-
-    querytxt = loadquerystring('relationship_types.cypher')
-
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    with neo4j_instance.driver.session() as session:
-        with neo4j_instance.driver.session() as session:
-            try:
-                recds: neo4j.Result = session.run(query)
-                for record in recds:
-                    result.append(record.get('relationship_types'))
-
-            except neo4j.exceptions.ClientError as e:
-                # If the error is from a timeout, raise a HTTP 408.
-                if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                    raise GatewayTimeout
-
-        # The query returns a list of a list.
-        return {'relationship_types': result[0]}
-
+#--------------------
+# sabs ENDPOINT ROUTINES
+# -------------------
 
 def sabs_get_logic(neo4j_instance) -> dict:
     """
@@ -1045,87 +1201,3 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
     # The query returns a single record.
 
     return termtype
-
-def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
-    """
-    Obtains information on sources, or nodes in the UBKGSOURCE ontology.
-
-    :param neo4j_instance: neo4j connection
-    :param sab: source (SAB)
-    :param context: UBKG context
-
-    """
-    sources: list[dict] = []
-
-    # Load and parameterize query.
-    querytxt = loadquerystring('sources.cypher')
-    # Filter by code SAB.
-    if len(sab) == 0:
-        querytxt = querytxt.replace('$sabfilter', '')
-    else:
-        querytxt = querytxt.replace('$sabfilter', f" AND t.name IN {sab}")
-
-    # Filter by ubkg context.
-    # JAS 24 May 2024 bug fix - replace t.name with tContext.name
-    if len(context) == 0:
-        querytxt = querytxt.replace('$contextfilter', '')
-    else:
-        querytxt = querytxt.replace('$contextfilter', f" AND tContext.name IN {context}")
-
-    # Set timeout for query based on value in app.cfg.
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    with neo4j_instance.driver.session() as session:
-        try:
-            recds: neo4j.Result = session.run(query)
-            for record in recds:
-
-                source = record.get('response')
-                try:
-                    sources.append(source)
-
-                except KeyError:
-                    pass
-        except neo4j.exceptions.ClientError as e:
-            # If the error is from a timeout, raise a HTTP 408.
-            if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
-                raise GatewayTimeout
-
-    return source
-
-
-def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltypes=None, relsabs=None, skip=None,
-                                           limit=None) -> List[dict]:
-
-    """
-    Obtains a subset of paths that originate from the concept with CUI=startCUI, in a sequence of relationships
-    specified by reltypes and relsab, limited by skip and limit parameters.
-
-    :param neo4j_instance: UBKG connection
-    :param startCUI: CUI of concept from which to expand paths
-    :param reltypes: sequential list of relationship types
-    :param relsabs: sequential list of relationship SABs
-    :param skip: paths to skip
-    :param limit: maximum number of paths to return
-
-    For example, reltypes=["isa","part_of"] and relsabs=["UBERON","PATO"] results in a query for paths that match
-    the pattern
-
-    (startCUI: Concept)-[r1:isa]-(c1:Concept)-[r2:has_part]->(c2:Concept)
-    where r1.SAB = "UBERON" and r2.SAB="PATO"
-    """
-
-    # Load query string and associate parameter values to variables.
-    querytxt = loadquerystring(filename='concepts_subgraph_sequential.cypher')
-    querytxt = querytxt.replace('$startCUI', f'"{startCUI}"')
-
-    sabjoin = format_list_for_query(listquery=reltypes, doublequote=True)
-    querytxt = querytxt.replace('$reltypes', sabjoin)
-    reljoin = format_list_for_query(listquery=relsabs, doublequote=True)
-    querytxt = querytxt.replace('$relsabs', reljoin)
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
-
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    return get_graph(neo4j_instance, query=query)

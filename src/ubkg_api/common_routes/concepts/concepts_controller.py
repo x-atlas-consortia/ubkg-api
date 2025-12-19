@@ -1,6 +1,7 @@
 import os
 from flask import Blueprint, jsonify, current_app, request, make_response
 
+
 # Cypher query functions
 from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
     concepts_concept_id_definitions_get_logic, concepts_expand_get_logic,\
@@ -13,6 +14,9 @@ from utils.http_error_string import get_404_error_string, validate_query_paramet
     check_neo4j_version_compatibility,check_max_mindepth,wrap_message
 # Functions to format query parameters for use in Cypher queries
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
+
+# Serialization functions
+from utils.path_json_serializer import PathJSONSerializer
 
 # S3 redirect functions
 from utils.s3_redirect import redirect_if_large
@@ -173,7 +177,9 @@ def concepts_paths_expand_get(concept_id):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
+    # Serialize the Path object resp as JSON.
+    result = PathJSONSerializer(result).json
+
     return redirect_if_large(resp=result)
 
 # JAS February 2024 Replaced POST with GET
@@ -217,11 +223,14 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
-    return redirect_if_large(resp=result)
+    # Serialize the Path object resp as JSON.
+    result = PathJSONSerializer(result).json
+    # Extract from the list.
+    return redirect_if_large(resp=result[0])
 
 @concepts_blueprint.route('<concept_id>/paths/trees', methods=['GET'])
 def concepts_trees_get(concept_id):
+
     """Return nodes in a spanning tree from a specified concept, based on
     the relationship pattern specified within the selected sources, to a specified path depth.
 
@@ -302,11 +311,14 @@ def concepts_trees_get(concept_id):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
-    return redirect_if_large(resp=result)
+    # Serialize the Path object resp as JSON.
+    result = PathJSONSerializer(result).json
+    # Extract from the list.
+    return redirect_if_large(resp=result[0])
 
 @concepts_blueprint.route('paths/subgraph', methods=['GET'])
 def concepts_subgraph_get():
+
     """
     Returns the paths in the subgraph specified by relationship types and SABs, constrained by
     depth parameters.
@@ -363,11 +375,13 @@ def concepts_subgraph_get():
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
-    return redirect_if_large(resp=result)
+    # Serialize the Path object resp as JSON.
+    result = PathJSONSerializer(result).json
+    return redirect_if_large(resp=result[0])
 
 @concepts_blueprint.route('<search>/nodeobjects', methods=['GET'])
 def concepts_concept_identifier_nodes_get(search):
+
     """
     Returns a "nodes" object representing a set of "Concept node" object.
     Each Concept node object translates and consolidates information about a Concept node in the UBKG.
@@ -468,7 +482,7 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
     result = concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=concept_id, reltypes=reltypes, relsabs=relsabs,
                                        skip=skip, limit=limit)
 
-    iserr = result is None or result == {}
+    iserr = result is None or result == []
 
     if concept_id == None:
         custom_request_path = f'any concept'
@@ -482,5 +496,7 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
-    return redirect_if_large(resp=result)
+    # Serialize the Path object resp as JSON.
+    result = PathJSONSerializer(result).json
+    # Extract from the list.
+    return redirect_if_large(resp=result[0])
