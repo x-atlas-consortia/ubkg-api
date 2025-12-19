@@ -199,7 +199,6 @@ Test scripts are in the _tests_ path.
 To add the specification for a new endpoint to the SmartAPI documentation for hs-ontology-api, update the files:
 1. **ubkg-api-spec.yaml** for ubkg-api
 2. **ubkg-api-ubkgbox-spec.yaml** for the UBKGBox deployment
-3. **ubkg-api-aws-api-gateway.yam.** for the Data Distillery deployment
 
 The YAML files conform to [Swagger OpenAPI](https://swagger.io/specification/) format.
 
