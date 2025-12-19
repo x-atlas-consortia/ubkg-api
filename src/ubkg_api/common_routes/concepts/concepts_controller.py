@@ -99,7 +99,7 @@ def concepts_concept_id_definitions_get(concept_id):
 
     return redirect_if_large(resp=result)
 
-# JAS January 2024 Converted from POST to GET.
+
 @concepts_blueprint.route('<concept_id>/paths/expand', methods=['GET'])
 def concepts_paths_expand_get(concept_id):
 
@@ -133,11 +133,11 @@ def concepts_paths_expand_get(concept_id):
     if err != 'ok':
         return make_response(err, 400)
 
-    # APR 2024 - Check range after setting defaults.
+
     # Set default mininum.
     mindepth = set_default_minimum(param_value=mindepth, default=1)
 
-    # MAY 2024 - moved mindepth !> maxdepth check up.
+
     # Validate that mindepth is not greater than maxdepth.
     err = validate_parameter_range_order(min_name='mindepth', min_value=mindepth, max_name='maxdepth',
                                          max_value=maxdepth)
@@ -172,7 +172,7 @@ def concepts_paths_expand_get(concept_id):
     result = concepts_expand_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel,
                                        mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
 
-    iserr = result is None or result == {}
+    iserr = result is None or result == []
 
     if iserr:
         err = get_404_error_string(prompt_string=f"No expanded paths found for specified parameters",
@@ -185,7 +185,7 @@ def concepts_paths_expand_get(concept_id):
 
     return redirect_if_large(resp=result)
 
-# JAS February 2024 Replaced POST with GET
+
 @concepts_blueprint.route('<origin_concept_id>/paths/shortestpath/<terminus_concept_id>', methods=['GET'])
 def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
 
@@ -273,7 +273,7 @@ def concepts_trees_get(concept_id):
               f"can be either 0 or 1."
         return make_response(err, 400)
 
-    # MAY 2024 - moved the mindepth !> maxdepth check before setting the default maxdepth.
+
     # Validate that mindepth is not greater than maxdepth.
     err = validate_parameter_range_order(min_name='mindepth', min_value=mindepth, max_name='maxdepth',
                                              max_value=maxdepth)
