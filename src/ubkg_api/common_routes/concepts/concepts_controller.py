@@ -401,7 +401,12 @@ def concepts_concept_identifier_nodes_get(search):
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
     result = concepts_identifier_node_get_logic(neo4j_instance, search=search)
-    if result is None or result == []:
+    iserr = result is None or result == {}
+    if not iserr:
+        nodeobjects = result.get('nodeobjects')
+        iserr = len(nodeobjects) == 0
+
+    if iserr:
         # Empty result
         err = get_404_error_string(prompt_string=f"No nodeobjects for concepts with identifier",
                                    custom_request_path=f"identifier='{search}'",
