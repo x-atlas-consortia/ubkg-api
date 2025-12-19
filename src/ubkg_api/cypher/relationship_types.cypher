@@ -1,5 +1,4 @@
-// December 2025
-// used by the /relationship-types endpoint.
+// Used by the /relationship-types endpoint.
 
 CALL db.relationshipTypes()
 YIELD relationshipType

@@ -1,4 +1,3 @@
-// December 2025
 // Used by the /sabs endpoint.
 
 CALL

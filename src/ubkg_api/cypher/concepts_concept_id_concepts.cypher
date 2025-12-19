@@ -1,5 +1,5 @@
 // Used by the /concepts/{concept_id}/concepts endpoint
-// December 2025 - refactored to return JSON
+
 
 WITH [$concept_id] AS query
 MATCH (b:Concept)<-[c]-(d:Concept)

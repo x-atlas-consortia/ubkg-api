@@ -6,7 +6,6 @@
 
 // The function that loads this query will replace values for code_id and termtype_filter.
 
-// December 2025 - refactored to JSON response
 CALL
 {
     WITH $code_id AS query

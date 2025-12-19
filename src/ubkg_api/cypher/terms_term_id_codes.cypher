@@ -1,5 +1,4 @@
-// December 2025
-// used by the /terms/{id}/codes endpoint
+// Used by the /terms/{id}/codes endpoint
 
 WITH [$term_id] AS query
 MATCH (a:Term)<-[b]-(c:Code)

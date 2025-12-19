@@ -1,4 +1,3 @@
-// December 2025
 // Used by the /property-types endpoint
 
 CALL db.propertyKeys()

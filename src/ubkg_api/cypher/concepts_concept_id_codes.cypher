@@ -1,4 +1,3 @@
-// December 2025
 // Used in the concepts/{concept_id}/codes endpoint
 
 WITH [$concept_id] AS query,

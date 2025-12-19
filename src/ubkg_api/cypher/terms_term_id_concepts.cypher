@@ -1,4 +1,3 @@
-// December 2025
 // Used by the /terms/{id}/concepts endpoint.
 
 WITH [$term_id] AS query

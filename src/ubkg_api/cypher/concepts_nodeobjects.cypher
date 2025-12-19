@@ -1,5 +1,3 @@
-// December 2025
-
 // Used by the concepts/<identifier>/nodes endpoint.
 // Returns representations of translated and consolidated information ("Concept nodes" or "concept subgraphs")
 // for the Concepts that "match" a search term.
