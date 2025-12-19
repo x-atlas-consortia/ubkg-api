@@ -197,7 +197,7 @@ echo | tee -a ubkg_unit_test.out
 
 echo "2. concepts/C0678222/concepts => valid concept; should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C4722518/concepts" \
+ --url "${UBKG_URL}/concepts/C0678222/concepts" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out

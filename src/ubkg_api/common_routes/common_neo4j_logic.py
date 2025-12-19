@@ -243,6 +243,10 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
     # Filter by parameters.
     querytxt = querytxt.replace('$concept_id', f"'{concept_id}'")
     sabjoin = format_list_for_query(listquery=sab, doublequote=True)
+    if len(sabjoin) == 0:
+        querytxt = querytxt.replace('$sabfilter','')
+    else:
+        querytxt = querytxt.replace('$sabfilter',f'AND b.SAB IN [{sabjoin}]')
     querytxt = querytxt.replace('$SAB', sabjoin)
 
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)

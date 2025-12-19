@@ -44,14 +44,19 @@ def concepts_concept_id_codes_get(concept_id):
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
     result = concepts_concept_id_codes_get_logic(neo4j_instance, concept_id, sab)
-    if result is None or result == []:
+
+    iserr = result is None
+    if not iserr:
+        codes = result[0].get('codes')
+        iserr =len(codes) == 0
+
+    if iserr:
         # Empty result
         err = get_404_error_string(prompt_string='No Codes with link to the specified Concept',
                                    custom_request_path=f'concept_id = {concept_id}',
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # February 2025
     return redirect_if_large(resp=result)
 
 
@@ -73,7 +78,6 @@ def concepts_concept_id_concepts_get(concept_id):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
     return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('<concept_id>/definitions', methods=['GET'])
@@ -93,7 +97,6 @@ def concepts_concept_id_definitions_get(concept_id):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
     return redirect_if_large(resp=result)
 
 # JAS January 2024 Converted from POST to GET.
@@ -404,7 +407,6 @@ def concepts_concept_identifier_nodes_get(search):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
     return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('/paths/subgraph/sequential', methods=['GET'])
