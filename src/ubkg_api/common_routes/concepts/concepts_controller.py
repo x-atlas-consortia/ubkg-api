@@ -371,7 +371,8 @@ def concepts_subgraph_get():
 
     result = concepts_subgraph_get_logic(neo4j_instance, sab=sab, rel=rel,
                                          skip=skip, limit=limit)
-    if result is None or result == {}:
+
+    if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No subgraphs (pairs of Concepts linked by relationships) found for "
                                                  f"specified relationship types",
