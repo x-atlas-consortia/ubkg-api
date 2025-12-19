@@ -80,7 +80,7 @@ then your test endpoint URLs should start with `http://127.0.0.1:5002/`.
 
 For example, if you test using PostMan, you can set a global variable corresponding to the first part of your test URLs:
 
-![img.png](img.png)
+![img.png](img.png)![img.png](img.png)
 
 # Testing changes
 To test changes to ubkg-api, you will need to start a local instance of the API.
