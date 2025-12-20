@@ -4,7 +4,7 @@ WITH $code_id AS query
 MATCH (:Term)<-[d]-(a:Code)<-[:CODE]-(b:Concept)-[:PREF_TERM]->(c:Term)
 // Note the link by CUI, which limits to those concepts with a linked preferred term.
 WHERE ((a.CodeID = query) AND (b.CUI = d.CUI))
-WITH COLLECT({concept:b.CUI,prefterm:c.name}) AS concepts
+WITH COLLECT(DISTINCT {concept:b.CUI,prefterm:c.name}) AS concepts
 WITH concepts
 UNWIND concepts AS concept
 WITH concept
