@@ -218,6 +218,26 @@ python3 -m twine upload dist/*
 ## Requirements
 Python 3.9 or newer
 
+# Optional JSON serialization
+
+A number of routes in the _concepts/paths_ path execute
+Cypher queries that return complex objects, inclduing neo4j Path objects. 
+Routes that return complex objects include:
++ /paths/expand
++ /paths/tress
++ /paths/subgraph
++ /paths/subgraph/sequential
+
+The **path_json_serializer.py** contains a class _PathJSONSerializer_, 
+a custom serializer that can handle the returns from the Cypher queries behind
+the routes. The controller script can serialize with the command
+```azure
+# Serialize the Path object resp as JSON.
+    result = PathJSONSerializer(result).json
+```
+
+The custom serializer offers more control than the available APOC functions.
+
 # Optional Timeout Feature
 
 The ubkg-api can be deployed in various environments.
