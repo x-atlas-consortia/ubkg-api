@@ -183,7 +183,7 @@ def concepts_paths_expand_get(concept_id):
     # Serialize the Path object resp as JSON.
     result = PathJSONSerializer(result).json
 
-    return redirect_if_large(resp=result)
+    return redirect_if_large(resp=result[0])
 
 
 @concepts_blueprint.route('<origin_concept_id>/paths/shortestpath/<terminus_concept_id>', methods=['GET'])
@@ -228,7 +228,7 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
         return make_response(err, 404)
 
     # Serialize the Path object resp as JSON.
-    result = PathJSONSerializer(result).json
+    #result = PathJSONSerializer(result).json
     # Extract from the list.
     return redirect_if_large(resp=result[0])
 
@@ -316,7 +316,7 @@ def concepts_trees_get(concept_id):
         return make_response(err, 404)
 
     # Serialize the Path object resp as JSON.
-    result = PathJSONSerializer(result).json
+    #result = PathJSONSerializer(result).json
     # Extract from the list.
     return redirect_if_large(resp=result[0])
 
@@ -381,7 +381,7 @@ def concepts_subgraph_get():
         return make_response(err, 404)
 
     # Serialize the Path object resp as JSON.
-    result = PathJSONSerializer(result).json
+    #result = PathJSONSerializer(result).json
     return redirect_if_large(resp=result[0])
 
 @concepts_blueprint.route('<search>/nodeobjects', methods=['GET'])
@@ -506,6 +506,6 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
         return make_response(err, 404)
 
     # Serialize the Path object resp as JSON.
-    result = PathJSONSerializer(result).json
+    #result = PathJSONSerializer(result).json
     # Extract from the list.
     return redirect_if_large(resp=result[0])
