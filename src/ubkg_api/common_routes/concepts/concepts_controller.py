@@ -45,12 +45,7 @@ def concepts_concept_id_codes_get(concept_id):
 
     result = concepts_concept_id_codes_get_logic(neo4j_instance, concept_id, sab)
 
-    iserr = result is None
-    if not iserr:
-        codes = result[0].get('codes')
-        iserr =len(codes) == 0
-
-    if iserr:
+    if result == []:
         # Empty result
         err = get_404_error_string(prompt_string='No Codes with link to the specified Concept',
                                    custom_request_path=f'concept_id = {concept_id}',
