@@ -59,7 +59,6 @@ class PathJSONSerializer(object):
 
     def _preprocess_resp(self, resp):
 
-        print('_preprocess_resp', resp)
         """Traverse and preprocess the resp structure to serialize Path objects."""
         for graph_item in resp:
 
@@ -74,7 +73,6 @@ class PathJSONSerializer(object):
 
             # Process the "paths" key, serialize every Path object
             if "paths" in graph_item:
-                print('paths in graph_item', graph_item)
                 if isinstance(graph_item["paths"], list):
                     graph_item["paths"] = [
                         self._serialize_path(path) for path in graph_item["paths"]
