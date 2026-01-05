@@ -321,7 +321,7 @@ echo | tee -a ubkg_unit_test.out
 
 echo "4. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=-1&limit=5 => skip negative; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=X&limit=5" \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=-1&limit=5" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -487,7 +487,7 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "13. concepts/C2720507/paths/expand?sab=SNOMEDCT_US&rel=isa&mindepth=9&maxdepth=10&skip=1&limit=10 => long query; should return custom 404" | tee -a ubkg_unit_test.out
+echo "13. concepts/C2720507/paths/expand?sab=SNOMEDCT_US&rel=isa&mindepth=9&maxdepth=10&skip=1&limit=10 => long query; should return custom 504" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=SNOMEDCT_US&rel=isa&mindepth=9&maxdepth=10&skip=1&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
@@ -510,7 +510,7 @@ echo | tee -a ubkg_unit_test.out
 
 echo "16. concepts/C2720507/paths/expand?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of&mindepth=2&maxdepth=3&skip=0&limit=10 => valid parameters, URL-encoded lists for sab, rel; should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=SNOMEDCT_US&sab=UBERON&rel=isa&rel=part_of&mindepth=2&maxdepth=3&limit=10" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of&mindepth=2&maxdepth=3&skip=0&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out

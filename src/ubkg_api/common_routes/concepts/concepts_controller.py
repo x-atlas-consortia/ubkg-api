@@ -491,7 +491,7 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
     if concept_id == None:
         custom_request_path = f'any concept'
     else:
-        custom_request_path = f"concept with 'identifier' '{concept_id}'"
+        custom_request_path = f"concept with 'identifier' = '{concept_id}'"
     custom_request_path = custom_request_path + f" with sequential relationships '{relsequence}'"
 
     if iserr:
