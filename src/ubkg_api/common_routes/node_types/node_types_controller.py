@@ -73,7 +73,7 @@ def node_types_counts_get(node_type=None):
         errtype = "No Node Types"
 
         err = get_404_error_string(prompt_string=f"{errtype}",
-                                   custom_request_path=f"node_type='{node_type}'",
+                                   custom_request_path=f"node_type = '{node_type}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
@@ -147,7 +147,7 @@ def node_types_counts_by_sab_node_type_get(node_type):
         errtype = "No Node Types"
 
         err = get_404_error_string(prompt_string=f"{errtype}",
-                                   custom_request_path=f"node_type='{node_type}'",
+                                   custom_request_path=f"node_type = '{node_type}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 

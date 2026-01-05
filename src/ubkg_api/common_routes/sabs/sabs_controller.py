@@ -70,7 +70,7 @@ def sabs_codes_counts_route_get(sab=None):
 
     if iserr:
         err = get_404_error_string(prompt_string="No sources",
-                                   custom_request_path=f"sab='{sab}'",
+                                   custom_request_path=f"sab = '{sab}'",
                                    timeout = neo4j_instance.timeout)
         print('returning make_response with 404')
         return make_response(err, 404)
@@ -134,7 +134,7 @@ def sabs_codes_details_sab_get(sab):
 
     if iserr:
         err = get_404_error_string(prompt_string="No codes",
-                                   custom_request_path=f"sab='{sab}'",
+                                   custom_request_path=f"sab = '{sab}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
@@ -196,7 +196,7 @@ def sabs_sab_term_types_get(sab):
 
     if iserr:
         err = get_404_error_string(prompt_string="No term types",
-                                   custom_request_path=f"sab='{sab}'",
+                                   custom_request_path=f"sab = '{sab}'",
                                    timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 

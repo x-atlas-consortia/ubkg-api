@@ -45,7 +45,7 @@ def format_request_query_string():
 
     listerr = []
     for req in request.args:
-        listerr.append(f"'{req}'='{request.args[req]}' ")
+        listerr.append(f"'{req}' = '{request.args[req]}' ")
 
     if len(listerr) > 0:
         err = ' and query parameter'
