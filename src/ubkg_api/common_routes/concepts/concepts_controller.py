@@ -265,9 +265,9 @@ def concepts_trees_get(concept_id):
 
     # Limit the minimum to 0 or 1.
     if int(mindepth) > 1:
-        err = f"Invalid value for 'mindepth' {mindepth}. The 'mindepth' parameter value for a spanning tree " \
+        err = f"Invalid value for 'mindepth' ({mindepth}). The 'mindepth' parameter value for a spanning tree " \
               f"can be either 0 or 1."
-        return make_response(err, 400)
+        return wrap_message(key="message", msg=err)
 
 
     # Validate that mindepth is not greater than maxdepth.
