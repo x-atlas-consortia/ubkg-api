@@ -48,7 +48,7 @@ def concepts_concept_id_codes_get(concept_id):
     if result == []:
         # Empty result
         err = get_404_error_string(prompt_string='No Codes with link to the specified Concept',
-                                   custom_request_path=f"concept_id = '{concept_id}'",
+                                   custom_request_path=f"'concept_id' = '{concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
@@ -69,7 +69,7 @@ def concepts_concept_id_concepts_get(concept_id):
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string='No Concepts with relationships to the specified Concept',
-                                   custom_request_path=f"concept_id = '{concept_id}'",
+                                   custom_request_path=f"'concept_id' = '{concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
@@ -88,7 +88,7 @@ def concepts_concept_id_definitions_get(concept_id):
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string='No Definitions for specified Concept',
-                                   custom_request_path=f"concept_id = '{concept_id}'",
+                                   custom_request_path=f"'concept_id' = '{concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
@@ -171,7 +171,7 @@ def concepts_paths_expand_get(concept_id):
 
     if iserr:
         err = get_404_error_string(prompt_string=f"No expanded paths found for specified parameters",
-                                   custom_request_path=f"query_concept_id = '{query_concept_id}'",
+                                   custom_request_path=f"'query_concept_id' = '{query_concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
@@ -217,8 +217,8 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No paths found between Concepts",
-                                   custom_request_path=f"origin_concept_id = '{origin_concept_id}' and "
-                                                       f"terminus_concept_id = '{terminus_concept_id}'",
+                                   custom_request_path=f"'origin_concept_id' = '{origin_concept_id}' and "
+                                                       f"'terminus_concept_id' = '{terminus_concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
@@ -306,7 +306,7 @@ def concepts_trees_get(concept_id):
     if result is None or result == {}:
         # Empty result
         err = get_404_error_string(prompt_string=f"No spanning tree found for specified parameters",
-                                   custom_request_path=f"query_concept_id = '{query_concept_id}'",
+                                   custom_request_path=f"'query_concept_id' = '{query_concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
@@ -405,7 +405,7 @@ def concepts_concept_identifier_nodes_get(search):
     if iserr:
         # Empty result
         err = get_404_error_string(prompt_string=f"No nodeobjects for concepts with identifier",
-                                   custom_request_path=f"identifier = '{search}'",
+                                   custom_request_path=f"'identifier' = '{search}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
@@ -491,7 +491,7 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
     if concept_id == None:
         custom_request_path = f'any concept'
     else:
-        custom_request_path = f"concept with identifier '{concept_id}'"
+        custom_request_path = f"concept with 'identifier' '{concept_id}'"
     custom_request_path = custom_request_path + f" with sequential relationships '{relsequence}'"
 
     if iserr:

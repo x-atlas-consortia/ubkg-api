@@ -193,7 +193,7 @@ def validate_parameter_is_numeric(param_name=None, param_value: str = '') -> str
     """
 
     if not param_value.lstrip('-').isnumeric():
-        err = f"Invalid value ({param_value}) for parameter '{param_name}'.  The parameter must be numeric."
+        err = f"Invalid value ('{param_value}') for parameter '{param_name}'.  The parameter must be numeric."
         return wrap_message(key="message", msg=err)
 
     return "ok"
