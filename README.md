@@ -377,4 +377,6 @@ In December 2025, the ubkg-api was refactored to a consistent and standard patte
 2. Cypher queries in external files
 3. Cypher responses in JSON format
 
-As part of refactoring, stale in-line documentation was either updated or removed.
+As part of refactoring:
+1. Stale in-line documentation was either updated or removed.
+2. HTTP 404 error messages were standardized.
