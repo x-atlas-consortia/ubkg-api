@@ -3,7 +3,7 @@ from ..common_neo4j_logic import node_types_node_type_counts_by_sab_get_logic, \
     node_types_node_type_counts_get_logic, node_types_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
-    validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
+    validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size, wrap_message
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 
 # S3 redirect functions
@@ -42,7 +42,8 @@ def node_type_counts_get():
           f'Execute the node_types/(node_type) endpoint ' \
           f'with the name of a node type (e.g., Codes). To obtain names of node types, execute the ' \
           f'node_types endpoint.'
-    return make_response(err, 400)
+    #return make_response(err, 400)
+    return wrap_message(key="message", msg=err)
 
 
 @node_types_blueprint.route('<node_type>/counts', methods=['GET'])
@@ -73,7 +74,7 @@ def node_types_counts_get(node_type=None):
         errtype = "No Node Types"
 
         err = get_404_error_string(prompt_string=f"{errtype}",
-                                   custom_request_path=f"node_type = '{node_type}'",
+                                   custom_request_path=f"'node_type' = '{node_type}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
@@ -101,7 +102,8 @@ def node_types_counts_by_sab_get():
           f'Execute the node_types/counts_by_sab/(node_type) endpoint ' \
           f'with the name of a node type (e.g., Codes) and SAB. To obtain names of node types, execute the ' \
           f'node_types endpoint.'
-    return make_response(err, 400)
+
+    return wrap_message(key="message", msg=err)
 
 
 @node_types_blueprint.route('<node_type>/counts-by-sab', methods=['GET'])
@@ -147,7 +149,7 @@ def node_types_counts_by_sab_node_type_get(node_type):
         errtype = "No Node Types"
 
         err = get_404_error_string(prompt_string=f"{errtype}",
-                                   custom_request_path=f"node_type = '{node_type}'",
+                                   custom_request_path=f"'node_type' = '{node_type}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
