@@ -1033,7 +1033,7 @@ echo | tee -a ubkg_unit_test.out
 
 echo "4. semantics/semantic-types/Anatomical%20Structure?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=-1&limit=10" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=a&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
