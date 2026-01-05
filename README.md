@@ -359,3 +359,22 @@ Send the result of the query to payload validation:
     # Redirect to S3 if payload is large.
     return redirect_if_large(resp=result)
 ```
+
+# December 2025 refactoring of ubkg-api
+
+The original implementation of ubkg-api used a Model View Controller architecture in which the model classes were based on the OpenAPI specification. The Cypher commands used by the API were embedded in controller logic.
+
+There were at least four incomplete waves of refactoring that occurred between 2023 and late 2025, including:
+1. The API was converted to use Flask Blueprint.
+2. Cypher queries changed from returning lists (the default) to returning formatted JSON strings.
+3. Cypher query strings were moved from being embedded as strings in the Python code of controller scripts to being loaded from files in the cypher directory of the repository.
+4. Models and controllers changed from translating list responses from Cyper queries into OpenAPI model classes to passing JSON strings with little to no modification.
+
+Because these prior refactorings were incomplete, there were essentially two code bases for endpoints, complicating maintenance.
+
+In December 2025, the ubkg-api was refactored to a consistent and standard pattern involving:
+1. Routes as Flask blueprints
+2. Cypher queries in external files
+3. Cypher responses in JSON format
+
+As part of refactoring, stale in-line documentation was either updated or removed.
