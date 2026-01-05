@@ -552,14 +552,14 @@ echo | tee -a ubkg_unit_test.out
 
 echo "5. concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=1&skip=1&limit=10 => non-numeric mindepth: should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=-1&skip=1&limit=10" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=1&skip=1&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
 echo "6. concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=1&maxdepth=Z&skip=1&limit=10 => non-numeric maxdepth: should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=-1&skip=1&limit=10" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=1&skip=1&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
