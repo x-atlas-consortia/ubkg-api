@@ -3,7 +3,7 @@ from ..common_neo4j_logic import sabs_codes_counts_query_get, sab_code_detail_qu
     sabs_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
-    validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
+    validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size, wrap_message
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 # S3 redirect functions
 from utils.s3_redirect import redirect_if_large
@@ -87,7 +87,8 @@ def sabs_codes_details_get():
     err = f'The response to this endpoint cannot be run for all SABs because of memory limitations. ' \
           f'Execute the /sabs/codes/details/(sab) endpoint with the identifier for a SAB. Execute ' \
           f'the /sabs endpoint for a list of all SABs in the UBKG.'
-    return make_response(err, 400)
+    #return make_response(err, 400)
+    return wrap_message(key="message", msg=err)
 
 
 @sabs_blueprint.route('<sab>/codes/details', methods=['GET'])
@@ -150,7 +151,9 @@ def sabs_term_types_get():
     err = f'The response to this endpoint cannot be run for all SABs because of memory limitations. ' \
           f'Execute the /sabs/term-types/(sab) endpoint with the identifier for a SAB. Execute ' \
           f'the /sabs endpoint for a list of all SABs in the UBKG.'
-    return make_response(err, 400)
+
+    #return make_response(err, 400)
+    return wrap_message(key="message", msg=err)
 
 
 @sabs_blueprint.route('<sab>/term-types', methods=['GET'])

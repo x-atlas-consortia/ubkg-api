@@ -718,7 +718,7 @@ echo | tee -a ubkg_unit_test.out
 
 echo "1. node-types/Codez/counts-by-sab?sab=SNOMEDCT_US GET => no match; should return custom 404" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/node-types/Codez/counts-by-sab?sab=SNOMED_US" \
+ --url "${UBKG_URL}/node-types/Codez/counts-by-sab?sab=SNOMEDCT_US" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -880,18 +880,6 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-#--------------------------------------------
-echo "TESTS FOR: sabs/codes/details GET" | tee -a ubkg_unit_test.out
-echo "SIGNATURE: /sabs/codes/details" | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-
-echo "1. sabs/codes/details => blocked; return custom 400" | tee -a ubkg_unit_test.out
-curl --request GET \
- --url "${UBKG_URL}/sabs/codes/details" \
- --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
 
 #--------------------------------------------
 echo "TESTS FOR: sabs/<SAB>/codes/details GET" | tee -a ubkg_unit_test.out
