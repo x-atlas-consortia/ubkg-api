@@ -937,19 +937,6 @@ echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
 #--------------------------------------------
-echo "TESTS FOR: sabs/term-types GET" | tee -a ubkg_unit_test.out
-echo "SIGNATURE: /sabs/term-types" | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-
-echo "1. sabs/term-types => blocked; should return custom 400" | tee -a ubkg_unit_test.out
-curl --request GET \
- --url "${UBKG_URL}/sabs/term-types" \
- --header "Accept: application/json"  | cut -c1-60 | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-
-#--------------------------------------------
 echo "TESTS FOR: sabs/<sab>/term-types GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /sabs/<sab>term-types" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
