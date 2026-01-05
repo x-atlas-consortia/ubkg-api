@@ -22,9 +22,12 @@ def terms_term_id_codes_get(term_id):
     result = terms_term_id_codes_get_logic(neo4j_instance, term_id)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string="No Codes with terms that exactly match the string parameter",
+        err = get_404_error_string(prompt_string="No Codes with terms that exactly match",
+                                   custom_request_path=f"'identifier' = '{term_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
+
+
 
 
     return redirect_if_large(resp=result)
@@ -44,7 +47,8 @@ def terms_term_id_concepts_get(term_id):
     result = terms_term_id_concepts_get_logic(neo4j_instance, term_id)
     if result is None or result == []:
         # Empty result
-        err = get_404_error_string(prompt_string="No Concepts with preferred terms that match the string parameter",
+        err = get_404_error_string(prompt_string="No Concepts with terms that exactly match",
+                                   custom_request_path=f"'identifier' = '{term_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
