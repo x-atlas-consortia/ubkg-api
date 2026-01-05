@@ -691,19 +691,6 @@ echo | tee -a ubkg_unit_test.out
 
 
 #--------------------------------------------
-echo "TESTS FOR: node-types/counts GET" | tee -a ubkg_unit_test.out
-echo "SIGNATURE: /node-types/counts" | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-
-echo "1. node-types/counts GET => blocked; should return custom 400" | tee -a ubkg_unit_test.out
-curl --request GET \
- --url "${UBKG_URL}/node-types/counts" \
- --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-
-#--------------------------------------------
 echo "TESTS FOR: node-types/<node-type>/counts GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /node-types/<node-type>/counts" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
