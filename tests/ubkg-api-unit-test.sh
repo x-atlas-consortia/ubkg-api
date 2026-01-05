@@ -1195,3 +1195,10 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
+echo "7. /sources?sab=X&context=base_context GET => invalid SAB, valid context; should return 404" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/sources?sab=X&context=base_context" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
