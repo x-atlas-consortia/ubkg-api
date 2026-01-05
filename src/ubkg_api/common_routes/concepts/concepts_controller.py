@@ -213,7 +213,6 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
 
     result = concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=origin_concept_id,
                                              terminus_concept_id=terminus_concept_id, sab=sab, rel=rel)
-    print(result)
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No paths found between Concepts",

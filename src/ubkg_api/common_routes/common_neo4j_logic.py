@@ -398,7 +398,6 @@ def get_graph(neo4j_instance, query: neo4j.Query) -> List[dict]:
                 raise GatewayTimeout
 
     # There will be a maximum of one record.
-    print(result)
     return result
 
 #--------------------
