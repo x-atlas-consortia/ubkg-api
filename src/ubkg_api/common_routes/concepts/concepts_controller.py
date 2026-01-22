@@ -1,10 +1,12 @@
+import os
 from flask import Blueprint, jsonify, current_app, request, make_response
+
 
 # Cypher query functions
 from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_concept_id_concepts_get_logic,\
     concepts_concept_id_definitions_get_logic, concepts_expand_get_logic,\
     concepts_shortestpath_get_logic, concepts_trees_get_logic, concepts_subgraph_get_logic, \
-    concepts_identfier_node_get_logic, concepts_subgraph_sequential_get_logic
+    concepts_identifier_node_get_logic, concepts_subgraph_sequential_get_logic
 # Functions to validate query parameters
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
@@ -12,6 +14,9 @@ from utils.http_error_string import get_404_error_string, validate_query_paramet
     check_neo4j_version_compatibility,check_max_mindepth,wrap_message
 # Functions to format query parameters for use in Cypher queries
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
+
+# Serialization functions
+from utils.path_json_serializer import PathJSONSerializer
 
 # S3 redirect functions
 from utils.s3_redirect import redirect_if_large
@@ -26,7 +31,6 @@ def concepts_concept_id_codes_get(concept_id):
     :param concept_id: The concept identifier
     :type concept_id: str
 
-    :rtype: Union[List[str], Tuple[List[str], int], Tuple[List[str], int, Dict[str, str]]
     """
 
     # Validate sab parameter.
@@ -40,14 +44,14 @@ def concepts_concept_id_codes_get(concept_id):
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
     result = concepts_concept_id_codes_get_logic(neo4j_instance, concept_id, sab)
-    if result is None or result == []:
+
+    if result == []:
         # Empty result
         err = get_404_error_string(prompt_string='No Codes with link to the specified Concept',
-                                   custom_request_path=f'concept_id = {concept_id}',
+                                   custom_request_path=f"'concept_id' = '{concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # February 2025
     return redirect_if_large(resp=result)
 
 
@@ -58,8 +62,6 @@ def concepts_concept_id_concepts_get(concept_id):
     :param concept_id: The concept identifier
     :type concept_id: str
 
-    :rtype: Union[List[SabRelationshipConceptTerm], Tuple[List[SabRelationshipConceptTerm], int],
-     Tuple[List[SabRelationshipConceptTerm], int, Dict[str, str]]
     """
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
@@ -67,11 +69,10 @@ def concepts_concept_id_concepts_get(concept_id):
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string='No Concepts with relationships to the specified Concept',
-                                   custom_request_path=f'concept_id = {concept_id}',
+                                   custom_request_path=f"'concept_id' = '{concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
     return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('<concept_id>/definitions', methods=['GET'])
@@ -87,14 +88,13 @@ def concepts_concept_id_definitions_get(concept_id):
     if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string='No Definitions for specified Concept',
-                                   custom_request_path=f"concept_id='{concept_id}'",
+                                   custom_request_path=f"'concept_id' = '{concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
     return redirect_if_large(resp=result)
 
-# JAS January 2024 Converted from POST to GET.
+
 @concepts_blueprint.route('<concept_id>/paths/expand', methods=['GET'])
 def concepts_paths_expand_get(concept_id):
 
@@ -128,11 +128,11 @@ def concepts_paths_expand_get(concept_id):
     if err != 'ok':
         return make_response(err, 400)
 
-    # APR 2024 - Check range after setting defaults.
+
     # Set default mininum.
     mindepth = set_default_minimum(param_value=mindepth, default=1)
 
-    # MAY 2024 - moved mindepth !> maxdepth check up.
+
     # Validate that mindepth is not greater than maxdepth.
     err = validate_parameter_range_order(min_name='mindepth', min_value=mindepth, max_name='maxdepth',
                                          max_value=maxdepth)
@@ -167,18 +167,20 @@ def concepts_paths_expand_get(concept_id):
     result = concepts_expand_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel,
                                        mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
 
-    iserr = result is None or result == {}
+    iserr = result is None or result == []
 
     if iserr:
         err = get_404_error_string(prompt_string=f"No expanded paths found for specified parameters",
-                                   custom_request_path=f"query_concept_id='{query_concept_id}'",
+                                   custom_request_path=f"'query_concept_id' = '{query_concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
-    return redirect_if_large(resp=result)
+    # Serialize the Path object resp as JSON.
+    result = PathJSONSerializer(result).json
 
-# JAS February 2024 Replaced POST with GET
+    return redirect_if_large(resp=result[0])
+
+
 @concepts_blueprint.route('<origin_concept_id>/paths/shortestpath/<terminus_concept_id>', methods=['GET'])
 def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
 
@@ -211,19 +213,22 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
 
     result = concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=origin_concept_id,
                                              terminus_concept_id=terminus_concept_id, sab=sab, rel=rel)
-    if result is None or result == {}:
+    if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No paths found between Concepts",
-                                   custom_request_path=f"origin_concept_id='{origin_concept_id}' and "
-                                                       f"terminus_concept_id='{terminus_concept_id}'",
+                                   custom_request_path=f"'origin_concept_id' = '{origin_concept_id}' and "
+                                                       f"'terminus_concept_id' = '{terminus_concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
-    return redirect_if_large(resp=result)
+    # Serialize the Path object resp as JSON.
+    result = PathJSONSerializer(result).json
+    # Extract from the list.
+    return redirect_if_large(resp=result[0])
 
 @concepts_blueprint.route('<concept_id>/paths/trees', methods=['GET'])
 def concepts_trees_get(concept_id):
+
     """Return nodes in a spanning tree from a specified concept, based on
     the relationship pattern specified within the selected sources, to a specified path depth.
 
@@ -259,11 +264,11 @@ def concepts_trees_get(concept_id):
 
     # Limit the minimum to 0 or 1.
     if int(mindepth) > 1:
-        err = f"Invalid value for 'mindepth' {mindepth}. The 'mindepth' parameter value for a spanning tree " \
+        err = f"Invalid value for 'mindepth' ({mindepth}). The 'mindepth' parameter value for a spanning tree " \
               f"can be either 0 or 1."
-        return make_response(err, 400)
+        return wrap_message(key="message", msg=err)
 
-    # MAY 2024 - moved the mindepth !> maxdepth check before setting the default maxdepth.
+
     # Validate that mindepth is not greater than maxdepth.
     err = validate_parameter_range_order(min_name='mindepth', min_value=mindepth, max_name='maxdepth',
                                              max_value=maxdepth)
@@ -300,15 +305,18 @@ def concepts_trees_get(concept_id):
     if result is None or result == {}:
         # Empty result
         err = get_404_error_string(prompt_string=f"No spanning tree found for specified parameters",
-                                   custom_request_path=f"query_concept_id='{query_concept_id}'",
+                                   custom_request_path=f"'query_concept_id' = '{query_concept_id}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
-    return redirect_if_large(resp=result)
+    # Serialize the Path object resp as JSON.
+    result = PathJSONSerializer(result).json
+    # Extract from the list.
+    return redirect_if_large(resp=result[0])
 
 @concepts_blueprint.route('paths/subgraph', methods=['GET'])
 def concepts_subgraph_get():
+
     """
     Returns the paths in the subgraph specified by relationship types and SABs, constrained by
     depth parameters.
@@ -358,18 +366,21 @@ def concepts_subgraph_get():
 
     result = concepts_subgraph_get_logic(neo4j_instance, sab=sab, rel=rel,
                                          skip=skip, limit=limit)
-    if result is None or result == {}:
+
+    if result is None or result == []:
         # Empty result
         err = get_404_error_string(prompt_string=f"No subgraphs (pairs of Concepts linked by relationships) found for "
                                                  f"specified relationship types",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
-    return redirect_if_large(resp=result)
+    # Serialize the Path object resp as JSON.
+    result = PathJSONSerializer(result).json
+    return redirect_if_large(resp=result[0])
 
 @concepts_blueprint.route('<search>/nodeobjects', methods=['GET'])
 def concepts_concept_identifier_nodes_get(search):
+
     """
     Returns a "nodes" object representing a set of "Concept node" object.
     Each Concept node object translates and consolidates information about a Concept node in the UBKG.
@@ -384,15 +395,19 @@ def concepts_concept_identifier_nodes_get(search):
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
-    result = concepts_identfier_node_get_logic(neo4j_instance, search=search)
-    if result is None or result == []:
+    result = concepts_identifier_node_get_logic(neo4j_instance, search=search)
+    iserr = result is None or result == {}
+    if not iserr:
+        nodeobjects = result.get('nodeobjects')
+        iserr = len(nodeobjects) == 0
+
+    if iserr:
         # Empty result
         err = get_404_error_string(prompt_string=f"No nodeobjects for concepts with identifier",
-                                   custom_request_path=f"identifier='{search}'",
+                                   custom_request_path=f"'identifier' = '{search}'",
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
     return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('/paths/subgraph/sequential', methods=['GET'])
@@ -470,12 +485,12 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
     result = concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=concept_id, reltypes=reltypes, relsabs=relsabs,
                                        skip=skip, limit=limit)
 
-    iserr = result is None or result == {}
+    iserr = result is None or result == []
 
     if concept_id == None:
         custom_request_path = f'any concept'
     else:
-        custom_request_path = f"concept with identifier '{concept_id}'"
+        custom_request_path = f"concept with 'identifier' = '{concept_id}'"
     custom_request_path = custom_request_path + f" with sequential relationships '{relsequence}'"
 
     if iserr:
@@ -484,5 +499,7 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Feb 2025
-    return redirect_if_large(resp=result)
+    # Serialize the Path object resp as JSON.
+    result = PathJSONSerializer(result).json
+    # Extract from the list.
+    return redirect_if_large(resp=result[0])

@@ -18,5 +18,4 @@ def relationship_type_get():
         err = get_404_error_string(prompt_string="No relationship types", timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Mar 2025
     return redirect_if_large(resp=result)

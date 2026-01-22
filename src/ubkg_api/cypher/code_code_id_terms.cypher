@@ -16,4 +16,4 @@ CALL
     RETURN DISTINCT c.CodeID AS code, type(r) as term_type, t.name as term
 }
 WITH code, COLLECT(DISTINCT {term_type: term_type, term: term}) AS terms
-RETURN {code:code,terms:terms} AS response
+RETURN COLLECT({code:code,terms:terms}) AS terms
