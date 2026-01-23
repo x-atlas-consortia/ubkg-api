@@ -45,7 +45,7 @@ class PathJSONSerializer(object):
             "element_id": getattr(node, "element_id", None).split(':')[-1],  # Extract Node ID
             "identity": int(getattr(node, "element_id", None).split(':')[-1]),  # Extract Node ID
             "labels": list(node.labels) if hasattr(node, "labels") else [],
-            "properties": {key: node[key] for key in node.keys()}  # Access properties using dictionary-like syntax
+            "properties": [{key: node[key] for key in node.keys()}]  # Access properties using dictionary-like syntax
         }
 
     def _serialize_relationship(self, rel) -> dict:
@@ -54,7 +54,8 @@ class PathJSONSerializer(object):
             "type": getattr(rel, "type", None),
             "start_node": getattr(rel, "start_node", {}).get("element_id"),
             "end_node": getattr(rel, "end_node", {}).get("element_id"),
-            "properties": dict(rel) if hasattr(rel, "properties") else {}
+            #"properties": dict(rel) if hasattr(rel, "properties") else {}
+            "properties": rel.properties if hasattr(rel, "properties") else {}
         }
 
     def _preprocess_resp(self, resp):

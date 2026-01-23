@@ -1397,7 +1397,7 @@ components:
                     type: integer
                     description: neo4j numeric identifier for node
                     example: 57732
-                  elementId:
+                  element_id:
                     type: string
                     description: identity, formatted as string
                     example: "57732"
@@ -1420,7 +1420,7 @@ components:
                     type: integer
                     description: neo4j numeric identifier for node
                     example: 747324
-                  elementId:
+                  element_id:
                     type: string
                     description: identity, formatted as string
                     example: "747324"
@@ -1453,7 +1453,7 @@ components:
                           type: integer
                           description: neo4j numeric identifier for the node
                           example: 747324
-                        elementId:
+                        element_id:
                           type: string
                           description: identity formatted as string
                           example: "747324"
@@ -1477,7 +1477,7 @@ components:
                           type: integer
                           description: neo4j numeric identifier for the node
                           example: 57732
-                        elementId:
+                        element_id:
                           type: string
                           description: identity formatted as string
                           example: "57732"
@@ -1501,7 +1501,7 @@ components:
                               type: integer
                               description: neo4j numeric identifier for the relationship
                               example: 22630008
-                            elementId:
+                            element_id:
                               type: string
                               description: identity, formatted as string
                               example: "22630008"
@@ -1509,7 +1509,7 @@ components:
                               type: integer
                               description: neo4j identifier for the start node of the relationship
                               example: 747324
-                            startNodeElementID:
+                            startNodeElementId:
                               type: string
                               description: start, formatted as string
                               example: "747324"
