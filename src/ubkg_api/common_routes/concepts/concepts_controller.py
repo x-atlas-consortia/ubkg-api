@@ -175,10 +175,10 @@ def concepts_paths_expand_get(concept_id):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Serialize the Path object resp as JSON.
+    # Serialize the graph response as JSON.
     result = PathJSONSerializer(result).json
 
-    return redirect_if_large(resp=result[0])
+    return redirect_if_large(resp=result)
 
 
 @concepts_blueprint.route('<origin_concept_id>/paths/shortestpath/<terminus_concept_id>', methods=['GET'])
@@ -221,10 +221,10 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Serialize the Path object resp as JSON.
+    # Serialize the graph response as JSON.
     result = PathJSONSerializer(result).json
     # Extract from the list.
-    return redirect_if_large(resp=result[0])
+    return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('<concept_id>/paths/trees', methods=['GET'])
 def concepts_trees_get(concept_id):
@@ -309,10 +309,10 @@ def concepts_trees_get(concept_id):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Serialize the Path object resp as JSON.
+    # Serialize the graph response as JSON.
     result = PathJSONSerializer(result).json
     # Extract from the list.
-    return redirect_if_large(resp=result[0])
+    return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('paths/subgraph', methods=['GET'])
 def concepts_subgraph_get():
@@ -374,9 +374,9 @@ def concepts_subgraph_get():
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Serialize the Path object resp as JSON.
+    # Serialize the graph object response as JSON.
     result = PathJSONSerializer(result).json
-    return redirect_if_large(resp=result[0])
+    return redirect_if_large(resp=result)
 
 @concepts_blueprint.route('<search>/nodeobjects', methods=['GET'])
 def concepts_concept_identifier_nodes_get(search):
@@ -499,7 +499,7 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
                                    timeout=neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Serialize the Path object resp as JSON.
+    # Serialize the graph response as JSON.
     result = PathJSONSerializer(result).json
     # Extract from the list.
-    return redirect_if_large(resp=result[0])
+    return redirect_if_large(resp=result)
