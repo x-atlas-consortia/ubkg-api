@@ -4,92 +4,80 @@ Class that serializes neo4j Path objects as JSON.
 Use case: the /concepts/paths endpoints of the ubkg-api.
 
 """
-from neo4j.graph import Path, Node, Relationship
+from neo4j.graph import Path, Node
 
 class PathJSONSerializer(object):
 
-    def __init__(self, path: Path):
+    def __init__(self, graph=None):
 
-        self.path = path
-        self.json = self._preprocess_resp(path)
+        # graph is a list with elements 'edges', 'nodes', and 'paths'.
 
-    def _serialize_path(self, path: Path) -> dict:
-        """Serialize a Neo4j Path object into a JSON-compatible dictionary."""
+        self._nodes = graph[0]['nodes']
+        self._edges = graph[0]['edges']
 
-        # Extract all nodes in the path
-        nodes = path.nodes if hasattr(path, "nodes") else []
-        nodes_serialized = [self._serialize_node(node) for node in nodes]
+        # Serialize neo4j paths object.
+        # Replicate the return for the "Table" view of the query returned for the
+        # neo4j browser.
 
-        # Extract relationships in the path
-        relationships = path.relationships if hasattr(path, "relationships") else []
-        relationships_serialized = [self._serialize_relationship(rel) for rel in relationships]
+        listpath = []
+        for path in graph[0]['paths']:
+            dictpath = {'start': self._serialize_node(node=path.start_node),
+                        'end': self._serialize_node(node=path.end_node),
+                        'segments': self._serialize_path(path=path),
+                        'length': float(len(path))}
 
-        # Extract start and end nodes from the nodes list
-        start_node = nodes_serialized[0] if nodes_serialized else {}
-        end_node = nodes_serialized[-1] if nodes_serialized else {}
+            listpath.append(dictpath)
 
-        return {
-            "start": start_node,
-            "end": end_node,
-            "length": len(relationships),  # Length is the number of relationships
-            "nodes": nodes_serialized,
-            "relationships": relationships_serialized,
-        }
+        self._paths = listpath
+
+        self.json = {'nodes': self._nodes, 'edges': self._edges, 'paths': self._paths}
 
     def _serialize_node(self, node: Node) -> dict:
-        """Serialize a Node object into a JSON-compatible dictionary."""
+
+        """Serialize a Node object into a JSON-compatible dictionary.
+        :param node: Node object
+        """
 
         if not node:
             return {}
         return {
-            "element_id": getattr(node, "element_id", None).split(':')[-1],  # Extract Node ID
+            "elementId": getattr(node, "element_id", None).split(':')[-1],  # Extract Node ID
             "identity": int(getattr(node, "element_id", None).split(':')[-1]),  # Extract Node ID
             "labels": list(node.labels) if hasattr(node, "labels") else [],
-            "properties": {key: node[key] for key in node.keys()}  # Access properties using dictionary-like syntax
+            "properties": [{key: node[key] for key in node.keys()}]  # Access properties using dictionary-like syntax
         }
 
-    def _serialize_relationship(self, rel) -> dict:
-        """Serialize a Relationship object into a JSON-compatible dictionary."""
-        return {
-            "type": getattr(rel, "type", None),
-            "start_node": getattr(rel, "start_node", {}).get("element_id"),
-            "end_node": getattr(rel, "end_node", {}).get("element_id"),
-            "properties": dict(rel) if hasattr(rel, "properties") else {}
-        }
+    def _serialize_path(self, path: Path) -> list[dict]:
+        """
+        Translates a neo4j Path object into a dict that replicates the "segments" object in the browser.
+        :param path: neo4j Path object
+        """
+        listrel = []
+        for rel in path.relationships:
+            dictrel = {}
 
-    def _preprocess_resp(self, resp):
+            # Start and end nodes for the relationship.
+            dictrel['start'] = self._serialize_node(rel.start_node)
+            dictrel['end'] = self._serialize_node(rel.end_node)
 
-        """Traverse and preprocess the resp structure to serialize Path objects."""
-        for graph_item in resp:
+            # Relationship details
+            dictrel_rel = {'identity': int(rel.element_id.split(':')[2])}
+            dictrel_rel['elementId'] = str(dictrel_rel['identity'])
+            dictrel_rel['start'] = int(dictrel['start']['identity'])
+            dictrel_rel['startNodeElementId'] = str(dictrel_rel['start'])
+            dictrel_rel['end'] = int(dictrel['end']['identity'])
+            dictrel_rel['endNodeElementId'] = str(dictrel_rel['end'])
+            dictrel_rel['type'] = rel.type
 
-            # Process the "nodes" if present.
-            if "nodes" in graph_item:
-                graph_item["nodes"] = [
-                    {   # Convert Node information if needed for further usage
-                        "name": node.get("name"),
-                        "id": node.get("id")
-                    } for node in graph_item["nodes"]
-                ]
+            # Obtain relationship property information from rel.items, which is a collections.abc.ItemsView
+            listproperties = []
+            for i in rel.items():
+                dictprop = {i[0]: i[1]}
+                listproperties.append(dictprop)
+            dictrel_rel['properties'] = listproperties
 
-            # Process the "paths" key, serialize every Path object
-            if "paths" in graph_item:
-                if isinstance(graph_item["paths"], list):
-                    graph_item["paths"] = [
-                        self._serialize_path(path) for path in graph_item["paths"]
-                        if isinstance(path, Path)  # Verify that each element is a Path
-                    ]
+            dictrel['relationship'] = dictrel_rel
 
-            # If additional keys like "edges" need processing, handle them here
-            if "edges" in graph_item:
-                # Ensure "edges" contains a list of dictionary-like objects
-                if isinstance(graph_item["edges"], list):
-                    graph_item["edges"] = [
-                        {
-                            "SAB": edge.get("SAB"),
-                            "source": edge.get("source"),
-                            "type": edge.get("type"),
-                            "target": edge.get("target")
-                        } for edge in graph_item["edges"]
-                    ]
+            listrel.append(dictrel)
 
-        return resp
+        return listrel

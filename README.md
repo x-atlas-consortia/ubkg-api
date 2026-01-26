@@ -221,16 +221,44 @@ Python 3.9 or newer
 # Optional JSON serialization
 
 A number of routes in the _concepts/paths_ path execute
-Cypher queries that return complex objects, inclduing neo4j Path objects. 
-Routes that return complex objects include:
+Cypher queries that return complex objects, including neo4j **Path** objects. 
+
+For example, the _/paths/subgraph_ endpoint executes the following 
+Cypher:
+```azure
+//For the set of paths,
+
+// 1. Obtain an "edges" object with information on all relationships in all paths.
+// 2. Obtain a "paths" object with path information on all paths.
+
+UNWIND(relationships(path)) AS r
+WITH path,collect({type:type(r),SAB:r.SAB,source:startNode(r).CUI,target:endNode(r).CUI}) AS path_r
+WITH collect(path) as paths, apoc.coll.toSet(apoc.coll.flatten(COLLECT(path_r))) AS edges
+
+// 3. Obtain a "nodes" object for all Concept nodes in all paths
+UNWIND(paths) AS path
+UNWIND(nodes(path)) AS n
+// Obtain preferred terms for Concept nodes.
+OPTIONAL MATCH (n)-[:PREF_TERM]->(t:Term)
+
+WITH paths,edges,collect(DISTINCT{id:n.CUI,name:t.name}) AS nodes
+RETURN {nodes:nodes, paths:paths, edges:edges} AS graph
+```
+The paths portion of the response is a neo4j Path object. Queries that attempt to return 
+responses with Path objects fail with an error that they "are not JSON serializable".
+
+Routes that return complex responses with Path objects include:
 + /paths/expand
-+ /paths/tress
++ /paths/trees
 + /paths/subgraph
 + /paths/subgraph/sequential
 
-The **path_json_serializer.py** contains a class _PathJSONSerializer_, 
+To convert neo4j Path objects into JSON-serializable objects, queries use the code in **path_json_serializer.py**.
+The script contains the class _PathJSONSerializer_, 
 a custom serializer that can handle the returns from the Cypher queries behind
-the routes. The controller script can serialize with the command
+the routes. 
+
+A controller script can serialize with the command
 ```azure
 # Serialize the Path object resp as JSON.
     result = PathJSONSerializer(result).json
