@@ -1,5 +1,5 @@
-import os
-from flask import Blueprint, jsonify, current_app, request, make_response
+
+from flask import Blueprint, current_app, request, make_response
 
 
 # Cypher query functions
@@ -45,7 +45,7 @@ def concepts_concept_id_codes_get(concept_id):
 
     result = concepts_concept_id_codes_get_logic(neo4j_instance, concept_id, sab)
 
-    if result == []:
+    if not result:
         # Empty result
         err = get_404_error_string(prompt_string='No Codes with link to the specified Concept',
                                    custom_request_path=f"'concept_id' = '{concept_id}'",
@@ -487,7 +487,7 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
 
     iserr = result is None or result == []
 
-    if concept_id == None:
+    if concept_id is None:
         custom_request_path = f'any concept'
     else:
         custom_request_path = f"concept with 'identifier' = '{concept_id}'"
