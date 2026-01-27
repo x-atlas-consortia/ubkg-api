@@ -80,7 +80,7 @@ then your test endpoint URLs should start with `http://127.0.0.1:5002/`.
 
 For example, if you test using PostMan, you can set a global variable corresponding to the first part of your test URLs:
 
-![img.png](img.png)
+![img.png](img.png)![img.png](img.png)
 
 # Testing changes
 To test changes to ubkg-api, you will need to start a local instance of the API.
@@ -124,134 +124,87 @@ Various methods of testing endpoint URLs are possible, including:
 
 # Adding new endpoints
 
-## Development note
-The ubkg-api currently uses two architectures:
-1. "legacy" endpoints use a MVC (Model-View-Controller) architecture in which the "native" results from Cypher queries are translated by means of a class hierarchy. 
-2. Newer endpoints use a simpler architecture, in which Cypher queries of streamed JSON are essentially passed through to response with little additional processing.
+## Endpoint pattern
+The ubkg-api is a Flask application with Blueprint extensions.
 
-The following instructions are primarily for the legacy architecture.
+An endpoint in ubkg-api involves:
+1. A Blueprint registered in **app.py** that defines route (URL) paths
+2. A **controller script**  in the _common_routes_ path
+3. A **route** decorator in the controller script that defines the endpoint's route
+4. A **controller routine** invoked by the route decorator
+5. A **functional routine**  in the **functional script** (**neo4j_logic.py**), invoked by the controller routine
+6. A **Cypher query** in the _cypher_ path, executed by the functional script
+ 
+In general, a controller script has multiple decorators, and thus multiple routes.
 
-Each endpoint in ubkg-api involves:
-- One or more functions in the **_functional script_** (**neo4j_logic.py**). The usual use case is a parameterized function that prepares a Cypher query against the target neo4j instance.
-- a **_controller_** script in the __routes__ path that registers a BluePrint route in Flask and links a route to a function in the functional script.
-- a **model** script in the __models__ path that describes the class that corresponds to the response of the endpoint.
+Endpoints follow a general pattern.
+1. The **controller routine**:
+   + validates request parameters
+   + formats request parameters
+   + executes the functional routine
+   + processes the product of the functional routine:
+     + handles the case of no data (HTTP 404)
+     + optionally serializes neo4j Path objects as JSON
+     + redirects output that exceeds configured size limits to a defined S3 bucket (HTTP 403) and returns the URL to the bucket
+2. The **functional routine**:
+   + reads the Cypher query from file
+   + passes parameters to the Cypher query
+   + executes the Cypher query
+   + processes the response of the Cypher query:
+     + handles the case of a server timeout (HTTP 408)
+     + packages the response, extracting or wrapping as necessary
+3. The **Cypher query**, in general, returns in either a stream in JSON or as a neo4j Path object.
 
-## Tasks:
-### Create a model script
-The model script is a class that defines the response for the endpoint.
-#### NOTE: This is the legacy architecture.
-#### File path
-Create the script in the __models__ path.
-#### Class method
-1. `__init__`: For every key that is returned,
-   1. List as a parameter.
-   2. Declare the type in the `self.openapi_types` dictionary.
-   3. Declare the mapping in the `self.attribute_map` dictionary.
-   4. Declare an internal property of the class to match the key.
+## Helpers and utilities
+1. **neo4j_connection_helper.py** contains the _Neo4jConnectionHelper_ class that manages connectivity to a UBKG context neo4j instance specified in the **app.cfg**.
+2. The _utils_ path contains utilities and classes that
+   + validate and format request parameters for passing to Cypher queries.
+   + build error strings for responses (e.g., 404)
+   + serialize neo4j Path objects to JSON format
+   + redirect output to a S3 bucket
 
-For example, for a string value with key _approved_symbol_,
-```
-       self.openapi_types = {
-            'approved_symbol': str
-        }
-        self.attribute_map = {
-            'approved_symbol': 'approved_symbol',
-        }
-        self._approved_symbol = approved_symbol
-```
+## Development tasks for a new endpoint
+1. Using neo4j Browser, develop a parameterized Cypher query that returns in JSON format. 
+2. Store the Cypher query in a file in the _cypher_ path.
+3. If a new endpoint is required, 
+   + Build a new controller script.
+   + Define and register a new Blueprint.
+   + In the controller script, define a new decorator for the endpoint route.
+4. Build a new functional routine in **neo4j_logic.py** for the endpoint.
+5. In the controller script, 
+   + Define a new controller routine for the endpoint.
+   + Validate request parameters.
+   + Execute the functional routine.
+   + Handle 404s.
+   + Optionally serialize Path objects as JSON.
+   + Redirect to S3 as needed.
+6. In the functional routine,
+   + Read the Cypher query.
+   + Pass parameters to the query.
+   + Execute the query.
+   + Handle timeout errors.
+   
+## Update tests scripts
 
-2. Add `serialize` and `from_dict` methods that refer to the returned key/value pairs. Override the return type of the `from_dict` to point to the model class.
-
-The following code is from the **GeneDetail** model class in __genedetail__.
-```
-    def serialize(self):
-        return {
-            "approved_symbol": self._approved_symbol
-        }
-
-    @classmethod
-    def from_dict(cls, dikt) -> 'GeneDetail':
-        """Returns the dict as a model
-
-        :param dikt: A dict.
-        :type: dict
-        :return: The GeneDetail of this GeneDetail
-        :rtype: GeneDetail
-        """
-        return util.deserialize_model(dikt, cls)
-```
-
-3. For each key in the response, define getter and setter functions.
-```
-   @property
-   def approved_symbol(self):
-        return self.approved_symbol
-
-    @approved_symbol.setter
-    def approved_symbol(self, approved_symbol):
-        self._approved_symbol = approved_symbol
-
-```
-
-### Add functional script code to neo4j_logic.py
-The _neo4j_logic.py_ script contains endpoint-related functions. The usual use case is a parameterized Cypher query.
-
-#### Naming convention
-1. For functions called directly from controllers, name the function with format *model*_*method*_logic. For example, the function that satisfies the POST method for the *genedetail* controller would be called **genedetail_post_logic**.
-2. Subfunctions called by main functions should be prefixed with an underscore.
-
-#### Loading large Cypher queries
-If the Cypher query used by an endpoint function is complex, store an annotated copy of the query in the _cypher_ directory.
-
-#### Examples
-The methods for returning to GET requests and POST requests are slightly different. You should be able to find examples of either type of function.
-
-#### Loading Cypher query strings
-
-Large or complex Cypher query strings can be stored in files in the _cypher_ directory and loaded using the **loadquerystring** function in the **common_neo4j_logic.py** script.
-
-Following is the excerpt from **common_neo4j_logic.py** that loads the large Cypher query string used for the _genes_ endpoint.
-```
-
-    # Load Cypher query from file.
-    query: str = loadquerystring('codes_code_id_codes.cypher')
-    
-```
-#### Nested objects
-
-If your response body is to contain nested objects, you will need to create models for each type of sub-object. 
-The containing model script will need to import the sub-object models. 
-
-For an example, review **genedetail.py** in hs-ontology-api.
-
-### Build a controller script
-#### File path
-Create a Python package in the __routes__ path.
-
-#### Define Blueprint
-Define a Blueprint object and route for your endpoint. Follow examples in the existing controllers.
-
-### Register your Blueprint
-In *app.py*, 
-1. Import your Blueprint.
-2. Register your Blueprint with Flask.
-
-The following snippet registers the Blueprint:
-
-```
-from common_routes.codes.codes_controller import codes_blueprint
-self.app.register_blueprint(codes_blueprint)
-```
+Test scripts are in the _tests_ path.
+1. **ubkg_unit_test.sh** should test using curl for all known use cases, including:
+   + invalid parameters
+   + missing parameters
+   + missing data
+   + timeout errors
+   + large output
+2. **ubkg_system_test.sh** should test for a working gateway--i.e., that the route has been defined in the API server gateway.
 
 # Updating SmartAPI documentation
-To add the specification for a new endpoint to the SmartAPI documentation for hs-ontology-api, update the file **ubkg-api-spec.yaml**.
+To add the specification for a new endpoint to the SmartAPI documentation for hs-ontology-api, update the files:
+1. **ubkg-api-spec.yaml** for ubkg-api
+2. **ubkg-api-ubkgbox-spec.yaml** for the UBKGBox deployment
 
-ubkg-api-spec.yaml conforms to [Swagger OpenAPI](https://swagger.io/specification/) format.
+The YAML files conform to [Swagger OpenAPI](https://swagger.io/specification/) format.
 
 You will need to specify:
 1. Paths that correspond to your endpoint routes.
 2. Schemas that correspond to the responses from endpoints.
-
 
 # Building and publishing to PyPI
 
@@ -264,6 +217,54 @@ python3 -m twine upload dist/*
 
 ## Requirements
 Python 3.9 or newer
+
+# Optional JSON serialization
+
+A number of routes in the _concepts/paths_ path execute
+Cypher queries that return complex objects, including neo4j **Path** objects. 
+
+For example, the _/paths/subgraph_ endpoint executes the following 
+Cypher:
+```azure
+//For the set of paths,
+
+// 1. Obtain an "edges" object with information on all relationships in all paths.
+// 2. Obtain a "paths" object with path information on all paths.
+
+UNWIND(relationships(path)) AS r
+WITH path,collect({type:type(r),SAB:r.SAB,source:startNode(r).CUI,target:endNode(r).CUI}) AS path_r
+WITH collect(path) as paths, apoc.coll.toSet(apoc.coll.flatten(COLLECT(path_r))) AS edges
+
+// 3. Obtain a "nodes" object for all Concept nodes in all paths
+UNWIND(paths) AS path
+UNWIND(nodes(path)) AS n
+// Obtain preferred terms for Concept nodes.
+OPTIONAL MATCH (n)-[:PREF_TERM]->(t:Term)
+
+WITH paths,edges,collect(DISTINCT{id:n.CUI,name:t.name}) AS nodes
+RETURN {nodes:nodes, paths:paths, edges:edges} AS graph
+```
+The paths portion of the response is a neo4j Path object. Queries that attempt to return 
+responses with Path objects fail with an error that they "are not JSON serializable".
+
+Routes that return complex responses with Path objects include:
++ /paths/expand
++ /paths/trees
++ /paths/subgraph
++ /paths/subgraph/sequential
+
+To convert neo4j Path objects into JSON-serializable objects, queries use the code in **path_json_serializer.py**.
+The script contains the class _PathJSONSerializer_, 
+a custom serializer that can handle the returns from the Cypher queries behind
+the routes. 
+
+A controller script can serialize with the command
+```azure
+# Serialize the Path object resp as JSON.
+    result = PathJSONSerializer(result).json
+```
+
+The custom serializer offers more control than the available APOC functions.
 
 # Optional Timeout Feature
 

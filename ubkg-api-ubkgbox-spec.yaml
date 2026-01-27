@@ -15,14 +15,23 @@ servers:
     description: UBKGBox instance of ubkg-api
 tags:
   - name: codes
+    description: endpoints about codes from a SAB
   - name: concepts
+    description: endpoints about concepts
   - name: concepts/paths
+    description: endpoints that return graph representations of paths
   - name: concepts/paths/subgraph
+    description: endpoints that return graph representations of subgraphs
   - name: general
+    description: structural and source information
   - name: node-types
+    description: types (labels) of nodes
   - name: sabs
+    description: Source ABbreviations (SABs) that identify data sources in the UBKG
   - name: semantic-types
+    description: information about semantic types
   - name: terms
+    description: information linking terms to concepts and codes
 security:
   - umls_key: []
 paths:
@@ -268,7 +277,7 @@ paths:
   /concepts/{concept_id}/nodeobjects:
     get:
       operationId: concepts_identifier_nodes_get
-      summary: Returns a set of "Concept Node objects" (also known as concept subgraphs) that "match" an identifier. [Each Concept node in the UBKG is the origin of a "concept subgraph" that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A "Concept Node object" represents this subgraph as a set of Concept properties--i.e., all of the Concept's linked Codes, terms, definitions, and semantic types. A "match" is an exact match between an identifier and a text-based property in a Concept Node object. Because an identifier may match properties in more than one Concept Node object, the endpoint can return multiple Concept Node objects.]
+      summary: Returns a set of "Concept Node objects" (or "concept subgraphs") that "match" the identifier (concept_id). A concept node in the UBKG is the origin of a "concept subgraph" that links a Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A "Concept Node object" represents this subgraph as a set of Concept properties--i.e., all of the Concept's linked Codes, terms, definitions, and semantic types. A "match" is an exact match between an identifier and a text-based property in a Concept Node object. Because an identifier may match properties in more than one Concept Node object, the endpoint can return multiple Concept Node objects.
       parameters:
         - name: concept_id
           in: path
@@ -1634,20 +1643,20 @@ components:
                     example: T018
     ConceptNodes: # Schema name
       type: object
-      description: A set of "Concept node" objects that translate and consolidate information about Concept nodes in the UBKG. Each Concept node in the UBKG is the origin of a subgraph that links the Concept node to a set of Code, Term, Definition, and Semantic Type nodes. The Concept node object represents information extracted from all of the nodes in the Concept node's subgraph.
+      description: A set of "Concept node" objects that translate and consolidate information about Concept nodes in the UBKG. A Concept node in the UBKG is the origin of a subgraph that links a Concept node to a set of Code, Term, Definition, and Semantic Type nodes. A Concept node object represents a concept subgraph.
       properties:
-        nodes:
+        nodeobjects:
           type: array
-          description: Array of Concept node objects. Each Concept node object represents a Concept node as the origin of a subgraph of linked Code, Term, Definition, and Semantic Type nodes.
+          description: Array of concept node objects. Each concept node object represents a Concept node as the origin of a subgraph of linked Code, Term, Definition, and Semantic Type nodes.
           items:
             type: object
             properties:
-              node:
+              concept:
                 type: object
                 properties:
                   cui:
                     type: string
-                    description: the identifier for the Concept node
+                    description: the identifier for the Concept node that is the origin of a concept node, or concept subgraph
                     example: C0007634
                   pref_term:
                     type: string

@@ -25,7 +25,7 @@ def sources_get():
 
     sab = parameter_as_list(param_name='sab')
     context = parameter_as_list(param_name='context')
-    # JAS 24 May 2024
+
     # Validate context parameter against enum.
     val_enum = ['base_context', 'data_distillery_context', 'hubmap_sennet_context']
     if context is not None:
@@ -48,5 +48,5 @@ def sources_get():
         err = get_404_error_string(prompt_string="No sources",timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Mar 2025
+
     return redirect_if_large(resp=result)

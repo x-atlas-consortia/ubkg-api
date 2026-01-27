@@ -1,3 +1,14 @@
+"""
+January 2026
+Open API base model class.
+This has been re-introduced to the ubkg-api to resolve dependency issues in the hs-ontology-api.
+
+The hs-ontology-api currently uses subclasses of the OpenAPI model class to translate Cypher
+streams from the neo4j driver. This was the original behavior of the ubkg-api.
+
+Once the hs-ontology-api endpoints have been refactored to where they directly use JSON streams
+instead of translating Cypher streams, classes related to OpenAPI will be removed from ubkg-api.
+"""
 # coding: utf-8
 
 import sys

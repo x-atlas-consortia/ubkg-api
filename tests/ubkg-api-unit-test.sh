@@ -197,7 +197,7 @@ echo | tee -a ubkg_unit_test.out
 
 echo "2. concepts/C0678222/concepts => valid concept; should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C4722518/concepts" \
+ --url "${UBKG_URL}/concepts/C0678222/concepts" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -321,7 +321,7 @@ echo | tee -a ubkg_unit_test.out
 
 echo "4. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=-1&limit=5 => skip negative; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=X&limit=5" \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=-1&limit=5" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -487,7 +487,7 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "13. concepts/C2720507/paths/expand?sab=SNOMEDCT_US&rel=isa&mindepth=9&maxdepth=10&skip=1&limit=10 => long query; should return custom 404" | tee -a ubkg_unit_test.out
+echo "13. concepts/C2720507/paths/expand?sab=SNOMEDCT_US&rel=isa&mindepth=9&maxdepth=10&skip=1&limit=10 => long query; should return custom 504" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=SNOMEDCT_US&rel=isa&mindepth=9&maxdepth=10&skip=1&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
@@ -510,7 +510,7 @@ echo | tee -a ubkg_unit_test.out
 
 echo "16. concepts/C2720507/paths/expand?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of&mindepth=2&maxdepth=3&skip=0&limit=10 => valid parameters, URL-encoded lists for sab, rel; should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=SNOMEDCT_US&sab=UBERON&rel=isa&rel=part_of&mindepth=2&maxdepth=3&limit=10" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of&mindepth=2&maxdepth=3&skip=0&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -552,14 +552,14 @@ echo | tee -a ubkg_unit_test.out
 
 echo "5. concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=1&skip=1&limit=10 => non-numeric mindepth: should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=-1&skip=1&limit=10" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=1&skip=1&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
 echo "6. concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=1&maxdepth=Z&skip=1&limit=10 => non-numeric maxdepth: should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=-1&skip=1&limit=10" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=1&skip=1&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -573,14 +573,14 @@ echo | tee -a ubkg_unit_test.out
 
 echo "8. concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=1&maxdepth=3&skip=-1&limit=10 => negative skip: should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=3&skip=-1&limit=10" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=1&maxdepth=3&skip=-1&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
 echo "9. concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=1&maxdepth=3&skip=1&limit=-10 => negative limit: should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=Z&maxdepth=3&skip=-1&limit=10" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=isa&mindepth=1&maxdepth=3&skip=1&limit=-10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -691,19 +691,6 @@ echo | tee -a ubkg_unit_test.out
 
 
 #--------------------------------------------
-echo "TESTS FOR: node-types/counts GET" | tee -a ubkg_unit_test.out
-echo "SIGNATURE: /node-types/counts" | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-
-echo "1. node-types/counts GET => blocked; should return custom 400" | tee -a ubkg_unit_test.out
-curl --request GET \
- --url "${UBKG_URL}/node-types/counts" \
- --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-
-#--------------------------------------------
 echo "TESTS FOR: node-types/<node-type>/counts GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /node-types/<node-type>/counts" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -721,18 +708,6 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-#--------------------------------------------
-echo "TESTS FOR: node-types/counts-by-sab GET" | tee -a ubkg_unit_test.out
-echo "SIGNATURE: /node-types/counts-by-sab" | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-
-echo "1. node-types/counts-by-sab GET => blocked because of likely timeout; should return custom 400" | tee -a ubkg_unit_test.out
-curl --request GET \
- --url "${UBKG_URL}/node-types/counts-by-sab?test=test" \
- --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
 
 #--------------------------------------------
 echo "TESTS FOR: node-types/<node-type>/counts-by-sab GET" | tee -a ubkg_unit_test.out
@@ -743,7 +718,7 @@ echo | tee -a ubkg_unit_test.out
 
 echo "1. node-types/Codez/counts-by-sab?sab=SNOMEDCT_US GET => no match; should return custom 404" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/node-types/Codez/counts-by-sab?sab=SNOMED_US" \
+ --url "${UBKG_URL}/node-types/Codez/counts-by-sab?sab=SNOMEDCT_US" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -905,18 +880,6 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-#--------------------------------------------
-echo "TESTS FOR: sabs/codes/details GET" | tee -a ubkg_unit_test.out
-echo "SIGNATURE: /sabs/codes/details" | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-
-echo "1. sabs/codes/details => blocked; return custom 400" | tee -a ubkg_unit_test.out
-curl --request GET \
- --url "${UBKG_URL}/sabs/codes/details" \
- --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
 
 #--------------------------------------------
 echo "TESTS FOR: sabs/<SAB>/codes/details GET" | tee -a ubkg_unit_test.out
@@ -970,19 +933,6 @@ echo "7. sabs/SNOMEDCT_US/codes/details?skip=0&limit=10 => valid: should return 
 curl --request GET \
  --url "${UBKG_URL}/sabs/SNOMEDCT_US/codes/details?skip=0&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-
-#--------------------------------------------
-echo "TESTS FOR: sabs/term-types GET" | tee -a ubkg_unit_test.out
-echo "SIGNATURE: /sabs/term-types" | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-echo | tee -a ubkg_unit_test.out
-
-echo "1. sabs/term-types => blocked; should return custom 400" | tee -a ubkg_unit_test.out
-curl --request GET \
- --url "${UBKG_URL}/sabs/term-types" \
- --header "Accept: application/json"  | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
@@ -1083,14 +1033,14 @@ echo | tee -a ubkg_unit_test.out
 
 echo "4. semantics/semantic-types/Anatomical%20Structure?skip=a&limit=10 => non-numeric skip; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=-1&limit=10" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=a&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
 echo "5. semantics/semantic-types/Anatomical%20Structure?skip=1&limit=a => non-numeric limit; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=1&limit=-1" \
+ --url "${UBKG_URL}/semantics/semantic-types/Anatomical%20Structure?skip=1&limit=a" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -1241,6 +1191,13 @@ echo | tee -a ubkg_unit_test.out
 echo "6. /sources?context=base_context GET => valid context; should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/sources?context=base_context" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "7. /sources?sab=X&context=base_context GET => invalid SAB, valid context; should return 404" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/sources?sab=X&context=base_context" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out

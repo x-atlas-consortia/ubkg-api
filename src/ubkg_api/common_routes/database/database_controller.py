@@ -13,5 +13,5 @@ def database_info_server_get():
 
     # Obtain neo4j database name, server, edition
     result =  database_info_server_get_logic(neo4j_instance)
-    # Mar 2025
+
     return redirect_if_large(resp=result)

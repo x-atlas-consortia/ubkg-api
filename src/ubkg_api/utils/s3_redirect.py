@@ -26,6 +26,7 @@ def getstashurl(resp, s3w:S3Worker)-> flask.Response:
         err = 'Unexpected error storing large results in S3.'
         return make_response(err, 500)
 
+
 def redirect_if_large(resp) -> flask.Response:
     """
     Checks the size of a string, assumed to be the response from an API endpoint.
@@ -71,10 +72,5 @@ def redirect_if_large(resp) -> flask.Response:
             if err != "ok":
                 return make_response(err, 403)
 
-    # Normal return
-    if isinstance(resp, dict):
-        # The response is already in JSON format.
-        return resp
-    else:
-        # The response is a list.
-        return jsonify(resp)
+    # Otherwise, return the processed response
+    return jsonify(resp)
