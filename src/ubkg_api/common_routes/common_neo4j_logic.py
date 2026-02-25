@@ -198,7 +198,7 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
     querytxt = loadquerystring('code_code_id_terms.cypher')
 
     # Filter by code_id.
-    querytxt = querytxt.replace('$code_id', f"'{code_id}'")
+    querytxt = querytxt.replace('$code_id', f'"{code_id}"')
 
     # Filter by code SAB.
     if len(term_type) == 0:

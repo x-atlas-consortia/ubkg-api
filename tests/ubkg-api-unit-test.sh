@@ -154,7 +154,14 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
+echo "4. codes/'/terms?term_type=PT => single quote; should return 404" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/'/terms" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
 
+exit
 #--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/codes GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/<concept_id>/codes"| tee -a ubkg_unit_test.out
