@@ -2,6 +2,7 @@
 # Common functions used for format HTTP error messages (404, 400) for endpoints.
 
 from flask import request, jsonify
+import re
 
 def wrap_message(key:str, msg:str) ->dict:
     """
@@ -287,6 +288,34 @@ def check_max_mindepth(mindepth: int, max_mindepth: int) -> str:
     if mindepth > max_mindepth:
         err = f"The maximum value of 'mindepth' for this endpoint is {max_mindepth}. " \
                f"Larger values of 'mindepth' result in queries that will exceed the server timeout."
+        return wrap_message(key="message", msg=err)
+
+    return "ok"
+
+def validate_param_string_chars(param_name: str, param_values: list[str]) -> str:
+    """
+    Verifies that a parameter value does not contain characters that
+    may be used maliciously.
+    :param param_name: name of the parameter
+    :param param_values: value of the parameter
+    """
+    for param_value in param_values:
+        if not re.fullmatch(r"[A-Z0-9_:'\"]+", param_value):
+            err = f"Invalid value ('{param_value}') for parameter '{param_name}'. Only alphanumeric characters, underscores, colons, single quotes, and double quotes are allowed. "
+            return wrap_message(key="message", msg=err)
+
+    return "ok"
+
+def validate_code_format(param_name: str, param_value: str) -> str:
+    """
+    Verifies that a parameter is in format SAB:CODE
+    :param param_name: name of the parameter
+    :param param_value: value of the parameter
+
+    Use case: code ids
+    """
+    if not re.fullmatch(r'[A-Z0-9_\-.]+:[A-Z0-9_\-.]+', param_value, re.IGNORECASE):
+        err = f"Invalid value ('{param_value}') for parameter '{param_name}'. The format is <SAB>:<CODE>."
         return wrap_message(key="message", msg=err)
 
     return "ok"

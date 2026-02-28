@@ -154,9 +154,16 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "4. codes/'/terms?term_type=PT => single quote; should return 404" | tee -a ubkg_unit_test.out
+echo "4. codes/X/terms?term_type=PT => invalid code format; should return 400" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/codes/'/terms" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "5. codes/DOID:9351/terms?term_type=* => invalid character; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/DOID:9351/terms?term_type=*" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out

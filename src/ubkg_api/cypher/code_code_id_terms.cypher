@@ -4,7 +4,8 @@
 // The list can be filtered to return only those terms of a particular "term type"--which, in the
 // UBKG, corresponds to the type of relationship between the term and the code.
 
-// The function that loads this query will replace values for code_id and termtype_filter.
+// The function that loads this query will replace code_id and termtype_filter with values
+// from path and query parameters of the call to the endpoint.
 
 CALL
 {

@@ -12,6 +12,7 @@ import logging
 import re
 from typing import List
 import os
+import json
 
 # For handling configurable timeouts
 from werkzeug.exceptions import GatewayTimeout
@@ -31,6 +32,31 @@ logger = logging.getLogger(__name__)
 #--------------------
 # UTILITY ROUTINES
 # -------------------
+
+def translate_query(session: neo4j.Session, querytxt: str, **params) -> str:
+    """
+    Returns a neo4j query string hydrated with parameter values.
+    To be used for debugging or logging only.
+    :param session: neo4j session
+    :param params: parameter values
+    :param querytxt: query string
+    """
+
+    display_query = querytxt
+    for key, value in params.items():
+        print(key, value)
+        if isinstance(value, str):
+            replacement = f"'{value}'"
+        elif isinstance(value, list):
+            replacement = json.dumps(value)
+        elif value is None:
+            replacement = 'null'
+        else:
+            replacement = str(value)
+        display_query = display_query.replace(f'${key}', replacement)
+
+    print('translate_query: ',display_query)
+    return display_query
 
 def loadquerystring(filename: str) -> str:
     """
@@ -183,7 +209,7 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]
     return result[0]
 
 
-def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -> dict:
+def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type: list[str] | None = None) -> dict:
     """
     Obtains information on terms that link to a code.
 
@@ -194,23 +220,36 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
     """
     result: list[dict] = []
 
-    # Load and parameterize query.
+    # Load query template.
     querytxt = loadquerystring('code_code_id_terms.cypher')
 
-    # Filter by code_id.
-    querytxt = querytxt.replace('$code_id', f'"{code_id}"')
+    # The query template string contains placeholders:
+    # $code_id, which corresponds to a neo4j parameter
+    # $termtype_filter, which corresponds to an optional filtering clause
 
-    # Filter by code SAB.
-    if len(term_type) == 0:
-        querytxt = querytxt.replace('$termtype_filter', '')
+    # BUILD QUERY PARAMS
+
+    # Required filter on code_id.
+    params: dict = {"code_id": code_id}
+
+    # Optional filter by term type.
+    # The values from term_type are passed as a Neo4j parameter.
+    if term_type:
+        term_type_clause = "AND TYPE(r) IN $term_type_filter"
+        params["term_type_filter"] = [t.upper() for t in term_type]
     else:
-        # case-insensitive
-        querytxt = querytxt.replace('$termtype_filter', f" AND TYPE(r) IN {[t.upper() for t in term_type]}")
+        term_type_clause = ""  # empty string replaces the placeholder
 
+    # Update the query template with the optional term type filter.
+    querytxt = querytxt.replace('$termtype_filter', term_type_clause)
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
     with neo4j_instance.driver.session() as session:
+
         try:
-            recds: neo4j.Result = session.run(query)
+            recds: neo4j.Result = session.run(query,**params)
 
             for record in recds:
                 result.append(record.get('terms'))
@@ -220,7 +259,8 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    # Extract from list.
+    # Because of the COLLECTS in the Cypher query, the response is a list that contains a list.
+    # Return the inner list.
     return result[0]
 
 #--------------------
