@@ -19,6 +19,12 @@ def codes_code_id_codes_get(code_id):
     :param code_id: The code identifier
     :type code_id: str
     """
+
+    # Validate code_id parameter.
+    err = validate_code_format(param_name='code_id', param_value=code_id)
+    if err != 'ok':
+        return make_response(err, 400)
+
     # Validate sab parameter.
     err = validate_query_parameter_names(parameter_name_list=['sab'])
     if err != 'ok':
@@ -26,6 +32,10 @@ def codes_code_id_codes_get(code_id):
 
     # Obtain a list of sab parameter values.
     sab = parameter_as_list(param_name='sab')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='sab', param_values=sab)
+    if err != 'ok':
+        return make_response(err, 400)
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 

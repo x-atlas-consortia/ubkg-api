@@ -142,35 +142,54 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     :param code_id: CodeID for the Code node, in format <SAB>:<CODE>
     :param sab: optional list of SABs from which to select codes that share links to the Concept node linked to the
     Code node
+
+    # Assumption: the parameters code_id and sab were validated by the controller.
     """
     result: list[dict] = []
 
-    # Load Cypher query from file.
+    # Load Cypher query template from file.
     querytxt: str = loadquerystring(filename='codes_code_id_codes.cypher')
+    # The query template string contains placeholders:
+    # $code_id, which corresponds to a neo4j parameter
+    # $sabfilter, which corresponds to an optional filtering clause
 
     # Filter by code_id.
-    querytxt = querytxt.replace('$code_id', f"'{code_id}'")
+    #querytxt = querytxt.replace('$code_id', f"'{code_id}'")
 
-    # Filter by code SAB.
-    if len(sab) == 0:
-        querytxt = querytxt.replace('$sabfilter', '')
+    # BUILD QUERY PARAMS
+
+    # Required filter on code_id.
+    params: dict = {"code_id": code_id}
+
+    # Optional filter by sab.
+    # The values from term_type are passed as a Neo4j parameter.
+    if len(sab) > 0:
+        sab_clause = f" AND c.SAB IN $sabfilter"
+        params["sabfilter"] = sab
     else:
-        querytxt = querytxt.replace('$sabfilter', f" AND c.SAB IN {sab}")
+        sab_clause = ""  # empty string replaces the placeholder
 
+    # Update the query template with the optional sab filter.
+    querytxt = querytxt.replace('$sabfilter', sab_clause)
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with (neo4j_instance.driver.session() as session):
         try:
-            recds: neo4j.Result = session.run(query)
+            # Execute the query with neo4j params
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('codes'))
+
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    # response is a list of lists.
+    # Because of the COLLECTS in the Cypher query, the response is a list that contains a list.
+    # Return the inner list.
     return result[0]
 
 
@@ -249,6 +268,7 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type: list[s
     with neo4j_instance.driver.session() as session:
 
         try:
+            # Execute the query with neo4j params
             recds: neo4j.Result = session.run(query,**params)
 
             for record in recds:

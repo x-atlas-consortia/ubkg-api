@@ -107,6 +107,22 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
+echo "6. /codes/x/codes?sab=CHV&sab=DOID => invalid code format; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/x/codes?sab=CHV&sab=DOID" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "6. /codes/SNOMEDCT_US%3A254837009/codes?sab=* => invalid parameter; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3A254837009/codes?sab=*" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+exit
+
 #--------------------------------------------
 echo "TESTS FOR: codes/<code_id>/concepts" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /codes/<code_id>/concepts" | tee -a ubkg_unit_test.out
@@ -168,7 +184,6 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-exit
 #--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/codes GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/<concept_id>/codes"| tee -a ubkg_unit_test.out
