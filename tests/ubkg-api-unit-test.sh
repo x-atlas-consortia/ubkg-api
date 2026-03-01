@@ -148,8 +148,6 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-exit
-
 #--------------------------------------------
 echo "TESTS FOR: codes/<code_id>/terms" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /codes/<code_id>/terms" | tee -a ubkg_unit_test.out
@@ -217,6 +215,22 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
+
+echo "3. concepts/C0678222/codes?sab=EFO,MONDO => valid concept, with sab list; should return 200" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0678222/codes?sab=EFO,MONDO" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "5. concepts/C0678222/codes?sab=* => invalid parameter; should return r00" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0678222/codes?sab=*" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+exit
 
 #--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/concepts GET" | tee -a ubkg_unit_test.out

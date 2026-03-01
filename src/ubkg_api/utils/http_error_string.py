@@ -300,7 +300,8 @@ def validate_param_string_chars(param_name: str, param_values: list[str]) -> str
     :param param_values: value of the parameter
     """
     for param_value in param_values:
-        if not re.fullmatch(r"[A-Z0-9_:'\"]+", param_value):
+
+        if not re.fullmatch(r"[A-Z0-9_:'\"]+", param_value, re.IGNORECASE):
             err = f"Invalid value ('{param_value}') for parameter '{param_name}'. Only alphanumeric characters, underscores, colons, single quotes, and double quotes are allowed. "
             return wrap_message(key="message", msg=err)
 

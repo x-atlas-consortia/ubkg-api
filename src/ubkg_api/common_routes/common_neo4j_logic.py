@@ -241,6 +241,7 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type: list[s
     :param code_id: a UBKG Code in format SAB:CodeId
     :param term_type: an optional list of acronyms for a code type
 
+    # Assumption: the parameters code_id and term_type were validated by the controller.
     """
     result: list[dict] = []
 
@@ -298,28 +299,44 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
     :param neo4j_instance: neo4j connection
     :param concept_id: a Concept Unique Identifier (CUI)
     :param sab: a list of SAB codes by which to filter codes in response
+
+    # Assumption: the parameter sab was validated by the controller.
     """
 
     result: list[str] = []
 
-    # Load Cypher query from file.
+    # Load query template.
     querytxt: str = loadquerystring(filename='concepts_concept_id_codes.cypher')
+    # The query template string contains placeholders:
+    # $concept_id, which corresponds to a neo4j parameter
+    # $sabfilter, which corresponds to an optional filtering clause
 
-    # Filter by parameters.
-    querytxt = querytxt.replace('$concept_id', f"'{concept_id}'")
-    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    if len(sabjoin) == 0:
-        querytxt = querytxt.replace('$sabfilter','')
+    # BUILD QUERY PARAMS
+
+    # Required filter on concept_id.
+    params: dict = {"concept_id": concept_id}
+
+    #sabjoin = format_list_for_query(listquery=sab, doublequote=True)
+
+    # Optional filter by sab.
+    # The values from sab are passed as a Neo4j parameter.
+    if len(sab) > 0:
+        sab_clause = f" AND b.SAB IN $sabfilter"
+        params["sabfilter"] = [s.upper() for s in sab]
     else:
-        querytxt = querytxt.replace('$sabfilter',f'AND b.SAB IN [{sabjoin}]')
-    querytxt = querytxt.replace('$SAB', sabjoin)
+        sab_clause = ""  # empty string replaces the placeholder
 
+    # Update the query template with the optional sab filter.
+    querytxt = querytxt.replace('$sabfilter', sab_clause)
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
 
+            # Execute the query with neo4j params
+            recds: neo4j.Result = session.run(query, **params)
             for record in recds:
                 result.append(record.get('codes'))
 
