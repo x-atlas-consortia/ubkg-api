@@ -350,7 +350,7 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
 def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> List[dict]:
     """
     Returns information on the Concept nodes that have relationships with the
-    specificed concept.
+    specified concept.
     :param neo4j_instance: neo4j connection
     :param concept_id: a Concept Unique Identifier (CUI)
 
@@ -358,17 +358,25 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
 
     result: list[dict] = []
 
-    # Load Cypher query from file.
+    # Load Cypher query template from file.
     querytxt: str = loadquerystring(filename='concepts_concept_id_concepts.cypher')
+    # The query template string contains placeholders:
+    # $concept_id, which corresponds to a neo4j parameter
 
-    # Filter by parameters.
-    querytxt = querytxt.replace('$concept_id', f"'{concept_id}'")
+    # BUILD QUERY PARAMS
 
+    # Required filter on concept_id.
+    params: dict = {"concept_id": concept_id}
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+            #recds: neo4j.Result = session.run(query)
+
+            # Execute the query with neo4j params
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('concepts'))
@@ -378,7 +386,8 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    # Extract from list.
+    # Because of the COLLECTS in the Cypher query, the response is a list that contains a list.
+    # Return the inner list.
     return result[0]
 
 def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -> List[dict]:
