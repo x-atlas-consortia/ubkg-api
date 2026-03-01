@@ -153,9 +153,6 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     # $code_id, which corresponds to a neo4j parameter
     # $sabfilter, which corresponds to an optional filtering clause
 
-    # Filter by code_id.
-    #querytxt = querytxt.replace('$code_id', f"'{code_id}'")
-
     # BUILD QUERY PARAMS
 
     # Required filter on code_id.
@@ -200,20 +197,27 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]
     :param neo4j_instance: neo4j connection
     :param code_id: CodeID for the Code node, in format <SAB>:<CODE>
 
+    # Assumption: the parameter code_id was validated by the controller.
+
     """
     result: list[dict] = []
 
-    # Load Cypher query from file.
+    # Load Cypher query template from file.
     querytxt: str = loadquerystring(filename='codes_code_id_concepts.cypher')
 
-    # Filter by code_id.
-    querytxt = querytxt.replace('$code_id', f"'{code_id}'")
+    # BUILD QUERY PARAMS
 
+    # Required filter on code_id.
+    params: dict = {"code_id": code_id}
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            # Execute the query with neo4j params
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('concepts'))
@@ -224,7 +228,8 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    # Extract from list.
+    # Because of the COLLECTS in the Cypher query, the response is a list that contains a list.
+    # Return the inner list.
     return result[0]
 
 

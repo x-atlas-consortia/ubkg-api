@@ -60,6 +60,12 @@ def codes_code_id_concepts_get(code_id):
 
     :rtype: Union[List[ConceptDetail], Tuple[List[ConceptDetail], int], Tuple[List[ConceptDetail], int, Dict[str, str]]
     """
+
+    # Validate code_id parameter.
+    err = validate_code_format(param_name='code_id', param_value=code_id)
+    if err != 'ok':
+        return make_response(err, 400)
+
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
     result = codes_code_id_concepts_get_logic(neo4j_instance, code_id)
 

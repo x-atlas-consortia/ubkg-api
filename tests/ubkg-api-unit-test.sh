@@ -121,8 +121,6 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-exit
-
 #--------------------------------------------
 echo "TESTS FOR: codes/<code_id>/concepts" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /codes/<code_id>/concepts" | tee -a ubkg_unit_test.out
@@ -142,6 +140,15 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
+
+echo "3. /codes/X/concepts => invalid code format; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/x/concepts" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+exit
 
 #--------------------------------------------
 echo "TESTS FOR: codes/<code_id>/terms" | tee -a ubkg_unit_test.out
