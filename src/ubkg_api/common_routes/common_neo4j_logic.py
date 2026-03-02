@@ -688,40 +688,35 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
 
     """
     result: list[dict] = []
-    # Load and parameterize base query.
+
+    # Load query template.
     querytxt = loadquerystring('semantics_semantic_types.cypher')
-
-    # The query can handle a list of multiple type identifiers (with proper formatting using format_list_for_query) or
-    # no values; however, the routes in the controller limit the type identifier to a single path variable.
-    # Convert single value to a list with one element.
     if semtype is None:
-        semtypes = []
-    else:
-        semtypes = [semtype]
+        semtype = ""
 
-    types = format_list_for_query(listquery=semtypes, doublequote=True)
-    querytxt = querytxt.replace('$types', types)
-
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
+    # Build params.
+    params: dict = {"types": semtype,
+                    "skip": int(skip),
+                    "limit": int(limit)
+                    }
 
     # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+            translate_query(session,querytxt=querytxt, **params)
+            recds: neo4j.Result = session.run(query, **params)
 
             # Add the relative position (skip) for each semantic type.
             position = int(skip) + 1
-            for record in recds:
-                semtypes = record.get('semantic_types')
-                for semtype in semtypes:
+            for recd in recds:
+                semtypes = recd.get('semantic_types')
+                for s in semtypes:
                     typewithpos = dict(position=position)
-                    typewithpos['semantic_type'] = semtype
+                    typewithpos['semantic_type'] = s
                     position = position + 1
                     result.append(typewithpos)
-
         except neo4j.exceptions.ClientError as e:
              # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
@@ -748,29 +743,23 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
 
     """
     result: list[dict] = []
-    # Load and parameterize base query.
+    # Load query template.
     querytxt = loadquerystring('semantics_semantic_subtypes.cypher')
 
-    # The query can handle a list of multiple type identifiers (with proper formatting using format_list_for_query) or
-    # no values; however, the routes in the controller limit the type identifier to a single path variable.
-    # Convert single value to a list with one element.
+    # Build params
     if semtype is None:
-        semtypes = []
-    else:
-        semtypes = [semtype]
-
-    types = format_list_for_query(listquery=semtypes, doublequote=True)
-    querytxt = querytxt.replace('$types', types)
-
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
+        semtype = ""
+    params: dict = {"types": semtype,
+                    "skip": int(skip),
+                    "limit": int(limit)}
 
     # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+            translate_query(session,querytxt=querytxt, **params)
+            recds: neo4j.Result = session.run(query, **params)
 
             # Add the relative position (skip) for each semantic subtype.
             position = int(skip) + 1
