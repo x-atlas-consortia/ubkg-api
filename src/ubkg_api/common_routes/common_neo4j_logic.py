@@ -653,21 +653,16 @@ def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltyp
     where r1.SAB = "UBERON" and r2.SAB="PATO"
     """
 
-    # Load query string and associate parameter values to variables.
+    # Load query string template.
     querytxt = loadquerystring(filename='concepts_subgraph_sequential.cypher')
-    querytxt = querytxt.replace('$startCUI', f'"{startCUI}"')
+    params: dict = {"startCUI": startCUI,
+                    "reltypes": reltypes,
+                    "relsabs": relsabs,
+                    "skip": int(skip),
+                    "limit": int(limit)
+                    }
 
-    sabjoin = format_list_for_query(listquery=reltypes, doublequote=True)
-    querytxt = querytxt.replace('$reltypes', sabjoin)
-    reljoin = format_list_for_query(listquery=relsabs, doublequote=True)
-    querytxt = querytxt.replace('$relsabs', reljoin)
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
-
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    return get_graph(neo4j_instance, query=query)
-
+    return get_graph(neo4j_instance, querytxt=querytxt, **params)
 
 #--------------------
 # semantics ENDPOINT ROUTINES

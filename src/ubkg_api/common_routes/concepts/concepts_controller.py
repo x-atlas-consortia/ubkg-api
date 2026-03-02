@@ -483,6 +483,7 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
 
     in which r1.SAB = 'UBERON' and r2.SAB = 'PATO'
 
+    Assumes that string parameters have been validated by the controller.
     """
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
@@ -517,6 +518,11 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
 
     # Get remaining parameter values from the path or query string.
     relsequence = parameter_as_list(param_name='relsequence')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='relsequence', param_values=relsequence)
+    if err != 'ok':
+        return make_response(err, 400)
+
     reltypes = []
     relsabs = []
     for rs in relsequence:
@@ -527,6 +533,15 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
         relsabs.append(rs.split(':')[0].upper())
         reltypes.append(rs.split(':')[1])
 
+        # Validate parameter values against whitelist.
+        err = validate_param_string_chars(param_name='relsabs', param_values=relsabs)
+        if err != 'ok':
+            return make_response(err, 400)
+
+        # Validate parameter values against whitelist.
+        err = validate_param_string_chars(param_name='reltypes', param_values=reltypes)
+        if err != 'ok':
+            return make_response(err, 400)
 
     result = concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=concept_id, reltypes=reltypes, relsabs=relsabs,
                                        skip=skip, limit=limit)
