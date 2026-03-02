@@ -1166,22 +1166,22 @@ def sabs_codes_counts_query_get(neo4j_instance, sab=None, skip=None, limit=None)
     """
     sabs: list[dict] = []
 
-    # Load and parameterize query.
+    # Load query template.
     querytxt = loadquerystring('sabs_codes_counts.cypher')
-    if sab is None:
-        sabjoin = ''
-    else:
-        sabjoin = format_list_for_query(listquery=[sab], doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
 
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
+    if sab is None:
+        sab = ""
+
+    # BUILD PARAMS.
+    params = {"sab": sab,
+              "skip": int(skip),
+              "limit": int(limit)}
 
     # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+            recds: neo4j.Result = session.run(query, **params)
 
             # Track the position of the sabs in the list, based on the value of skip.
             position = int(skip) + 1
