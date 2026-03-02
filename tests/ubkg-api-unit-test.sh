@@ -230,8 +230,6 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-exit
-
 #--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/concepts GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/<concept_id>/concepts" | tee -a ubkg_unit_test.out
@@ -272,6 +270,7 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
+exit
 #--------------------------------------------
 echo "TESTS FOR: concepts/paths/subgraph" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/paths/subgraph?sab=<sab>&rel=<relationship type>&skip=<number>&limit=<number>" | tee -a ubkg_unit_test.out

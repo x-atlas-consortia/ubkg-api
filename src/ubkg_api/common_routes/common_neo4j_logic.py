@@ -405,8 +405,6 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
     # The query template string contains placeholders:
     # $concept_id, which corresponds to a neo4j parameter
 
-    # Filter by parameters.
-    #querytxt = querytxt.replace('$concept_id', f"'{concept_id}'")
 
     # BUILD QUERY PARAMS
 
@@ -476,21 +474,27 @@ def concepts_identifier_node_get_logic(neo4j_instance, search: str) -> List[dict
 # concepts/paths ENDPOINT UTILITIES
 # -------------------
 
-def get_graph(neo4j_instance, query: neo4j.Query) -> List[dict]:
+def get_graph(neo4j_instance, querytxt: str, **params) -> List[dict]:
     """
 
     Used by paths-related endpoints to return a graph object.
-    :param query: query string with timeout
+    :param querytxt: query string with timeout
     :param neo4j_instance: UBKG connection
+    :param params: additional query parameters
 
     Assumes that the query string returns a JSON object named graph in the nodes/paths/edges format.
 
     """
     result: list[dict] = []
 
+    # Instantiate the query with the configured timeout.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+            #recds: neo4j.Result = session.run(query)
+            debug_query = translate_query(session, querytxt=querytxt, **params)
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('graph'))
@@ -521,25 +525,27 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     :param maxdepth: maximum path length
     :param skip: paths to skip
     :param limit: maximum number of paths to return
+
+    Assumes that parameters were validated by the controller.
     """
 
-    # Load query string and associate parameter values to variables.
+    # Load query string template.
     querytxt = loadquerystring(filename='concepts_expand.cypher')
+    # The query template string contains placeholders:
+    # $concept_id, $mindepth, $maxdepth, $skip, and $limit correspond to a neo4j parameters
+    # $sab, $rel correspond to filters
 
-    querytxt = querytxt.replace('$query_concept_id', f'"{query_concept_id}"')
-    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
-    reljoin = format_list_for_query(listquery=rel, doublequote=True)
-    querytxt = querytxt.replace('$rel', reljoin)
-    querytxt = querytxt.replace('$mindepth', str(mindepth))
-    querytxt = querytxt.replace('$maxdepth', str(maxdepth))
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
+    # BUILD QUERY PARAMS
+    params: dict = {"query_concept_id": query_concept_id,
+                    "sab": sab,
+                    "rel": rel,
+                    "mindepth": int(mindepth),
+                    "maxdepth": int(maxdepth),
+                    "skip": int(skip),
+                    "limit": int(limit)}
 
-
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    return get_graph(neo4j_instance, query=query)
+    # Return query as graph.
+    return get_graph(neo4j_instance, querytxt=querytxt, **params)
 
 
 def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, terminus_concept_id=None,

@@ -121,6 +121,7 @@ def concepts_paths_expand_get(concept_id):
     if err != 'ok':
         return make_response(err, 400)
 
+
     # Check that the maximum path depth is non-negative.
     maxdepth = request.args.get('maxdepth')
     err = validate_parameter_is_nonnegative(param_name='maxdepth', param_value=maxdepth)
@@ -164,10 +165,20 @@ def concepts_paths_expand_get(concept_id):
     # Set default row limit.
     limit = set_default_maximum(param_value=limit, default=1000)
 
-    # Get remaining parameter values from the path or query string.
+    # Get and validate remaining parameter values from the path or query string.
     query_concept_id = concept_id
+
     sab = parameter_as_list(param_name='sab')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='sab', param_values=sab)
+    if err != 'ok':
+        return make_response(err, 400)
+
     rel = parameter_as_list(param_name='rel')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='rel', param_values=rel)
+    if err != 'ok':
+        return make_response(err, 400)
 
     result = concepts_expand_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel,
                                        mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
