@@ -7,14 +7,14 @@ CALL
 {
 MATCH (c:Concept {CUI: $origin_concept_id})
 MATCH (d:Concept {CUI: $terminus_concept_id})
-CALL apoc.algo.dijkstra(c, d, apoc.text.join([x IN [$rel] | "<"+x], "|"), "none", 1)
+CALL apoc.algo.dijkstra(c, d, apoc.text.join([x IN $rel | "<"+x], "|"), "none", 1)
 YIELD path
 return path
 }
 
 // Filter to those paths that involve relationships with the specified values of SAB.
 WITH path
-WHERE ALL(r IN relationships(path) WHERE r.SAB IN [$sab])
+WHERE ALL(r IN relationships(path) WHERE r.SAB IN $sab)
 
 ////////////////////////
 // GRAPH FORMAT OPTION

@@ -270,7 +270,6 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-exit
 #--------------------------------------------
 echo "TESTS FOR: concepts/paths/subgraph" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/paths/subgraph?sab=<sab>&rel=<relationship type>&skip=<number>&limit=<number>" | tee -a ubkg_unit_test.out
@@ -564,6 +563,20 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
+echo "17. concepts/C2720507/paths/expand?sab=*%2CUBERON&rel=isa%2Cpart_of&mindepth=2&maxdepth=3&skip=0&limit=10 => invalid parameters, should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=*%2CUBERON&rel=isa%2Cpart_of&mindepth=2&maxdepth=3&skip=0&limit=10" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "18. concepts/C2720507/paths/expand?sab=SNOMEDCT_US%2CUBERON&rel=isa%2C*&mindepth=2&maxdepth=3&skip=0&limit=10 => invalid parameters, should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=*%2CUBERON&rel=isa%2C*&mindepth=2&maxdepth=3&skip=0&limit=10" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
 #--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/paths/trees GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/<concept_id>/paths/trees?sab=<SAB>&rel=<relationship type>&mindepth=<number>&maxdepth=<number>&skip=<number>&limit=<number>"
@@ -676,6 +689,20 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
+echo "16. concepts/C2720507/paths/trees?sab=*&rel=isa&mindepth=1&maxdepth=3&skip=1&limit=10 => invalid parametr: should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=*&rel=isa&mindepth=1&maxdepth=3&skip=1&limit=10" \
+--header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "16. concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=*&mindepth=1&maxdepth=3&skip=1&limit=10 => invalid parametr: should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=*&mindepth=1&maxdepth=3&skip=1&limit=10" \
+--header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
 #--------------------------------------------
 echo "TESTS FOR: concepts/<origin_concept_id>/paths/shortestpath/<terminus_concept_id> GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/<origin_concept_id>/paths/shortestpath/<terminus_concept_id>?sab=<SAB>&rel=<relationship types" | tee -a ubkg_unit_test.out
@@ -724,6 +751,21 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
+
+echo "7. concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US%2*&rel=isa%2Cpart_of => invalid parameters; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US%2*&rel=isa%2Cpart_of" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "8. concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US%2UBERON&rel=isa%2C* => invalid parameters; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US%2UBERON&rel=isa%2C*" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
 
 #--------------------------------------------
 echo "TESTS FOR: node-types GET" | tee -a ubkg_unit_test.out

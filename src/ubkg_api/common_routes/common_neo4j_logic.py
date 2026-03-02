@@ -402,8 +402,6 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
 
     # Load Cypher query template from file.
     querytxt: str = loadquerystring(filename='concepts_concept_id_definitions.cypher')
-    # The query template string contains placeholders:
-    # $concept_id, which corresponds to a neo4j parameter
 
 
     # BUILD QUERY PARAMS
@@ -531,9 +529,6 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
 
     # Load query string template.
     querytxt = loadquerystring(filename='concepts_expand.cypher')
-    # The query template string contains placeholders:
-    # $concept_id, $mindepth, $maxdepth, $skip, and $limit correspond to a neo4j parameters
-    # $sab, $rel correspond to filters
 
     # BUILD QUERY PARAMS
     params: dict = {"query_concept_id": query_concept_id,
@@ -554,21 +549,21 @@ def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, term
     """
     Returns the shortest path between two CUIs using Dykstra's algorithm with default weights,
     subject to constraints specified in parameters.
+
+    Assumes that parameters were validated by the controller.
     """
 
-    # Load query string and associate parameter values to variables.
+    # Load query string template.
     querytxt = loadquerystring(filename='concepts_shortestpath.cypher')
 
-    querytxt = querytxt.replace('$origin_concept_id', f'"{origin_concept_id}"')
-    querytxt = querytxt.replace('$terminus_concept_id', f'"{terminus_concept_id}"')
-    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
-    reljoin = format_list_for_query(listquery=rel, doublequote=True)
-    querytxt = querytxt.replace('$rel', reljoin)
+    # BUILD QUERY PARAMS
+    params: dict = {"origin_concept_id": origin_concept_id,
+                    "terminus_concept_id": terminus_concept_id,
+                    "sab": sab,
+                    "rel": rel}
 
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    return get_graph(neo4j_instance, query=query)
+    # Return query as graph.
+    return get_graph(neo4j_instance, querytxt=querytxt, **params)
 
 
 def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, mindepth=None,
@@ -585,28 +580,27 @@ def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, re
     :param maxdepth: maximum path length
     :param skip: paths to skip
     :param limit: maximum number of paths to return
+
+    Assumes that parameters were validated by the controller.
     """
 
-    # Load query string and associate parameter values to variables.
+    # Load query string template.
     querytxt = loadquerystring(filename='concepts_spanning_tree.cypher')
 
-    querytxt = querytxt.replace('$query_concept_id', f'"{query_concept_id}"')
-    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
-    reljoin = format_list_for_query(listquery=rel, doublequote=True)
-    querytxt = querytxt.replace('$rel', reljoin)
-    querytxt = querytxt.replace('$mindepth', str(mindepth))
-    querytxt = querytxt.replace('$maxdepth', str(maxdepth))
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
+    # BUILD QUERY PARAMS
+    params: dict = {"query_concept_id": query_concept_id,
+                    "sab": sab,
+                    "rel": rel,
+                    "mindepth": int(mindepth),
+                    "maxdepth": int(maxdepth),
+                    "skip": int(skip),
+                    "limit": int(limit)}
 
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    return get_graph(neo4j_instance, query=query)
-
+    # Return query as graph.
+    return get_graph(neo4j_instance, querytxt=querytxt, **params)
 
 #--------------------
-# concepts/paths ENDPOINT ROUTINES
+# concepts/paths/subgraph ENDPOINT ROUTINES
 # -------------------
 
 def concepts_subgraph_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, skip=None, limit=None) \
