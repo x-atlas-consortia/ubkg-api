@@ -856,6 +856,13 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
+echo "5. node-types/Code/counts-by-sab?sab=* GET => invalid parameter; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/node-types/Code/counts-by-sab?sab=*" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
 #--------------------------------------------
 echo "TESTS FOR: property-types GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /property-types" | tee -a ubkg_unit_test.out

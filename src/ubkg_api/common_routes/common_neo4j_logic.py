@@ -491,8 +491,7 @@ def get_graph(neo4j_instance, querytxt: str, **params) -> List[dict]:
 
     with neo4j_instance.driver.session() as session:
         try:
-            #recds: neo4j.Result = session.run(query)
-            debug_query = translate_query(session, querytxt=querytxt, **params)
+
             recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
@@ -706,6 +705,7 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
     querytxt = querytxt.replace('$skip', str(skip))
     querytxt = querytxt.replace('$limit', str(limit))
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -765,6 +765,7 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
     querytxt = querytxt.replace('$skip', str(skip))
     querytxt = querytxt.replace('$limit', str(limit))
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -806,7 +807,7 @@ def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[dict]:
     querytxt = loadquerystring('terms_term_id_codes.cypher')
     querytxt = querytxt.replace('$term_id', f'"{term_id}"')
 
-    # Set timeout for query based on value in app.cfg.
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -834,6 +835,7 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
 
     querytxt = querytxt.replace('$term_id', f'"{term_id}"')
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     # The Cypher query is not in JSON format, but is a list of lists.
@@ -879,6 +881,7 @@ def property_types_get_logic(neo4j_instance) -> dict:
 
     querytxt = loadquerystring('property_types.cypher')
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -908,6 +911,7 @@ def relationship_types_get_logic(neo4j_instance) -> dict:
 
     querytxt = loadquerystring('relationship_types.cypher')
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -950,7 +954,7 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
     else:
         querytxt = querytxt.replace('$contextfilter', f" AND tContext.name IN {context}")
 
-    # Set timeout for query based on value in app.cfg.
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -983,30 +987,37 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
     :param neo4j_instance: neo4j connection
     :param sab: optional list of sabs
 
+    Assumes that the sab parameter was validated by the controller.
     """
 
     nodetypes: list[dict] = []
-    # Load and parameterize base query.
+    # Load query template.
     querytxt = loadquerystring('node_types_by_sab.cypher')
 
+    # Build query parameters.
     if node_type is None:
         node_type = ''
     else:
         node_type = [node_type]
-    typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
-    querytxt = querytxt.replace('$node_type', typesjoin)
+    params = {"node_type": node_type}
+
+    #typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
+    #querytxt = querytxt.replace('$node_type', typesjoin)
 
     if sab is None:
         sab = ''
-    else:
-        sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
+    #else:
+        #sabjoin = format_list_for_query(listquery=sab, doublequote=True)
+    params["sab"] = sab
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
+
             total_count = 0
             for record in recds:
                 # Each row from the query includes a dict that contains the actual response content.
@@ -1035,22 +1046,26 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
 
     """
     nodetypes: list[dict] = []
-    # Load and parameterize base query.
+
+    # Load query template.
 
     querytxt = loadquerystring('node_types_counts.cypher')
 
+    # Build query parameters.
     if node_type is None:
         node_type = ''
     else:
         node_type = [node_type]
-    typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
-    querytxt = querytxt.replace('$node_type', typesjoin)
+    params = {"node_type": node_type}
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
+
             total_count = 0
             for record in recds:
                 # Each row from the query includes a dict that contains the actual response content.
@@ -1082,6 +1097,7 @@ def node_types_get_logic(neo4j_instance) -> dict:
 
     querytxt = loadquerystring('node_types.cypher')
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -1115,6 +1131,7 @@ def sabs_get_logic(neo4j_instance) -> dict:
     # query = 'MATCH (n:Code) RETURN apoc.coll.sort(COLLECT(n.SAB)) AS sab'
     querytxt = loadquerystring('sabs.cypher')
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -1160,6 +1177,7 @@ def sabs_codes_counts_query_get(neo4j_instance, sab=None, skip=None, limit=None)
     querytxt = querytxt.replace('$skip', str(skip))
     querytxt = querytxt.replace('$limit', str(limit))
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
         try:
@@ -1211,6 +1229,7 @@ def sab_code_detail_query_get(neo4j_instance, sab=None, skip=None, limit=None) -
     querytxt = querytxt.replace('$skip', str(skip))
     querytxt = querytxt.replace('$limit', str(limit))
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -1257,6 +1276,7 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
     querytxt = querytxt.replace('$skip', str(skip))
     querytxt = querytxt.replace('$limit', str(limit))
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:

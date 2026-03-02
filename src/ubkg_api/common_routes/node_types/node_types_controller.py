@@ -2,7 +2,7 @@ from flask import Blueprint, current_app, make_response
 from ..common_neo4j_logic import node_types_node_type_counts_by_sab_get_logic, \
     node_types_node_type_counts_get_logic, node_types_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
-    validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
+    validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, validate_param_string_chars, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size, wrap_message
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 
@@ -132,6 +132,10 @@ def node_types_counts_by_sab_node_type_get(node_type):
 
     # Get remaining parameter values from the path or query string.
     sab = parameter_as_list(param_name='sab')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='sab', param_values=sab)
+    if err != 'ok':
+        return make_response(err, 400)
 
     result = node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=node_type, sab=sab)
     iserr = False
