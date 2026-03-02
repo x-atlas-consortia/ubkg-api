@@ -425,7 +425,7 @@ echo | tee -a ubkg_unit_test.out
 
 echo "10. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&relsequence=*skip=0&limit=5 => invalid parameter; should return 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&relseqence=*&skip=0&limit=5" \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&relsequence=*&skip=0&limit=5" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -593,7 +593,7 @@ echo | tee -a ubkg_unit_test.out
 
 echo "18. concepts/C2720507/paths/expand?sab=SNOMEDCT_US%2CUBERON&rel=isa%2C*&mindepth=2&maxdepth=3&skip=0&limit=10 => invalid parameters, should return 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=*%2CUBERON&rel=isa%2C*&mindepth=2&maxdepth=3&skip=0&limit=10" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=SNOMEDCT_US%2CUBERON&rel=isa%2C*&mindepth=2&maxdepth=3&skip=0&limit=10" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -780,9 +780,9 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "8. concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US%2UBERON&rel=isa%2C* => invalid parameters; should return 400" | tee -a ubkg_unit_test.out
+echo "8. concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US&rel=* => invalid parameters; should return 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US%2UBERON&rel=isa%2C*" \
+ --url "${UBKG_URL}/concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US&rel=*" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -1323,7 +1323,7 @@ echo | tee -a ubkg_unit_test.out
 
 echo "8. /sources?sab=*&context=base_context GET => invalid SAB, valid context; should return 400" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/sources?sab=X&context=base_context" \
+ --url "${UBKG_URL}/sources?sab=*&context=base_context" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -1331,7 +1331,7 @@ echo | tee -a ubkg_unit_test.out
 echo "9. /sources?sab=CL&context=* GET => valid SAB, invalid context; should return 400" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/sources?sab=cl&context=*" \
- --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
