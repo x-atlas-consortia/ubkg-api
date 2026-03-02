@@ -3,13 +3,13 @@
 // Note: this query would cause an OOME if all sabs were specified, so look only for one SAB.
 
 // Required filter for SAB
-WITH [$sab] as sab_query
+WITH $sab as sab_query
 WITH sab_query
 // Get total code count
 CALL
 {
     WITH sab_query
-    MATCH (n:Code) WHERE n.SAB IS NOT NULL AND n.SAB IN sab_query
+    MATCH (n:Code) WHERE n.SAB IS NOT NULL AND n.SAB = sab_query
     RETURN n.SAB as sab_match, COUNT(DISTINCT n) AS code_count
 }
 WITH sab_match,code_count
@@ -33,7 +33,7 @@ CALL
 }
 //Build output
 WITH sab_match, code_count, code, terms
-SKIP 0 LIMIT 1000
+SKIP $skip LIMIT $limit
 WITH sab_match, code_count,COLLECT({code:code,terms:terms}) AS codes
 WITH {sab:sab_match, total_count:code_count,codes:codes} as sab
 RETURN sab as output
