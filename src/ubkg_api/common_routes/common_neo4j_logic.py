@@ -444,19 +444,20 @@ def concepts_identifier_node_get_logic(neo4j_instance, search: str) -> List[dict
 
     result: list[dict] = []
 
-    # Load query string from file.
+    # Load query string template.
     querytxt = loadquerystring(filename='concepts_nodeobjects.cypher')
 
-    # Format the search parameter for the Cypher query.
-    list_identifier = [search]
-    list_identifier_join = format_list_for_query(listquery=list_identifier, doublequote=True)
-    querytxt = querytxt.replace('$search', list_identifier_join)
+    # Required filter on concept_id.
+    params: dict = {"search": search}
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            # Execute the query with neo4j params
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('nodeobjects'))

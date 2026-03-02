@@ -15,36 +15,30 @@
 // 4. A term for a Code linked to a Concept (i.e., a Term node in the Concept node subgraph)
 
 
-WITH [$search] AS query
 CALL {
 
 //1. Look for Concepts with preferred terms that match the search term.
-WITH query
-MATCH (n:Concept)-[:PREF_TERM]->(t:Term) WHERE t.name IN query
+MATCH (n:Concept)-[:PREF_TERM]->(t:Term) WHERE t.name IN [$search]
 RETURN n
 
 //2. Look for Concepts linked to Codes with terms that match the search term.
 UNION
-WITH query
-MATCH (n:Concept)-[:CODE]->(:Code)-[tty]->(t:Term) WHERE tty.CUI = toString(n.CUI) AND t.name IN query
+MATCH (n:Concept)-[:CODE]->(:Code)-[tty]->(t:Term) WHERE tty.CUI = toString(n.CUI) AND t.name IN [$search]
 RETURN n
 
 //3. Look for Concepts linked to Codes with CodeIDs that match the search term.
 UNION
-WITH query
-MATCH (n:Concept)-[:CODE]->(c:Code) WHERE c.CodeID IN query
+MATCH (n:Concept)-[:CODE]->(c:Code) WHERE c.CodeID IN [$search]
 RETURN n
 
 //4. Look for Concepts with CUIs that match the search term.
 UNION
-WITH query
-MATCH (n:Concept) WHERE n.CUI IN query
+MATCH (n:Concept) WHERE n.CUI IN [$search]
 RETURN n
 }
 
 // For each Concept node, obtain information from the subgraph.
 WITH DISTINCT n
-//SKIP 0 LIMIT 100
 
 // 1. the preferred term for the Concept
 OPTIONAL MATCH (n)-[:PREF_TERM]->(t:Term)
