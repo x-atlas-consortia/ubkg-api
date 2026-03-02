@@ -792,16 +792,19 @@ def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[dict]:
     Returns information on Codes with terms that exactly match the specified term_id string.
     """
 
-    # Load and parameterize base query.
+    # Load query template.
     querytxt = loadquerystring('terms_term_id_codes.cypher')
-    querytxt = querytxt.replace('$term_id', f'"{term_id}"')
+
+    # Build params.
+    params: dict = {"term_id": term_id}
 
     # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('codes'))
@@ -820,9 +823,12 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     """
 
     concepts: list[str] = []
+    # Load query template.
     querytxt = loadquerystring('terms_term_id_concepts.cypher')
+    # Build params.
+    params: dict = {"term_id": term_id}
 
-    querytxt = querytxt.replace('$term_id', f'"{term_id}"')
+    #querytxt = querytxt.replace('$term_id', f'"{term_id}"')
 
     # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
@@ -831,7 +837,8 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     # Maintain for downward compatibility.
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+            translate_query(session,querytxt=querytxt, **params)
+            recds: neo4j.Result = session.run(query, **params)
             for record in recds:
                 try:
                     concepts.append(record)
