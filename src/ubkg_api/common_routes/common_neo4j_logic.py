@@ -1270,18 +1270,24 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
     """
     termtypes: list[dict] = []
 
+    # Load query template.
     querytxt = loadquerystring(filename='sabs_term_types.cypher')
-    sabjoin = format_list_for_query(listquery=[sab], doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
+
+    if sab is None:
+        sab = ""
+
+    # BUILD PARAMS.
+    params = {"sab": sab,
+              "skip": int(skip),
+              "limit": int(limit)}
 
     # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query,**params)
 
             for record in recds:
                 try:
