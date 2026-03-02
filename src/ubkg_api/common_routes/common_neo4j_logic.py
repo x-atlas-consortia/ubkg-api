@@ -275,7 +275,7 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type: list[s
 
         try:
             # Execute the query with neo4j params
-            recds: neo4j.Result = session.run(query,**params)
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('terms'))
@@ -373,7 +373,6 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
 
     with neo4j_instance.driver.session() as session:
         try:
-            #recds: neo4j.Result = session.run(query)
 
             # Execute the query with neo4j params
             recds: neo4j.Result = session.run(query, **params)
@@ -705,7 +704,7 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
 
     with neo4j_instance.driver.session() as session:
         try:
-            translate_query(session,querytxt=querytxt, **params)
+
             recds: neo4j.Result = session.run(query, **params)
 
             # Add the relative position (skip) for each semantic type.
@@ -758,7 +757,7 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
 
     with neo4j_instance.driver.session() as session:
         try:
-            translate_query(session,querytxt=querytxt, **params)
+
             recds: neo4j.Result = session.run(query, **params)
 
             # Add the relative position (skip) for each semantic subtype.
@@ -837,7 +836,7 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     # Maintain for downward compatibility.
     with neo4j_instance.driver.session() as session:
         try:
-            translate_query(session,querytxt=querytxt, **params)
+
             recds: neo4j.Result = session.run(query, **params)
             for record in recds:
                 try:
@@ -883,6 +882,7 @@ def property_types_get_logic(neo4j_instance) -> dict:
     with neo4j_instance.driver.session() as session:
         with neo4j_instance.driver.session() as session:
             try:
+
                 recds: neo4j.Result = session.run(query)
                 for record in recds:
                     result.append(record.get('property_types'))
@@ -1107,6 +1107,7 @@ def node_types_get_logic(neo4j_instance) -> dict:
 
     with neo4j_instance.driver.session() as session:
         try:
+
             recds: neo4j.Result = session.run(query)
             for record in recds:
                 result.append(record.get('node_types'))
@@ -1292,7 +1293,7 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
     with neo4j_instance.driver.session() as session:
         try:
 
-            recds: neo4j.Result = session.run(query,**params)
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 try:
