@@ -399,7 +399,16 @@ def concepts_subgraph_get():
 
     # Get remaining parameter values from the path or query string.
     sab = parameter_as_list(param_name='sab')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='sab', param_values=sab)
+    if err != 'ok':
+        return make_response(err, 400)
+
     rel = parameter_as_list(param_name='rel')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='rel', param_values=rel)
+    if err != 'ok':
+        return make_response(err, 400)
 
     result = concepts_subgraph_get_logic(neo4j_instance, sab=sab, rel=rel,
                                          skip=skip, limit=limit)

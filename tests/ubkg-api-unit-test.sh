@@ -333,10 +333,24 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "9. concepts/paths/subgraph?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of&skip=0&limit=10 => valid parameters,list sab, rel: should return 200" | tee -a ubkg_unit_test.out
+echo "9. concepts/paths/subgraph?sab=SNOMEDCT_US&rel=isa&skip=0&limit=10 => valid parameters,list sab, rel: should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/paths/subgraph?sab=SNOMEDCT_US&rel=isa&skip=0&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "10. concepts/paths/subgraph?sab=*&rel=isa&skip=0&limit=10 => invalid parameters,: should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/paths/subgraph?sab=*&rel=isa&skip=0&limit=10" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "11. concepts/paths/subgraph?sab=SNOMEDCT_US&rel=*&skip=0&limit=10 => invalid parameters,: should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/paths/subgraph?sab=SNOMEDCT_US&rel=*&skip=0&limit=10" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 

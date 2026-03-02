@@ -619,19 +619,17 @@ def concepts_subgraph_get_logic(neo4j_instance, query_concept_id=None, sab=None,
     :param limit: maximum number of paths to return
     """
 
-    # Load query string and associate parameter values to variables.
+    # Load query string template.
     querytxt = loadquerystring(filename='concepts_subgraph.cypher')
 
-    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
-    reljoin = format_list_for_query(listquery=rel, doublequote=True)
-    querytxt = querytxt.replace('$rel', reljoin)
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
+    # BUILD QUERY PARAMS
+    params: dict = {"sab": sab,
+                    "rel": rel,
+                    "skip": int(skip),
+                    "limit": int(limit)}
 
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    return get_graph(neo4j_instance, query=query)
+    # Return query as graph.
+    return get_graph(neo4j_instance, querytxt=querytxt, **params)
 
 
 def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltypes=None, relsabs=None, skip=None,
