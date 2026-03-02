@@ -926,29 +926,38 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
     :param sab: source (SAB)
     :param context: UBKG context
 
+    Assumes that parameters were validated by controller.
     """
     sources: list[dict] = []
 
-    # Load and parameterize query.
+    # Load query template.
     querytxt = loadquerystring('sources.cypher')
-    # Filter by code SAB.
-    if len(sab) == 0:
-        querytxt = querytxt.replace('$sabfilter', '')
-    else:
-        querytxt = querytxt.replace('$sabfilter', f" AND t.name IN {sab}")
 
-    # Filter by ubkg context.
-    if len(context) == 0:
-        querytxt = querytxt.replace('$contextfilter', '')
+    params: dict = {}
+    # Optional filter by sab.
+    # The values from term_type are passed as a Neo4j parameter.
+    if sab:
+        sab_clause = "AND t.name IN $sabfilter"
+        params["sabfilter"] = [s.upper() for s in sab]
     else:
-        querytxt = querytxt.replace('$contextfilter', f" AND tContext.name IN {context}")
+        sab_clause =  ""  # empty string replaces the placeholder
+    querytxt = querytxt.replace('$sabfilter', sab_clause)
+
+    # Optional filter by context.
+    if context:
+        context_clause = "AND tContext.name IN $contextfilter"
+        params["contextfilter"] = context
+    else:
+        context_clause = ""  # empty string replaces the placeholder
+    querytxt = querytxt.replace('$contextfilter', context_clause)
 
     # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
             for record in recds:
 
                 source = record.get('response')

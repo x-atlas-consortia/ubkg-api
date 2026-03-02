@@ -1300,9 +1300,9 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "5. /sources?sab=HPOMP GET => valid SAB; should return 200" | tee -a ubkg_unit_test.out
+echo "5. /sources?sab=CL GET => valid SAB; should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/sources?sab=HPOMP" \
+ --url "${UBKG_URL}/sources?sab=CL" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -1317,6 +1317,20 @@ echo | tee -a ubkg_unit_test.out
 echo "7. /sources?sab=X&context=base_context GET => invalid SAB, valid context; should return 404" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/sources?sab=X&context=base_context" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "8. /sources?sab=*&context=base_context GET => invalid SAB, valid context; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/sources?sab=X&context=base_context" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "9. /sources?sab=CL&context=* GET => valid SAB, invalid context; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/sources?sab=cl&context=*" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out

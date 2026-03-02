@@ -2,7 +2,7 @@ from flask import Blueprint, current_app, make_response, request
 from ..common_neo4j_logic import sources_get_logic
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
-    validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size
+    validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size, validate_param_string_chars
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 
 # S3 redirect functions
@@ -24,7 +24,16 @@ def sources_get():
         return make_response(err, 400)
 
     sab = parameter_as_list(param_name='sab')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='sab', param_values=sab)
+    if err != 'ok':
+        return make_response(err, 400)
+
     context = parameter_as_list(param_name='context')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='context', param_values=context)
+    if err != 'ok':
+        return make_response(err, 400)
 
     # Validate context parameter against enum.
     val_enum = ['base_context', 'data_distillery_context', 'hubmap_sennet_context']
