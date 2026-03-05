@@ -116,7 +116,7 @@ curl --request GET \
 echo | tee -a ubkg_system_test.out
 echo | tee -a ubkg_system_test.out
 
-echo "/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product,NCI%3Agene_product_encoded_by_gene&skip=0&limit=5" | tee -a ubkg_system_test.out
+echo "/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%is_marked_by_gene_product,NCI%3Agene_product_encoded_by_gene&skip=0&limit=5" | tee -a ubkg_system_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product,NCI:gene_product_encoded_by_gene&skip=0&limit=5" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_system_test.out

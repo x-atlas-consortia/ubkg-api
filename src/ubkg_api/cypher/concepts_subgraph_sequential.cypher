@@ -12,10 +12,10 @@
 WITH $startCUI AS initCUI,
 // 2. Sequence of relationship types
 //['isa','only_in_taxon','has_part'] as reltypes,
-[$reltypes] AS reltypes,
+$reltypes AS reltypes,
 // 3. Sequence of relationship SABs
 //['CL','MP','EFO'] as relsabs,
-[$relsabs] AS relsabs
+$relsabs AS relsabs
 
 // SELECTION OF STARTING CUIS
 // Obtain either the CUI provided by the parameter OR the CUIs for all concepts that have the first relationship

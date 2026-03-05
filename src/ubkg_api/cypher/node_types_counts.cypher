@@ -3,7 +3,7 @@
 // node_types/counts/{node_type}
 
 // Optional filter on label type
-WITH [$node_type] as label_query
+WITH $node_type as label_query
 WITH label_query
 // Either filter to specified labels or return information on all labels
 CALL

@@ -5,7 +5,7 @@
 // is likely to exceed API server timeouts for large databases such as the Data Distillery.
 
 // Optional filter on label type
-WITH [$node_type] as label_query
+WITH $node_type as label_query
 WITH label_query
 // Either filter to specified labels or return information on all labels
 CALL
@@ -14,12 +14,12 @@ CALL
     CALL db.labels() YIELD label WHERE (CASE WHEN label_query=[] THEN 1=1 ELSE label IN label_query END) RETURN label as match_label
 }
 // Optional filter on SAB
-WITH match_label, [$sab] AS sab_query
+WITH match_label, $sab AS sab_query
 
 // Return counts by label and sab
 CALL
 {
-    WITH match_label,sab_query
+    WITH match_label, sab_query
     MATCH (n)
     WHERE match_label in labels(n)
     AND CASE WHEN sab_query=[] then 1=1 ELSE n.SAB in sab_query END

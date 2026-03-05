@@ -5,9 +5,9 @@
 // Find all paths with relationships of specified types defined by the specified set of SABs.
 CALL
 {
-WITH apoc.text.join([x in [$sab] | x ], " OR ") AS sabs
+WITH apoc.text.join([x in $sab | x ], " OR ") AS sabs
 CALL db.index.fulltext.queryRelationships("r_SAB",sabs)
-YIELD relationship AS r WHERE TYPE(r) IN [$rel]
+YIELD relationship AS r WHERE TYPE(r) IN $rel
 MATCH path=((n1)-[r]->(n2))
 RETURN path
 ORDER BY n1.CUI, n2.CUI

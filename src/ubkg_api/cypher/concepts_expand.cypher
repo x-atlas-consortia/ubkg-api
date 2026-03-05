@@ -4,17 +4,20 @@
 
 // Identify all paths starting from the specified node
 // with path lengths in the specified range.
+
+// The calling function will replace all strings with dollar sign prefixes.
+
 CALL
 {
 MATCH (c:Concept {CUI: $query_concept_id})
-CALL apoc.path.expand(c,apoc.text.join([x IN [$rel] | "<"+x], "|"), "Concept", $mindepth, $maxdepth)
+CALL apoc.path.expand(c,apoc.text.join([x IN $rel | "<"+x], "|"), "Concept", $mindepth, $maxdepth)
 YIELD path
 return path
 }
 
 // Filter to those paths that involve relationships with the specified values of SAB.
 WITH path
-WHERE ALL(r IN relationships(path) WHERE r.SAB IN [$sab])
+WHERE ALL(r IN relationships(path) WHERE r.SAB IN $sab)
 
 // Filter to a specified subset of paths--i.e., to support pagination.
 // The result of the path.expand function is ordered in terms of Depth First Search, so the order of paths is invariant.

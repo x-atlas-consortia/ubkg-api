@@ -1,5 +1,7 @@
 // Used by the /concepts/{concept_id}/concepts endpoint
 
+// The function that loads this query will replace concept_id with a value
+// from path parameter of the call to the endpoint.
 
 WITH [$concept_id] AS query
 MATCH (b:Concept)<-[c]-(d:Concept)

@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, current_app, make_response  #, request
 from ..common_neo4j_logic import (codes_code_id_codes_get_logic, codes_code_id_concepts_get_logic,
                                   codes_code_id_terms_get_logic)
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
-    validate_parameter_value_in_enum
+    validate_parameter_value_in_enum, validate_param_string_chars, validate_code_format
 from utils.http_parameter import parameter_as_list
 
 codes_blueprint = Blueprint('codes', __name__, url_prefix='/codes')
@@ -19,6 +19,12 @@ def codes_code_id_codes_get(code_id):
     :param code_id: The code identifier
     :type code_id: str
     """
+
+    # Validate code_id parameter.
+    err = validate_code_format(param_name='code_id', param_value=code_id)
+    if err != 'ok':
+        return make_response(err, 400)
+
     # Validate sab parameter.
     err = validate_query_parameter_names(parameter_name_list=['sab'])
     if err != 'ok':
@@ -26,6 +32,10 @@ def codes_code_id_codes_get(code_id):
 
     # Obtain a list of sab parameter values.
     sab = parameter_as_list(param_name='sab')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='sab', param_values=sab)
+    if err != 'ok':
+        return make_response(err, 400)
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
@@ -50,6 +60,12 @@ def codes_code_id_concepts_get(code_id):
 
     :rtype: Union[List[ConceptDetail], Tuple[List[ConceptDetail], int], Tuple[List[ConceptDetail], int, Dict[str, str]]
     """
+
+    # Validate code_id parameter.
+    err = validate_code_format(param_name='code_id', param_value=code_id)
+    if err != 'ok':
+        return make_response(err, 400)
+
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
     result = codes_code_id_concepts_get_logic(neo4j_instance, code_id)
 
@@ -69,15 +85,24 @@ def codes_code_id_terms_get(code_id):
     :param code_id: the code identifier
     """
 
-    # Validate parameters.
-    # Validate sab parameter.
+    # Validate code_id parameter.
+    err = validate_code_format(param_name='code_id',param_value=code_id)
+    if err != 'ok':
+        return make_response(err, 400)
+
+    # Validate the query parameter names.
     err = validate_query_parameter_names(parameter_name_list=['term_type'])
     if err != 'ok':
         return make_response(err, 400)
 
-    # Obtain a list of sab parameter values.
+    # Format the term_type parameter as a list.
     term_type = parameter_as_list(param_name='term_type')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='term_type',param_values=term_type)
+    if err != 'ok':
+        return make_response(err, 400)
 
+    # Query the UBKG instance.
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
     result = codes_code_id_terms_get_logic(neo4j_instance, code_id=code_id,term_type=term_type)
 
@@ -88,5 +113,5 @@ def codes_code_id_terms_get(code_id):
                                    timeout = neo4j_instance.timeout)
         return make_response(err, 404)
 
-    # Extract from list.
-    return redirect_if_large(resp=result[0])
+    # Redirect large responses to S3 bucket.
+    return redirect_if_large(resp=result)

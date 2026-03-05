@@ -8,13 +8,13 @@
 // 2. Type Unique Identifier (TUI) (e.g., "T017")
 
 // Optional filter on semantic type
-WITH [$types] as type_query
+WITH $types as type_query
 WITH type_query
 CALL
 {
     WITH type_query
     MATCH (s:Semantic)-[:ISA_STY]->(q:Semantic)
-    WHERE q.name IN type_query OR q.TUI IN type_query
+    WHERE q.name = type_query OR q.TUI = type_query
     RETURN s
 }
 WITH type_query, s ORDER BY s.STN SKIP $skip LIMIT $limit
