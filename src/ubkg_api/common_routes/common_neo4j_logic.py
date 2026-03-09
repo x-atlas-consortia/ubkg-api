@@ -12,6 +12,7 @@ import logging
 import re
 from typing import List
 import os
+import json
 
 # For handling configurable timeouts
 from werkzeug.exceptions import GatewayTimeout
@@ -31,6 +32,31 @@ logger = logging.getLogger(__name__)
 #--------------------
 # UTILITY ROUTINES
 # -------------------
+
+def translate_query(session: neo4j.Session, querytxt: str, **params) -> str:
+    """
+    Returns a neo4j query string hydrated with parameter values.
+    To be used for debugging or logging only.
+    :param session: neo4j session
+    :param params: parameter values
+    :param querytxt: query string
+    """
+
+    display_query = querytxt
+    for key, value in params.items():
+        print(key, value)
+        if isinstance(value, str):
+            replacement = f"'{value}'"
+        elif isinstance(value, list):
+            replacement = json.dumps(value)
+        elif value is None:
+            replacement = 'null'
+        else:
+            replacement = str(value)
+        display_query = display_query.replace(f'${key}', replacement)
+
+    print('translate_query: ',display_query)
+    return display_query
 
 def loadquerystring(filename: str) -> str:
     """
@@ -116,35 +142,51 @@ def codes_code_id_codes_get_logic(neo4j_instance, code_id: str, sab: List[str]) 
     :param code_id: CodeID for the Code node, in format <SAB>:<CODE>
     :param sab: optional list of SABs from which to select codes that share links to the Concept node linked to the
     Code node
+
+    # Assumption: the parameters code_id and sab were validated by the controller.
     """
     result: list[dict] = []
 
-    # Load Cypher query from file.
+    # Load Cypher query template from file.
     querytxt: str = loadquerystring(filename='codes_code_id_codes.cypher')
+    # The query template string contains placeholders:
+    # $code_id, which corresponds to a neo4j parameter
+    # $sabfilter, which corresponds to an optional filtering clause
 
-    # Filter by code_id.
-    querytxt = querytxt.replace('$code_id', f"'{code_id}'")
+    # BUILD QUERY PARAMS
 
-    # Filter by code SAB.
-    if len(sab) == 0:
-        querytxt = querytxt.replace('$sabfilter', '')
+    # Required filter on code_id.
+    params: dict = {"code_id": code_id}
+
+    # Optional filter by sab.
+    # The values from term_type are passed as a Neo4j parameter.
+    if len(sab) > 0:
+        sab_clause = f" AND c.SAB IN $sabfilter"
+        params["sabfilter"] = sab
     else:
-        querytxt = querytxt.replace('$sabfilter', f" AND c.SAB IN {sab}")
+        sab_clause = ""  # empty string replaces the placeholder
 
+    # Update the query template with the optional sab filter.
+    querytxt = querytxt.replace('$sabfilter', sab_clause)
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with (neo4j_instance.driver.session() as session):
         try:
-            recds: neo4j.Result = session.run(query)
+            # Execute the query with neo4j params
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('codes'))
+
         except neo4j.exceptions.ClientError as e:
             # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    # response is a list of lists.
+    # Because of the COLLECTS in the Cypher query, the response is a list that contains a list.
+    # Return the inner list.
     return result[0]
 
 
@@ -155,20 +197,27 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]
     :param neo4j_instance: neo4j connection
     :param code_id: CodeID for the Code node, in format <SAB>:<CODE>
 
+    # Assumption: the parameter code_id was validated by the controller.
+
     """
     result: list[dict] = []
 
-    # Load Cypher query from file.
+    # Load Cypher query template from file.
     querytxt: str = loadquerystring(filename='codes_code_id_concepts.cypher')
 
-    # Filter by code_id.
-    querytxt = querytxt.replace('$code_id', f"'{code_id}'")
+    # BUILD QUERY PARAMS
 
+    # Required filter on code_id.
+    params: dict = {"code_id": code_id}
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            # Execute the query with neo4j params
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('concepts'))
@@ -179,11 +228,12 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    # Extract from list.
+    # Because of the COLLECTS in the Cypher query, the response is a list that contains a list.
+    # Return the inner list.
     return result[0]
 
 
-def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -> dict:
+def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type: list[str] | None = None) -> dict:
     """
     Obtains information on terms that link to a code.
 
@@ -191,26 +241,41 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
     :param code_id: a UBKG Code in format SAB:CodeId
     :param term_type: an optional list of acronyms for a code type
 
+    # Assumption: the parameters code_id and term_type were validated by the controller.
     """
     result: list[dict] = []
 
-    # Load and parameterize query.
+    # Load query template.
     querytxt = loadquerystring('code_code_id_terms.cypher')
 
-    # Filter by code_id.
-    querytxt = querytxt.replace('$code_id', f"'{code_id}'")
+    # The query template string contains placeholders:
+    # $code_id, which corresponds to a neo4j parameter
+    # $termtype_filter, which corresponds to an optional filtering clause
 
-    # Filter by code SAB.
-    if len(term_type) == 0:
-        querytxt = querytxt.replace('$termtype_filter', '')
+    # BUILD QUERY PARAMS
+
+    # Required filter on code_id.
+    params: dict = {"code_id": code_id}
+
+    # Optional filter by term type.
+    # The values from term_type are passed as a Neo4j parameter.
+    if term_type:
+        term_type_clause = "AND TYPE(r) IN $term_type_filter"
+        params["term_type_filter"] = [t.upper() for t in term_type]
     else:
-        # case-insensitive
-        querytxt = querytxt.replace('$termtype_filter', f" AND TYPE(r) IN {[t.upper() for t in term_type]}")
+        term_type_clause = ""  # empty string replaces the placeholder
 
+    # Update the query template with the optional term type filter.
+    querytxt = querytxt.replace('$termtype_filter', term_type_clause)
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
     with neo4j_instance.driver.session() as session:
+
         try:
-            recds: neo4j.Result = session.run(query)
+            # Execute the query with neo4j params
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('terms'))
@@ -220,7 +285,8 @@ def codes_code_id_terms_get_logic(neo4j_instance,code_id: str, term_type=None) -
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    # Extract from list.
+    # Because of the COLLECTS in the Cypher query, the response is a list that contains a list.
+    # Return the inner list.
     return result[0]
 
 #--------------------
@@ -233,28 +299,44 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
     :param neo4j_instance: neo4j connection
     :param concept_id: a Concept Unique Identifier (CUI)
     :param sab: a list of SAB codes by which to filter codes in response
+
+    # Assumption: the parameter sab was validated by the controller.
     """
 
     result: list[str] = []
 
-    # Load Cypher query from file.
+    # Load query template.
     querytxt: str = loadquerystring(filename='concepts_concept_id_codes.cypher')
+    # The query template string contains placeholders:
+    # $concept_id, which corresponds to a neo4j parameter
+    # $sabfilter, which corresponds to an optional filtering clause
 
-    # Filter by parameters.
-    querytxt = querytxt.replace('$concept_id', f"'{concept_id}'")
-    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    if len(sabjoin) == 0:
-        querytxt = querytxt.replace('$sabfilter','')
+    # BUILD QUERY PARAMS
+
+    # Required filter on concept_id.
+    params: dict = {"concept_id": concept_id}
+
+    #sabjoin = format_list_for_query(listquery=sab, doublequote=True)
+
+    # Optional filter by sab.
+    # The values from sab are passed as a Neo4j parameter.
+    if len(sab) > 0:
+        sab_clause = f" AND b.SAB IN $sabfilter"
+        params["sabfilter"] = [s.upper() for s in sab]
     else:
-        querytxt = querytxt.replace('$sabfilter',f'AND b.SAB IN [{sabjoin}]')
-    querytxt = querytxt.replace('$SAB', sabjoin)
+        sab_clause = ""  # empty string replaces the placeholder
 
+    # Update the query template with the optional sab filter.
+    querytxt = querytxt.replace('$sabfilter', sab_clause)
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
 
+            # Execute the query with neo4j params
+            recds: neo4j.Result = session.run(query, **params)
             for record in recds:
                 result.append(record.get('codes'))
 
@@ -268,7 +350,7 @@ def concepts_concept_id_codes_get_logic(neo4j_instance, concept_id: str, sab: Li
 def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> List[dict]:
     """
     Returns information on the Concept nodes that have relationships with the
-    specificed concept.
+    specified concept.
     :param neo4j_instance: neo4j connection
     :param concept_id: a Concept Unique Identifier (CUI)
 
@@ -276,17 +358,24 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
 
     result: list[dict] = []
 
-    # Load Cypher query from file.
+    # Load Cypher query template from file.
     querytxt: str = loadquerystring(filename='concepts_concept_id_concepts.cypher')
+    # The query template string contains placeholders:
+    # $concept_id, which corresponds to a neo4j parameter
 
-    # Filter by parameters.
-    querytxt = querytxt.replace('$concept_id', f"'{concept_id}'")
+    # BUILD QUERY PARAMS
 
+    # Required filter on concept_id.
+    params: dict = {"concept_id": concept_id}
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            # Execute the query with neo4j params
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('concepts'))
@@ -296,7 +385,8 @@ def concepts_concept_id_concepts_get_logic(neo4j_instance, concept_id: str) -> L
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    # Extract from list.
+    # Because of the COLLECTS in the Cypher query, the response is a list that contains a list.
+    # Return the inner list.
     return result[0]
 
 def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -> List[dict]:
@@ -309,16 +399,23 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
 
     result: list[dict] = []
 
-    # Load Cypher query from file.
+    # Load Cypher query template from file.
     querytxt: str = loadquerystring(filename='concepts_concept_id_definitions.cypher')
 
-    # Filter by parameters.
-    querytxt = querytxt.replace('$concept_id', f"'{concept_id}'")
 
+    # BUILD QUERY PARAMS
+
+    # Required filter on concept_id.
+    params: dict = {"concept_id": concept_id}
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            # Execute the query with neo4j params
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('definitions'))
@@ -328,7 +425,8 @@ def concepts_concept_id_definitions_get_logic(neo4j_instance, concept_id: str) -
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
                 raise GatewayTimeout
 
-    # Extract from list.
+    # Because of the COLLECTS in the Cypher query, the response is a list that contains a list.
+    # Return the inner list.
     return result[0]
 
 
@@ -345,19 +443,20 @@ def concepts_identifier_node_get_logic(neo4j_instance, search: str) -> List[dict
 
     result: list[dict] = []
 
-    # Load query string from file.
+    # Load query string template.
     querytxt = loadquerystring(filename='concepts_nodeobjects.cypher')
 
-    # Format the search parameter for the Cypher query.
-    list_identifier = [search]
-    list_identifier_join = format_list_for_query(listquery=list_identifier, doublequote=True)
-    querytxt = querytxt.replace('$search', list_identifier_join)
+    # Required filter on concept_id.
+    params: dict = {"search": search}
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            # Execute the query with neo4j params
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('nodeobjects'))
@@ -373,21 +472,26 @@ def concepts_identifier_node_get_logic(neo4j_instance, search: str) -> List[dict
 # concepts/paths ENDPOINT UTILITIES
 # -------------------
 
-def get_graph(neo4j_instance, query: neo4j.Query) -> List[dict]:
+def get_graph(neo4j_instance, querytxt: str, **params) -> List[dict]:
     """
 
     Used by paths-related endpoints to return a graph object.
-    :param query: query string with timeout
+    :param querytxt: query string with timeout
     :param neo4j_instance: UBKG connection
+    :param params: additional query parameters
 
     Assumes that the query string returns a JSON object named graph in the nodes/paths/edges format.
 
     """
     result: list[dict] = []
 
+    # Instantiate the query with the configured timeout.
+    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
+
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('graph'))
@@ -418,25 +522,24 @@ def concepts_expand_get_logic(neo4j_instance, query_concept_id=None, sab=None, r
     :param maxdepth: maximum path length
     :param skip: paths to skip
     :param limit: maximum number of paths to return
+
+    Assumes that parameters were validated by the controller.
     """
 
-    # Load query string and associate parameter values to variables.
+    # Load query string template.
     querytxt = loadquerystring(filename='concepts_expand.cypher')
 
-    querytxt = querytxt.replace('$query_concept_id', f'"{query_concept_id}"')
-    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
-    reljoin = format_list_for_query(listquery=rel, doublequote=True)
-    querytxt = querytxt.replace('$rel', reljoin)
-    querytxt = querytxt.replace('$mindepth', str(mindepth))
-    querytxt = querytxt.replace('$maxdepth', str(maxdepth))
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
+    # BUILD QUERY PARAMS
+    params: dict = {"query_concept_id": query_concept_id,
+                    "sab": sab,
+                    "rel": rel,
+                    "mindepth": int(mindepth),
+                    "maxdepth": int(maxdepth),
+                    "skip": int(skip),
+                    "limit": int(limit)}
 
-
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    return get_graph(neo4j_instance, query=query)
+    # Return query as graph.
+    return get_graph(neo4j_instance, querytxt=querytxt, **params)
 
 
 def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, terminus_concept_id=None,
@@ -445,21 +548,21 @@ def concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=None, term
     """
     Returns the shortest path between two CUIs using Dykstra's algorithm with default weights,
     subject to constraints specified in parameters.
+
+    Assumes that parameters were validated by the controller.
     """
 
-    # Load query string and associate parameter values to variables.
+    # Load query string template.
     querytxt = loadquerystring(filename='concepts_shortestpath.cypher')
 
-    querytxt = querytxt.replace('$origin_concept_id', f'"{origin_concept_id}"')
-    querytxt = querytxt.replace('$terminus_concept_id', f'"{terminus_concept_id}"')
-    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
-    reljoin = format_list_for_query(listquery=rel, doublequote=True)
-    querytxt = querytxt.replace('$rel', reljoin)
+    # BUILD QUERY PARAMS
+    params: dict = {"origin_concept_id": origin_concept_id,
+                    "terminus_concept_id": terminus_concept_id,
+                    "sab": sab,
+                    "rel": rel}
 
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    return get_graph(neo4j_instance, query=query)
+    # Return query as graph.
+    return get_graph(neo4j_instance, querytxt=querytxt, **params)
 
 
 def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, mindepth=None,
@@ -476,28 +579,27 @@ def concepts_trees_get_logic(neo4j_instance, query_concept_id=None, sab=None, re
     :param maxdepth: maximum path length
     :param skip: paths to skip
     :param limit: maximum number of paths to return
+
+    Assumes that parameters were validated by the controller.
     """
 
-    # Load query string and associate parameter values to variables.
+    # Load query string template.
     querytxt = loadquerystring(filename='concepts_spanning_tree.cypher')
 
-    querytxt = querytxt.replace('$query_concept_id', f'"{query_concept_id}"')
-    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
-    reljoin = format_list_for_query(listquery=rel, doublequote=True)
-    querytxt = querytxt.replace('$rel', reljoin)
-    querytxt = querytxt.replace('$mindepth', str(mindepth))
-    querytxt = querytxt.replace('$maxdepth', str(maxdepth))
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
+    # BUILD QUERY PARAMS
+    params: dict = {"query_concept_id": query_concept_id,
+                    "sab": sab,
+                    "rel": rel,
+                    "mindepth": int(mindepth),
+                    "maxdepth": int(maxdepth),
+                    "skip": int(skip),
+                    "limit": int(limit)}
 
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    return get_graph(neo4j_instance, query=query)
-
+    # Return query as graph.
+    return get_graph(neo4j_instance, querytxt=querytxt, **params)
 
 #--------------------
-# concepts/paths ENDPOINT ROUTINES
+# concepts/paths/subgraph ENDPOINT ROUTINES
 # -------------------
 
 def concepts_subgraph_get_logic(neo4j_instance, query_concept_id=None, sab=None, rel=None, skip=None, limit=None) \
@@ -515,19 +617,17 @@ def concepts_subgraph_get_logic(neo4j_instance, query_concept_id=None, sab=None,
     :param limit: maximum number of paths to return
     """
 
-    # Load query string and associate parameter values to variables.
+    # Load query string template.
     querytxt = loadquerystring(filename='concepts_subgraph.cypher')
 
-    sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
-    reljoin = format_list_for_query(listquery=rel, doublequote=True)
-    querytxt = querytxt.replace('$rel', reljoin)
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
+    # BUILD QUERY PARAMS
+    params: dict = {"sab": sab,
+                    "rel": rel,
+                    "skip": int(skip),
+                    "limit": int(limit)}
 
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    return get_graph(neo4j_instance, query=query)
+    # Return query as graph.
+    return get_graph(neo4j_instance, querytxt=querytxt, **params)
 
 
 def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltypes=None, relsabs=None, skip=None,
@@ -551,21 +651,16 @@ def concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=None, reltyp
     where r1.SAB = "UBERON" and r2.SAB="PATO"
     """
 
-    # Load query string and associate parameter values to variables.
+    # Load query string template.
     querytxt = loadquerystring(filename='concepts_subgraph_sequential.cypher')
-    querytxt = querytxt.replace('$startCUI', f'"{startCUI}"')
+    params: dict = {"startCUI": startCUI,
+                    "reltypes": reltypes,
+                    "relsabs": relsabs,
+                    "skip": int(skip),
+                    "limit": int(limit)
+                    }
 
-    sabjoin = format_list_for_query(listquery=reltypes, doublequote=True)
-    querytxt = querytxt.replace('$reltypes', sabjoin)
-    reljoin = format_list_for_query(listquery=relsabs, doublequote=True)
-    querytxt = querytxt.replace('$relsabs', reljoin)
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
-
-    query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
-
-    return get_graph(neo4j_instance, query=query)
-
+    return get_graph(neo4j_instance, querytxt=querytxt, **params)
 
 #--------------------
 # semantics ENDPOINT ROUTINES
@@ -592,39 +687,35 @@ def semantics_semantic_id_semantic_types_get_logic(neo4j_instance, semtype=None,
 
     """
     result: list[dict] = []
-    # Load and parameterize base query.
+
+    # Load query template.
     querytxt = loadquerystring('semantics_semantic_types.cypher')
-
-    # The query can handle a list of multiple type identifiers (with proper formatting using format_list_for_query) or
-    # no values; however, the routes in the controller limit the type identifier to a single path variable.
-    # Convert single value to a list with one element.
     if semtype is None:
-        semtypes = []
-    else:
-        semtypes = [semtype]
+        semtype = ""
 
-    types = format_list_for_query(listquery=semtypes, doublequote=True)
-    querytxt = querytxt.replace('$types', types)
+    # Build params.
+    params: dict = {"types": semtype,
+                    "skip": int(skip),
+                    "limit": int(limit)
+                    }
 
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
-
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
 
             # Add the relative position (skip) for each semantic type.
             position = int(skip) + 1
-            for record in recds:
-                semtypes = record.get('semantic_types')
-                for semtype in semtypes:
+            for recd in recds:
+                semtypes = recd.get('semantic_types')
+                for s in semtypes:
                     typewithpos = dict(position=position)
-                    typewithpos['semantic_type'] = semtype
+                    typewithpos['semantic_type'] = s
                     position = position + 1
                     result.append(typewithpos)
-
         except neo4j.exceptions.ClientError as e:
              # If the error is from a timeout, raise a HTTP 408.
             if e.code == 'Neo.ClientError.Transaction.TransactionTimedOutClientConfiguration':
@@ -651,28 +742,23 @@ def semantics_semantic_id_subtypes_get_logic(neo4j_instance, semtype=None, skip=
 
     """
     result: list[dict] = []
-    # Load and parameterize base query.
+    # Load query template.
     querytxt = loadquerystring('semantics_semantic_subtypes.cypher')
 
-    # The query can handle a list of multiple type identifiers (with proper formatting using format_list_for_query) or
-    # no values; however, the routes in the controller limit the type identifier to a single path variable.
-    # Convert single value to a list with one element.
+    # Build params
     if semtype is None:
-        semtypes = []
-    else:
-        semtypes = [semtype]
+        semtype = ""
+    params: dict = {"types": semtype,
+                    "skip": int(skip),
+                    "limit": int(limit)}
 
-    types = format_list_for_query(listquery=semtypes, doublequote=True)
-    querytxt = querytxt.replace('$types', types)
-
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
-
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
 
             # Add the relative position (skip) for each semantic subtype.
             position = int(skip) + 1
@@ -705,16 +791,19 @@ def terms_term_id_codes_get_logic(neo4j_instance, term_id: str) -> List[dict]:
     Returns information on Codes with terms that exactly match the specified term_id string.
     """
 
-    # Load and parameterize base query.
+    # Load query template.
     querytxt = loadquerystring('terms_term_id_codes.cypher')
-    querytxt = querytxt.replace('$term_id', f'"{term_id}"')
 
-    # Set timeout for query based on value in app.cfg.
+    # Build params.
+    params: dict = {"term_id": term_id}
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 result.append(record.get('codes'))
@@ -733,17 +822,22 @@ def terms_term_id_concepts_get_logic(neo4j_instance, term_id: str) -> List[str]:
     """
 
     concepts: list[str] = []
+    # Load query template.
     querytxt = loadquerystring('terms_term_id_concepts.cypher')
+    # Build params.
+    params: dict = {"term_id": term_id}
 
-    querytxt = querytxt.replace('$term_id', f'"{term_id}"')
+    #querytxt = querytxt.replace('$term_id', f'"{term_id}"')
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     # The Cypher query is not in JSON format, but is a list of lists.
     # Maintain for downward compatibility.
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
             for record in recds:
                 try:
                     concepts.append(record)
@@ -782,11 +876,13 @@ def property_types_get_logic(neo4j_instance) -> dict:
 
     querytxt = loadquerystring('property_types.cypher')
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         with neo4j_instance.driver.session() as session:
             try:
+
                 recds: neo4j.Result = session.run(query)
                 for record in recds:
                     result.append(record.get('property_types'))
@@ -811,6 +907,7 @@ def relationship_types_get_logic(neo4j_instance) -> dict:
 
     querytxt = loadquerystring('relationship_types.cypher')
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -836,29 +933,38 @@ def sources_get_logic(neo4j_instance, sab=None, context=None) -> dict:
     :param sab: source (SAB)
     :param context: UBKG context
 
+    Assumes that parameters were validated by controller.
     """
     sources: list[dict] = []
 
-    # Load and parameterize query.
+    # Load query template.
     querytxt = loadquerystring('sources.cypher')
-    # Filter by code SAB.
-    if len(sab) == 0:
-        querytxt = querytxt.replace('$sabfilter', '')
-    else:
-        querytxt = querytxt.replace('$sabfilter', f" AND t.name IN {sab}")
 
-    # Filter by ubkg context.
-    if len(context) == 0:
-        querytxt = querytxt.replace('$contextfilter', '')
+    params: dict = {}
+    # Optional filter by sab.
+    # The values from term_type are passed as a Neo4j parameter.
+    if sab:
+        sab_clause = "AND t.name IN $sabfilter"
+        params["sabfilter"] = [s.upper() for s in sab]
     else:
-        querytxt = querytxt.replace('$contextfilter', f" AND tContext.name IN {context}")
+        sab_clause =  ""  # empty string replaces the placeholder
+    querytxt = querytxt.replace('$sabfilter', sab_clause)
 
-    # Set timeout for query based on value in app.cfg.
+    # Optional filter by context.
+    if context:
+        context_clause = "AND tContext.name IN $contextfilter"
+        params["contextfilter"] = context
+    else:
+        context_clause = ""  # empty string replaces the placeholder
+    querytxt = querytxt.replace('$contextfilter', context_clause)
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
             for record in recds:
 
                 source = record.get('response')
@@ -886,30 +992,37 @@ def node_types_node_type_counts_by_sab_get_logic(neo4j_instance, node_type=None,
     :param neo4j_instance: neo4j connection
     :param sab: optional list of sabs
 
+    Assumes that the sab parameter was validated by the controller.
     """
 
     nodetypes: list[dict] = []
-    # Load and parameterize base query.
+    # Load query template.
     querytxt = loadquerystring('node_types_by_sab.cypher')
 
+    # Build query parameters.
     if node_type is None:
         node_type = ''
     else:
         node_type = [node_type]
-    typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
-    querytxt = querytxt.replace('$node_type', typesjoin)
+    params = {"node_type": node_type}
+
+    #typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
+    #querytxt = querytxt.replace('$node_type', typesjoin)
 
     if sab is None:
         sab = ''
-    else:
-        sabjoin = format_list_for_query(listquery=sab, doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
+    #else:
+        #sabjoin = format_list_for_query(listquery=sab, doublequote=True)
+    params["sab"] = sab
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
+
             total_count = 0
             for record in recds:
                 # Each row from the query includes a dict that contains the actual response content.
@@ -938,22 +1051,26 @@ def node_types_node_type_counts_get_logic(neo4j_instance, node_type=None) -> dic
 
     """
     nodetypes: list[dict] = []
-    # Load and parameterize base query.
+
+    # Load query template.
 
     querytxt = loadquerystring('node_types_counts.cypher')
 
+    # Build query parameters.
     if node_type is None:
         node_type = ''
     else:
         node_type = [node_type]
-    typesjoin = format_list_for_query(listquery=node_type, doublequote=True)
-    querytxt = querytxt.replace('$node_type', typesjoin)
+    params = {"node_type": node_type}
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
+
             total_count = 0
             for record in recds:
                 # Each row from the query includes a dict that contains the actual response content.
@@ -985,10 +1102,12 @@ def node_types_get_logic(neo4j_instance) -> dict:
 
     querytxt = loadquerystring('node_types.cypher')
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
+
             recds: neo4j.Result = session.run(query)
             for record in recds:
                 result.append(record.get('node_types'))
@@ -1018,6 +1137,7 @@ def sabs_get_logic(neo4j_instance) -> dict:
     # query = 'MATCH (n:Code) RETURN apoc.coll.sort(COLLECT(n.SAB)) AS sab'
     querytxt = loadquerystring('sabs.cypher')
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
@@ -1052,21 +1172,22 @@ def sabs_codes_counts_query_get(neo4j_instance, sab=None, skip=None, limit=None)
     """
     sabs: list[dict] = []
 
-    # Load and parameterize query.
+    # Load query template.
     querytxt = loadquerystring('sabs_codes_counts.cypher')
+
     if sab is None:
-        sabjoin = ''
-    else:
-        sabjoin = format_list_for_query(listquery=[sab], doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
+        sab = ""
 
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
+    # BUILD PARAMS.
+    params = {"sab": sab,
+              "skip": int(skip),
+              "limit": int(limit)}
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+            recds: neo4j.Result = session.run(query, **params)
 
             # Track the position of the sabs in the list, based on the value of skip.
             position = int(skip) + 1
@@ -1103,22 +1224,23 @@ def sab_code_detail_query_get(neo4j_instance, sab=None, skip=None, limit=None) -
     """
     codes: list[dict] = []
 
-    # Load and parameterize query.
+    # Load query template.
     querytxt = loadquerystring('sabs_codes_details.cypher')
     if sab is None:
-        sabjoin = ''
-    else:
-        sabjoin = format_list_for_query(listquery=[sab], doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
+        sab = ""
 
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
+    # BUILD PARAMS.
+    params = {"sab": sab,
+              "skip": int(skip),
+              "limit": int(limit)}
 
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
             # Track the position of the codes in the list, based on the value of skip.
             position = int(skip) + 1
             res_codes = {}
@@ -1154,17 +1276,24 @@ def sab_term_type_get_logic(neo4j_instance, sab=None, skip=None, limit=None) -> 
     """
     termtypes: list[dict] = []
 
+    # Load query template.
     querytxt = loadquerystring(filename='sabs_term_types.cypher')
-    sabjoin = format_list_for_query(listquery=[sab], doublequote=True)
-    querytxt = querytxt.replace('$sab', sabjoin)
-    querytxt = querytxt.replace('$skip', str(skip))
-    querytxt = querytxt.replace('$limit', str(limit))
 
+    if sab is None:
+        sab = ""
+
+    # BUILD PARAMS.
+    params = {"sab": sab,
+              "skip": int(skip),
+              "limit": int(limit)}
+
+    # Instantiate the query with the configured timeout.
     query = neo4j.Query(text=querytxt, timeout=neo4j_instance.timeout)
 
     with neo4j_instance.driver.session() as session:
         try:
-            recds: neo4j.Result = session.run(query)
+
+            recds: neo4j.Result = session.run(query, **params)
 
             for record in recds:
                 try:

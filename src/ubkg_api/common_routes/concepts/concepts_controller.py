@@ -11,7 +11,7 @@ from ..common_neo4j_logic import concepts_concept_id_codes_get_logic, concepts_c
 from utils.http_error_string import get_404_error_string, validate_query_parameter_names, \
     validate_parameter_value_in_enum, validate_required_parameters, validate_parameter_is_numeric, \
     validate_parameter_is_nonnegative, validate_parameter_range_order, check_payload_size, \
-    check_neo4j_version_compatibility,check_max_mindepth,wrap_message
+    check_neo4j_version_compatibility,check_max_mindepth,wrap_message, validate_param_string_chars
 # Functions to format query parameters for use in Cypher queries
 from utils.http_parameter import parameter_as_list, set_default_minimum, set_default_maximum
 
@@ -40,6 +40,11 @@ def concepts_concept_id_codes_get(concept_id):
 
     # Obtain a list of sab parameter values.
     sab = parameter_as_list(param_name='sab')
+
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='sab', param_values=sab)
+    if err != 'ok':
+        return make_response(err, 400)
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
 
@@ -116,6 +121,7 @@ def concepts_paths_expand_get(concept_id):
     if err != 'ok':
         return make_response(err, 400)
 
+
     # Check that the maximum path depth is non-negative.
     maxdepth = request.args.get('maxdepth')
     err = validate_parameter_is_nonnegative(param_name='maxdepth', param_value=maxdepth)
@@ -159,10 +165,20 @@ def concepts_paths_expand_get(concept_id):
     # Set default row limit.
     limit = set_default_maximum(param_value=limit, default=1000)
 
-    # Get remaining parameter values from the path or query string.
+    # Get and validate remaining parameter values from the path or query string.
     query_concept_id = concept_id
+
     sab = parameter_as_list(param_name='sab')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='sab', param_values=sab)
+    if err != 'ok':
+        return make_response(err, 400)
+
     rel = parameter_as_list(param_name='rel')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='rel', param_values=rel)
+    if err != 'ok':
+        return make_response(err, 400)
 
     result = concepts_expand_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel,
                                        mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
@@ -208,8 +224,19 @@ def concepts_shortestpath_get(origin_concept_id, terminus_concept_id):
     # Get remaining parameter values from the path or query string.
     origin_concept_id = origin_concept_id
     terminus_concept_id = terminus_concept_id
+
     sab = parameter_as_list(param_name='sab')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='sab', param_values=sab)
+    if err != 'ok':
+        return make_response(err, 400)
+
+
     rel = parameter_as_list(param_name='rel')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='rel', param_values=rel)
+    if err != 'ok':
+        return make_response(err, 400)
 
     result = concepts_shortestpath_get_logic(neo4j_instance, origin_concept_id=origin_concept_id,
                                              terminus_concept_id=terminus_concept_id, sab=sab, rel=rel)
@@ -297,8 +324,18 @@ def concepts_trees_get(concept_id):
 
     # Get remaining parameter values from the path or query string.
     query_concept_id = concept_id
+
     sab = parameter_as_list(param_name='sab')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='sab', param_values=sab)
+    if err != 'ok':
+        return make_response(err, 400)
+
     rel = parameter_as_list(param_name='rel')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='rel', param_values=rel)
+    if err != 'ok':
+        return make_response(err, 400)
 
     result = concepts_trees_get_logic(neo4j_instance, query_concept_id=query_concept_id, sab=sab, rel=rel,
                                       mindepth=mindepth, maxdepth=maxdepth, skip=skip, limit=limit)
@@ -362,7 +399,16 @@ def concepts_subgraph_get():
 
     # Get remaining parameter values from the path or query string.
     sab = parameter_as_list(param_name='sab')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='sab', param_values=sab)
+    if err != 'ok':
+        return make_response(err, 400)
+
     rel = parameter_as_list(param_name='rel')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='rel', param_values=rel)
+    if err != 'ok':
+        return make_response(err, 400)
 
     result = concepts_subgraph_get_logic(neo4j_instance, sab=sab, rel=rel,
                                          skip=skip, limit=limit)
@@ -437,6 +483,7 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
 
     in which r1.SAB = 'UBERON' and r2.SAB = 'PATO'
 
+    Assumes that string parameters have been validated by the controller.
     """
 
     neo4j_instance = current_app.neo4jConnectionHelper.instance()
@@ -471,6 +518,11 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
 
     # Get remaining parameter values from the path or query string.
     relsequence = parameter_as_list(param_name='relsequence')
+    # Validate parameter values against whitelist.
+    err = validate_param_string_chars(param_name='relsequence', param_values=relsequence)
+    if err != 'ok':
+        return make_response(err, 400)
+
     reltypes = []
     relsabs = []
     for rs in relsequence:
@@ -481,6 +533,15 @@ def concepts_paths_subraphs_sequential_get(concept_id=None):
         relsabs.append(rs.split(':')[0].upper())
         reltypes.append(rs.split(':')[1])
 
+        # Validate parameter values against whitelist.
+        err = validate_param_string_chars(param_name='relsabs', param_values=relsabs)
+        if err != 'ok':
+            return make_response(err, 400)
+
+        # Validate parameter values against whitelist.
+        err = validate_param_string_chars(param_name='reltypes', param_values=reltypes)
+        if err != 'ok':
+            return make_response(err, 400)
 
     result = concepts_subgraph_sequential_get_logic(neo4j_instance, startCUI=concept_id, reltypes=reltypes, relsabs=relsabs,
                                        skip=skip, limit=limit)

@@ -107,6 +107,20 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
+echo "6. /codes/x/codes?sab=CHV&sab=DOID => invalid code format; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/x/codes?sab=CHV&sab=DOID" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "6. /codes/SNOMEDCT_US%3A254837009/codes?sab=* => invalid parameter; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/SNOMEDCT_US%3A254837009/codes?sab=*" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
 #--------------------------------------------
 echo "TESTS FOR: codes/<code_id>/concepts" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /codes/<code_id>/concepts" | tee -a ubkg_unit_test.out
@@ -124,6 +138,13 @@ echo "2. /codes/SNOMEDCT_US%3A254837009/concepts => valid code; should return 20
 curl --request GET \
  --url "${UBKG_URL}/codes/SNOMEDCT_US%3A254837009/concepts" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "3. /codes/X/concepts => invalid code format; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/x/concepts" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
@@ -154,6 +175,19 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
+echo "4. codes/X/terms?term_type=PT => invalid code format; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/'/terms" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "5. codes/DOID:9351/terms?term_type=* => invalid character; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/codes/DOID:9351/terms?term_type=*" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
 
 #--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/codes GET" | tee -a ubkg_unit_test.out
@@ -179,6 +213,20 @@ echo "3. concepts/C0678222/codes => valid concept; should return 200" | tee -a u
 curl --request GET \
  --url "${UBKG_URL}/concepts/C0678222/codes" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "3. concepts/C0678222/codes?sab=EFO,MONDO => valid concept, with sab list; should return 200" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0678222/codes?sab=EFO,MONDO" \
+ --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "5. concepts/C0678222/codes?sab=* => invalid parameter; should return r00" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0678222/codes?sab=*" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
@@ -285,10 +333,24 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "9. concepts/paths/subgraph?sab=SNOMEDCT_US%2CUBERON&rel=isa%2Cpart_of&skip=0&limit=10 => valid parameters,list sab, rel: should return 200" | tee -a ubkg_unit_test.out
+echo "9. concepts/paths/subgraph?sab=SNOMEDCT_US&rel=isa&skip=0&limit=10 => valid parameters,list sab, rel: should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/paths/subgraph?sab=SNOMEDCT_US&rel=isa&skip=0&limit=10" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "10. concepts/paths/subgraph?sab=*&rel=isa&skip=0&limit=10 => invalid parameters,: should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/paths/subgraph?sab=*&rel=isa&skip=0&limit=10" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "11. concepts/paths/subgraph?sab=SNOMEDCT_US&rel=*&skip=0&limit=10 => invalid parameters,: should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/paths/subgraph?sab=SNOMEDCT_US&rel=*&skip=0&limit=10" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
@@ -312,52 +374,59 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "3. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=X&limit=5 => skip non-numeric; should return custom 400" | tee -a ubkg_unit_test.out
+echo "3. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=X&limit=5 => skip non-numeric; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=X&limit=5" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "4. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=-1&limit=5 => skip negative; should return custom 400" | tee -a ubkg_unit_test.out
+echo "4. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=-1&limit=5 => skip negative; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=-1&limit=5" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "5. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=0&limit=x => limit non-numeric; should return custom 400" | tee -a ubkg_unit_test.out
+echo "5. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=0&limit=x => limit non-numeric; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=0&limit=x" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "6. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&skip=0&limit=-1 => limit negative; should return custom 400" | tee -a ubkg_unit_test.out
+echo "6. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=0&limit=-1 => limit negative; should return custom 400" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&skip=0&limit=-1" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "7. concepts/C0006142X/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product,NCI%3Agene_product_encoded_by_gene&skip=0&limit=5 => invalid CUI; should return custom 404" | tee -a ubkg_unit_test.out
+echo "7. concepts/C0006142X/paths/subgraph/sequential?relsequence=NC:3Ais_marked_by_gene_product,NCI%3Agene_product_encoded_by_gene&skip=0&limit=5 => invalid CUI; should return custom 404" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C0006142X/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product,NCI:gene_product_encoded_by_gene&skip=0&limit=5" \
  --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "8. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product,NCI%3Agene_product_encoded_by_gene&skip=0&limit=5 => valid, with list; should return 200" | tee -a ubkg_unit_test.out
+echo "8. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product,NCI:gene_product_encoded_by_gene&skip=0&limit=5 => valid, with list; should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product,NCI:gene_product_encoded_by_gene&skip=0&limit=5" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "9. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&relsequence=NCI%3Agene_product_encoded_by_gene&skip=0&limit=5 => valid, with individual; should return 200" | tee -a ubkg_unit_test.out
+echo "9. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&relsequence=NCI:gene_product_encoded_by_gene&skip=0&limit=5 => valid, with individual; should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&relsequence=NCI:gene_product_encoded_by_gene&skip=0&limit=5" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "10. concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&relsequence=*skip=0&limit=5 => invalid parameter; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C0006142/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&relsequence=*&skip=0&limit=5" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
@@ -369,7 +438,7 @@ echo "TESTS FOR: concepts/<identifier>/paths/subgraph/sequential GET" | tee -a u
 echo "SIGNATURE: /concepts/<identifier>/paths/subgraph/sequential?relsequence=<SAB1:rel1,SAB2:rel2&skip=<skip>&limit=<limit>" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
-echo "1. concepts/paths/subgraph/sequential?relsequence=NCI%3Ais_marked_by_gene_product&relsequence=NCI%3Agene_product_encoded_by_gene&skip=0&limit=5 => valid, with individual; should return 200" | tee -a ubkg_unit_test.out
+echo "1. concepts/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&relsequence=NCI:gene_product_encoded_by_gene&skip=0&limit=5 => valid, with individual; should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/concepts/paths/subgraph/sequential?relsequence=NCI:is_marked_by_gene_product&relsequence=NCI:gene_product_encoded_by_gene&skip=0&limit=5" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
@@ -515,6 +584,20 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
+echo "17. concepts/C2720507/paths/expand?sab=*%2CUBERON&rel=isa%2Cpart_of&mindepth=2&maxdepth=3&skip=0&limit=10 => invalid parameters, should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=*%2CUBERON&rel=isa%2Cpart_of&mindepth=2&maxdepth=3&skip=0&limit=10" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "18. concepts/C2720507/paths/expand?sab=SNOMEDCT_US%2CUBERON&rel=isa%2C*&mindepth=2&maxdepth=3&skip=0&limit=10 => invalid parameters, should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/expand?sab=SNOMEDCT_US%2CUBERON&rel=isa%2C*&mindepth=2&maxdepth=3&skip=0&limit=10" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
 #--------------------------------------------
 echo "TESTS FOR: concepts/<concept_id>/paths/trees GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/<concept_id>/paths/trees?sab=<SAB>&rel=<relationship type>&mindepth=<number>&maxdepth=<number>&skip=<number>&limit=<number>"
@@ -627,6 +710,20 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
+echo "16. concepts/C2720507/paths/trees?sab=*&rel=isa&mindepth=1&maxdepth=3&skip=1&limit=10 => invalid parametr: should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=*&rel=isa&mindepth=1&maxdepth=3&skip=1&limit=10" \
+--header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "16. concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=*&mindepth=1&maxdepth=3&skip=1&limit=10 => invalid parametr: should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/trees?sab=SNOMEDCT_US&rel=*&mindepth=1&maxdepth=3&skip=1&limit=10" \
+--header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
 #--------------------------------------------
 echo "TESTS FOR: concepts/<origin_concept_id>/paths/shortestpath/<terminus_concept_id> GET" | tee -a ubkg_unit_test.out
 echo "SIGNATURE: /concepts/<origin_concept_id>/paths/shortestpath/<terminus_concept_id>?sab=<SAB>&rel=<relationship types" | tee -a ubkg_unit_test.out
@@ -675,6 +772,21 @@ curl --request GET \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
+
+echo "7. concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US%2*&rel=isa%2Cpart_of => invalid parameters; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US%2*&rel=isa%2Cpart_of" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "8. concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US&rel=* => invalid parameters; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/concepts/C2720507/paths/shortestpath/C1272753?sab=SNOMEDCT_US&rel=*" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
 
 #--------------------------------------------
 echo "TESTS FOR: node-types GET" | tee -a ubkg_unit_test.out
@@ -741,6 +853,13 @@ echo "4. node-types/Code/counts-by-sab?sab=SNOMEDCT_US%2CNCI GET => valid, list 
 curl --request GET \
  --url "${UBKG_URL}/node-types/Code/counts-by-sab?sab=SNOMEDCT_US%2CNCI" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "5. node-types/Code/counts-by-sab?sab=* GET => invalid parameter; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/node-types/Code/counts-by-sab?sab=*" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
@@ -1181,9 +1300,9 @@ curl --request GET \
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 
-echo "5. /sources?sab=HPOMP GET => valid SAB; should return 200" | tee -a ubkg_unit_test.out
+echo "5. /sources?sab=CL GET => valid SAB; should return 200" | tee -a ubkg_unit_test.out
 curl --request GET \
- --url "${UBKG_URL}/sources?sab=HPOMP" \
+ --url "${UBKG_URL}/sources?sab=CL" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
@@ -1198,7 +1317,21 @@ echo | tee -a ubkg_unit_test.out
 echo "7. /sources?sab=X&context=base_context GET => invalid SAB, valid context; should return 404" | tee -a ubkg_unit_test.out
 curl --request GET \
  --url "${UBKG_URL}/sources?sab=X&context=base_context" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "8. /sources?sab=*&context=base_context GET => invalid SAB, valid context; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/sources?sab=*&context=base_context" \
  --header "Accept: application/json" | cut -c1-60 | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+echo | tee -a ubkg_unit_test.out
+
+echo "9. /sources?sab=CL&context=* GET => valid SAB, invalid context; should return 400" | tee -a ubkg_unit_test.out
+curl --request GET \
+ --url "${UBKG_URL}/sources?sab=cl&context=*" \
+ --header "Accept: application/json" | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 echo | tee -a ubkg_unit_test.out
 

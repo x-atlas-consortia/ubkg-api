@@ -4,7 +4,8 @@
 // that share links to the same Concept node to which the specified code links.
 // The list can be filtered to return only those codes from a particular SAB.
 
-// The function that loads this query will replace values for code_id and sab_filter.
+// The function that loads this query will replace code_id and sabfilter with values
+// from path and query parameters of the call to the endpoint.
 
 // Find the CUI for the concept to which the specified Code links.
 CALL

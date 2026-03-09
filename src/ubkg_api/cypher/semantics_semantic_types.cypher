@@ -8,10 +8,10 @@
 //    a. Name (e.g., "Anatomical Structure")
 //    b. Type Unique Identifier (TUI) (e.g., "T017")
 
-CALL apoc.do.when(([$types] = []),
+CALL apoc.do.when(($types = ''),
 "MATCH (s:Semantic) RETURN s",
-'MATCH (s:Semantic) WHERE s.name IN [$types] OR s.TUI IN [$types] RETURN s',
-{})
+"MATCH (s:Semantic) WHERE s.name = $types OR s.TUI = $types RETURN s",
+{types: $types})
 YIELD value
 WITH value.s as s ORDER BY s.STN SKIP $skip LIMIT $limit
 WITH DISTINCT {sty:s.name,tui:s.TUI,def:s.DEF,stn:s.STN}  AS stys

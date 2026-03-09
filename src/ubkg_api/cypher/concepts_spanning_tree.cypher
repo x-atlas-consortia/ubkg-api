@@ -7,14 +7,14 @@
 CALL
 {
 MATCH (c:Concept {CUI: $query_concept_id})
-CALL apoc.path.spanningTree(c,{relationshipFilter:apoc.text.join([x IN [$rel] | "<"+x], "|"), labelFilter:"Concept", minLevel:$mindepth, maxLevel:$maxdepth})
+CALL apoc.path.spanningTree(c,{relationshipFilter:apoc.text.join([x IN $rel | "<"+x], "|"), labelFilter:"Concept", minLevel:$mindepth, maxLevel:$maxdepth})
 YIELD path
 return path
 }
 
 // Filter to those paths that involve relationships with the specified values of SAB.
 WITH path
-WHERE ALL(r IN relationships(path) WHERE r.SAB IN [$sab])
+WHERE ALL(r IN relationships(path) WHERE r.SAB IN $sab)
 
 // Filter to a specified subset of paths--i.e., to support pagination.
 // The result of the path.expand function is ordered in terms of Depth First Search, so the order of paths is invariant.
