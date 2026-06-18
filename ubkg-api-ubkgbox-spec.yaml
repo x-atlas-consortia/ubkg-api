@@ -1338,10 +1338,6 @@ components:
           type: string
           description: Concept Unique Identifier (CUI) for the Concept node
           example: C0006142
-        prefterm:
-          type: string
-          description: Preferred term for the Concept node.
-          example: Malignant neoplasm of breast
     ConceptPaths: # Schema name
       type: object
       description: Represents a graph for a set of paths that originate from a Concept node.
