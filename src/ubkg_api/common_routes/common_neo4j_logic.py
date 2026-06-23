@@ -201,6 +201,7 @@ def codes_code_id_concepts_get_logic(neo4j_instance, code_id: str) -> List[dict]
 
     """
     result: list[dict] = []
+    print('codes_code_id_concepts_get_logic', code_id)
 
     # Load Cypher query template from file.
     querytxt: str = loadquerystring(filename='codes_code_id_concepts.cypher')

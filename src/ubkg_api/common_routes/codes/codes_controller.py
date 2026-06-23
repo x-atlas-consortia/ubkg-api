@@ -61,6 +61,7 @@ def codes_code_id_concepts_get(code_id):
     :rtype: Union[List[ConceptDetail], Tuple[List[ConceptDetail], int], Tuple[List[ConceptDetail], int, Dict[str, str]]
     """
 
+    print('codes_code_id_concepts_get', code_id)
     # Validate code_id parameter.
     err = validate_code_format(param_name='code_id', param_value=code_id)
     if err != 'ok':
