@@ -78,9 +78,9 @@ app.run(host='0.0.0.0', port="5002")
 
 then your test endpoint URLs should start with `http://127.0.0.1:5002/`.
 
-For example, if you test using PostMan, you can set a global variable corresponding to the first part of your test URLs:
-
-![img.png](img.png)![img.png](img.png)
+For example, if you test using PostMan, you can define an environment variable (e.g., **local_ontology**) with a value equal to "http://127.0.0.1:5002."
+Your test endpoints can then refer to the environment variable--e.g.,
+"{{ontology_url}}/terms/diabetes/codes".
 
 # Testing changes
 To test changes to ubkg-api, you will need to start a local instance of the API.
